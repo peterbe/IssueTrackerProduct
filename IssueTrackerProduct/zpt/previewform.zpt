@@ -1,0 +1,134 @@
+<form action="/" method="POST" name="add_issue" 
+	tal:attributes="action here/ActionURL" tal:define="global emptylist python:[]; global emptystring string:"
+	enctype="multipart/form-data">
+
+<span tal:condition="python:not request.has_key('sections') and request.has_key('section')">
+<span tal:define="dummy python:request.set('sections',[request['section']])"
+tal:replace="nothing">
+here's a special script that converts 'section' into ['section'] if present and 'sections' is not present
+</span>
+</span>
+
+<table border=0 tal:define="false python:0;emptystring python:''">
+	<tr>
+		<td class="strong">Subject:</td>
+		<td colspan="3"><input name="subject" size="40" maxlength="70" value="" tal:define="subject request/subject |emptystring"
+tal:attributes="value subject"></td>
+
+	</tr>
+	<tr>
+		<td class="strong">Name:</td>
+		<td colspan="3"><input name="fromname"
+                tal:define="fromname python:here.getSavedUser('fromname')"
+                value="" tal:attributes="value fromname" size="30"></td>
+	</tr>
+	<tr>
+		<td><strong>Email:</strong></td>
+		<td colspan="3"><input name="email"
+                tal:define="email python:here.getSavedUser('email')"
+                value="" tal:attributes="value email" size="30">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="4">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="strong">Description:</td>
+		<td colspan="3">
+			<textarea name="description:text" rows=10 cols=60 tal:define="description request/description | emptystring" tal:content="description"></textarea>
+		</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td colspan="3">
+		<strong>Display format:</strong>
+		<span tal:define="display_format request/display_format | here/getSavedTextFormat">
+			<input type="radio" name="display_format:string" value="plaintext" tal:attributes="checked python:display_format=='plaintext'">Plain as it's written
+			<input type="radio" name="display_format:string" value="structuredtext" tal:attributes="checked python:display_format=='structuredtext'">
+			<a tal:attributes="href string:${here/getRootURL}/StructuredText.html">Structured Text</a>
+		</span>
+		</td>
+	</tr>
+	<tr>
+		<td class="strong">Section(s):</td>
+		<td colspan="2">
+			<select name="sections:list" multiple size=7 tal:define="emptylist python:[];sections request/sections | emptylist"
+			tal:attributes="size python:min(7, len(here.sections_options))">
+				<option tal:repeat="option here/sections_options" value="" tal:attributes="value option; selected python:option in sections" tal:content="option">
+				Section</option>
+			</select>
+		</td>
+		<td>
+		    <span tal:condition="here/ShowHideMeOption">
+			<strong>Hide me?</strong>
+		    <input type="checkbox" name="hide_me:boolean" value="1" tal:define="hide_me request/hide_me | false" tal:attributes="checked python:hide_me">
+		    <br>tick and the public won't be able to see your name or emailaddress
+		    <br>
+		    <br>
+			</span>
+			<span tal:condition="here/ShowConfidentialOption">
+		    <strong>Confidential issue?</strong>
+		    <input type="checkbox" name="confidential:boolean" value="1"  tal:define="confidential request/confidential | false" tal:attributes="checked python:confidential">
+		    <br>tick and the public can't see the issue. 
+			</span>
+			
+			<span tal:condition="not:python:here.ShowHideMeOption() or here.ShowConfidentialOption()"
+			tal:replace="structure python:'&nbsp;'*60"></span>
+		    
+		</td>
+	</tr>
+
+	<tr>
+		<td class="strong">Type:</td>
+		<td>
+			<select name="type:string" tal:define="types here/types; size python:len(types); type request/type | here/default_type | emptystring" size="3" tal:attributes="size size">
+				<option tal:repeat="option types" value="" tal:attributes="value option;selected python:option == type" tal:content="option">
+				Types</option>
+			</select>
+		</td>
+		<td class="strong">Urgency:</td>
+		<td tal:define="urgencies here/urgencies; size python:len(urgencies); urgency request/urgency | here/default_urgency | emptystring">
+			<select name="urgency:string" size="" tal:attributes="size size">
+				<option  tal:repeat="option urgencies" value="" tal:attributes="value option; selected python:urgency == option" tal:content="option">
+				Urgencies</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="strong">URL:</td>
+		<td colspan="3"><input name="url2issue" size="40" value="" tal:define="url2issue request/url | request/url2issue | emptystring" tal:attributes="value url2issue"></td>
+	</tr>
+	<tr tal:repeat="each python:range(here.getNoFileattachments())">
+		<td><strong>File attachment:</strong></td>
+		<td colspan="3" tal:define="index repeat/each/index" tal:content="structure python:here.getFileattachmentInput(index)"></td>
+	</tr>
+
+	<tr tal:condition="here/hasManagerRole">
+		<td class="strong">Status:</td>
+		<td colspan="3">
+			<select name="status"
+			tal:define="statuses here/getStatuses; status request/status | emptystring">
+				<option tal:repeat="option statuses" value="" tal:attributes="value option; selected python:option == status" tal:content="option">
+				Statuses</option>
+			</select>
+		</td>
+	</tr>
+
+</table>
+<!-- Default status if not selectable -->
+<input type="hidden" tal:condition="not:here/hasManagerRole" name="status" value="open"
+tal:attributes="value python:here.getStatuses()[0]">
+<input type="hidden" tal:condition="python:request.has_key('Tempfolder_fileattachments')"
+ tal:attributes="value request/Tempfolder_fileattachments" name="Tempfolder_fileattachments">
+<br>
+<span tal:define="previewissue python:request.has_key('previewissue')">
+
+	<input type="submit" name="previewissue" value="   Preview again   " class="submitbutton" tal:condition="previewissue">
+	
+	<input type="submit" name="previewissue" value="   Preview first   " class="submitbutton" tal:condition="not:previewissue">
+
+</span>
+<input type="submit" name="submitissue" value="   Save Issue   " class="submitbutton">
+
+</form>
+

@@ -1,0 +1,43 @@
+<form action="Subscribe" method="get"
+    tal:define="email python:here.getSavedUser('email');
+                issueuser here/getIssueUser;
+                implicitly_subscribing python:here.isImplicitlySubscribing(email)"
+    tal:condition="here/AllowIssueSubscription">
+
+
+<b class="bigger">Subscription to changes</b>
+<br /><br />
+    &nbsp;
+
+<em tal:condition="implicitly_subscribing">
+You are already involved in this issue. 
+</em>
+
+<tal:block condition="not:implicitly_subscribing">
+
+  <span tal:condition="issueuser" tal:omit-tag="">
+    <input type="hidden" name="subscriber" value="issueuser"
+     tal:define="acluser issueuser/getIssueUserIdentifierString;
+                 global already python:here.isSubscribing(acluser)" />
+    User: <br tal:replace="issueuser/getFullname" />
+  </span>
+
+  <span tal:condition="not:issueuser" tal:omit-tag="">
+    <input name="subscriber" size="25"
+      tal:define="global already python:here.isSubscribing(email)"
+      tal:attributes="value email; type python:test(already, 'hidden','text')" />
+    <br tal:condition="already"
+        tal:replace="structure python:here.ShowNameEmail('',email, highlight=0)" />
+  </span>
+
+  <input type="submit" value="Subscribe"
+   tal:condition="not:already" />
+  <input type="submit" name="unsubscribe" value="Unsubscribe"
+   tal:condition="already" />
+
+</tal:block>
+
+        
+        
+</form>
+

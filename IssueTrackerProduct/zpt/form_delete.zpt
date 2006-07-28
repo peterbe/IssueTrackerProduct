@@ -1,0 +1,32 @@
+<table align="center" width="40%">
+<tr><td>
+<p style="color:red;font-weight:bold;">
+Deleting an Issue should not be necessary unless the issue is broken or faulty.<br />
+Use 'Complete' for most cases.<br />
+<br />
+N.B. Nothing "bad" happens if you delete it.
+</p>
+</td></tr></table>
+<h2 align="center">Delete Issue?</h2>
+
+<table align="center">
+<tr>
+<td valign="top">
+<form action="../DeleteIssue" method="post">
+	<input type="hidden" name="issueID" value=""
+        tal:attributes="value here/getId">
+	<input type="hidden" name="IssueAction" value="Delete">
+	<input type="submit" value="Yes" class="submitbutton">
+</form>
+</td>
+<td tal:content="structure python:'&amp;nbsp;'*10">&nbsp;</td>
+<td valign="top">
+<form action="" method="post"
+      tal:attributes="action here/ActionURL">
+	<input type="submit" value="No" class="submitbutton" />
+</form>
+</td>
+</tr>
+</table>
+
+<br />

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<rdf:RDF 
+ xmlns:tal="http://xml.zope.org/namespaces/tal"
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns="http://purl.org/rss/1.0/"
+ tal:define="issues options/issues|here/ListIssuesFiltered">
+<channel tal:define="root here/getRoot"
+         tal:attributes="rdf:about options/about_url|root/absolute_url">
+  <title tal:content="options/title|root/getTitle"></title>
+  <link tal:content="options/link|root/absolute_url"></link>
+  <description tal:content="options/description|default">IssueTrackerProduct</description>
+  <dc:language tal:content="options/language|default">en-US</dc:language>
+
+  <items>
+    <rdf:Seq>
+      <rdf:li tal:repeat="issue issues" 
+              tal:attributes="resource issue/absolute_url" />
+    </rdf:Seq>
+  </items>
+
+</channel>
+
+<item tal:repeat="issue issues"
+      tal:attributes="rdf:about issue/absolute_url">
+  <title tal:define="status python:issue.getStatus().capitalize()"
+         tal:content="string:${issue/getTitle} (${status})"></title>
+  <link tal:content="issue/absolute_url"></link>
+  <dc:date tal:content="python:issue.getIssueDate().strftime('%Y-%m-%dT%H:%M:%S+00:00')"></dc:date>
+  <dc:subject tal:content="python:', '.join(issue.getSections())"></dc:subject>
+  <description tal:content="structure python:here.CDATAText(issue.showDescription())"></description>
+</item>
+
+
+</rdf:RDF>

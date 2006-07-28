@@ -1,0 +1,128 @@
+
+<span tal:condition="python:options.get('SubmitError')"
+ tal:replace="structure here/show_submissionerror_message">
+</span>
+
+
+<form method="post" name="form_followup" enctype="multipart/form-data"
+      tal:attributes="action here/relative_url"
+ tal:define="minimalformfollowup python:request.has_key('minimalformfollowup'); 
+             issueuser here/getIssueUser;
+             cmfuser here/getCMFUser;
+             zopeuser here/getZopeUser;
+             loggedin python:issueuser or (zopeuser and here.getSavedUser('fromname') and here.getSavedUser('email'))">
+
+<input type="hidden" name="action" value="AddFollowup"
+       tal:attributes="value request/otherAction | default" />
+<input type="hidden" tal:condition="python:request.has_key('Tempfolder_fileattachments')"
+	   tal:attributes="value request/Tempfolder_fileattachments" name="Tempfolder_fileattachments" />
+
+
+<h3 tal:condition="not:minimalformfollowup"><br tal:replace="structure python:request.get('otherActionTitle','Add Followup')" />
+<em tal:condition="python:options.get('draft_saved')"
+ >(draft saved)</em></h3>
+
+<table border="0">
+	<tr>
+		<td colspan="2">
+		<div tal:condition="python:request.has_key('otherComment')">
+		<b tal:content="request/otherComment | default">Other title</b></div>
+        <span class="submiterror" tal:content="structure python:here.ShowSubmitError(options, 'comment', linebreak=1)"></span>
+		<textarea tabindex="1" name="comment" id="textarea" rows="10" cols="70"
+		tal:attributes="rows python:test(minimalformfollowup, 5, 10);
+                                cols python:test(minimalformfollowup, 70, 70);
+                                onfocus python:test(here.SaveDrafts() and here.UseAutoSave(), 'startautosave()');
+                                onblur python:test(here.SaveDrafts() and here.UseAutoSave(), 'stopautosave()')
+                                "
+		tal:content="python:request.get('comment','')"></textarea>
+        
+		</td>
+	</tr>
+	<tr tal:condition="python:not minimalformfollowup and not loggedin">
+		<td colspan="2" align="center">
+		<b>Display format:</b>
+		<span tal:define="display_format request/display_format | here/getSavedTextFormat">
+			<input type="radio" name="display_format:string"
+          value="plaintext"
+          tal:attributes="checked python:display_format=='plaintext'" />Plain as it's written
+			<input type="radio" name="display_format:string"
+          value="structuredtext"
+          tal:attributes="checked python:display_format=='structuredtext'" />
+          <a tal:attributes="href string:${here/getRootURL}/What-is-StructuredText">Structured Text</a>
+		</span>
+		</td>
+	</tr>
+	<tr>
+		<td tal:define="fromname request/fromname | python:here.getSavedUser('fromname');email request/email | python:here.getSavedUser('email')">
+		
+			<input type="hidden" name="fromname" value=""
+			tal:condition="not:python:minimalformfollowup and fromname=='' or not minimalformfollowup"
+			tal:attributes="value fromname" />
+			
+			<input type="hidden" name="email" value=""
+			tal:condition="not:python:minimalformfollowup and email=='' or not minimalformfollowup"
+			tal:attributes="value email" />
+			
+	        <table>
+                <tr tal:condition="python:loggedin and not minimalformfollowup">
+                   <td><b>User:</b></td>
+                   <td tal:condition="issueuser"
+                       tal:content="structure python:here.ShowNameEmail(issueuser.getFullname(), issueuser.getEmail(), highlight=0)"></td>
+                   <td tal:condition="cmfuser"
+                       tal:content="structure python:here.ShowNameEmail(cmfuser.getProperty('fullname'), cmfuser.getProperty('email'), highlight=0)"></td>
+                   <td tal:condition="python:not issueuser and not cmfuser"
+                       tal:content="structure python:here.ShowNameEmail(here.getSavedUser('fromname'), here.getSavedUser('email'), highlight=0)"></td>
+                </tr>
+		<tr tal:condition="python:not loggedin and (minimalformfollowup and fromname=='' or not minimalformfollowup)">
+		    <td><b>Name:</b></td>
+                    <td><input tabindex="2" name="fromname" value="" tal:attributes="value fromname"
+			 size="25" /></td>
+		</tr>
+		<tr tal:condition="python:not loggedin and (minimalformfollowup and email=='' or not minimalformfollowup)">
+		    <td><b>Email:</b></td>
+		    <td><input tabindex="3" name="email" tal:attributes="value email" size="25" /></td>
+                </tr>
+                <tr tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
+                    <td colspan=2><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
+                </tr>
+		<tr tal:repeat="each python:range(here.getNoFollowupFileattachments())">
+		    <td><b>File attachment:</b></td>
+		    <td tal:define="index repeat/each/index" tal:content="structure python:here.getFileattachmentInput(index, initsize=25)"></td>
+		</tr>
+		</table>
+		</td>
+		<td align="left" valign="top" 
+            tal:attributes="align python:test(minimalformfollowup and not here.getNoFollowupFileattachments(),'right','left')">
+			<div tal:condition="not:minimalformfollowup">&nbsp;</div>
+			<input type="submit" name="ModifyIssue:method" value="  Save  " class="submitbutton"
+             onclick="javascript:this.value='Saving...'" />
+			<input type="submit" name="previewissue" value="  Preview  " class="submitbutton" />
+            <input type="submit" value="Cancel" name="Cancel:method" 
+             tal:condition="not:minimalformfollowup" />
+            <input type="submit" name="SaveDraftThread:method" value=" Save draft " 
+             tal:condition="python:not minimalformfollowup and here.SaveDrafts()"
+             onclick="javascript:this.value='Saving draft...'" />	     
+		
+		</td>
+
+	</tr>
+	<tr tal:define="Others2Notify python:here.Others2Notify(format='merged', requireemail=1)" tal:condition="Others2Notify">
+		<td colspan="2" width="500"><input type="checkbox" id="notify" name="notify:boolean" value="1"
+		tal:attributes="checked python:request.has_key('notify') or not request.has_key('asked_notify')" />
+			<input type="hidden" name="asked_notify:boolean" value="1" />
+			<label for="notify">Notify the others</label>
+			<span tal:condition="python:Others2Notify">(<span
+             tal:replace="structure python:', '.join(Others2Notify)">Peter Bengtsson &lt;mail@peterbe.com&gt;</span>)</span>
+			</td>
+		</tr>
+	
+</table>
+
+<input type="hidden" name="draft_followup_id" 
+ tal:define="draft_followup_id python:options.get('draft_followup_id', request.get('draft_followup_id', ''))"
+ tal:attributes="value draft_followup_id" />
+
+
+</form>
+
+<br tal:define="dummy python:here.nullifyTempfolderREQUEST()" tal:replace="nothing" />

@@ -1,0 +1,46 @@
+<table tal:define="info here/getUserAchievements" tal:condition="info" 
+ border="0" cellspacing="0" cellpadding="4">
+  <thead class="lhead">
+    <tr class="lhead">
+      <th style="width:150px"># issues</th>
+      <th>Opened</th>
+      <th>Closed</th>
+    </tr>
+  </thead>
+    <tr tal:condition="info/ever|nothing" class="lodd">
+      <td><strong>Ever</strong></td>
+      <td><code tal:content="info/ever/opened"></code></td>
+      <td><code tal:content="info/ever/closed"></code></td>      
+    </tr>    
+    
+    <tr tal:condition="info/month|nothing" class="lodd">
+      <td class="indent1"><strong>This month</strong></td>
+      <td><code tal:content="info/month/opened"></code></td>
+      <td><code tal:content="info/month/closed"></code></td>      
+    </tr>
+    <tr tal:condition="info/last_month|nothing" class="lodd">
+      <td class="indent1"><strong>Last month</strong></td>
+      <td><code tal:content="info/last_month/opened"></code></td>
+      <td><code tal:content="info/last_month/closed"></code></td>      
+    </tr>
+    <tr tal:condition="info/last_week|nothing" class="lodd">
+      <td class="indent2"><strong>Last week</strong></td>
+      <td><code tal:content="info/last_week/opened"></code></td>
+      <td><code tal:content="info/last_week/closed"></code></td>      
+    </tr>
+    <tr tal:condition="info/week|nothing" class="lodd">
+      <td class="indent2"><strong>This week</strong></td>
+      <td><code tal:content="info/week/opened"></code></td>
+      <td><code tal:content="info/week/closed"></code></td>      
+    </tr>
+    <tr tal:condition="info/yesterday|nothing" class="lodd">
+      <td class="indent3"><strong>Yesterday</strong></td>
+      <td><code tal:content="info/yesterday/opened"></code></td>
+      <td><code tal:content="info/yesterday/closed"></code></td>      
+    </tr>    
+    <tr tal:condition="info/today|nothing" class="lodd">
+      <td class="indent3"><strong>Today</strong></td>
+      <td><code tal:content="info/today/opened"></code></td>
+      <td><code tal:content="info/today/closed"></code></td>      
+    </tr>
+</table>

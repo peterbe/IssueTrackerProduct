@@ -1,0 +1,23 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Management')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+<p class="form-title">IssueTracker Notifyable Container</p>
+
+<p>The notifyables you define here can be reached by all Issue Tracker instance
+in its acquisition path.</p>
+
+<p>Click <a href="<dtml-var URL2>/manage_findResult?searchtype=simple&obj_metatypes%3Alist=Issue+Tracker&obj_ids%3Atokens=&obj_searchterm=&obj_mspec=%3C&obj_mtime=&search_sub%3Aint=1&btn_submit=Find">here</a>
+to find which instances can reach this container.</p>
+
+<dtml-var NotifyableManagementPartForm>
+
+
+
+
+<dtml-var manage_page_footer>

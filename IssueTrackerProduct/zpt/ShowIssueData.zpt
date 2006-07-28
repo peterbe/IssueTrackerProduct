@@ -1,0 +1,208 @@
+<div class="issue" align="left" tal:define="in_completelist python:here.thisInURL('CompleteList')"
+ tal:attributes="ondblclick python:test(in_completelist, 'G(\'%s\')'%here.absolute_url_path())">
+  <div class="istatus" tal:define="status here/status"
+			        tal:content="python:status.capitalize()">Status</div>
+  <div class="ihead">
+    <h3 tal:condition="not:in_completelist"><span 
+      tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id"></span><br tal:replace="structure here/showTitle" />
+    &nbsp;<a tal:condition="here/hasEmailOriginal" href="ShowOriginalEmail"><img tal:condition="python:here.getSubmissionType()=='email'"
+     alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16" border="0"
+     src="/misc_/IssueTrackerProduct/emailicon.gif" /></a>
+     <img tal:condition="python:here.getSubmissionType()=='email' and not here.hasEmailOriginal()"
+     alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16"
+     src="/misc_/IssueTrackerProduct/emailicon.gif" />
+    </h3>
+    <h3 tal:condition="in_completelist"><span tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id">
+    </span><a tal:attributes="href here/absolute_url_path" tal:content="structure here/showTitle" class="ilink">The Title</a>
+    &nbsp;<img tal:condition="python:here.getSubmissionType()=='email'"
+     alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16"
+     src="/misc_/IssueTrackerProduct/emailicon.gif" />
+     <tal:test tal:condition="python:here.isFromBrother(here)">
+       (<a tal:define="brother python:here.getBrotherFromIssue(here)"
+           tal:attributes="href brother/absolute_url_path" class="brother"
+           tal:content="brother/getTitle"></a>)
+     </tal:test>
+     </h3>
+  </div>
+
+  <div>
+    <div class="ibody" tal:content="structure python:here.showDescription(signature_hidden=1)">This is the text</div>
+
+    <div class="idetails2">
+      <b>Submitted by:</b> 
+      <span tal:define="emptystring python:''; hide_me here/hide_me; 
+	                  fromname here/getFromname| emptystring; 
+                      email here/getEmail | emptystring"
+	      tal:replace="structure python:here.ShowNameEmail(fromname,email,hide_me)">Author</span>
+
+    <div tal:define="issuedate here/getIssueDate;
+                     difference python:here.timeSince(issuedate, here.ZopeTime(), afterword='old');
+                     datestr python:here.showDate(issuedate)"
+        ><span tal:condition="difference" tal:omit-tag="">
+         <span class="issuedate" tal:content="structure datestr"></span>
+	 <br />
+	 <br tal:replace="difference" /></span>
+         <br tal:condition="not:difference"
+         tal:replace="structure datestr" />
+         </div>
+  
+    <div tal:content="structure here/showFileattachments"></div>
+
+  
+  </div> 
+
+  <form action="#i" method="post"
+  tal:define="change python:user.has_permission('Change Issue Tracker Issues', here) and not in_completelist and here.AllowIssueAttributeChange() and request.get('change')=='Details'"
+  tal:attributes="method python:test(change, 'post','get')"
+  >
+  <table class="idetails-table" summary="Details" border="0"
+   tal:attributes="ondblclick python:test(user.has_permission('Change Issue Tracker Issues', here) and not in_completelist and here.AllowIssueAttributeChange(), 'location.href=location.href+\'?change=Details#i\'')">
+    <tr tal:condition="python:change and here.UseEstimatedTime()">
+      <td class="ilabel">Estimated time</td>
+      <td>
+        <input name="estimated_time_hours" size="7" 
+         tal:define="preval python:request.get('estimated_time_hours', here.getEstimatedTimeHours())"
+         tal:attributes="value python:here.showTimeHours(preval)" />  (hours)
+      </td>
+    </tr>
+    <tr tal:condition="python:not change and here.getEstimatedTimeHours()">
+      <td class="ilabel">Estimated time</td>
+      <td tal:content="python:here.showTimeHours(here.getEstimatedTimeHours(), show_unit=1)">
+      </td>
+    </tr>    
+    <tr tal:condition="python:change and here.UseActualTime()">
+      <td class="ilabel">Actual time</td>
+      <td>
+        <input name="actual_time_hours" size="7" 
+         tal:define="preval python:request.get('actual_time_hours', here.getActualTimeHours())"
+         tal:attributes="value python:here.showTimeHours(preval)" /> (hours)
+      </td>
+    </tr>
+    <tr tal:condition="python:not change and here.getActualTimeHours()">
+      <td class="ilabel">Actual time</td>
+      <td tal:content="python:here.showTimeHours(here.getActualTimeHours(), show_unit=1)">
+      </td>
+    </tr>    
+    <tr tal:condition="python:change and here.ShowConfidentialOption()">
+      <td class="ilabel">Confidential</td>
+      <td>
+        <input type="checkbox" name="confidential:boolean" value="1" 
+         tal:attributes="checked python:test(here.isConfidential())" />
+      </td>      
+    </tr>
+    <tr tal:condition="python:not change and here.isConfidential()">
+      <td colspan="2"><acronym title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym></td>
+    </tr>    
+    <tr>
+      <td class="ilabel">Sections:</td>
+      <td tal:condition="not:change"
+          tal:content="python:', '.join(here.getSections())">Homepage, Other
+      </td>
+      <td tal:condition="change">
+        <select name="sections:list" multiple="multiple" 
+         tal:define="sections here/getSections"
+         tal:attributes="size python:min(6, len(here.sections_options))">
+            <option tal:repeat="option here/sections_options" 
+                tal:attributes="value option; selected python:option in sections"
+                tal:content="option">Section</option>
+	</select>
+      </td>
+    </tr>
+    <tr>
+      <td class="ilabel">Type:</td>
+      <td tal:condition="not:change" tal:content="here/type">
+      </td>
+      <td tal:condition="change">
+        <select name="type" tal:define="types here/types; size python:min(6, len(types)); type here/getType" tal:attributes="size size">
+          <option 
+           tal:repeat="option types" 
+           tal:attributes="value option;
+                           selected python:option==type" 
+           tal:content="option">Types</option>
+	</select>
+      </td>
+    </tr>
+    <tr>
+      <td class="ilabel">Urgency:</td>
+      <td tal:condition="not:change"
+          tal:content="here/urgency" tal:attributes="class here/getUrgencyCSSSelector">
+      </td>
+      <td tal:condition="change"> 
+        <select tal:define="urgencies here/urgencies;
+                            size python:min(6, len(urgencies)); 
+                            urgency here/getUrgency"
+         tal:attributes="size size" name="urgency">
+            <option  tal:repeat="option urgencies" tal:attributes="value option; selected python:urgency == option" tal:content="option">Urgencies</option>
+	</select>
+      </td>
+    </tr>
+    <tr tal:condition="python:here.url2issue and not change">
+      <td class="ilabel">URL:</td>
+      <td><a tal:attributes="href python:here.showURL2Issue(here.url2issue, href=1)"
+                 tal:content="python:here.showURL2Issue(here.url2issue)">http://url</a></td>
+    </tr>
+    <tr tal:condition="python:change and here.ShowConfidentialOption()">
+      <td class="ilabel">URL:</td>
+      <td>
+        <input name="url2issue" tal:attributes="value here/url2issue" size="30" />
+      </td>
+    </tr>    
+    <tr>
+      <td>&nbsp;</td>
+      <td tal:condition="change">
+        <input type="submit" name="editIssueDetails:method" value="Save changes" />
+      </td>
+      <td tal:condition="not:change">
+        <input type="hidden" name="change" value="Details" />
+        <input type="submit"  value="change details" class="smallbutton"
+         tal:condition="python:user.has_permission('Change Issue Tracker Issues', here) and not in_completelist and here.AllowIssueAttributeChange()"/>
+      </td>      
+    </tr>
+  </table>
+  </form>
+  
+ <div class="clearerR">&nbsp;</div>
+
+  </div>
+
+
+  <tal:block tal:define="assignments here/getAssignments;use_extoptions here/UseExtendedOptions">
+  <div class="assignment" tal:condition="python:assignments or here.UseIssueAssignment()">
+    <div tal:repeat="assignment assignments"
+     tal:attributes="style python:test(not repeat['assignment'].end,'text-decoration:line-through')">
+    <br tal:replace="python:assignment.showState(complete=1)" />:
+    <span tal:define="has_assigneeuser assignment/hasACLAssigneeUser">
+     
+     <em tal:condition="not:has_assigneeuser">User no longer available</em>
+
+     <span tal:condition="has_assigneeuser" 
+      tal:replace="structure python:here.ShowNameEmail(assignment.getAssigneeFullname(), assignment.getAssigneeEmail(), highlight=0)"></span>
+    </span>
+    <span tal:define="is_end repeat/assignment/end"
+     tal:condition="python:is_end and assignment.isYou()">
+     
+     <form action="changeAssignment" tal:define="all_users python:here.getAllIssueUsers(exclude_assignee=assignment.getACLAssignee())" method="post" name="changeassignment" 
+                                     tal:condition="python:all_users and not in_completelist">
+	<select name="assignee" style="color:#666"
+         tal:define="issueuser here/getIssueUser;selected python:request.get('assignee','');
+                     youare python:here.getWhoYouAre(issueuser)" tabindex="30"
+             tal:attributes="onchange string:if(this.options[this.selectedIndex].value){location.href='changeAssignment?assignee='+this.options[this.selectedIndex].value+'&send_email='+document.changeassignment.send_email.checked}">
+             <option value="" style="color:#666">Change assignment...</option>
+				<option tal:repeat="user all_users" style="color:#000"
+                 tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected"
+                 tal:content="python:user['user'].getFullname()">
+				Statuses</option>
+	</select>
+        <input type="checkbox" name="send_email" checked="checked" value="1" />Send notification to new assignee
+        <noscript><input type="submit" value="Change" /></noscript>
+      </form>
+    </span>
+    </div>
+  </div>
+  
+<!--  <div class="clearerL" tal:condition="python:not (assignments and here.UseIssueAssignment()) and use_extoptions">&nbsp;</div> -->
+  
+  </tal:block>
+  
+</div>
+

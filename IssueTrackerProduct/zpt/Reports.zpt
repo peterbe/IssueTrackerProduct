@@ -1,0 +1,66 @@
+<html metal:use-macro="here/getHeader">
+<style metal:fill-slot="extracss">
+.report {
+  background-repeat: no-repeat;
+  background-image: url(/misc_/IssueTrackerProduct/report-big.png);
+  margin-bottom:12px;
+  padding-bottom:10px;
+  background-position: 10px 25px;
+}
+.report h3, .report h4 {
+  width:450px;
+  padding:2px;
+  padding-left:6px;
+  background-color:#eee;
+  border-top:1px solid #999;
+  
+}
+.report p {
+  margin-left:50px;
+}
+</style>
+<div metal:fill-slot="body" tal:omit-tag="">
+
+<tal:check tal:condition="not:python:here.hasManagerRole() or not here.PrivateReports()"
+><br tal:replace="python:request.RESPONSE.redirect(here.getRootURL())" /></tal:check>
+
+<h3>Reports</h3>
+
+
+<div tal:define="allscripts python:here.getScripts(sort=True, reverse=True);
+                today here/ZopeTime;
+                baseurl python:here.relative_url()+'/'+here.whichList();
+                listissues_url string:${here/relative_url}/ListIssues;
+                completelist_url string:${here/relative_url}/CompleteList">
+                
+                
+  <div class="report" tal:repeat="script allscripts">
+    <h3 tal:content="script/title_or_id">Name of script</h3>
+    
+    <p>Show with <a href="#" 
+     tal:attributes="href string:$listissues_url/report-${script/getId}">List issues</a>
+     |
+     <a href="#" 
+     tal:attributes="href string:$completelist_url/report-${script/getId}">Complete List</a><br />
+     
+     <tal:block define="yieldcount script/getYieldCountAndDate" condition="yieldcount">
+     Found <span tal:replace="python:test(yieldcount[0]==1, '1 issue', '%s issues'%yieldcount[0])"></span>
+       <tal:subblock tal:condition="python:yieldcount[1]">
+         <br tal:define="diff python:here.timeSince(yieldcount[1], today, afterword='ago', minute_granularity=1)"
+             tal:condition="diff"
+             tal:replace="diff" />
+       </tal:subblock>
+         
+     </tal:block>
+     
+     </p>
+  </div>
+
+</div>
+
+
+
+<p>&nbsp;</p>
+
+</div>
+</html>

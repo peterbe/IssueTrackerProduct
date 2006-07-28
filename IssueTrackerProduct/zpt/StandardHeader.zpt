@@ -1,0 +1,107 @@
+<metal:block define-macro="standard"><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+ tal:define="dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=iso-8859-1');dummy here/StopCache">
+
+<head tal:define="root_relative_url here/getRootRelativeURL">
+
+<title tal:content="structure here/titleTag"></title>
+<meta name="generator" content="IssueTrackerProduct - http://www.issuetrackerproduct.com" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="alternate" type="application/rss+xml" title="RSS" tal:attributes="href string:${root_relative_url}/rss.xml" />
+<link rel="alternate" type="application/rss+xml" title="RSS (with followups)" tal:attributes="href string:${root_relative_url}/rss.xml?show=all" />
+<link rel="start" tal:attributes="href string:${root_relative_url}/" title="Home" />
+<tal:block define="forced_css here/getForcedStylesheet">
+<link tal:condition="not:forced_css" rel="stylesheet" type="text/css" tal:attributes="href string:${root_relative_url}/screen.css" media="screen" />
+<link tal:condition="not:forced_css" rel="stylesheet" type="text/css" tal:attributes="href string:${root_relative_url}/print.css" media="print" />
+<link tal:condition="forced_css" rel="stylesheet" type="text/css" tal:attributes="href forced_css" />
+</tal:block>
+<link rel="Shortcut Icon" href="/favicon.ico" type="image/x-icon" tal:attributes="href string:${root_relative_url}/favicon.ico" />
+
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/core.js"></script>
+<script type="text/javascript" tal:condition="here/doDebug">
+function debug(s) {var el=$('dbgout');if(el)el.innerHTML=el.innerHTML+'<br />\n'+s;}
+</script>
+<script type="text/javascript" tal:condition="not:here/doDebug">
+function debug(s){}
+</script>
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/tw-sack.js"></script>
+
+<meta tal:replace="here/testAutoLogin" />
+
+<script type="text/javascript" tal:condition="here/useAccessKeys"
+ tal:attributes="src string:$root_relative_url/keyboardshortcuts.js"></script>
+ 
+<style metal:define-slot="extracss" tal:omit-tag=""></style>
+<script metal:define-slot="extrajs" tal:omit-tag=""></script>
+
+</head>
+
+<body>
+<div id="head">
+  <h1 class="head" tal:content="structure python:here.getRoot().title_or_id().replace(' ','&nbsp;')">The Title</h1>
+
+<div id="topright">
+<form metal:use-macro="here/search_widget/macros/search_form"></form>
+</div><!--/topright-->
+
+
+<div class="clearer">&nbsp;</div>
+
+<div id="tabs">
+<div id="tab1">
+<ul id="tabnav" tal:define="use_accesskeys here/useAccessKeys">
+	<li tal:repeat="menu here/getMenuItems"
+        tal:attributes="class python:test(menu[2],'tab1','tab0')"
+        ><a tal:attributes="href python:menu[1]"
+	    tal:content="structure python:here.displayMenuItem(menu)"></a></li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+<!-- BODY -->
+
+<div id="main">
+<div metal:define-slot="body">
+
+<!--METALbody-->
+
+</div><!--/metal:body-->
+</div>
+
+<div class="clearerR">&nbsp;</div>
+
+<div metal:use-macro="here/recent_history_widget/macros/recent_history"></div><!--/recent-->
+<div class="clearer">&nbsp;</div>
+
+<div id="foot" align="center">
+  <tal:block tal:repeat="menu here/getMenuItems"><a tal:attributes="href python:menu[1]; style python:test(menu[2], 'text-decoration:none')" tal:content="python:menu[0]">Home</a> <br tal:condition="not:repeat/menu/end" tal:replace="structure string:&#183;" /></tal:block>
+    <br />
+    <a tal:attributes="href string:${here/getRootRelativeURL}/rss.xml">RSS</a> &#183;
+    <a tal:attributes="href string:http://www.issuetrackerproduct.com?version=${here/getIssueTrackerVersion}">IssueTrackerProduct.com</a>  &#183;
+    <a tal:attributes="href string:${here/getRootRelativeURL}/About.html" class="foot" >About</a>
+    <br />&nbsp;
+  </div><!--/foot-->
+
+<span tal:condition="here/doDebug" tal:omit-tag="">
+<div id="dbgout" style="font-family:monospace,courier,sans-serif;font-size:0.7em;"></div>
+<!--<textarea id="dbgout" cols="117" rows="10" style="font-family:monospace,courier,sans-serif;font-size:0.7em;"></textarea>-->
+<a href="http://validator.w3.org/check/referer?ss=1">Validate</a>, <a href="http://feedvalidator.org/check.cgi?url=http%3A%2F%2Fhome.peterbe.com%3A8088%2Ftest%2FnewT%2Frss.xml">RSS feed</a><br />
+<b>SESSION</b> <div tal:content="structure request/SESSION"></div><br/>
+<b>COOKIES</b> <div tal:content="structure request/cookies"></div>
+<span tal:condition="here/getIssueUser">
+<b>USER</b> <div tal:content="structure python:here.getIssueUser().debugInfo()"></div>
+</span>
+<span tal:condition="here/getZopeUser">
+<b>ZOPEUSER</b> <div tal:content="structure python:here.getZopeUser().getRoles()"></div>
+</span>
+<a href="javascript:void(z=document.body.appendChild(document.createElement('script')));void(z.language='javascript');void(z.type='text/javascript');void(z.src='http://slayeroffice.com/tools/modi/modi.js');void(z.id='modi');">DOM inspector</a> ("v" to edit, ESC to exit)
+</span>
+</html>
+
+        
+</metal:block>

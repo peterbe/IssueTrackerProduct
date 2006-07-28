@@ -1,0 +1,25 @@
+<table align="center" cellpadding="15" bgcolor="#efefef"
+ style="border:1px solid black">
+    <tr>
+	<td valign="top">
+	    <h3>Issue Added!</h3>
+	    <p>Bookmark this URL or copy the link location</p>
+	    <h4 align="center"><a href="URL1"
+                        tal:attributes="href request/URL1"
+                        tal:content="request/URL1">URL1</a></h4>
+
+	    <form tal:replace="structure here/tell_a_friend">
+	    </form>
+	    
+	</td>
+	<td valign="top" tal:condition="python:here.doShowAlwaysNotifyStatus() and here.getAlwaysNotify()">
+		<p><strong>Notification was sent to:</strong></p>
+		<div tal:repeat="anotify python:here.getAlwaysNotify(except_email=here.email)">
+		<img src="/misc_/IssueTrackerProduct/notification.gif"
+		width="16" height="16" alt="Notified" />
+		<span tal:replace="anotify" />
+		</div>
+	</td>
+    </tr>
+</table>
+

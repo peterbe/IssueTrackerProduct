@@ -1,0 +1,152 @@
+<dtml-var manage_page_header>
+
+<script type="text/javascript">
+function validateForm(f) {
+  var p = f.password.value;
+  var c = f.confirm.value;
+  if (p!='password' && c !='pconfirm' && p!=c) {
+      alert("Error: Password and confirmation do not match");
+      return false;
+  }
+  return true;
+}
+</script>
+
+<dtml-var "manage_form_title(this(), _,
+           form_title='Change User',
+           help_product='OFSP',
+           help_topic='User-Folder_Edit-User.stx'
+	   )">
+
+<form action="manage_users" method="post" onsubmit="return validateForm(this)">
+<table>
+<tr>
+<td valign="top">
+<div class="form-label">
+Name
+</div>
+</td>
+<td valign="top">
+<div class="form-text">
+<dtml-var expr="user.name">
+</div>
+</td>
+</tr>
+<tr><td colspan=2>&nbsp;</td></tr>
+<dtml-if remote_user_mode__>
+  <input type="hidden" name="password" value="<dtml-var 
+   password html_quote>" />
+  <input type="hidden" name="confirm"  value="<dtml-var 
+   password html_quote>" />
+<dtml-else>
+<tr>
+<td valign="top">
+<div class="form-label">
+New Password
+</div>
+</td>
+<td valign="top">
+<input type="password" name="password" size="30" value="password" />
+</td>
+</tr>
+<tr>
+<td valign="top">
+<div class="form-label">
+(Confirm)
+</div>
+</td>
+<td valign="top">
+<input type="password" name="confirm" size="30" value="pconfirm" />
+</td>
+</tr>
+</dtml-if>
+<tr>
+<td valign="top">
+<div class="form-optional">
+Domains
+</div>
+</td>
+<td valign="top">
+<input type="text" name="domains:tokens" size="30"
+  value="<dtml-if expr="user.domains"><dtml-in expr="user.domains"><dtml-var sequence-item html_quote> </dtml-in></dtml-if>" />
+</td>
+</tr>
+
+<tr>
+<td valign="top">
+<div class="form-label">
+Roles
+</div>
+</td>
+<td valign="top">
+<div class="form-element">
+<select name="roles:list" size="5" multiple>
+<dtml-in valid_roles>
+<dtml-if expr="_vars['sequence-item'] != 'Authenticated'">
+<dtml-if expr="_vars['sequence-item'] != 'Anonymous'">
+<dtml-if expr="_vars['sequence-item'] != 'Shared'">
+<dtml-if expr="_vars['sequence-item'] in user.roles">
+<option value="<dtml-var sequence-item html_quote>" selected><dtml-var 
+ sequence-item>
+<dtml-else>
+<option value="<dtml-var sequence-item html_quote>"><dtml-var sequence-item>
+</dtml-if>
+</dtml-if>
+</dtml-if>
+</dtml-if>
+</dtml-in valid_roles>
+</select>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<div class="form-optional">
+E-Mail
+</div>
+</td>
+<td valign="top">
+<input type="text" name="email" size="30"
+  value="<dtml-if expr="user.email"><dtml-var expr="user.email"></dtml-if>" />
+</td>
+</tr>
+<tr>
+<td valign="top">
+<div class="form-optional">
+Full name
+</div>
+</td>
+<td valign="top">
+<input type="text" name="fullname" size="30"
+  value="<dtml-if expr="user.fullname"><dtml-var expr="user.fullname"></dtml-if>" />
+</td>
+</tr>
+
+<dtml-comment>
+<tr>
+<td valign="top">
+<div class="form-optional">
+Must change password
+</div>
+</td>
+<td valign="top">
+<input type="checkbox" name="must_change_password:boolean" value="1"
+  value="<dtml-if "user.mustChangePassword()">checked="checked"</dtml-if>" />
+</td>
+</tr>
+</dtml-comment>
+
+<tr>
+<td>
+<input type="hidden" name="name" value="<dtml-var 
+ expr="user.name" html_quote>" />
+<br /><br />
+<input class="form-element" type="submit" name="submit" value="Change" />
+</div>
+</td>
+</tr>
+</table>
+</form>
+
+
+
+<dtml-var manage_page_footer>

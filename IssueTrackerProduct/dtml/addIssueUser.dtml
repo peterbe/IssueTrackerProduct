@@ -1,0 +1,169 @@
+<dtml-var manage_page_header>
+
+<script type="text/javascript">
+function validateForm(f) {
+  var p = f.password.value;
+  var c = f.confirm.value;
+  if (p!=c) {
+      alert("Error: Password and confirmation do not match");
+      return false;
+  }
+  var e = f.email.value;
+  if (!e) {
+      alert("Error: No email provided");
+      return false;
+  }
+
+  return true;
+}
+</script>
+
+<dtml-var "manage_form_title(this(), _,
+           form_title='Add User',
+           help_product='OFSP',
+           help_topic='User-Folder_Add-User.stx'
+	   )">
+
+<p class="form-help">
+To add a new user, enter the name <dtml-unless remote_user_mode__>
+,password, confirmation</dtml-unless> and roles for the new user and 
+click &quot;Add&quot;. <em>Domains</em> is an optional list of domains 
+from which the user is allowed to login. 
+</p>
+
+<form action="manage_users" method="post" onsubmit="return validateForm(this)">
+<table>
+  <tr>
+    <td valign="top">
+<table>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  Name
+  </div>
+  </td>
+  <td align="left" valign="top">
+  <input type="text" name="name" size="30" />
+  </td>
+</tr>
+
+<dtml-if remote_user_mode__>
+<input type="hidden" name="password" value="password" />
+<input type="hidden" name="confirm"  value="password" />
+<dtml-else>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  Password
+  </div>
+  </td>
+  <td align="left" valign="top">
+  <input type="password" name="password" size="30" />
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  (Confirm)
+  </div>
+  </td>
+  <td align="left" valign="top">
+  <input type="password" name="confirm" size="30" />
+  </td>
+</tr>
+</dtml-if>
+
+<tr>
+<td align="left" valign="top">
+<div class="form-optional">
+Domains
+</div>
+</td>
+<td align="left" valign="top">
+<input type="text" name="domains:tokens" size="30" value="" />
+</td>
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  Roles
+  </div>
+  </td>
+  <td align="left" valign="top">
+  <div class="form-element">
+  <select name="roles:list" size="5" multiple>
+  <dtml-in valid_roles>
+  <dtml-if expr="_vars['sequence-item'] != 'Authenticated'">
+  <dtml-if expr="_vars['sequence-item'] != 'Anonymous'">
+  <dtml-if expr="_vars['sequence-item'] != 'Shared'">
+  <option value="<dtml-var sequence-item html_quote>"><dtml-var 
+   sequence-item>
+  </dtml-if>
+  </dtml-if>
+  </dtml-if>
+  </dtml-in valid_roles>
+  </select>
+  <br />
+</tr>
+<tr>
+<td align="left" valign="top">
+<div class="form-label">
+E-Mail
+</div>
+</td>
+<td align="left" valign="top">
+<input type="text" name="email" size="30" value="" />
+</td>
+</tr>
+<tr>
+<td align="left" valign="top">
+<div class="form-label">
+Full name
+</div>
+</td>
+<td align="left" valign="top">
+<input type="text" name="fullname" size="30" value="" />
+</td>
+</tr>
+
+<tr>
+<td>
+  <input type="submit" name="submit" value="Add" />
+  </div>
+</td>
+</tr>
+</table>
+    </td>
+    <td>&nbsp;&nbsp;&nbsp;</td>
+    <td valign="top">
+    <h3>Explanation</h3>
+    <p><b>IssueTracker Manager</b> only is if the user should be able to 
+        change the status of issues (i.e. Take, Complete, Delete, etc.) and 
+        see the confidential issues.<br>
+        An IssueTracker Manager can <i>not</i> access the Zope management
+        interface like a native Manager can.</p>
+
+    <p><b>IssueTracker User</b> is very basic meaning the user can at least
+       view the issue tracker of disable for anonymous users but not much 
+       else.</p>
+
+    <p><b>Manager</b> supersedes IssueTracker Manager so if you want a user 
+       to have full access to everything this is the choice.</p>
+
+    <p>Any user can have multiple roles but it shouldn't be necessary since 
+       they are all linearly inherited meaning that there's nothing extra an
+       <b>IssueTracker Manager</b> can do that a <b>Manager</b> can't and so 
+       on.</p>
+
+    <p tal:replace="nothing"><b>'Must change password'</b> means that the first time this user logs
+       in a page will appear for the user asking for a new better password.<br />
+       This is useful if at this stage set them up with a dummy password (e.g. 'test123')
+       but really want the user to change it to something better.</p>
+  
+    </td>
+  </tr>
+</table>
+</form>
+
+<dtml-var manage_page_footer>

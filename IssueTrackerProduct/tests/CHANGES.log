@@ -1,0 +1,15 @@
+- 0.4
+
+  Added class StandaloneWordRegex to testUtils.py
+  
+- 0.3
+
+  Added class AddParam2URLTestCase to testUtils.py
+  
+- 0.2
+
+  Added class SplitTermsTestCase to testUtils.py
+  
+- 0.1
+
+  Added testUtils.py with unittest class TimeSinceTestCase

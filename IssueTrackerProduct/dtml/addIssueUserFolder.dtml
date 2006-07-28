@@ -1,0 +1,148 @@
+<dtml-var manage_page_header>
+
+<dtml-var "manage_form_title(this(), _,
+           form_title='Add IssueUserFolder',
+	   )">
+
+
+<dtml-call "REQUEST.set('in_issue_tracker', 0)">
+<dtml-try>
+  <dtml-let issuetrackerroot="getRoot()">
+    <dtml-if "issuetrackerroot.meta_type=='Issue Tracker'">
+       <dtml-call "REQUEST.set('in_issue_tracker', 1)">
+    </dtml-if>
+  </dtml-let>
+<dtml-except>
+</dtml-try>
+
+
+<p>
+<dtml-if "REQUEST['in_issue_tracker']">
+Since you are creating this User Folder <em>inside an Issue Tracker object</em>, 
+the webmaster email (<em><dtml-var getSitemasterEmail></em>) will be used for
+<b>possible password email reminders</b>.
+<dtml-call "REQUEST.set('SitemasterEmail', getSitemasterEmail())">
+<dtml-else>
+Since you are <em>not</em> creating this User Folder inside a Issue Tracker
+object you have to enter a webmaster email if you want to use the
+password email reminders feature for users within.
+</dtml-if>
+</p>
+
+<form action="manage_addIssueUserFolder" method="post">
+<table cellspacing="0" cellpadding="2" border="0">
+  <tr>
+    <td align="left" valign="top">
+    <div class="form-optional">
+    Webmaster email
+    </div>
+    </td>
+    <td align="left" valign="top"><p>
+    <input type="text" name="webmaster_email" size="40" value="" />
+    <dtml-if "REQUEST.get('SitemasterEmail')">
+      (you can leave this empty)
+    </dtml-if>
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+    </td>
+    <td align="left" valign="top">
+
+    </td>
+  </tr>
+</table>
+
+<dtml-if "'acl_users' in objectIds('User Folder')">
+<p>Please note that since there already is User Folder here, 
+you can to convert all the users to be Issue Users.<br>
+If we can't find a valid email address for a user, <em>that user will NOT be converted and you have to recreate it.</em></p>
+
+<dtml-in "manage_getUsersToConvert()" mapping>
+<dtml-let key="_.string.replace(username,' ','')">
+<input type="hidden" name="keys:list" value="<dtml-var key>">
+  <dtml-if sequence-start>
+    <table border=0>
+      <tr>
+        <th>Keep</th>
+        <th>Username</th>
+        <th>Fullname</th>
+        <th>Email</th>
+        <th>Roles</th>
+        <th><em>Domains</em></th>
+      </tr>
+  </dtml-if>
+  <tr>
+    <td valign="top"><input type="checkbox" name="keep_usernames:list" value="<dtml-var key>" 
+         <dtml-unless invalid_email>checked="checked"</dtml-unless>></td>
+    <td valign="top"><input name="username_<dtml-var key>" value="<dtml-var username>">
+    </td>
+    <td valign="top">
+    <dtml-if "_.len(fullname)>1">
+      <select name="fullname_<dtml-var key>" size="<dtml-var "_.len(fullname)">">
+      <dtml-in fullname>
+        <option value="<dtml-var sequence-item>"
+         <dtml-if sequence-start>selected="selected"</dtml-if>
+         ><dtml-var sequence-item></option>
+      </dtml-in>
+      </select>
+    <dtml-else>
+      <input name="fullname_<dtml-var key>" value="<dtml-if fullname><dtml-var "fullname[0]"><dtml-else><dtml-var "username.capitalize()"></dtml-if>">
+    </dtml-if>
+    </td>
+
+    <td valign="top">
+    <dtml-if "_.len(email)>1">
+      <select name="email_<dtml-var key>" size="<dtml-var "_.len(email)">">
+      <dtml-in email>
+        <option value="<dtml-var sequence-item>"
+         <dtml-if sequence-start>selected="selected"</dtml-if>
+         ><dtml-var sequence-item></option>
+      </dtml-in>
+      </select>
+    <dtml-else>
+      <input name="email_<dtml-var key>" value="<dtml-if email><dtml-var "email[0]"><dtml-else>required</dtml-if>"
+       <dtml-if invalid_email>style="color:red;"</dtml-if>>
+    </dtml-if>
+    </td>
+
+
+    <td valign="top"><dtml-let vroles=valid_roles><select name="roles_<dtml-var key>:list" size="<dtml-var "_.len(vroles)-2">">
+      <dtml-in vroles>
+      <dtml-if expr="_vars['sequence-item'] != 'Authenticated'">
+      <dtml-if expr="_vars['sequence-item'] != 'Anonymous'">
+      <dtml-if expr="_vars['sequence-item'] != 'Shared'">
+      <option value="<dtml-var sequence-item html_quote>"
+       <dtml-if "_['sequence-item'] in roles">selected="selected"</dtml-if>
+       ><dtml-var sequence-item></option>
+      </dtml-if>
+      </dtml-if>
+      </dtml-if>
+      </dtml-in>
+      </dtml-let>
+      </select>
+      
+    </td>
+    
+    <td valign="top"><input name="domains_<dtml-var key>:tokens" value="<dtml-var "_.string.join(domains, ' ')">">
+    </td>
+  </tr>
+
+  <dtml-if sequence-end>
+    </table><br>
+  </dtml-if>
+</dtml-let>
+</dtml-in>
+
+</dtml-if>
+
+
+<div class="form-element">
+    <input class="form-element" type="submit" name="submit" 
+     value="Add IssueTracker User Folder" /> 
+</div>
+
+
+</form>
+
+<dtml-var manage_page_footer>

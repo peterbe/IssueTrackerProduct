@@ -1,0 +1,161 @@
+<html metal:use-macro="here/getHeader">
+
+<script type="text/javascript" metal:fill-slot="extrajs"><!--
+function _deldraft(draftid, method) {
+  // return true if the AJAX request failed, 
+  // return false if everything went fine.
+  var d = 'id='+draftid +'&return_show_drafts=1';
+  var a = new sack(method);
+  a.AjaxFailedAlert=null;
+  a.encodeURIString = false;
+  a.runAJAX(d);
+  a.onCompletion = function() { $('issuedraftsouter').innerHTML=a.response; };
+  if (a.failed) return true;
+  return false;  
+}
+function deldraft(draftid) { return _deldraft(draftid, 'DeleteDraftIssue'); }
+function deldraftfollowup(draftid) { return _deldraft(draftid, 'DeleteDraftFollowup'); }
+
+//--></script>
+
+<link rel="stylesheet" type="text/css" metal:fill-slot="extracss"
+ tal:attributes="href string:${here/getRootRelativeURL}/home.css" />
+
+<div metal:fill-slot="body">
+
+<div id="rest">
+
+
+    <table tal:define="statuslist here/CountStatuses" tal:condition="python:len(statuslist)>0"
+     summary="List of counts per different statuses"
+     border="0" cellspacing="0" cellpadding="2">
+
+      <tr class="lhead">
+        <th tal:repeat="statuscount statuslist" align="center">&nbsp;&nbsp;<a tal:define="status python:statuscount[0]"
+         tal:attributes="href python:here.getStatus2ListLink(status)" tal:content="python:status.capitalize()">Status</a>&nbsp;&nbsp;</th>
+      </tr>
+      <tr >
+        <td align="center" tal:repeat="statuscount statuslist" tal:content="python:statuscount[1]">count</td>
+      </tr>
+
+      <tr>
+        <td align="right" colspan=1 tal:attributes="colspan python:len(statuslist)">
+          Only for the last 
+          <a href="?count_status_since=1" tal:attributes="style python:test(request.has_key('count_status_since') and request['count_status_since']=='1','background-color: gainsboro;;','')">1 day</a>, 
+          <a href="?count_status_since=7" tal:attributes="style python:test(request.has_key('count_status_since') and request['count_status_since']=='7','background-color: gainsboro;;','')">1 week</a> or
+          <a href="?count_status_since=30" tal:attributes="style python:test(request.has_key('count_status_since') and request['count_status_since']=='30','background-color: gainsboro;;','')">1 month</a>
+
+            <a tal:condition="python:request.has_key('count_status_since')" href="" >ever</a>
+
+        </td>
+      </tr>
+     </table>
+
+  <br />
+  <ul class="further">
+    <li id="statistics"
+     tal:condition="python:here.hasManagerRole() or not here.PrivateStatistics()"
+      ><a href="Statistics">Statistics</a></li>
+    <li id="reports"
+     tal:condition="python:here.getReportsContainer().getScripts()"
+      ><a href="Reports"
+       tal:define="reportscontainer here/getReportsContainer"
+       tal:attributes="href reportscontainer/absolute_url_path">Reports</a></li>
+  </ul>
+  
+  <ul class="further" tal:define="plugins here/getPluginObjects"
+                   tal:condition="plugins">
+    <li tal:repeat="plugin plugins"
+        tal:attributes="style string:background-image:url(/${plugin/icon})">
+      <a tal:attributes="href plugin/absolute_url_path"
+         tal:content="plugin/getTitle|plugin/title_or_id"></a>
+    </li>
+  </ul>
+
+
+  <div id="issuedraftsouter" tal:content="structure here/show_drafts"></div>
+  
+  <div id="nextactionsouter"
+   tal:condition="here/showNextActionIssues"
+   tal:content="structure here/show_next_actions"></div>
+
+
+
+</div>
+
+<div id="outlook" tal:define="global at_least_one_found python:0">
+
+
+<dl  tal:define="days_filter python:30*2;
+                 batch_limit context/getOutlookBatchSize;
+                 dummy python:request.set('keep_sortorder',0);
+                 dummy python:request.set('sortorder', 'modifydate');
+                 dummy python:request.set('reverse',0);
+                 filteredissues python:here.ListIssuesFiltered(skip_filter=1)[:batch_limit];
+		 today context/ZopeTime;
+                 todaystrf nocall:today/strftime;
+                 daylabels python:here.getOutlookDaylabels(filteredissues);
+                 ">
+    <tal:repeat repeat="issue filteredissues">
+    <tal:cutoff define="age python:int(today-issue.getModifyDate())"
+                condition="python:age < days_filter">
+      <tal:item define="global at_least_one_found python:1" />
+
+      <dt tal:define="label python:daylabels.get(issue.getId())" tal:condition="label" 
+          tal:content="label" class="daylabel"></dt>
+      
+      <dd tal:define="threads issue/ListThreads"
+        ><span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
+         <b><a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
+               tal:attributes="href issue/relative_url_path;
+                               title python:test(diff, diff)"
+	         tal:content="structure python:context.displayBriefTitle(issue.getTitle())"
+		 class="ilink"
+		 ></a></b>&nbsp;<img src="/misc_/IssueTrackerProduct/paperclip.gif"
+                  tal:define="noattachments issue/countFileattachments"
+                  tal:condition="noattachments"
+                  tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                  <tal:test tal:condition="python:here.isFromBrother(issue)">
+                   (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+                       tal:attributes="href brother/absolute_url_path" class="brother"
+                       tal:content="brother/getTitle"></a>)
+                  </tal:test>                              
+                 - <b class="status" tal:content="python:issue.getStatus().capitalize()"></b><br />
+	    <tal:threads condition="threads">
+	        <a tal:define="anchor python:len(threads)"
+		   tal:attributes="href string:${issue/relative_url_path}#i${anchor}"
+		   tal:content="structure python:here.colorizeThreadChange(threads[-1].getTitle())"></a>
+		by: <a tal:replace="structure python:here.ShowNameEmail(threads[-1].getFromname(),threads[-1].getEmail())"></a><br />
+		
+	    </tal:threads>
+	    
+	    <tal:new condition="not:threads">
+ 	      Submitted by: <a tal:replace="structure python:here.ShowNameEmail(issue.getFromname(), issue.getEmail())"></a><br />
+		
+	    </tal:new>	    
+      </dd>
+    </tal:cutoff>
+    </tal:repeat>
+    
+<p tal:condition="not:at_least_one_found">    
+<em tal:condition="here/hasAnyIssues">
+No activity in the last <br tal:replace="python:days_filter/7" /> weeks</em>
+
+<em tal:condition="not:here/hasAnyIssues">
+No issues added yet</em>
+</p>
+
+
+</dl>
+
+
+</div>
+
+
+
+
+<br class="clearer"/>
+
+</div>
+</html>
+

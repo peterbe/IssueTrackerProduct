@@ -1,0 +1,56 @@
+<html metal:use-macro="here/getHeader">
+<div metal:fill-slot="body">
+
+<h2>About keyboard shortcuts</h2>
+
+
+<style type="text/css">
+b.key { font-size:115%; }
+</style>
+
+<div class="bumf">
+
+<h3>Navigating around different pages</h3>
+
+<ul>
+  <li>To go to <a href="./">the home page</a>, press <b class="key">g</b> followed by <b class="key">h</b></li>
+  <li>To <a href="AddIssue">add an issue</a>, press <b class="key">g</b> followed by <b class="key">a</b></li>
+  <li>To <a href="QuickAddIssue">add an issue quickly</a>, press <b class="key">g</b> followed by <b class="key">q</b> (or <b class="key">Q</b>)</li>
+  <li>To see a <a href="ListIssues">list of issues</a>, press <b class="key">g</b> followed by <b class="key">l</b> (or <b class="key">L</b>)</li>
+  <li>To see a <a href="CompleteList">complete list of issues</a>, press <b class="key">g</b> followed by <b class="key">c</b></li>
+  <li>To go to <a href="User">your user page</a>, press <b class="key">g</b> followed by <b class="key">u</b></li>
+  <li tal:condition="python:here.hasManagerRole() or not here.PrivateStatistics()"
+   >To go to <a href="Statistics">the statistics page</a>, press <b class="key">g</b> followed by <b class="key">s</b></li>
+  <li tal:condition="python:here.getReportsContainer().getScripts()"
+   >To list <a href="Reports">all reports</a>, press <b class="key">g</b> followed by <b class="key">r</b></li>
+</ul>
+<br />
+
+<h3>Searching from anywhere</h3>
+
+<p>To search for something press <b class="key">s</b> or <b class="key">/</b> and the focus will be placed in the search box. Hit the Enter key 
+when you have entered your search word(s). If you want to search for something again, just press the 
+<b class="key">s</b> or <b class="key">/</b> key again and enter another search word.</p>
+
+<br />
+
+<h3>Quickly go to an issue</h3>
+
+<p>If you know the issue number (aka. issue ID) of an issue you want to go to, press the <b class="key">#</b> key (some keyboards might require
+a Shift press first) and a dialog box will open to ask you for the issue number. You don't have to enter all the padded
+zeros or the # symbol itself but it should work nomatter what you enter as long as it is a possible issue reference.</p>
+
+<h3>Jumping to next and previous issue link</h3>
+
+<p>On any page where there is a list of links to issue (where the link text is the title of the issue)
+you can jump to the next and previous such link with the keys <b class="key">n</b> and <b class="key">p</b>
+respectively. This merely puts the focus on the next and previous links but to go to the issue page it links to
+you simply hit Return since the focus is on the link.</p>
+
+<br />
+
+
+</div>
+
+</div>
+</html>

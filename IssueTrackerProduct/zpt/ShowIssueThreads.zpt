@@ -1,0 +1,45 @@
+<div align="center" tal:define="threads python:here.ListThreads()" tal:condition="threads">
+
+  <div tal:repeat="thread threads" class="threadbox" align="left">
+
+    <a tal:attributes="name string:i${repeat/thread/number}"></a>
+    <div class="thead">
+	<b tal:content="structure python:here.colorizeThreadChange(thread.getTitle())">
+		Title</b>
+
+    <a tal:condition="thread/hasEmailOriginal" 
+       tal:attributes="href string:${thread/getId}/ShowOriginalEmail"><img tal:condition="python:thread.getSubmissionType()=='email'"
+     alt="Followup submitted via email" width="16" height="16" border="0"
+     src="/misc_/IssueTrackerProduct/emailicon.gif" /></a>
+     <img tal:condition="python:thread.getSubmissionType()=='email' and not thread.hasEmailOriginal()"
+     alt="Followup submitted via email" width="16" height="16"
+     src="/misc_/IssueTrackerProduct/emailicon.gif" />
+
+        &nbsp;&nbsp;-&nbsp;&nbsp;
+	<span tal:define="fromname thread/getFromname;email thread/getEmail"
+	     tal:replace="structure python:here.ShowNameEmail(fromname,email)">
+				Name and Email</span>
+				
+    <a tal:attributes="href string:#i${repeat/thread/number}" class="plink">#</a>
+                                
+	
+    </div>
+	 
+	<div class="trest">
+	  
+        <div class="tbody" tal:define="comment thread/getComment">
+	    <div tal:condition="comment"				            
+			tal:replace="structure thread/showComment">
+			    COMMENT here
+	    </div>
+	    <em tal:condition="not:comment">No comment.</em>
+        </div>
+
+	    <div class="threaddate" tal:content="structure python:here.showDate(thread.getThreadDate())">date</div>
+        <div class="threadfiles" tal:content="structure thread/showThreadFileattachments"></div>
+        <div class="clearerR">&nbsp;</div>
+
+    </div>
+			
+  </div>
+</div>

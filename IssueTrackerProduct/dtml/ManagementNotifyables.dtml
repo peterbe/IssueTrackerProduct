@@ -1,0 +1,31 @@
+<dtml-var manage_page_header>
+<dtml-with "_(management_view='Management')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+
+
+<dtml-var "ManagementTabs('Notifyables')">
+
+
+<p class="form-title">Notifyables Mangement</p>
+
+<dtml-if hasGlobalContainer>
+<p><b>
+<img src="/misc_/IssueTrackerProduct/issuetracker_notifyablecontainer.gif" alt="Issue Tracker Notifyable Container" 
+   title="Issue Tracker Notifyable Container" border="0" align="left" />
+Bare in mind</b> that you have a global container for notifyables.<br>
+The ones you create here only work within this instance.</p>
+</dtml-if>
+
+<dtml-var NotifyableManagementPartForm>
+
+
+<br>&nbsp;
+
+
+<dtml-var manage_page_footer>

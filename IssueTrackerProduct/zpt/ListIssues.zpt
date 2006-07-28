@@ -1,0 +1,37 @@
+<div tal:define="b_start here/getBatchStart;
+                 b_size here/getBatchSize;
+                 filteredissues options/filteredissues|here/ListIssuesFiltered;
+                 global filteredissues_len python:len(filteredissues);
+                 Batch python:modules['ZTUtils'].Batch;
+                 global batch python:Batch(filteredissues, b_size, b_start, orphan=1);
+		 dummy python:here.setWhichList('ListIssues')"
+     tal:replace="nothing"     
+/><html metal:use-macro="here/getHeader">
+<style type="text/css" metal:fill-slot="extracss">
+.bd { font-size:90%}
+</style>
+<div metal:fill-slot="body" tal:omit-tag="">
+
+
+<span tal:replace="structure here/filter_options"/>
+
+<h3 class="pagetitle" tal:content="here/getListPageTitle">List Issues</h3>
+<a tal:condition="request/report|nothing" tal:attributes="href string:${here/getRootURL}/Reports">All reports</a>
+
+
+
+<span tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len, batch=batch)"></span>
+
+
+<table tal:define="sublist here/whichSubList; 
+                   tmpl python:here.getListIssuesList(sublist)"
+tal:replace="structure python:tmpl(batch=batch)"></table>
+
+
+<span tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len, batch=batch, nosum=1, showSubListOptions=1)"></span>
+
+<br /><br />
+
+
+</div>
+</html>

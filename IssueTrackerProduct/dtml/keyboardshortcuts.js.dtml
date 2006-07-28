@@ -1,0 +1,138 @@
+<dtml-call "doCache(hours=24)"><dtml-call "RESPONSE.setHeader('Content-Type','application/x-javascript')">
+
+var keyboard_shortcuts_enabled = true;
+
+function disableKS(e) { 
+  keyboard_shortcuts_enabled = false; 
+}
+function enableKS(e) { 
+  keyboard_shortcuts_enabled = true; 
+}
+
+var curr_ilink_idx=-1;
+var all_ilinks = new Array();
+var prev_keycode;
+var num_keycode=""; //numeric keycode
+function body_onkeypress(evt){
+    if (!keyboard_shortcuts_enabled) return;
+    function S(k) { return String.fromCharCode(k); }
+    if (window.event) key=window.event.keyCode;
+    else key=evt.which;
+
+    var s = S(key).toLowerCase();
+    if (prev_keycode) prev_s = S(prev_keycode).toLowerCase();
+    else prev_s = "";
+
+    var burl='<dtml-var getRootRelativeURL>';
+    if (s != 'g' && prev_s=='g'){
+        
+        if (s=='h') {
+            location.href=burl+'/'; return false;
+        } else if (s=='a') { //65 = a
+            location.href=burl+'/AddIssue'; return false;
+        } else if (s=='q') { // 81 = q
+	    location.href=burl+'/QuickAddIssue'; return false;
+        } else if (s=='l') { // 76 = l
+            location.href=burl+'/ListIssues'; return false;
+        } else if (s == 'c') { // 67 = c
+            location.href=burl+'/CompleteList'; return false;
+        } else if (s == 'u') { // 85 = u
+            location.href=burl+'/User'; return false;
+        } else if (s == 'r') { 
+            location.href=burl+'/Reports'; return false;
+            
+        <dtml-if "hasManagerRole() or not PrivateStatistics()">
+        } else if (s == 's') { 
+            location.href=burl+'/Statistics'; return false;
+        </dtml-if>
+        
+        }       
+        
+    } else if (s == '#') { // 51 = #
+       var issue = prompt("Enter issue number or title:","");
+       issueid = issue.replace(/^\s+|\s+$/g,''); // strip whitespace
+       <dtml-if "issueprefix">
+       ok_id = new RegExp(/^\d+$|/^<dtml-var issueprefix>\d+$/);
+       <dtml-else>
+       ok_id = new RegExp(/^\d+$|^#\d+$/);
+       </dtml-if>
+       if (issueid) {
+         if (ok_id.exec(issueid)) {
+	   if (issueid.length!=<dtml-var "randomid_length">)
+             while(issueid.length<<dtml-var "randomid_length">)
+               issueid = "0"+issueid;
+	   if (issueid[0]=='#') issueid = issueid.substring(1, issueid.length);
+           location.href=burl+'/'+issueid;
+           return false;
+         } else {
+           location.href='<dtml-var "getRootURL()">/<dtml-var "whichList()">/?search_only_on=title&q='+escape(issue);
+         }
+       }
+
+    } else if (s=='n') {
+	if (all_ilinks.length>1) {
+	  if (curr_ilink_idx==-1) 
+	     curr_ilink_idx=0;
+	  else {
+	     unhighlightILink(all_ilinks[curr_ilink_idx]);
+	     curr_ilink_idx = (curr_ilink_idx+1) % all_ilinks.length;
+	  }
+	  highlightILink(all_ilinks[curr_ilink_idx]);
+	} 
+        
+    } else if (s=='p') {
+        if (all_ilinks.length>1) {
+	  if (curr_ilink_idx==-1) 
+	     curr_ilink_idx=all_ilinks.length-1;
+	  else {
+	     unhighlightILink(all_ilinks[curr_ilink_idx]);
+	     curr_ilink_idx = (curr_ilink_idx-1) % all_ilinks.length;
+	  }
+	  highlightILink(all_ilinks[curr_ilink_idx]);
+	}
+       
+    } else if (s=='s' || s=='/') {
+        window.scrollTo(0,0);
+	disableKS();
+        $('q').focus();
+	$('q').select();
+    } 
+
+    prev_keycode=key;
+    return true;
+}
+
+addEvent(document, 'keypress', body_onkeypress);
+
+function toggleInputsKS() {
+  els = [document.getElementsByTagName("INPUT"), document.getElementsByTagName("TEXTAREA"), document.getElementsByTagName("SELECT")];
+  for (i=0; i< els.length; i++)
+    for (j=0; j<els[i].length; j++){
+      addEvent(els[i][j], 'blur', enableKS);
+      addEvent(els[i][j], 'focus', disableKS);
+    }
+}
+
+function findILinks() {
+   c=0;
+   links = document.getElementsByTagName('a');
+   for (i=0;i<links.length;i++)
+     if (links[i].className=='ilink') { c++;
+       all_ilinks.push(links[i]);
+     }
+}
+
+function highlightILink(el){
+   el.innerHTML = '&gt;' + el.innerHTML;
+   el.focus();
+}
+function unhighlightILink(el){
+   var s= el.innerHTML;
+   el.innerHTML = el.innerHTML.substring(4);
+   
+}
+
+addEvent(window, 'load', toggleInputsKS);
+addEvent(window, 'load', findILinks);
+
+

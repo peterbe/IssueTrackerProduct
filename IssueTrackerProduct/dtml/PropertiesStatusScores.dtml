@@ -1,0 +1,90 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Properties')">
+<dtml-var manage_tabs>
+</dtml-with>
+
+<div style="float:right;font-size:10px; padding:6px">
+  <a href="manage_editIssueTrackerPropertiesForm" 
+  style="text-decoration:underline">&lt;&lt;&lt; Return to all properties</a>
+</div>
+
+<h2>Status scores</h2>
+
+
+
+<p>The status scores is a way to put a value on each status. This makes it possible to 
+tell how valuable it is to have an issue in a particular status, where the lowest value is 
+given to a status where the issue is not near completion an the higest value when the issue is 
+in its ideal state.</p>
+
+<form action="manage_saveStatusScores" method="post">
+<dtml-let values="getStatusScoreValues(return_incomplete=1)">
+<dtml-comment> values here is a dict where for each status it gives a percentage (int [0-100]) or None
+</dtml-comment>
+
+<table border="0">
+  <dtml-in "getStatuses()">
+  <dtml-let preval="values.get(_['sequence-item'])">
+    <tr>
+      <td>
+        <p><b><dtml-var sequence-item></b></p>
+        <input type="hidden" name="used_statuses:list" value="<dtml-var sequence-item>" />
+      </td>
+      <td><select name="values:list">
+            
+            <option value="" <dtml-if "preval==_.None">selected="selected"</dtml-if>
+             >n/a</option>
+            <dtml-in "_.range(0, 101)">
+              <option value="<dtml-var sequence-item>"
+               <dtml-if "preval==_['sequence-item']">selected="selected"</dtml-if>
+               ><dtml-var sequence-item></option>
+            </dtml-in>
+            
+          </select>%
+      </td>
+      <td><p>
+        <dtml-if "preval==_.None">
+          <!-- some default values -->
+          <dtml-if "_['sequence-item']=='open'">
+            suggestion: 0%
+          <dtml-elif "_['sequence-item']=='taken'">
+            suggestion: 25%
+          <dtml-elif "_['sequence-item']=='on hold'">
+            suggestion: 50%
+          <dtml-elif "_['sequence-item']=='rejected'">
+            suggestion: 95%
+          <dtml-elif "_['sequence-item']=='completed'">
+            suggestion: 100%
+          </dtml-if>
+        <dtml-else>&nbsp;
+        </dtml-if>
+      </p>
+      </td>
+    </tr>
+  </dtml-let>
+  </dtml-in>
+</table>
+
+<input type="submit" value="Save" />
+</dtml-let>
+</form>
+
+
+<p>The status scores are used when calculating the progress of a whole issuetracker.
+If most issues are in a status with a high status score, it means that the whole issuetracker
+is making good progress. This calculation is not very scientific because the dependencies on
+people or software might be a cause of a low total score which might give a false image of 
+lack of progress. <br />
+This calculation will be shown on the <a href="Statistics">More statistics</a> page.</p>
+
+<dtml-let status_values="getStatusScoreValues()">
+<dtml-if "hasStatusValues(status_values)">
+<p>
+  <dtml-let calculated_average="calculateStatusScoreProgress(status_values)">
+    Current overall status progress: <b><dtml-var "'%.1f'%calculated_average">%</b>
+  </dtml-let>
+</p>
+</dtml-if>
+</dtml-let>
+
+<dtml-var manage_page_footer>

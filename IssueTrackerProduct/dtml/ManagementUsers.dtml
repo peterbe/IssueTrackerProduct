@@ -1,0 +1,153 @@
+<dtml-var manage_page_header>
+<dtml-with "_(management_view='Management')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+
+
+<dtml-var "ManagementTabs('Users')">
+
+<style>
+div.area { background-color:#efefef;
+    padding:1px 7px;
+    margin:5px;}
+
+</style>
+
+<p class="form-title">User Mangement</p>
+
+<div class="area">
+<p><strong>Anonymous access</strong></p>
+
+<dtml-if "isViewPermissionOn()">
+<p>This IssueTracker instance is currently <b>open</b> to the public (or equivalently what public is to your network setup). This means that anonymous access is granted. Anonymous users can add issues and see the non-confidential ones listed.</p>
+
+<form action="manage_ViewPermissionToggle">
+<input type="hidden" name="DestinationURL" value="<dtml-var URL>">
+<p>This means that the <code>View</code> permission is granted for the <code>Anonymous</code> Zope user. If you want to switch off this and only allow users who can log in access, press the button below:<br>
+<div align="center">
+<input type="submit" value="Disallow anonymous access">
+</div>
+</p>
+</form>
+
+<dtml-else>
+
+<form action="manage_ViewPermissionToggle">
+<input type="hidden" name="DestinationURL" value="<dtml-var URL>">
+<p>This IssueTracker instance is currently <b>closed</b> to the public (or equivalently what public is to your network setup). This means that anonymous access is <b>not</b> granted. Every visiting user must have a role other than Anonymous that gives them access. You can grant anonymous access by pressing the button below:<br>
+<div align="center">
+<input type="submit" value="Allow anonymous access">
+</div>
+</p>
+</form>
+</dtml-if>
+
+</div>
+
+<p>&nbsp;</p>
+
+<div class="area">
+<p><strong>Issue Assignment</strong></p>
+
+<dtml-let userfolders="getAllIssueUserFolders()" 
+          all_users="getAllIssueUsers(userfolders, filter=0)">
+
+<dtml-if "UseIssueAssignment()">
+
+<dtml-if all_users>
+
+
+<dtml-let blacklist="getIssueAssignmentBlacklist(check_each=1)">
+<form action="<dtml-var URL1>">
+<input type="hidden" name="DestinationURL" value="<dtml-var URL>">
+<p>You can blacklist (make unselectable when adding an issue) some users here that it will not be possible to assign issues to. By default, an issue can be assigned to anybody from the selection list below.
+<table>
+<tr>
+  <th>Available</th>
+  <th>&nbsp;</th>
+  <th>Blacklisted</th>
+</tr>
+<tr>
+  <td><select name="add_identifiers:list" multiple="multiple"
+       size="<dtml-var "_.min(10, _.len(all_users)-_.len(blacklist))">">
+      <dtml-in all_users mapping>
+        <dtml-if "identifier not in blacklist">
+          <option value="<dtml-var identifier>"><dtml-var "user.getFullname()"></option>
+        </dtml-if>
+      </dtml-in>
+      </select>
+  </td>
+  <td>&nbsp;&nbsp;&nbsp;</td>
+  <td><dtml-if blacklist>
+      <select name="remove_identifiers:list" multiple="multiple"
+       size="<dtml-var "_.min(10, _.len(blacklist))">">
+      <dtml-in all_users mapping>
+        <dtml-if "identifier in blacklist"
+>        <option value="<dtml-var identifier>"><dtml-var "user.getFullname()"></option>
+        </dtml-if>
+      </dtml-in>
+      </select>
+      <dtml-else>
+       <p><em>None blacklisted</em>
+      </dtml-if>
+</tr>
+<tr>
+  <td align="center"><input type="submit" name="manage_AddToBlacklist:method"
+                      value="Blacklist &gt;&gt;&gt;"></td>
+  <td>&nbsp;</td>
+  <td align="center"><dtml-if blacklist><input type="submit" 
+     name="manage_RemoveFromBlacklist:method" value="&lt;&lt;&lt; Enable">
+      </dtml-if></td>
+
+</tr>
+</table>
+</form>
+</dtml-let>
+
+<dtml-else>
+<p>You have Issue Assignment <b>on</b> but no users defined.<br>
+<dtml-if userfolders>
+<a href="<dtml-var "userfolders[0].absolute_url()">/manage_main">Click here to define some users</a>.
+<dtml-else>
+First you have to create a Issue Tracker User Folder object. 
+Follow <a href="manage_addProduct/IssueTrackerProduct/addIssueUserFolder">this link</a> and return here after.
+</dtml-if>
+</p>
+</dtml-if>
+
+
+<br>
+
+<form action="manage_UseIssueAssignmentToggle">
+<input type="hidden" name="DestinationURL" value="<dtml-var URL>">
+<p>You can disable Issue Assignment without loosing your settings for blacklisting.<br>
+<input type="submit" value="Disable Issue Assignment">
+</form>
+
+
+
+<dtml-else>
+
+<form action="manage_UseIssueAssignmentToggle">
+<input type="hidden" name="DestinationURL" value="<dtml-var URL>">
+<p>You currently have Issue Assignment <b>disabled</b> meaning that IssueTracker users can not be assigned to issues even though IssueTracker users are defined. To switch it on, follow the link below:<br>
+<div align="center">
+<input type="submit" value="Use Issue Assignment">
+</div>
+</p>
+</form>
+</dtml-if>
+</dtml-let>
+
+</div>
+
+
+<br>&nbsp;
+
+
+<dtml-var manage_page_footer>

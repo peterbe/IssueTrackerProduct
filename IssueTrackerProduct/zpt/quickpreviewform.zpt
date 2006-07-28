@@ -1,0 +1,75 @@
+<form action="/" method="POST" name="add_issue" 
+	tal:attributes="action here/ActionURL" tal:define="global emptylist python:[]; global emptystring string:">
+
+<span tal:condition="python:not request.has_key('sections') and request.has_key('section')">
+<span tal:define="dummy python:request.set('sections',[request['section']])"
+tal:replace="nothing">
+here's a special script that converts 'section' into ['section'] if present and 'sections' is not present
+</span>
+</span>
+
+
+
+
+<table border=0 tal:define="emptystring python:'';fromname python:here.getSavedUser('fromname');email python:here.getSavedUser('email'); display_format python:here.getSavedTextFormat(no_default=1)">
+	<tr>
+		<td class="strong">Subject:</td>
+		<td><input name="subject" size="40" maxlength="70" value="" tal:define="subject request/subject |emptystring"
+tal:attributes="value subject"></td>
+
+	</tr>
+	<tr tal:condition="python:test(fromname =='')">
+	    <td class="strong">Name:</td>
+	    <td><input name="fromname" value="" tal:attributes="value fromname" size="30"></td>
+	</tr>
+	<tr tal:condition="python:test(email =='' or request.has_key('invalidemailaddress'))">
+	    <td class="strong">Email:</td>
+	    <td><input name="email" value="" tal:attributes="value email" size="30"></td>
+	</tr>
+	<tr>
+		<td colspan="2" class="strong">
+			Description:<br>
+			<textarea name="description:text" rows=8 cols=50 tal:define="description request/description | emptystring" tal:content="description"></textarea>
+
+		<input tal:condition="not:python:test(display_format =='')" type="hidden" name="display_format:string" value=""
+       tal:attributes="value here/getSavedTextFormat">
+		</td>
+	</tr>
+	<tr tal:condition="python:test(display_format =='')">
+	    <td class="strong">Display format:</td>
+	    <td tal:define="display_format here/getSavedTextFormat">
+		<input type="radio" name="display_format:string" value="plaintext" tal:attributes="checked python:display_format=='plaintext'">Plain as it's written
+		<input type="radio" name="display_format:string" value="structuredtext" tal:attributes="checked python:display_format=='structuredtext'">
+		<a tal:attributes="href string:${here/getRootURL}/StructuredText.html">Structured Text</a>
+	    </td>
+	</tr>
+	<tr>
+		<td class="strong">Section(s):</td>
+		<td colspan="2">
+			<table>
+				<tr>
+					<td>
+						<select name="sections:list" multiple size=7 tal:define="emptylist python:[];sections request/sections | here/defaultsections | emptylist"
+						tal:attributes="size python:min(7, len(here.sections_options))">
+							<option tal:repeat="option here/sections_options" value="" tal:attributes="value option; selected python:option in sections" tal:content="option">
+							Section</option>
+						</select>
+					</td>
+					<td align="center">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="submit" name="submitissue" value="   Save Issue   " class="submitbutton">
+					</td>
+				</tr>
+			</table>
+			
+		</td>
+
+	</tr>
+</table>
+
+<input type="hidden" name="type" value="" tal:attributes="value here/default_type">
+<input type="hidden" name="urgency" value="" tal:attributes="value here/default_urgency">
+
+
+
+</form>

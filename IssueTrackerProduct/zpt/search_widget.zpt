@@ -1,0 +1,23 @@
+<form method="get" metal:define-macro="search_form"
+   tal:define="qvalue string:; qvalue request/q | qvalue; page python:test(here.thisInURL('CompleteList'),'CompleteList','ListIssues');actionurl string:${here/getRootRelativeURL}/${page}"
+   tal:attributes="action python:here.aurl(actionurl, {'sortorder':'search'})">
+<input name="q" id="q" value="" tal:attributes="value qvalue" maxlength="30" />  
+<input type="submit" value="Search" />
+<div tal:condition="python:here.hasFilter() or here.getCurrentlyUsedSavedFilter(request_only=0)">
+<input type="checkbox" name="filter_in_search" value="1" 
+ tal:attributes="checked python:test(here.useFilterInSearch())" />
+ 
+<tal:block tal:define="saved_filter_id python:here.getCurrentlyUsedSavedFilter(request_only=0)">
+  <acronym tal:condition="saved_filter_id" 
+           tal:attributes="title python:here.getSavedFilterObject(saved_filter_id).getTitle()">
+  Use current filters in search</acronym>
+  <acronym tal:condition="python:not saved_filter_id" tal:replace="default">Use current filters in search </acronym>
+</tal:block>
+
+</div>
+<div style="color:red"
+    tal:condition="python:request.get('SearchError')"
+    tal:content="structure request/SearchError"></div>
+<div 
+    tal:condition="python:request.get('SearchFilterWarning')"
+    tal:content="structure request/SearchFilterWarning"></div></form>

@@ -1,0 +1,53 @@
+<table align="center" style="border:1px solid #CCCCCC;background-color:#EFEFEF">
+<tr><td>
+
+<table  border=0 cellpadding=4 tal:define="Batch python:modules['ZTUtils'].Batch;">
+    <tr>
+	<td colspan="5">
+	<div class="big" align="center">
+	<strong>Your Recent History</strong></div></td>
+    </tr>
+    <tr>
+	<td valign="top" tal:condition="here/hasRecentAddedIssues">
+	    <div class="strong">Recently added issues</div>
+	    <ul tal:define="issues here/getRecentAddedIssues;
+			issuesbatch python:Batch(issues,5, 0, orphan=1);">
+		<li tal:repeat="issue issuesbatch">
+		    <a href="" tal:content="python:here.displayBriefTitle(issue.title)"
+			    tal:attributes="href issue/absolute_url"></a>
+		</li>
+	    </ul>
+	</td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+	<td valign="top" tal:condition="here/hasRecentIssueVisits">
+	    <div class="strong">Recently viewed issues</div>
+	    <ul tal:define="issues here/getRecentIssueVisits;
+			issuesbatch python:Batch(issues,5, 0, orphan=1);">
+		<li tal:repeat="issue issuesbatch">
+		    <a href="" tal:content="python:here.displayBriefTitle(issue.title)"
+			    tal:attributes="href issue/absolute_url"></a>
+			    by <span tal:define="noone string:No name;fromname issue/fromname | noone"
+			    tal:replace="fromname">name</span>
+		</li>
+	    </ul>
+	</td>
+
+	<td valign="top" tal:condition="here/hasRecentSearchTerms">
+	    <div class="strong">Recent searches</div>
+	    <ul tal:define="terms here/getRecentSearchTerms;
+			termsbatch python:Batch(terms,5, 0, orphan=1);">
+		<li tal:repeat="term termsbatch">
+		    <a href="" tal:content="term/q"
+		    tal:define="termq python:here.url_quote_plus(term['q']);page python:test(here.thisInURL('CompleteList'),'CompleteList','ListIssues');actionurl string:${here/getRootURL}/${page}; actionurl python:here.aurl(actionurl,{'sortorder':'search'})"
+			    tal:attributes="href string:${actionurl}?q=${termq}"></a>
+		     (<br tal:replace="term/yield"/> found)
+		    
+		</li>
+	    </ul>
+	</td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    </tr>
+</table>
+
+</td></tr>
+</table>

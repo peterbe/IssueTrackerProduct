@@ -1,0 +1,149 @@
+<dtml-var manage_page_header>
+<dtml-with "_(management_view='Management')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+
+<style type="text/css">
+div.area { background-color:#efefef; padding:2px 15px; margin:7px; }
+#userstory { width:50%;left:50%;border:1px solid green; padding:0 8px; background-color:#efefef; }
+</style>
+
+
+<dtml-var "ManagementTabs('Main')">
+
+
+<dtml-if "REQUEST.get('userstory')">
+  <div align="center">
+  <div id="userstory" align="left">
+    <a href="<dtml-var "REQUEST['URL1']">/manage_ManagementForm" style="float:right;padding-top:3px;"
+             ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
+    <h3>Dear IssueTrackerProduct administrator,</h3>
+     <p>
+       Please excuse this potentially intrusive message but the IssueTrackerProduct is a free Open Source
+       project that relys heavily on user community participation. <br />
+       Unless you haven't already done so, please take a few minutes to enter your user story on the
+       <a href="http://www.issuetrackerproduct.com/UserStoryForm" style="font-weight:bold">IssueTrackerProduct.com User Story Form</a>
+       
+    </p>
+  </div>
+  </div>
+</dtml-if>
+
+
+<form action="<dtml-var getRootURL>/UpdateEverything">
+<div class="area">
+<p><strong>Update Everything</strong></p>
+<input type="hidden" name="DestinationURL" value="<dtml-var URL>">
+&nbsp;&nbsp;<input type="submit" value="Update Everything">
+<p class="form-help">
+Deploys standards, Updates catalog and makes sure all objects have the 
+attributes they should have.<br>
+Press this button whenever you have installed a new version of the 
+IssueTrackerProduct or made any major changes that will effect the ZCatalog
+such as importing/pasting issues or if you have manually deleted issues in the
+Zope management interface.<br>
+It doesn't hurt to press this button. It will only fix things that needs to 
+be fixed.
+</p>
+</div>
+</form> 
+
+
+
+
+<form action="<dtml-var getRootURL>/ReplaceEmail">
+<div class="area">
+<p><strong>Replace email address occurance</strong></p>
+<input type="hidden" name="DestinationURL" value="<dtml-var URL>">
+<p>Old: <input name="old" value="" size="30"> &nbsp;
+   New: <input name="new" size="30">&nbsp;
+<input type="checkbox" name="casesensitive:int" value="1"> case sensitive
+<br>
+&nbsp;&nbsp;<input type="submit" value="Replace all occurances">
+<p class="form-help">Replaces all occurances of a particular
+email address in issues and issue threads.</p>
+</div>
+</form>
+
+
+<script type="text/javascript"><!--
+function checkAreYouSure(buttonnid) {
+  var checkbox = document.getElementById('areyousure_toggle');
+  if (checkbox.checked) { return true; }
+  else {
+    alert("Please check the \"Check to confirm...\" checkbox");
+    var submitbutton = document.getElementById('submitbutton_toggle');
+    submitbutton.value = document.getElementById('buttontext').value;
+    return false;
+  }
+  return true;
+}
+//-->
+</script>
+<dtml-if "manage_canUseBTreeFolder()">
+<form action="<dtml-var getRootURL>/" onsubmit="return checkAreYouSure();">
+<div class="area">
+<p><strong>Use BTreeFolder</strong></p>
+
+<dtml-let count="countIssueObjects()">
+
+<dtml-if "manage_isUsingBTreeFolder()">
+  <p>You are using a BTreeFolder to store your <dtml-var count> issues.</p>
+  <p>If you like you can convert back to storing all issues in the Issue Tracker root<br />
+  <input type="hidden" name="buttontext" id="buttontext" value="Convert back to plain storage" />
+  <input type="submit" name="manage_convertFromBTreeFolder:method"
+   id="submitbutton_toggle"
+   value="Convert back to plain storage"
+   onclick="this.value='Please wait...'"
+   onkeypress="this.value='Please wait...'">
+  <input type="checkbox" name="areyousure:boolean" value="1"
+   id="areyousure_toggle">
+   Check to confirm that you really want to do this.  
+  </p>
+<dtml-else>
+
+  <p>You currently have <dtml-var count> issues,
+  <dtml-if "count>=500">
+  which is quite a lot. Using a BTreeFolder2 can be good for you.
+  <dtml-else>
+  which isn't very much, but you might intend to have many more.
+  </dtml-if>
+  <br>
+  If you want to store all your issues inside a 
+  <a href="http://hathawaymix.org/Software/BTreeFolder2">BTreeFolder2</a>
+  instead of your Issue Tracker instance you can do so. The advantage is 
+  that BTreeFolders can handle loads of objects all stored in one place and
+  the ZMI isn't slow to use because the list of issues would be too long.<br>
+  The disadvantage is that you will have slightly longer URLs.  
+  </p>
+  <p>
+  <input type="hidden" name="buttontext" id="buttontext" value="Convert to using BTreeFolder2" />  
+  <input type="submit" name="manage_convert2BTreeFolder:method"
+   id="submitbutton_toggle"
+   value="Convert to using BTreeFolder2"
+   onclick="this.value='Please wait...'"
+   onkeypress="this.value='Please wait...'">
+  <input type="checkbox" name="areyousure:boolean" value="1"
+   id="areyousure_toggle">
+   Check to confirm that you really want to do this.
+  </p>
+  
+</dtml-if>
+
+
+</p>
+</dtml-let>
+
+
+</div>
+</form>
+</dtml-if>
+
+
+<br />&nbsp;
+<dtml-var manage_page_footer>

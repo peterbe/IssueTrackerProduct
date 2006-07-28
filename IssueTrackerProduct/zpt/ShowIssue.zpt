@@ -1,0 +1,177 @@
+<html metal:use-macro="here/getHeader">
+<metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
+
+<script type="text/javascript"
+ tal:attributes="src string:$ru/followup.js"></script>
+ 
+<script
+ tal:define="conf here/getWYSIWYGEditor"
+ tal:condition="python:here.getSavedTextFormat()=='html' and conf"
+ tal:replace="structure conf"></script>
+ 
+</metal:script>
+
+
+ 
+<div metal:fill-slot="body" tal:omit-tag="" 
+ tal:define="in_completelist python:here.thisInURL('CompleteList')">
+
+
+<div tal:define="searchresulturl here/getCameFromSearchURL"
+     tal:condition="searchresulturl">
+<a class="backlink" tal:attributes="href searchresulturl" onclick="history.go(-1);return false"
+ >&#171; Back to search results</a>
+</div>
+
+<div tal:define="reporturl here/getCameFromReportURL"
+     tal:condition="reporturl">
+<a class="backlink" tal:attributes="href reporturl" onclick="history.go(-1);return false"
+ >&#171; Back to report results</a>
+</div>
+
+
+<div align="center" tal:condition="python:request.has_key('NewIssue')">
+<table class="announcement" cellpadding="6" border="0">
+  <tr tal:define="always_notified python:here.Always2Notify(emailtoskip=here.email, format='merged', requireemail=1, include_assignee=1)">
+    <td valign="top" align="left">
+            <a tal:attributes="href request/URL1" style="float:right"
+               tal:condition="not:python:here.doShowAlwaysNotifyStatus() and always_notified"
+             ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
+
+	    <h3>Issue added!</h3>
+	    <p><b><a href="URL1"
+                        tal:attributes="href request/URL1"
+                        tal:content="request/URL1">URL1</a></b></p>
+
+	    <form tal:condition="here/UseTellAFriend" 
+                  tal:replace="structure here/tell_a_friend">
+	    </form>
+
+    </td>
+
+    <td valign="top" tal:condition="python:here.doShowAlwaysNotifyStatus() and always_notified">
+            <tal:block tal:condition="python:here.doShowAlwaysNotifyStatus() and always_notified">
+            <a tal:attributes="href request/URL1" style="float:right"
+             ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
+             <br clear="right" />
+            </tal:block>
+             
+		<p><b>Notification was sent to:</b></p>
+		<div tal:repeat="anotify always_notified">
+		<img src="/misc_/IssueTrackerProduct/notification.gif"
+		width="16" height="16" alt="Notification icon" />
+		<span tal:replace="structure anotify" />
+		</div>
+
+    </td>
+  </tr>
+</table>
+</div>
+
+
+<span tal:condition="request/previewissue|nothing" tal:omit-tag="">
+
+<h3 class="preview">Preview before saving</h3>
+
+<div class="threadbox" tal:define="previewtitle python:here.getPreviewTitle(here.status, request['action'])">
+	<div class="thead" tal:define="issueuser here/getIssueUser"> 
+	<b tal:content="structure python:here.colorizeThreadChange(previewtitle)">
+		Title
+	</b>
+	 &nbsp;&nbsp;-&nbsp;&nbsp;
+	<span tal:condition="issueuser"
+	     tal:content="structure python:here.ShowNameEmail(issueuser, highlight=0)">
+				Name and Email
+	</span>
+	<span tal:condition="not:issueuser"
+         tal:define="fromname python:here.getSavedUser('fromname');
+                     email python:here.getSavedUser('email');
+                     emptystring string:;
+                     fromname request/fromname|fromname|emptystring;
+                     email request/email|email|emptystring"
+	     tal:content="structure python:here.ShowNameEmail(fromname,email,highlight=0)">
+				Name and Email
+	</span>
+    </div>
+	<div class="trest" tal:define="emptystring string:;
+                                       comment request/comment | emptystring;
+                                       display_format python:here.getSavedTextFormat;
+                                       display_format request/display_format|display_format|here/default_display_format">
+	
+        <div class="tbody">
+	    <p tal:condition="comment"				            
+			tal:replace="structure python:here.ShowDescription(comment.strip()+' ', display_format)">
+			    COMMENT here
+	    </p>
+        <span tal:condition="not:comment">
+	    <em tal:condition="python:request['action'].lower()!='addfollowup'">No comment.</em>
+        <span class="submiterror" tal:condition="not:python:request['action'].lower()!='addfollowup'">Follow ups must have a comment</span>
+        </span>
+        </div>
+
+	    <div align="right" tal:content="structure python:here.showDate(here.ZopeTime())">date</div>
+
+        <div class="followupfiles" tal:content="structure python:here.showFileattachments(only_temporary=1)"></div>
+
+    </div>
+
+</div>
+
+<div tal:define="false python:0;notify request/notify | false; dispatch here/doDispatchOnSubmit; Others2Notify python:here.Others2Notify(format='merged', requireemail=1)"
+    tal:condition="python:notify and Others2Notify">
+Notification will be sent to: <br tal:replace="structure python:', '.join(Others2Notify)" />
+</div>
+
+</span>
+
+
+<span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span>
+<span tal:condition="request/action|request/draft_followup_id|nothing" tal:replace="structure python:here.ExtensionForm(options)"></span>
+
+
+
+
+<div align="center">
+
+  <!-- id=issue -->
+  <a name="i"></a>
+  <div tal:attributes="id python:test(not in_completelist, 'issuedata')"
+       tal:content="structure here/ShowIssueData">Show the actual issue data
+  </div>
+  <!--/ id=issue-->
+
+  <!-- Special options -->
+  <table border="0" class="specialoptions"
+   tal:define="use_tellafriend here/UseTellAFriend; 
+               allow_subscription here/AllowIssueSubscription"
+   tal:condition="python:use_tellafriend or allow_subscription">
+  <tr>
+    <td valign="top" tal:condition="use_tellafriend" tal:content="structure here/tell_a_friend"></td>
+    <td style="padding-left:10px" valign="top" tal:condition="python:allow_subscription and not request.get('MoreEmailOptions')"
+     tal:content="structure here/subscription"></td>
+  </tr>
+  </table>
+  <!-- /Special options -->
+
+  <!-- Show Issue Threads -->
+  <div tal:define="in_completelist python:here.thisInURL('CompleteList')"
+       tal:attributes="id python:test(not in_completelist, 'threads')"
+       tal:content="structure here/ShowIssueThreads">Show the threads
+  </div>
+  <!-- /Show Issue Threads -->
+
+</div>
+
+
+<span tal:condition="not:python:request.has_key('previewissue') or request.has_key('action')"
+tal:replace="structure here/quick_form_followup"></span>
+
+
+<tal:block define="useaccesskeys here/useAccessKeys" condition="request/action|nothing">
+<script type="text/javascript" tal:condition="not:useaccesskeys">if(document.form_followup)document.form_followup['comment'].focus();</script>
+<script type="text/javascript" tal:condition="useaccesskeys">if(document.form_followup)document.form_followup['comment'].focus();disableKS();</script>
+</tal:block>
+
+
+</div>
+</html>

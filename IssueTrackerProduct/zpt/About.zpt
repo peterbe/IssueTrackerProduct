@@ -1,0 +1,19 @@
+<html metal:use-macro="here/getHeader">
+ 
+<div metal:fill-slot="body">
+
+<h2>About the <a tal:attributes="href string:http://www.issuetrackerproduct.com?version=${options/version}">IssueTrackerProduct</a></h2>
+
+<p><a href="./">Return to Issue Tracker</a>
+</p>
+<p>
+<b>Version:</b> <br tal:replace="structure options/version" /><br />
+</p>
+
+<p><b>Change log:</b></p>
+
+<br tal:replace="structure options/changelog" />
+
+</div>
+</html>
+

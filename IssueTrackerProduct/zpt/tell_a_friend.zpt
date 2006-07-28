@@ -1,0 +1,107 @@
+<div tal:define="ignoreword string:email addresses here;
+             emptystring python:'';
+             emailstring request/email_string | emptystring;
+             fromname python:here.getSavedUserName();email python:here.getSavedUserEmail()">
+<form action="TellAFriend" method="get"
+ tal:condition="not:python:request.has_key('MoreEmailOptions')">
+
+<div align="center" tal:condition="python:request.get('tellafriend')">
+    <b style="color:green;" tal:condition="python:int(request.get('good',0))"
+      tal:content="request/tellafriend|default">
+            Message sent!</b>
+    <b style="color:#cc9900;" tal:condition="python:int(request.get('bad',0))"
+     tal:content="request/tellafriend|default">
+            Multimessage not sent because of no valid destinations.</b>
+</div>
+
+<b class="bigger">Tell a Friend</b>
+[<a tal:attributes="href string:?MoreEmailOptions=1#details">with more options</a>]
+<br /><br />
+        
+<input tal:condition="not:emailstring" name="email_string" size="40"
+tal:attributes="value request/email_string | ignoreword;size python:test(here.AllowIssueSubscription(), 35, 45); onclick string:if (this.value=='${ignoreword}'){this.value=''}; onFocus string:if (this.value=='${ignoreword}'){this.value=''}; onBlur string:if (this.value=='${ignoreword}'||this.value==''){this.value='${ignoreword}'}" />
+<input type="hidden" name="ignoreword" tal:attributes="value ignoreword" />
+<input type="hidden" name="added:int" tal:attributes="value python:request.has_key('NewIssue')" />
+<input type="hidden" name="NewIssue" value="Submitted" tal:condition="python:request.get('NewIssue')=='Submitted'" />
+<input tal:condition="emailstring" name="email_string" size="35" 
+tal:attributes="value emailstring;size python:test(here.AllowIssueSubscription(), 35, 45)" />
+<input type="submit" value="Send!" />
+        
+</form>
+
+
+
+<form action="TellAFriend" method="get"
+tal:condition="python:request.get('MoreEmailOptions')">
+
+<script type="text/javascript">
+function bolderCkbox(id,on) {
+  var elem = $(id);
+  if (on) {elem.style.fontWeight='bold';}
+  else {elem.style.fontWeight='normal';}
+}
+</script>
+
+<div align="center" tal:condition="python:request.get('tellafriend')">
+    <b style="color:green;" tal:condition="python:int(request.get('good',0))"
+      tal:content="request/tellafriend|default">
+            Message sent!</b>
+    <b style="color:#cc9900;" tal:condition="python:int(request.get('bad',0))"
+     tal:content="request/tellafriend|default">
+            Multimessage not sent because of no valid destinations.</b>
+</div>
+    <b class="bigger">Tell a Friend with more options</b><br />
+
+  <table tal:define="friends python:here.getFriends(maxlength=request.get('MaxLengthFriends',13))">
+    <tr>
+      <td valign="top">
+      
+    <table border="0">
+        <tr>
+            <td><b>To:</b></td>
+            <td><input tal:condition="emailstring" name="email_string" size="50" id="es"
+    tal:attributes="value emailstring"><input size="50"
+    tal:condition="not:emailstring" name="email_string" id="es"
+    tal:attributes="value ignoreword; 
+                    onclick string:if (this.value=='${ignoreword}'){this.value=''}; 
+		    onfocus string:if (this.value=='${ignoreword}'){this.value=''}; 
+		    onblur string:if (this.value=='${ignoreword}'||this.value==''){this.value='${ignoreword}'}" /></td>
+        </tr>
+        <tr tal:condition="python:email==''">
+            <td><b>From:</b></td>
+            <td><input name="from_sender" size="45" tal:condition="not:python:email==''"
+            tal:attributes="value string:${fromname} <${email}>" />
+            <input name="from_sender" size="45" tal:define="ignorefrom string:optional"
+            tal:attributes="value ignorefrom; onclick string:if (this.value=='${ignorefrom}'){this.value=''}; onFocus string:if (this.value=='${ignorefrom}'){this.value=''}; onBlur string:if (this.value=='${ignorefrom}'||this.value==''){this.value='${ignorefrom}'}"
+            
+            /></td>
+        </tr>
+        <tr>
+            <td colspan="2" tal:define="default_message python:here.getDefaultTellAFriendMessage(added=request.has_key('NewIssue'))">
+            <textarea name="message_sender" rows="11" cols="50"
+            tal:content="structure python:here.html_entity_fixer(request.get('message_sender',default_message))"></textarea>
+            </td>
+        </tr>
+    </table>
+
+      </td>
+      <td tal:condition="friends" valign="top" align="left">
+       <b>Friends</b><br />
+        <div tal:define="preval request/friends|here/getSavedEmailfriends" 
+	     tal:repeat="friend friends" tal:omit-tag="">
+          <input type="checkbox" name="friends:list" 
+           tal:attributes="value python:friend['email'];
+                           onclick string:bolderCkbox('f${repeat/friend/index}', this.checked)"
+            /> 
+          <span tal:attributes="id string:f${repeat/friend/index}"><br tal:replace="structure friend/show" /></span><br />
+        </div>
+      </td>
+    </tr>
+  </table>
+      
+
+    <input type="hidden" name="ignoreword" tal:attributes="value ignoreword" />
+    <input type="hidden" name="NewIssue" value="Submitted" tal:condition="python:request.get('NewIssue')=='Submitted'" />
+    <input type="submit" value="Email them!" />  
+</form>
+</div>

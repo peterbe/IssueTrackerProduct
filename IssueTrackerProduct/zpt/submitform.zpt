@@ -1,0 +1,64 @@
+<form action="" method="post"
+      tal:define="zero python:0; emptystring string:;emptylist python:[]"
+      tal:attributes="action here/ActionURL">
+
+<input type="hidden" name="Tempfolder_fileattachments"
+       tal:condition="python:request.has_key('Tempfolder_fileattachments')"
+       tal:attributes="value python:request['Tempfolder_fileattachments']">
+       
+<input type="hidden" name="subject"
+       tal:define="subject request/subject | emptystring"
+       value="" tal:attributes="value subject">
+
+<input type="hidden" name="fromname"
+       tal:define="fromname request/fromname | emptystring"
+       value="" tal:attributes="value fromname">
+
+<input type="hidden" name="email"
+       tal:define="email request/email | emptystring"
+       value="" tal:attributes="value email">
+
+<input type="hidden" name="confidential:int"
+       tal:define="confidential request/confidential | zero; confidential python:test(confidential,1,0)"
+       value="0" tal:attributes="value confidential">
+
+<input type="hidden" name="hide_me:int"
+       tal:define="hide_me request/hide_me | zero; hide_me python:test(hide_me, 1, 0)"
+       value="" tal:attributes="value hide_me">
+
+<input type="hidden" name="display_format:string" value=""
+       tal:define="display_format request/display_format | here/getSavedTextFormat | emptystring;"
+       tal:attributes="value display_format">
+
+<input type="hidden" name="description:text"
+       tal:define="description request/description | emptystring"
+       value="" tal:attributes="value description">
+
+<input type="hidden" name="type"
+       tal:define="type request/type | emptystring" value=""
+       tal:attributes="value type">
+
+<input type="hidden" name="urgency"
+       tal:define="urgency request/urgency | emptystring"
+       value="" tal:attributes="value urgency">
+
+<input type="hidden" name="status"
+       tal:define="status request/status| emptystring"
+       value="" tal:attributes="value status">
+
+<input type="hidden" name="url2issue"
+       tal:define="url2issue request/url2issue | emptystring"
+       value="" tal:attributes="value url2issue">
+
+
+<input tal:define="sections request/sections | emptylist"
+       tal:repeat="section sections" type="hidden"
+       name="sections" value=""
+       tal:attributes="value section">
+
+
+<table bgcolor="#ff6666" cellpadding="6"><tr><td>
+<input type="submit" name="submitissue" value=" Save this issue now " class="submitbutton">
+</td></tr></table>
+
+</form>

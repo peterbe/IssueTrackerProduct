@@ -1,0 +1,148 @@
+<html metal:use-macro="here/getHeader">
+<div metal:fill-slot="body">
+
+<h3>About Structured Text</h3>
+
+<style type="text/css">
+td.st-o { 
+    font-family:'Courier New', Courier; 
+}
+
+td.st-r { 
+    font-family:Arial, Verdana, sans-serif; 
+    background-color:#cccccc;
+}
+
+</style>
+
+<div class="bumf">
+<p style="font-weight:bold;">Structured text is a text input format that allows for some simple text formatting such as 
+bold text, links or code inclusion.</p>
+</div>
+
+
+
+<table align="center" border=1 cellpadding=5 cellspacing=0>
+<tr>
+  <td width="30%"><p><strong>You enter...</strong></p></td>
+  <td width="30%" class="st-r"><p><strong>You get...</strong></p></td>
+</tr>
+<tr>
+  <td class="st-o">'Sam' said: *I* did **not** do _it_</td>
+  <td class="st-r"><code>Sam</code> said: <em>I</em> did <strong>not</strong> do <u>it</u></td>
+</tr>
+<tr>
+  <td class="st-o">Send "email":mailto:info@foo.com to<br /> "Foo.com":http://www.foo.com</td>
+  <td class="st-r">Send <a href="mailto:info@foo.com">email</a> to <a href="http://www.foo.com">Foo.com</a></td>
+</tr>
+<tr>
+  <td class="st-o">Line breaks<br />don't matter.<br /><br />Only paragraph breaks<br />do.</td>
+  <td class="st-r">Line breaks don't matter.<br /><br />Only paragraph breaks do.</td>
+</tr>
+<tr>
+  <td class="st-o">Pseudo code::<br /><br />&nbsp;while (!perl) {<br />&nbsp;&nbsp;&nbsp;&nbsp;print "Python";<br />&nbsp;}</td>
+  <td class="st-r">Pseudo code:
+<pre style="background-color:#eeeeee;">
+ while (!perl) {
+    print "Python";
+ }
+</pre></td>
+</tr>
+<tr>
+  <td class="st-o">- Bulleted lists can be...<br /><br />- Written using '-', '*' or '<code>o</code>'...<br /><br />- Or using numbers like <code>'1.'</code>, <code>'2.'</code>, etc.</td>
+  <td class="st-r"><ul>
+<li>Bulleted lists can be...</li>
+<li>Written using '-', <code>*</code> or <code>o</code>...</li>
+<li>Or using numbers like <code>1.</code>, <code>2.</code>, etc.</li>
+
+</ul></td>
+</tr>
+</table>
+
+<div class="bumf">
+
+
+<p>Alternative external links:</p>
+<ul>
+  <li><a href="http://plone.org/documentation/how-to/structured-text-cheatsheet"
+       title="Article by Alexander Limi on Working with Structured Text"
+       >Working with Structured Text</a> by Alexander Limi</li>
+  <li><a href="http://www.zope.org/Documentation/Articles/STX"
+       title="Article by Paul Everitt if you're familiar with HTML"
+       >An Introduction to Structured Text</a> by Paul Everitt</li>
+</ul>  
+
+<p>Structured text is text that uses indentation and simple
+symbology to indicate the structure of a document. <br />
+A structured string consists of a sequence of paragraphs separated by
+one or more blank lines.  Each paragraph has a level which is defined
+as the minimum indentation of the paragraph.  A paragraph is a
+sub-paragraph of another paragraph if the other paragraph is the last
+preceding paragraph that has a lower level.</p>
+<p>Special symbology is used to indicate special constructs:</p>
+
+<ul>
+<li><p>A single-line paragraph whose immediately succeeding paragraphs are lower
+  level is treated as a header.</p></li>
+<li><p>A paragraph that begins with a '-', <code>*</code>, or <code>o</code> is treated as an
+  unordered list (bullet) element.</p></li>
+<li><p>A paragraph that begins with a sequence of digits followed by a
+  white-space character is treated as an ordered list element.</p></li>
+<li><p>A paragraph that begins with a sequence of sequences, where each
+  sequence is a sequence of digits or a sequence of letters followed
+  by a period, is treated as an ordered list element.</p></li>
+<li><p>A paragraph with a first line that contains some text, followed by
+  some white-space and <code>--</code> is treated as
+  a descriptive list element. The leading text is treated as the
+  element title.</p></li>
+<li><p>Sub-paragraphs of a paragraph that ends in the word <code>example</code> or the
+  word <code>examples</code>, or <code>::</code> is treated as example code and is output as is:
+<pre>
+    &lt;table border=0&gt;
+      &lt;tr&gt;
+        &lt;td&gt; Foo 
+    &lt;/table&gt;
+</pre>
+</p></li>
+<li><p>Text enclosed single quotes (with white-space to the left of the
+  first quote and whitespace or puctuation to the right of the second quote)
+  is treated as example code.<p>  For example: <code>&amp;lt;dtml-var foo&gt;</code>.</p>
+</li>
+<li><p>Text surrounded by '<em><code> characters (with white-space to the left of the
+  first </code></em><code> and whitespace or puctuation to the right of the second </code><em>')
+  is </em>emphasized*.</p></li>
+<li><p>Text surrounded by '<strong><code> characters (with white-space to the left of the
+  first </code></strong><code> and whitespace or puctuation to the right of the second </code><strong>')
+  is made </strong>strong**.</p></li>
+<li><p>Text surrounded by <code>_</code> underscore characters (with whitespace to the left 
+  and whitespace or punctuation to the right) is made _underlined_.</p></li>
+<li><p>Text encloded by double quotes followed by a colon, a URL, and concluded
+  by punctuation plus white space, <em>or</em> just white space, is treated as a
+  hyper link.<p>  For example, <code>&amp;quot;Zope&amp;quot;:http://www.zope.org/</code> is interpreted as 
+  <a href="http://www.zope.org/">Zope</a> </p>
+<p>  <em>Note: This works for relative as well as absolute URLs.</em></p>
+</li>
+<li><p>Text enclosed by double quotes followed by a comma, one or more spaces,
+  an absolute URL and concluded by punctuation plus white space, or just
+  white space, is treated as a hyper link.<p>  For example: <code>&amp;quot;mail me&amp;quot;, mailto:amos@digicool.com</code> is 
+  interpreted as <a href="mailto:amos@digicool.com">mail me</a> </p>
+</li>
+<li><p>Text enclosed in brackets which consists only of letters, digits,
+  underscores and dashes is treated as hyper links within the document.<p>  For example: <code>"As demonstrated by Smith &amp;#091;12&amp;#093; this technique ..."</code> </p>
+<p>  Is interpreted as: "As demonstrated by Smith <a href="#12"><a href="#12">[12]</a></a> this technique"</p>
+<p>  Together with the next rule this allows easy coding of references or end notes.</p>
+</li>
+<li><p>Text enclosed in brackets which is preceded by the start of a line, two
+  periods and a space is treated as a named link. For example:<p>  <code>.. &amp;#091;12&amp;#093; "Effective Techniques" Smith, Joe ...</code></p>
+<p>  Is interpreted as </p>
+<p>  <a name="12"><a href="#12">[12]</a></a> "Effective Techniques" Smith, Joe ...</p>
+<p>  <em>Note:  see the &lt;A NAME="12"&gt; in the HTML source.</em></p>
+<p>  Together with the previous rule this allows easy coding of references or
+  end notes.</p>
+</li>
+
+</ul>
+
+</div>
+</div>
+</html>

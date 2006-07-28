@@ -1,0 +1,8 @@
+<form action="" method="get"
+      tal:define="qvalue string:; qvalue request/q | qvalue; page python:test(here.thisInURL('CompleteList'),'CompleteList','ListIssues');actionurl string:${here/getRootURL}/${page}"
+      tal:attributes="action python:here.aurl(actionurl, {'sortorder':'search'})">
+<input name="q" value="" tal:attributes="value qvalue" maxlength="30"> 
+<input type="submit" value="Search"><div
+    tal:condition="python:test(qvalue in here.statuses)"
+    tal:replace="default" style="color:red">You can use the Filter options to filter on <em
+    tal:content="qvalue">ex. open</em></div></form>

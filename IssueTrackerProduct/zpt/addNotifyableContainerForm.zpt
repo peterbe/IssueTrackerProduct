@@ -1,0 +1,32 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+
+<h2 tal:define="form_title string:Add IssueTracker Container"
+    tal:replace="structure here/manage_form_title">Form Title</h2>
+
+
+
+<p style="font-weight:bold; color:red;" tal:condition="python:hasattr(here,'global_notifyables')">
+You already have a Issue Tracker Notifyable Container deployed.
+</p>
+<a tal:condition="python:hasattr(here,'global_notifyables')" style="text-decoration:underline;"
+ tal:attributes="href string:${here/global_notifyables/absolute_url}/manage_workspace">
+Go to it now</a>
+
+
+
+
+
+<span tal:condition="not:python:hasattr(here,'global_notifyables')">
+
+<span tal:condition="python:int(request.get('goto_after', 0))">
+<br tal:define="dummy python:request.RESPONSE.redirect('manage_addNotifyableContainer?goto_after:int=1')" />
+</span>
+
+<span tal:condition="not:python:int(request.get('goto_after', 0))">
+<br tal:define="dummy python:request.RESPONSE.redirect('manage_addNotifyableContainer')" />
+</span>
+
+</span>
+
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

@@ -1,0 +1,59 @@
+<table border="0" cellpadding="3" cellspacing="0" width="98%" align="center"
+tal:define="todaysdate python:here.ZopeTime()"
+ style="border:1px solid #ccc">
+   <thead>
+	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
+		<td><span tal:replace="structure python:here.HeadingLinks(here.translateSortorderOption(here.getDefaultSortorder()), here.getDefaultSortorder(), default=1, inverted=1, sortinfo=sortinfo)">Date</span></td>
+		<td><span tal:replace="structure python:here.HeadingLinks('Sections','sections', sortinfo=sortinfo)">Sections</span></td>
+		<td><span tal:replace="structure python:here.HeadingLinks('From','from', sortinfo=sortinfo)">From</span></td>
+		<td><span tal:replace="structure python:here.HeadingLinks('Urgency','urgency', sortinfo=sortinfo)">Urgency</span></td>
+		<td><span tal:replace="structure python:here.HeadingLinks('Type','type', sortinfo=sortinfo)">Type</span></td>
+
+	</tr>
+   </thead>
+   <tbody tal:repeat="issue options/batch" 
+          tal:attributes="class python:test(path('repeat/issue/odd'), 'lodd','leven');
+	                  ondblclick string:G('${issue/absolute_url_path}')">
+		<tr tal:condition="python:request.get('FirstThreadResultId')==issue.id and request.get('sortorder','')=='search'"
+          class="l_commenthead">
+			<td colspan="5">Found in comment...</td>
+		</tr>
+		<tr> 
+			<td tal:define="creationdate python:issue.issuedate; difference python:here.timeSince(creationdate, todaysdate, afterword='old');
+			                ainfo python:issue.showAdditionalInformation(usebrackets=1, timedifference=difference)">
+				<span tal:condition="here/ShowIdWithTitle" tal:content="structure string:#${issue/getId} " class="id">
+				</span>
+				<a class="ilink" tal:attributes="title string:Go to issue #${issue/id}; href python:issue.absolute_url_path()"
+                                  tal:content="structure issue/showTitle">Title
+                                </a>&nbsp;<img src="/misc_/IssueTrackerProduct/paperclip.gif" 
+                                 tal:define="noattachments issue/countFileattachments"
+                                 tal:condition="noattachments"
+                                 tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                                 <tal:test tal:condition="python:here.isFromBrother(issue)">
+                                   (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+                                      tal:attributes="href brother/absolute_url_path" class="brother"
+                                      tal:content="brother/getTitle"></a>)
+                                 </tal:test>
+				 - <acronym class="status" tal:content="python:issue.status.capitalize()"
+				    tal:attributes="title issue/StatusByWhom">Status</acronym>&nbsp;
+				<span tal:condition="ainfo" tal:content="ainfo" class="bd">
+				</span>
+			</td>
+			<td tal:define="sections python:', '.join(issue.getSections())">
+                           <span tal:condition="python:len(sections)>40" style="font-size:90%" tal:content="sections"></span>
+                           <span tal:condition="not:python:len(sections)>40" tal:replace="sections"></span>
+			</td>
+                        <td tal:define="hide_me issue/hide_me | nothing; 
+                                fromname issue/getFromname; 
+                                email issue/getEmail"
+				tal:content="structure python:here.ShowNameEmail(fromname,email,hide_me)">
+				Name and Email
+			 </td>
+			 <td tal:attributes="class string:${issue/getUrgencyCSSSelector}" tal:content="issue/urgency">
+			 </td>
+			 <td tal:content="issue/type">type</td>
+		</tr>
+
+	</tbody>
+
+</table>

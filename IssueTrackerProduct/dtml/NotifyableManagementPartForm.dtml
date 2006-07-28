@@ -1,0 +1,175 @@
+<style type="text/css">
+a.link { 
+    text-decoration:underline;
+    font-size:90%;
+}
+</style>
+
+
+<p class="form-help"><i>Notifyables</i> are the kind of entities that can be <i>notified</i> upon submitting an issue.
+<br>Having no notifyables is the same as switching this feature off.</p>
+
+<dtml-call convertOldGroups2Objects>
+
+<dtml-if "isGlobalHere()">
+    <dtml-call "REQUEST.set('only','')">
+<dtml-else>
+    <dtml-call "REQUEST.set('only','local')">
+</dtml-if>
+
+<dtml-let notify_groups="getNotifyableGroups(only=only)">
+
+<table cellspacing=0 cellpadding=0 border=0><tr><td valign="top">
+<form action="<dtml-var URL1>" method="post">
+<table width="100%" cellpadding="4" border=0>
+	<tr class="list-header">
+		
+		<th colspan="2">
+		<img src="/misc_/IssueTrackerProduct/issuetracker_notifyablegroup.gif" alt="Issue Tracker Notifyable Group" 
+   title="Issue Tracker Notifyable Group" border="0" align="left" />Notifyable groups</th>
+	</tr>
+	<tr>
+	
+	<dtml-if notify_groups>
+		<td>
+		<table cellpadding="4" cellspacing=0>
+		    <dtml-in notify_groups>
+		    <tr>
+			<td>&nbsp;</td>
+			<td><input type="checkbox" name="notify_groups:list"
+			    value="<dtml-var id>"></td>
+			<td><a href="<dtml-var absolute_url>/manage_editNotifyableGroupForm?back_url=<dtml-var URL>"
+			class="link"><dtml-var title html_quote></a></td>
+		    </tr>
+		    </dtml-in>
+		</table>
+		<input type="submit" value="Delete selected groups"
+		name="manage_delNotifyGroups:method">
+		</td>
+	
+	
+	<dtml-else>
+		<td><p><i>None yet</i></p></td>
+	</dtml-if>
+	    <td>
+		<table>
+		    <tr>
+			<td>&nbsp;</td>
+			<td>
+			    <input name="notify_group" size="30" maxlength="30">
+			</td>
+			<td>
+			    <input type="submit" value="Add" name="manage_saveNotifyGroup:method">
+			</td>
+		    </tr>
+		</table>
+	    </td>
+	</tr>
+</table>
+
+</form>
+<br>&nbsp;
+
+</td></tr>
+<tr><td>
+
+<form action="<dtml-var URL1>" method="post">
+<dtml-let len_notify_groups="_.len(notify_groups)">
+
+<table border=0 cellpadding="4" cellspacing=0>
+	<dtml-let CurrentURL=URL>
+	<dtml-in "getNotifyables(only=only)">
+	<dtml-if sequence-start>
+
+	    <tr class="list-header">
+		    <th><img src="/misc_/IssueTrackerProduct/issuetracker_notifyable.gif" alt="Issue Tracker Notifyable" 
+   title="Issue Tracker Notifyable" border="0" /></th>
+		    <th colspan="3">Existing notifyables</th>
+	    </tr>
+	    <tr>
+		    <th>&nbsp;</th>
+		    <td><p><b>Email address and name/alias</b></td>
+		    <td colspan="2"><p>&nbsp;<b>Belongs to</b></td>
+	    </tr>
+	</dtml-if>
+	<tr>
+		<td><input type="checkbox" name="del_notify_ids:list" value="<dtml-var id>">
+			<input type="hidden" name="notify_ids:list" value="<dtml-var id>"></td>
+		<td>
+		    <a href="<dtml-var absolute_url>/manage_editNotifyableForm?back_url=<dtml-var URL>"
+			    class="link" title="Click to edit the this notifyable"
+			    ><dtml-if alias><dtml-var alias>, </dtml-if>
+		    <dtml-var email></a>
+		</td>
+		<dtml-if len_notify_groups>
+		<td colspan="2">
+		    &nbsp;
+		    <dtml-if groups>
+			<dtml-in "getGroupsByIds(groups)">
+			    <a href="<dtml-var absolute_url>/manage_editNotifyableGroupForm"
+                class="link"><dtml-var title html_quote></a><dtml-unless sequence-end>, </dtml-unless>
+			</dtml-in>
+		    <dtml-else>
+			<em>no groups</em>
+		    </dtml-if>
+		</td>
+		</dtml-if>
+	</tr>
+	<dtml-if sequence-end>
+	    <tr>
+		<td colspan="4"> 
+		    <input name="manage_delNotifyables:method" type="submit" value="Delete selected notifyables" />
+			<br>&nbsp;
+		</td>
+	    </tr>
+	</dtml-if>
+	</dtml-in>
+	</dtml-let>
+	<dtml-let addHowMany="REQUEST.get('addHowMany',1)">
+	<tr class="list-header">
+		<th><img src="/misc_/IssueTrackerProduct/issuetracker_notifyable.gif" alt="Issue Tracker Notifyable" 
+   title="Issue Tracker Notifyable" border="0" /></th>
+		<th colspan="3">Add notifyable</th>
+	</tr>
+	<tr>
+		<th>&nbsp;</th>
+		<th>Name/Alias</th>
+		<th>Email address</th>
+		<dtml-if len_notify_groups>
+		    <th>
+			<i>Groups</i>
+		    </th>
+		</dtml-if>
+	</tr>
+	<dtml-in "_.range(addHowMany)">
+	<tr>
+		<td>&nbsp;</td>
+		<td><input name="new_alias:list" size="30" maxlength="75"></td>
+		<td><input name="new_email:list" size="30" maxlength="75"></td>
+		<dtml-if len_notify_groups>
+		<dtml-if sequence-start>
+		<td rowspan="<dtml-var addHowMany>" valign="top"><select name="new_groups:list" multiple size="<dtml-var "_.len(notify_groups)">">
+			<dtml-in notify_groups>
+			<option value="<dtml-var id>"><dtml-var title></option>
+			</dtml-in>
+			</select>
+		</td>
+		</dtml-if>
+		</dtml-if>
+	</tr>
+	</dtml-in>
+	<tr>
+		<td colspan="4" align="center">
+        <input type="submit" value="  Save  " name="manage_addNotifyables:method">
+		</td>
+	</tr>
+	</dtml-let>
+
+</table>
+</dtml-let>
+
+</form>
+
+</td></tr></table>
+
+</dtml-let>

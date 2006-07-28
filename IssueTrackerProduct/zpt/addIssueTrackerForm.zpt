@@ -1,0 +1,39 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+
+<h2>Add IssueTracker</h2>
+
+<div tal:condition="not:here/manage_hasAquirableMailHost"
+ style="padding:1px 8px;margin:4px;border:1px solid #999;background-color:#efefef;font-family:Arial,sans-serif;">
+<p><b>Warning</b><br />
+It appears that you do not have a <code>Mail Host</code> object deploy in your
+Zope acquisition path. An Issue Tracker needs one to be able to send out emails
+when that becomes necessary. Either go back and create one first (recommended)
+or create one inside the Issue Tracker that you're now about to create.<br />
+The recommended name to use is: <code>MailHost</code></p>
+</div>
+
+
+<form action="manage_addIssueTracker">
+<table border="0"> 
+<tr><th>Id</th> 
+    <td><input type="text" name="id"></td>
+</tr> 
+<tr><th>Title</th> 
+    <td><input type="text" name="title" value="Issue Tracker" /></td> 
+</tr> 
+<tr><td></td>
+    <td><input type="submit" value=" Add " /> 
+	<input type="submit" name="addandgoto" value="Add and go to" />
+	<input type="submit" name="addandedit" value="Add and go to Properties Wizard" />
+</td>
+</tr> 
+</table>
+</form> 
+
+<blockquote style="width:400px;"><p>It is <b>highly recommended</b> that you go through the 
+<b><em>Properties Wizard</em></b> the
+first time since it will prepare many of internal properties depending on how you intend to
+use this IssueTracker.</p>
+</blockquote>
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

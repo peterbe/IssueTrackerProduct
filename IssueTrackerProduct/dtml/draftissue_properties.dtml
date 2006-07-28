@@ -1,0 +1,29 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Properties')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+<p class="form-title">Issue Draft properties</p>
+
+<p>The draft objects do not have a manual Properties interface.
+The following details is known about this draft:</p>
+
+<table>
+  <tr>
+    <th>Attribute</th>
+    <th>Value</th>
+  </tr>
+  <dtml-in get__dict__nicely>
+  <tr>
+    <td><p><b><dtml-var "_['sequence-item']['key']"></b></p></td>
+    <td><p><dtml-var "_['sequence-item']['value']" html_quote newline_to_br></p></td>
+  </tr>
+  </dtml-in>
+</table>
+
+<p>&nbsp;</p>
+<dtml-var manage_page_footer>

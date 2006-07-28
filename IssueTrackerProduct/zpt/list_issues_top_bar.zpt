@@ -1,0 +1,50 @@
+<div class="topbar"
+ tal:define="filteredissues_len python:options['filteredissues_len'];batch python:options['batch']">
+
+  <span class="floatL">
+    <div tal:condition="not:python:options.has_key('nosum')" tal:omit-tag="string:&nbsp;">
+     # Issues: <span tal:replace="filteredissues_len">number</span>
+     <span style="color:#999" tal:condition="python:request.TotalNoIssues > filteredissues_len">
+    (<br tal:replace="python:request.TotalNoIssues-filteredissues_len" /> issues filtered out or hidden)
+    </span>
+    </div>
+    <span tal:condition="python:options.get('showSubListOptions') and options['batch']"
+	      tal:define="sublist here/whichSubList" 
+	      tal:omit-tag="">Display:
+	<tal:block tal:condition="python:sublist=='rich'">
+	    <b>Rich</b> or <a title="Switch to show a compact list of issues. Less information and less scrolling"
+	     href="?list-type=Compact" tal:attributes="href python:here.changeWhichSubListURL('Compact')">Compact</a>
+	</tal:block>
+	<tal:block tal:condition="python:sublist=='compact'">
+	    <a title="Switch to show a richer list of issues. More information and more scrolling"
+	     tal:attributes="href python:here.changeWhichSubListURL('Rich')">Rich</a> or <b>Compact</b>
+	</tal:block>
+     <span tal:condition="here/ShowCSVExportLink" tal:omit-tag="">
+     or <a href="ListIssues.csv" tal:attributes="href here/CSVExportURL">CSV</a>
+     </span>
+   </span>
+     
+  </span>
+
+<span class="floatR">
+  <span tal:condition="python:request.has_key('show')" tal:omit-tag="">
+    <a tal:attributes="href python:here.BatchedQueryString('none')">Show only 
+  the first <span tal:replace="here/default_batch_size">5</span> issues</a>
+  </span>
+  &nbsp;
+  <span tal:condition="python:batch.previous or batch.next" tal:omit-tag="">
+    <a tal:define="p batch/previous" tal:condition="p"
+        tal:attributes="href python:here.BatchedQueryString({'start':p.first})"
+        ><b>&lt; <br tal:replace="python:test(p.first, 'Previous','First')"/> <span tal:replace="p/length">n</span></b></a>
+    &nbsp;
+    <a tal:condition="not:python:request.has_key('show')" 
+    tal:attributes="href python:here.BatchedQueryString('all')">Show them all</a>
+    &nbsp;
+    <a tal:define="p batch/next" tal:condition="p"
+        tal:attributes="href python:here.BatchedQueryString({'start':p.first})"
+        href><b><br tal:replace="python:test(p.length==here.default_batch_size,'Next','Last')"> <span tal:replace="p/length">n</span> &gt;</b></a>
+  </span>
+</span>
+
+  <br style="clear:both" />
+</div>

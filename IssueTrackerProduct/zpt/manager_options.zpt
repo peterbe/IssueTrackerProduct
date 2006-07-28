@@ -1,0 +1,45 @@
+<table align="center" class="options_table" cellpadding="3" cellspacing="0">
+    <tr>
+	<td>
+
+	<table align="center" cellpadding="2" cellspacing="15">
+	    <tr>
+		<td width="90" class="actionbuttonbox" align="center"
+		tal:attributes="onclick string:window.open('${here/ActionURL}?IssueAction_AddFollowup=1', '_top')">
+		    <a class="actionbuttonbox"
+		    href="?IssueAction_AddFollowup=1">Add followup</a>
+		</td>
+		<td width="90" class="actionbuttonbox" align="center" tal:condition="here/ShowDownloadButton" 
+		tal:attributes="onclick string:window.open('${here/ActionURL}/issue2TXT', '_top')">
+		    <a class="actionbuttonbox"
+		    href="issue2TXT">Download</a>
+		</td>
+	    </tr>
+	</table>
+
+	</td>
+	<td>
+
+
+<table align="center" cellpadding="2" cellspacing="15">
+    <tr tal:define="buttons here/getOptionButtons; status here/status">
+	<tal tal:repeat="button buttons">
+	<td width="90" class="actionbuttonbox" align="center"
+	    tal:define="action python:button[0]"
+	    tal:attributes="onclick string:window.open('${here/ActionURL}?${action}=1', '_top')">
+	    <a href="dumt" class="actionbuttonbox"
+	    tal:define="action python:button[0]"
+	    tal:attributes="href string:?${action}=1"
+	    tal:content="python:button[1]">Open</a>
+	</td>
+	</tal>
+    </tr>
+</table>
+
+
+	</td>
+    </tr>
+</table>
+
+
+

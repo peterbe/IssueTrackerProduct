@@ -1,0 +1,32 @@
+<tal:block tal:define="issues here/getNextActionIssuesWeb;
+                       b_size python:here.getBatchSize(default=10);
+                       Batch python:modules['ZTUtils'].Batch;
+                       batch python:Batch(issues, b_size, 0, orphan=1);
+                       today here/ZopeTime" 
+           tal:condition="issues">
+      <h4>Your next action issues</h4>
+      <p tal:repeat="issue batch">
+	<tal:subblock tal:define="threads issue/ListThreads">
+	<span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
+         <b><a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
+               tal:attributes="href issue/relative_url_path;
+                               title python:test(diff, diff)"
+	         tal:content="structure python:context.displayBriefTitle(issue.getTitle())"
+		 class="ilink"
+		 ></a></b>&nbsp;<img src="/misc_/IssueTrackerProduct/paperclip.gif"
+                  tal:define="noattachments issue/countFileattachments"
+                  tal:condition="noattachments"
+                  tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                 - <b class="status" tal:content="python:issue.getStatus().capitalize()"></b><br />
+		 
+	    <span class="shaded" tal:content="python:request.get('nextaction_reasons',{}).get(issue.getId())"></span>
+	</tal:subblock>
+        
+        <a tal:define="isend repeat/issue/end;
+                       nextsize python:b_size+b_size"
+           tal:condition="python:isend and len(issues)>b_size"
+           tal:attributes="href string:?size=${nextsize}"
+           style="padding-left:60px;padding-top:15px;font-weight:bold;display:block"
+           >Show <br tal:replace="b_size" /> more issues &gt;</a>
+      </p>
+</tal:block>

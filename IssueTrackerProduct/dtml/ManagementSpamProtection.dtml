@@ -1,0 +1,140 @@
+<dtml-var manage_page_header>
+<dtml-with "_(management_view='Management')">
+<dtml-var manage_tabs>
+</dtml-with>
+<script type="text/javascript">
+
+function _select(check_on) {
+  var f = document.getElementById('foundspam');
+  var box, j;
+  var boxes = [f['issuepaths:list'], f['threadpaths:list']];
+  for (j in boxes) {
+    box = boxes[j];
+    for (var i=0,len=box.length; i<len; i++)
+      box[i].checked = check_on;
+  }
+}
+function selectAll() {
+  _select(true);
+}
+function unselectAll() {
+  _select(false);
+}
+
+</script>
+<style type="text/css">
+#foundspam a:link, #foundspam a:visited { text-decoration:underline; }
+</style>
+
+<dtml-var "ManagementTabs('Spam protection')">
+
+<p>Spam protection is done by you specifying what keywords aren't
+allowed in issues or followups. If there's a match on any of the
+keywords you specify here, the issue or the follow will not be
+saved.</p>
+
+<a name="form"></a>
+<form action="manage_saveSpamKeywords" method="post">
+
+<dtml-let keywords="getSpamKeywords()" 
+          expanded_keywords="getSpamKeywordsExpanded()">
+<textarea name="keywords:lines" cols="50"
+  <dtml-if "_.len(expanded_keywords)>50">rows="30"
+  <dtml-elif "_.len(expanded_keywords)>20">rows="20"
+  <dtml-else>rows="10"
+  </dtml-if>
+
+><dtml-var "'\n'.join(expanded_keywords)" html_quote></textarea>
+
+</dtml-let>
+<br />
+<input type="submit" value="Save spam keywords" />
+</form>
+
+<br />
+<dtml-if "REQUEST.get('findspam')">
+<a name="findings"></a>
+<form action="manage_deleteIssuesAndThreads" id="foundspam" method="post">
+  <dtml-call "REQUEST.set('totalcount',0)">
+  <dtml-let issues="manage_findIssuesContainingSpam()">
+    <dtml-call "REQUEST.set('totalcount',REQUEST['totalcount']+_.len(issues))">
+    <dtml-in issues>
+      <dtml-if sequence-start><strong>Issue with spam in it</strong><br /></dtml-if>
+      
+      <input type="checkbox" name="issuepaths:list"
+       value="<dtml-var "'/'.join(getPhysicalPath())">" />
+       <dtml-if "ShowIdWithTitle()">#<dtml-var getId></dtml-if>
+       <a href="<dtml-var absolute_url>"
+        ><dtml-var getTitle html_quote></a>
+        <dtml-let count="countThreads()">
+        <dtml-if count>
+        <small>(<dtml-var count> followups)</small>
+        </dtml-if>
+        </dtml-let>
+	<br />
+      
+    </dtml-in>
+  </dtml-let>
+
+  <dtml-let threads="manage_findThreadsContainingSpam()">
+    <dtml-call "REQUEST.set('totalcount',REQUEST['totalcount']+_.len(threads))">  
+    <dtml-in threads>
+      <dtml-if sequence-start><strong>Followups with spam in it</strong><br /></dtml-if>
+      
+      <input type="checkbox" name="threadpaths:list"
+       value="<dtml-var "'/'.join(getPhysicalPath())">" />
+        <dtml-if "ShowIdWithTitle()">#<dtml-var "aq_parent.getId()"></dtml-if>
+       <a href="<dtml-var "aq_parent.absolute_url()">#i<dtml-var "REQUEST['thread_counts'].get(absolute_url_path(),'')">"
+        ><dtml-var getTitle html_quote></a>
+        <small>(of <a href="<dtml-var "aq_parent.absolute_url()">"><dtml-var "aq_parent.getTitle()"></a>)</small>
+	<br />
+      
+    </dtml-in>
+  
+  </dtml-let>
+  <dtml-if "REQUEST['totalcount']>10">
+    <input type="button" name="nothing" value="Select all" 
+     style="font-size:80%"
+     onclick="if(this.value=='Select all'){selectAll();this.value='Unselect all'}else{unselectAll();this.value='Select all'}"
+     />
+  </dtml-if>
+  <input type="submit" value="Delete selected" />
+</form>
+</dtml-if>
+
+
+<form action="manage_ManagementSpamProtection#findings">
+<dtml-if "REQUEST.get('findspam')">
+
+
+<input type="submit" name="findspam"
+ value="Find again" />
+<dtml-else>
+<input type="submit" name="findspam"
+ value="Find issues and followups on current config" />
+</dtml-if> 
+</form>
+
+<br />
+
+<h4>How this works</h4>
+
+<p>
+You write <strong>one keyword per line</strong>. A <strong>keyword can contain
+spaces</strong>. Any duplicates or blank are filtered out when you save.
+</p>
+<p>Combinations and subwords are entered like this: you write first the
+keyword and then all subwords on the following lines but add a bit of
+whitespace before the words to indicate the relationship of the first
+keyword. Combinations are matched if the first word (no whitespace to
+the left) is found <em>and</em> the <em>any</em> of the following
+words appear. This is useful if you want to flag up two offending
+words who on their own are harmless but together is considered spam.
+It doesn't matter who many spaces you put in front of a subword.
+All text matching is done <strong>case <em>in</em>sensitively</strong>.
+</p>
+
+<br />&nbsp;
+
+
+<dtml-var manage_page_footer>

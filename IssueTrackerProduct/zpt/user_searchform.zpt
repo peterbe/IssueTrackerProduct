@@ -1,0 +1,24 @@
+<form action="show_only_me" method="get"
+      tal:define="fromname python:here.getSavedUser('fromname');email python:here.getSavedUser('email')"
+      tal:attributes="action string:${here/getRootURL}/ShowOnlyMe">
+<table>
+  <tr>
+    <td>Name:</td>
+    <td><input name="fromname" value=""
+               tal:attributes="value fromname"></td>
+    <td rowspan="2">
+      <input type="submit" value="List issues only with this">
+    </td>
+  </tr>
+  <tr>
+    <td>Email:</td>
+    <td><input name="email" value=""
+               tal:attributes="value email"></td>
+  </tr>
+</table>
+
+ 
+
+</form>
+
+

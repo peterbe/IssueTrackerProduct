@@ -1,0 +1,68 @@
+<style type="text/css">
+#navcontainer
+{
+font-size:13px;
+margin-left: auto;
+margin-right: auto;
+margin-bottom: 40px;
+border-top: 1px solid #999;
+z-index: 1;
+}
+
+#navcontainer ul
+{
+list-style-type: none;
+text-align: center;
+margin-top: -8px;
+padding: 0;
+position: relative;
+z-index: 2;
+}
+
+#navcontainer li
+{
+display: inline;
+text-align: center;
+margin: 0 5px;
+}
+
+#navcontainer li a
+{
+padding: 1px 7px;
+color: #666;
+background-color: #fff;
+border: 1px solid #ccc;
+text-decoration: none; 
+/*text-decoration: underline; */
+}
+
+#navcontainer li a:hover
+{
+color: #000;
+border: 1px solid #666;
+border-top: 2px solid #666;
+border-bottom: 2px solid #666;
+}
+
+#navcontainer li a#current
+{
+background-color:#eee;
+font-weight:bold;
+color: #000;
+border: 1px solid #666;
+border-top: 2px solid #666;
+border-bottom: 2px solid #666;
+}
+.clearboth { clear: both; }
+</style>
+
+<br class="clearboth">
+<div id="navcontainer">
+<ul id="navlist">
+<dtml-in tabdicts mapping>
+  <li><a <dtml-if current>id="current"</dtml-if>
+   href="<dtml-var href>"><dtml-var name></a>
+</dtml-in>
+
+</ul>
+</div>

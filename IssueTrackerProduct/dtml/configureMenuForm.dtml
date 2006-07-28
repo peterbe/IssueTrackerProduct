@@ -1,0 +1,84 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Properties')">
+<dtml-var manage_tabs>
+</dtml-with>
+
+<script type="text/javascript">
+function clearInputs(number) {
+  document.getElementById("href"+number).value="";
+  document.getElementById("label"+number).value="";
+  document.getElementById("inurl"+number).value="";
+}
+</script>
+
+<div style="text-align:right;font-size:10px; padding:6px">
+  <a href="manage_editIssueTrackerPropertiesForm" 
+  style="text-decoration:underline">&lt;&lt;&lt; Return to all properties</a>
+</div>
+
+
+<form action="manage_editMenuItems" method="post">
+
+<table>
+  <tr>
+    <th>&nbsp;</th>
+    <th>href</th>
+    <th>label</th>
+    <th>inurl</th>
+  </tr>
+<dtml-in "getMenuItemsList()" mapping>
+  <tr>
+    <td><dtml-var sequence-number>.</td>
+    <td><input name="hrefs:list" id="href<dtml-var sequence-number>" size="30" value="<dtml-var href>" /></td>
+    <td><input name="labels:list" id="label<dtml-var sequence-number>" size="30" value="<dtml-var label>" /></td>
+    <td><input name="inurls:list" id="inurl<dtml-var sequence-number>" size="30"
+     <dtml-if "hasattr(inurl, 'upper')">
+     value="<dtml-var inurl>" />
+     <dtml-else>
+      value="<dtml-var "' '.join(inurl)"> "/>
+     </dtml-if>
+   </td>
+   <td><input type="button" value="clear"
+onclick="clearInputs(<dtml-var sequence-number>)" /></td>
+  </tr>
+</dtml-in>
+  <tr>
+    <td><em>n</em>.</td>
+    <td><input name="hrefs:list" size="30" value="" /></td>
+    <td><input name="labels:list" size="30" value="" /></td>
+    <td><input name="inurls:list" size="30" value="" /></td>
+  </tr>
+</table>
+
+<br />
+<input type="submit" value="Save changes" />
+<br />
+<input type="submit" name="reset_to_default" 
+value="Reset to default values" /><br />
+
+<h4>Help</h4>
+
+<p>This page allows you to change what appears in the menu. 
+The menu is shown in two places, the top navigation bar and centred at
+the bottom of each screen. One item is added dynamically and that's
+the Login tab which changes to the fullname if you're logged in. That
+tab can't be configured here.</p>
+
+<p>The only non-obvious field is the <b>inurl</b> one. This is a word
+(or several if split by space) that tells the dynamic script if you're
+on that page or not and shows this in the menu. 
+If you're uncertain, just make it the same as the
+<b>href</b> but without any / forward slashes. If you enter several
+words for the <b>inurl</b> and separate them by space, then it will
+do one check for each.</p>
+  
+<p>If you want to <b>remove</b> one item from the menu, just make it
+blank on href, label and inurl.<br />
+If you want to <b>add</b> a new menu item, use the <em>n<sup>th</sup></em>
+line.
+</p>
+
+
+</form>
+
+<dtml-var manage_page_footer>

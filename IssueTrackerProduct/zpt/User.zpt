@@ -1,0 +1,379 @@
+<html metal:use-macro="here/getHeader">
+<script metal:fill-slot="extrajs" type="text/javascript"><!--
+var isKonqueror = (navigator.appName == "Konqueror");
+//-->
+</script>
+<style type="text/css" metal:fill-slot="extracss">
+#rightcorner { float:right; }
+#rightcorner_change { float:right; border:1px solid #666; }
+.h3 { 
+    font-weight:bold;
+    font-size:120%;
+}
+td.st { /* status */
+    color:red;
+    padding: 0 14px;    
+}
+.listtable {
+    border:1px solid #ccc;
+}
+div.shaded {
+    color:#999;
+}
+td.indent1 {padding-left:10px;}
+td.indent2 {padding-left:30px;}
+td.indent3 {padding-left:50px;}
+</style>
+
+<div metal:fill-slot="body" tal:omit-tag="" tal:define="batchlimit python:20">
+
+
+<span tal:condition="python:options.get('SubmitError')"
+ tal:replace="structure here/show_submissionerror_message">
+</span>
+
+
+<tal:block tal:define="issueuser here/getIssueUser;
+                       cmfuser here/getCMFUser;
+                       zopeuser here/getZopeUser;
+                       today here/ZopeTime">
+
+<div id="rightcorner" tal:condition="python:issueuser or cmfuser or zopeuser"
+tal:attributes="id python:test(request.get('change'),'rightcorner_change','rightcorner')">
+
+<table tal:condition="python:request.get('change')=='details'">
+  <tr>
+    <td valign="top">
+<form action="UserChangeDetails">
+<table>
+  <tr>
+    <td><b>Name</b></td>
+    <td><input name="fullname" tal:condition="issueuser"
+         tal:attributes="value request/fullname|issueuser/getFullname" />
+        <input name="fullname" tal:condition="cmfuser"
+         tal:define="default python:cmfuser.getProperty('fullname')"
+         tal:attributes="value request/fullname|default" />
+        <input name="fullname" tal:condition="not:python:issueuser or cmfuser"
+         tal:attributes="value python:request.get('fullname', here.getSavedUser('fullname'))" />
+        <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fullname')"></span>
+    </td>
+  </tr>
+  <tr>
+    <td><b>Email</b></td>
+    <td><input name="email" tal:condition="issueuser"
+         tal:attributes="value request/email|issueuser/getEmail" />
+        <input name="email" tal:condition="cmfuser"
+         tal:define="default python:cmfuser.getProperty('email')"
+         tal:attributes="value request/email|default" />
+        <input name="email" tal:condition="not:python:issueuser or cmfuser"
+         tal:attributes="value python:request.get('email', here.getSavedUser('email'))" />
+        <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'email')"></span></td>
+  </tr>
+  <tr>
+    <td><b>Display format</b></td>
+    <td tal:define="display_format request/display_format | here/getSavedTextFormat | string:plaintext">
+        <input type="radio" tabindex="5" name="display_format" value="plaintext" tal:attributes="checked python:display_format=='plaintext'" />Plain as it's written<br />
+	<input type="radio" tabindex="6" name="display_format" value="structuredtext" tal:attributes="checked python:display_format=='structuredtext'" />
+	<a href="What-is-StructuredText">Structured Text</a><br />
+        <tal:test condition="here/hasWYSIWYGEditor">
+	<input type="radio" tabindex="7" name="display_format" value="html" tal:attributes="checked python:display_format=='html'" />
+	<a href="What-is-WYSIWYG">WYSIWYG</a>
+        </tal:test>
+    </td>    
+  </tr>  
+  <tr>
+    <td>&nbsp;</td>
+    <td><input type="submit" value="Save" onclick="javascript:this.value='Saving...'" /></td>
+  </tr>
+</table>
+</form>
+    </td>
+    <td valign="top"><a tal:attributes="href string:${here/relative_url}/User">Cancel</a></td>
+  </tr>
+</table>
+
+
+<table tal:condition="python:request.get('change')=='password' and issueuser">
+  <tr>
+    <td valign="top">
+<form action="IssueUserChangePassword" method="post">
+<table>
+  <tr>
+    <td><b>Old </b></td>
+    <td><input type="password" name="old" tal:attributes="value python:request.get('old','')" />
+        <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'old')"></span></td>
+  </tr>
+  <tr>
+    <td><b>New </b></td>
+    <td><input type="password" name="new" tal:attributes="value python:request.get('new','')" />
+        <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'new')"></span></td>
+  </tr>
+  <tr>
+    <td><b>Confirm </b></td>
+    <td><input type="password" name="confirm" tal:attributes="value python:request.get('confirm','')" />
+        <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'confirm')"></span></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><input type="submit" value="Save" onclick="javascript:this.value='Saving...'" /></td>
+  </tr>
+</table>
+</form>
+    </td>
+    <td valign="top"><a tal:attributes="href string:${here/relative_url}/User">Cancel</a></td>
+  </tr>
+</table>
+
+
+<form action="changeUserOptions" tal:condition="not:python:request.get('change')">
+<div style="color:#666;"
+ tal:condition="python:request.get('changemsg')"
+ tal:content="python:request.get('changemsg')"></div>
+<b tal:condition="issueuser" tal:content="string:${issueuser/getFullname}, ${issueuser/getEmail}"></b>
+<b tal:condition="cmfuser" tal:content="python:cmfuser.getProperty('fullname')+', '+cmfuser.getProperty('email')"></b>
+<b tal:condition="not:python:issueuser or cmfuser" tal:content="python:here.getSavedUser('fromname')+', '+here.getSavedUser('email')"></b><br />
+
+<tal:block define="df here/getSavedTextFormat">
+Display format: 
+<span tal:condition="python:df=='plaintext'">Plain as it's written</span>
+<span tal:condition="python:df=='structuredtext'">Structured Text</span>
+<span tal:condition="python:df=='html'">WYSIWYG</span>
+</tal:block>
+
+<br />
+<a href="?change=details">Change</a>
+<tal:block tal:condition="issueuser"> | <a href="?change=password">Change password</a></tal:block><br />
+
+
+<div tal:condition="here/showAutoLoginOption" 
+     tal:attributes="class python:test(not here.doAutoLogin(),'shaded')">
+<input type="checkbox" name="autologin" id="autologin" value="1" onchange="this.form.submit()"
+ tal:attributes="checked python:test(here.doAutoLogin())" /> <label for="autologin">Log me in automatically next time</label>
+</div>
+
+<div tal:define="useaccesskeys here/useAccessKeys"
+     tal:condition="here/ShowAccessKeysOption"
+     tal:attributes="class python:test(not useaccesskeys,'shaded')">
+<input type="checkbox" name="use_accesskeys" id="use_accesskeys" value="1" onchange="this.form.submit()"
+ tal:attributes="checked python:test(useaccesskeys)" /> <label for="use_accesskeys">Use keyboard shortcuts</label>
+ &nbsp;<a href="Keyboard-shortcuts">more info</a>
+</div>
+
+<div tal:define="remember_sfp here/rememberSavedfilterPersistently"
+     tal:condition="here/ShowRememberSavedfilterPersistentlyOption"
+     tal:attributes="class python:test(not remember_sfp,'shaded')">
+<input type="checkbox" name="remember_savedfilter_persistently" id="rsfp" value="1" onchange="this.form.submit()"
+ tal:attributes="checked python:test(remember_sfp)" /> <label for="rsfp">Remember used filter persistently</label>
+</div>
+
+<div tal:define="show here/showNextActionIssues"
+     tal:attributes="class python:test(not show,'shaded')">
+<input type="checkbox" name="show_nextactions" id="show_nextactions" value="1" onchange="this.form.submit()"
+ tal:attributes="checked python:test(show)" /> <label for="show_nextactions">Enable 'Your next action issues'</label>
+ &nbsp;<a href="Your-next-action-issues">more info</a>
+</div>
+
+<noscript>
+<input type="submit" value="Save changes" />
+</noscript>
+</form>
+
+
+</div>
+
+<div id="userachievements" tal:content="structure here/show_user_achievements">
+</div>
+
+<br />
+<br tal:define="global showlists options/user_lists" tal:replace="nothing" />
+
+
+<div tal:condition="issueuser" tal:omit-tag="">
+<div id="assigned" 
+ tal:define="myassignments options/myassignments;
+             len_myassignments python:len(myassignments);
+	     myassignments python:test(myassignments>batchlimit and not request.get('showall')=='assignments', myassignments[:batchlimit], myassignments)">
+
+
+<div tal:condition="myassignments" tal:omit-tag="">
+<table border="0" cellpadding="5" cellspacing="0" class="listtable">
+ <thead>
+  <tr class="lhead">
+    <td colspan="2"><span class="h3">Issues <em>assigned</em> to you</span>
+(<a href="ListIssues?i=Assigned">List these</a>, <a href="CompleteList?i=Assigned">Complete list</a>)</td>
+    <td align="right">
+      <a class="list-toggler" href="?hide=assignments" tal:condition="python:'assignments' in showlists">[hide list]</a>
+      <a class="list-toggler" href="?expand=assignments" tal:condition="not:python:'assignments' in showlists">[expand list]</a>
+    </td>
+  </tr>
+ </thead>
+ <tbody tal:condition="python:'assignments' in showlists">
+  <tr tal:repeat="assignment myassignments" tal:attributes="class python:test(path('repeat/assignment/odd'), 'lodd','leven')">
+    <td><a tal:attributes="href python:assignment.aq_parent.relative_url()" class="ilink"
+           tal:content="structure python:here.safe_html_quote(here.lengthLimit(assignment.aq_parent.getTitle(), 60))"></a>
+        <tal:test tal:condition="python:here.isFromBrother(assignment.aq_parent)">
+           (<a tal:define="brother python:here.getBrotherFromIssue(assignment.aq_parent)"
+               tal:attributes="href brother/absolute_url_path" class="brother"
+               tal:content="brother/getTitle"></a>)
+        </tal:test>
+    </td>
+    <td class="st" tal:content="python:assignment.aq_parent.status.capitalize()"></td>
+    <td class="s" tal:content="structure python:here.showDate(assignment.getAssignmentDate(), today=today)"></td>
+  </tr>
+ </tbody>
+ <tbody tal:condition="python:len_myassignments>batchlimit and not request.get('showall')=='assignments' and 'assignments' in showlists">
+   <tr class="lfoot">
+     <td colspan="2" align="right">
+       <em>You have <b tal:content="python:len_myassignments-batchlimit"></b> more issues assigned to you</em>
+     </td>
+     <td><em><a href="?showall=assignments">Show them all</a></em></td>
+   </tr>
+ </tbody>  
+</table>
+<br />&nbsp;
+</div>
+
+</div>
+</div>
+
+
+
+<div id="added" 
+  tal:define="myissues options/myissues;
+              len_myissues python:len(myissues);
+	      myissues python:test(myissues>batchlimit and not request.get('showall')=='added', myissues[:batchlimit], myissues)">
+
+<table tal:condition="myissues" border="0" cellpadding="5" cellspacing="0" class="listtable">
+ <thead>
+  <tr class="lhead">
+    <td colspan="2"><span class="h3">Issues you have <em>added</em></span>
+(<a href="ListIssues?i=Added">List these</a>, <a href="CompleteList?i=Added">Complete list</a>)</td>
+    <td align="right">
+      <a class="list-toggler" href="?hide=added#added" tal:condition="python:'added' in showlists">[hide list]</a>
+      <a class="list-toggler" href="?expand=added#added" tal:condition="not:python:'added' in showlists">[expand list]</a>
+    </td>
+  </tr>
+ </thead>
+ <tbody tal:condition="python:'added' in showlists">
+  <tr tal:repeat="issue myissues" tal:attributes="class python:test(path('repeat/issue/odd'), 'lodd','leven')">
+    <td><a tal:attributes="href python:issue.relative_url()" class="ilink"
+           tal:content="structure python:here.safe_html_quote(here.lengthLimit(issue.getTitle(), 60))"></a>
+        <tal:test tal:condition="python:here.isFromBrother(issue)">
+           (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+               tal:attributes="href brother/absolute_url_path" class="brother"
+               tal:content="brother/getTitle"></a>)
+        </tal:test>
+    </td>
+    <td class="st" tal:content="python:issue.status.capitalize()"></td>
+    <td class="s" tal:content="structure python:here.showDate(issue.getIssueDate(), today=today)"></td>
+  </tr>
+ </tbody>
+ <tbody tal:condition="python:len_myissues>batchlimit and not request.get('showall')=='added' and 'added' in showlists">
+   <tr class="lfoot">
+     <td colspan="2" align="right">
+       <em>You have <b tal:content="python:len_myissues-batchlimit"></b> more issues that you have added</em>
+     </td>
+     <td><em><a href="?showall=added">Show them all</a></em></td>
+   </tr>
+ </tbody> 
+</table>
+
+<p tal:condition="not:myissues"><em>No issues added yet in your name</em></p>
+
+</div>
+
+
+<br />&nbsp;
+
+
+<a name="followedup"></a>
+<div id="followedup" 
+ tal:define="mythreads options/mythreads; threadcounts options/threadcounts;
+	     len_mythreads python:len(mythreads);
+	     mythreads python:test(mythreads>batchlimit and not request.get('showall')=='followedup', mythreads[:batchlimit], mythreads)">
+
+
+<table tal:condition="mythreads" border="0" cellpadding="5" cellspacing="0" class="listtable">
+ <thead>
+  <tr class="lhead">
+    <td colspan="2"><span class="h3">Issues <em>followed up</em> on</span>
+(<a href="ListIssues?i=FollowedUp">List these</a>, <a href="CompleteList?i=FollowedUp">Complete list</a>)</td>
+    <td align="right">
+      <a class="list-toggler" href="?hide=followedup#followedup" tal:condition="python:'followedup' in showlists">[hide list]</a>
+      <a class="list-toggler" href="?expand=followedup#followedup" tal:condition="not:python:'followedup' in showlists">[expand list]</a>
+    </td>
+  </tr>
+ </thead>
+ <tbody tal:condition="python:'followedup' in showlists">
+  <tr tal:repeat="thread mythreads" tal:attributes="class python:test(path('repeat/thread/odd'), 'lodd','leven')">
+    <td><a tal:attributes="href python:thread.aq_parent.relative_url()" class="ilink"
+           tal:content="structure python:here.safe_html_quote(here.lengthLimit(thread.aq_parent.getTitle(), 40))"></a>
+        <tal:test tal:condition="python:here.isFromBrother(thread.aq_parent)">
+           (<a tal:define="brother python:here.getBrotherFromIssue(thread.aq_parent)"
+               tal:attributes="href brother/absolute_url_path" class="brother"
+               tal:content="brother/getTitle"></a>)
+        </tal:test>
+    </td>
+    <td class="smaller"><a tal:attributes="href python:thread.aq_parent.relative_url()+'#i%s'%threadcounts[thread.absolute_url()]"
+ tal:content="structure python:here.colorizeThreadChange(thread.getTitle())"></a></td>
+    <td class="smaller" tal:content="structure python:here.showDate(thread.getThreadDate())"></td>
+  </tr>
+ </tbody>
+ <tbody tal:condition="python:len_mythreads>batchlimit and not request.get('showall')=='followedup' and 'followedup' in showlists">
+   <tr class="lfoot">
+     <td colspan="2" align="right">
+       <em>You have <b tal:content="python:len_mythreads-batchlimit"></b> more followups that you have added</em>
+     </td>
+     <td><em><a href="?showall=followedup">Show them all</a></em></td>
+   </tr>
+ </tbody>
+</table>
+
+</div>
+
+
+<br />&nbsp;
+
+
+
+<div id="subscribed" tal:define="mysubscriptions options/mysubscriptions"
+ tal:condition="mysubscriptions">
+ 
+<table border="0" cellpadding="5" cellspacing="0" class="listtable">
+ <thead>
+  <tr class="lhead">
+    <td colspan="2"><span class="h3">Issues you have <em>subscribed</em> to</span>
+(<a href="ListIssues?i=Subscribed">List these</a>, <a href="CompleteList?i=Subscribed">Complete list</a>)</td>
+    <td align="right">
+      <a class="list-toggler" href="?hide=subscribed" tal:condition="python:'subscribed' in showlists">[hide list]</a>
+      <a class="list-toggler" href="?expand=subscribed#subscribed" tal:condition="not:python:'subscribed' in showlists">[expand list]</a>
+    </td>
+  </tr>
+ </thead>
+ <tbody tal:condition="python:'subscribed' in showlists">
+  <tr tal:repeat="issue mysubscriptions" tal:attributes="class python:test(path('repeat/issue/odd'), 'lodd','leven')">
+    <td><a tal:attributes="href python:issue.relative_url()" class="ilink"
+           tal:content="structure python:here.safe_html_quote(here.lengthLimit(issue.getTitle(), 60))"></a>
+        <tal:test tal:condition="python:here.isFromBrother(issue)">
+           (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+               tal:attributes="href brother/absolute_url_path" class="brother"
+               tal:content="brother/getTitle"></a>)
+        </tal:test>
+    </td>
+    <td class="st" tal:content="python:issue.status.capitalize()"></td>
+    <td class="s" tal:content="structure python:here.showDate(issue.getIssueDate())"></td>
+  </tr>
+ </tbody>
+</table>
+
+</div>
+
+
+
+
+</tal:block>
+
+<p>&nbsp;</p>
+
+</div>
+</html>

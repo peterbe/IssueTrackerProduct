@@ -1,0 +1,109 @@
+<h3 class="preview">Preview before saving</h3>
+
+<!--<div align="center">-->
+<div class="issue" align="left">
+
+<!-- Preview Issue -->
+  <div class="istatus" tal:define="status python:here.getStatuses()[0]"
+			        tal:content="python:modules['string'].capitalize(status)">Status</div>
+  <div class="ihead"
+    tal:define="t request/title | nothing">
+    <h3 tal:condition="t" tal:content="structure python:here.tag_quote(t)"></h3>
+    <h3 tal:condition="not:t"><em class="submiterror">Issues must have a subject</em></h3>
+  </div>
+  <div>
+  <div class="ibody" tal:define="emptystring string:;
+                              false python:0;
+                              description request/description | emptystring; 
+                              display_format request/display_format | here/getSavedTextFormat"
+                  tal:condition="python:request.get('description','').strip()"
+                  tal:content="structure python:here.ShowDescription(description.strip()+' ', display_format)">
+
+    This is the text
+  </div>
+
+  <div class="ibody" tal:condition="not:python:request.get('description','').strip()">
+    <p class="submiterror"><em>Issues must have a description.</em></p>
+  </div>
+
+  <div class="idetails2">
+  
+  <div tal:define="issueuser here/getIssueUser;
+                   zopeuser here/getZopeUser;
+                   loggedin python:issueuser or (zopeuser and here.getSavedUser('fromname') and here.getSavedUser('email'))">
+    <b>Submitted by:</b> 
+    <span tal:condition="python:loggedin and issueuser"
+          tal:replace="structure python:here.ShowNameEmail(issueuser.getFullname(), issueuser.getEmail(), highlight=0)">YES</span>
+    <span tal:condition="python:loggedin and not issueuser"
+          tal:replace="structure python:here.ShowNameEmail(here.getSavedUser('fromname'), here.getSavedUser('email'), highlight=0)">YES</span>          
+    <span tal:define="emptystring python:''; hide_me request/hide_me | nothing; 
+	                  fromname request/fromname| emptystring; 
+                      email request/email | emptystring"
+          tal:condition="not:loggedin"
+	      tal:replace="structure python:here.ShowNameEmail(fromname,email,hide_me)">Author</span>
+    </div>
+    <div tal:content="structure python:here.showDate(here.ZopeTime())">date</div>
+    <div tal:content="structure python:here.showFileattachments(only_temporary=1)"></div>
+
+  </div>
+
+  <table class="idetails-table">
+    <tr tal:condition="request/confidential|nothing">
+      <td colspan="2">
+        <tal:block condition="not:here/hasManagerRole" replace="default">Confidential</tal:block>
+        <acronym tal:condition="here/hasManagerRole" title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym>
+      </td>      
+    </tr>  
+    <tr>
+      <td class="ilabel">Sections:</td>
+      <td tal:content="here/getPreviewSections">Homepage, Other</td>
+    </tr>
+    <tr>
+      <td class="ilabel">Type:</td>
+      <td tal:content="request/type|nothing">missing page</td>
+    </tr>
+    <tr>
+      <td class="ilabel">Urgency:</td>
+      <td><span tal:condition="request/urgency|nothing" 
+           tal:content="request/urgency|nothing"
+           tal:attributes="class python:here.getUrgencyCSSSelector(request.get('urgency'))">critical</span></td>
+    </tr>
+    <tr tal:define="url2issue request/url2issue|nothing"
+        tal:condition="url2issue">
+      <td class="ilabel">URL:</td>
+      <td><a tal:attributes="href python:here.showURL2Issue(url2issue, href=1)" tal:content="python:here.showURL2Issue(url2issue)">http://url</a></td>
+    </tr>
+    
+  </table>
+
+
+  <div class="clearerR">&nbsp;</div>
+
+  <div class="assignment" tal:define="user python:test(request.get('assignee'), here.getIssueUserObject(request.get('assignee')), nothing)" 
+    tal:condition="user">
+    Assigned to: 
+    <span tal:replace="structure python:here.ShowNameEmail(user.getFullname(), user.getEmail(), highlight=0)"></span>
+    
+  </div>
+
+
+  
+    
+
+  </div>
+<!-- /Preview Issue -->
+
+</div>
+<!--</div>-->
+
+<div style="float:left" tal:define="notifyies python:here.Always2Notify(format='merged', requireemail=1, include_assignee=1)"
+ tal:condition="python:notifyies and here.doShowAlwaysNotifyStatus()">
+Notification will be sent to: <br tal:replace="structure python:', '.join(notifyies)" />
+</div>
+
+
+
+<table align="center" bgcolor="#ff6666" cellpadding="5"><tr><td>
+<input type="submit" name="SubmitIssue:method" value="Save this issue now" class="submitbutton"
+ onclick="javascript:this.value=' Saving Issue... '" />
+</td></tr></table>

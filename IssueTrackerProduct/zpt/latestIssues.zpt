@@ -1,0 +1,46 @@
+<div tal:define="b_size string:5;global b_size request/size | b_size; 
+		 dummy python:request.set('sortorder',nothing);
+                 filteredissues here/ListIssuesFiltered;
+                 Batch python:modules['ZTUtils'].Batch;
+                 global batch python:Batch(filteredissues, int(b_size), 0, orphan=1);
+                 display_date here/display_date;
+                 global string python:modules['string'];"
+     tal:replace="nothing" />
+
+
+	<table border=0 cellpadding="4" cellspacing="0">
+	<tr style="background-color:#A9A9A9" >
+		<td class="issuelistheading" colspan="2"><span tal:replace="b_size">#</span> Latest Issues</td>
+
+	</tr>
+	<tbody tal:repeat="issue batch">
+		<tr bgcolor="gainsboro"
+      tal:define="odd repeat/issue/odd; global bgcolor python:test(odd,here.odd_bgcolor,here.even_bgcolor)"
+      tal:attributes="bgcolor bgcolor">
+			<td>
+			<strong><a href="issueID" title="status"
+               tal:attributes="href issue/absolute_url; title issue/status"
+               tal:define="title issue/title"
+               tal:content="python:here.displayBriefTitle(title)">Title</a></strong>
+			</td>
+			<td><strong
+    style="color:red;" tal:content="python:issue.status.capitalize()"></strong></td>
+		</tr>
+		<tr tal:define="threads python:issue.ListThreads();lastthread python:issue.getLastThread();odd repeat/issue/odd; global bgcolor python:test(odd,here.odd_bgcolor,here.even_bgcolor)"
+		tal:attributes="bgcolor bgcolor"
+		tal:condition="threads">
+		<td colspan=2 align="right"><span style="font-size:80%">&nbsp;&nbsp;
+		<a href="" tal:define="anchor python:len(threads)"
+		tal:attributes="href string:${issue/absolute_url}#i${anchor}"><span 
+        tal:replace="structure python:here.colorizeThreadChange(lastthread.title, fontsize='100%%')"/></a> by 
+        <span tal:replace="structure python:here.ShowNameEmail(lastthread.fromname, lastthread.email)">Nameandemail</span>
+        </span>
+		</td>
+		</tr>
+	</tbody>
+	<tr tal:condition="not:python:batch">
+		<td>
+			<em>None</em>
+		</td>
+	</tr>
+	</table>

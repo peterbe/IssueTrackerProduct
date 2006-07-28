@@ -1,0 +1,851 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Properties')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+
+<p class="form-title">Properties Wizard</p>
+
+
+<style type="text/css">
+div.errormessage {
+    border:1px solid #FF9999;
+    background-color:#FFCCCC;
+    padding-left:10px;
+    padding-right:10px;  
+}
+
+.submiterror {
+    font-family:Arial, Verdana, sans-serif;
+    color:red;
+    font-weight:bold;
+}
+
+#backlinks {
+   padding-left:13px;
+   float:right;
+   width:40%;
+   border:1px solid #666;
+   margin:15px;
+}
+#backlinks a {
+   text-decoration:underline;
+   font-weight:bold;
+}
+
+li {
+  font-family: Verdana, Helvetica, sans-serif;
+  font-size: 10pt;
+  color: #333333;
+}
+p.smaller {
+   font-size:0.7em;
+}
+
+/* Urgencies */
+.ur-0 {color:#666; }
+.ur-1 { } /* default 'normal' */
+.ur-2 {font-weight:bold; }
+.ur-3 {font-weight:bold; color:red; }
+.ur-4 {font-weight:bolder; color:red; }
+
+label.fmt {
+    font-size:0.8em;
+    font-family: Verdana, Helvetica, sans-serif;
+}
+</style>
+
+<dtml-if error>
+    <dtml-var show_submissionerror_message>
+<dtml-else>
+    <dtml-call "REQUEST.set('error',{})">
+</dtml-if>
+
+<form action="manage_PropertiesWizard" method="post" name="form1">
+<input type="hidden" name="stage:int" value="<dtml-var stage>" /
+<dtml-if firsttime>
+  <input type="hidden" name="firsttime:int" value="<dtml-var firsttime>" />
+</dtml-if>
+<p>Stage: <dtml-var stage> of 12</p>
+
+
+<dtml-if "stage==3">
+  <div id="backlinks">
+  <p>You can...<br />
+     <a href="manage_PropertiesWizard?submit:int=0&amp;stage:int=1&amp;firsttime:int=<dtml-if firsttime><dtml-var firsttime><dtml-else>0</dtml-if>">go back and add more sections?</a>
+  </div>
+<dtml-elif "stage==5">
+  <div id="backlinks">
+  <p>You can...<br />
+     <a href="manage_PropertiesWizard?submit:int=0&amp;stage:int=4&amp;firsttime:int=<dtml-if firsttime><dtml-var firsttime><dtml-else>0</dtml-if>"
+      >go back and change the types and urgencies?</a>
+  </div>
+
+<dtml-elif "stage==9">
+  <div id="backlinks">
+  <p>You can...<br />
+     <a href="manage_PropertiesWizard?submit:int=0&amp;stage:int=8&amp;firsttime:int=<dtml-if firsttime><dtml-var firsttime><dtml-else>0</dtml-if>"
+      >go back and change who's running this issue tracker?</a>
+  </div>
+
+</dtml-if>
+
+
+
+<!-- ----------------------------------------- -->
+
+
+<dtml-if "stage==1">
+
+
+  <p>How do you intend to use this IssueTracker? 
+  Choose which one you think is most appropriate.
+  <br /><br />
+
+  <input type="radio" name="whatuse" value="softwaredevelopment" checked="checked"
+   id="wu1"/>
+  <label for="wu1">Software/Application development (default)</label <br />
+
+  <input type="radio" name="whatuse" value="helpdesk_external" id="wu2" />
+  <label for="wu2">Helpdesk (open/external)</label> <br />
+
+  <input type="radio" name="whatuse" value="helpdesk_internal" id="wu3" />
+  <label for="wu3">Helpdesk (closed/internal)</label> <br />
+
+
+
+<dtml-elif "stage==2">
+
+  <p>Now enter the various sections that issues should be able to belong to.
+  <br />
+  It is recommended that you enter a few more than the default suggestions but
+  these can be changed later.
+  <br /><br />
+
+  <dtml-var "ShowError(error, 'sections_options')">
+
+  <textarea name="sections_options:lines" rows="9" cols="35"><dtml-var "_.string.join(sections_options,'\n')" html_quote></textarea>
+
+  <br />
+
+<dtml-elif "stage==3">
+
+  <p>Select the default section issues should belong to if someone who adds
+  an issue do <em>not</em> specify which section it belongs to:<br />
+  <br />
+
+  <dtml-let this_sections_options="REQUEST.get('sections_options',sections_options)">
+          <select name="defaultsections:list" multiple size="<dtml-var "_.min(7, _.len(this_sections_options))">">
+	      <dtml-in this_sections_options>
+               <option <dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>
+               ><dtml-var sequence-item html_quote></option>
+	      </dtml-in>
+          </select>
+  </dtml-let>
+  <dtml-var "ShowError(error, 'defaultsections')">
+  <p class="smaller">Ideally you select one but you can select multiple default sections by holding down the 
+  <code>Ctrl</code> key as you select sections.
+
+   
+
+
+<dtml-elif "stage==4">
+
+  <p>Enter the kind of <b>types</b> and <b>urgencies</b> that issues should have.</p>
+
+  <table cellpadding=5>
+    <tr>
+      <th>Types</th>
+      <th>Urgencies</th>
+    </tr>
+    <tr>
+      <td>
+        
+        <textarea name="types:lines" rows="6" cols="35"
+         ><dtml-var "_.string.join(types, '\n')" html_quote></textarea>
+        <dtml-var "ShowError(error, 'types')">
+      </td>
+      <td>
+        <textarea name="urgencies:lines" rows="6" cols="35"
+         ><dtml-var "_.string.join(urgencies, '\n')" html_quote></textarea>
+        <dtml-var "ShowError(error, 'urgencies')">
+      </td>
+    </tr>
+  </table>
+
+  <p class="smaller">Enter one item per line. All excessive whitespace will be removed.</p>
+  
+
+<dtml-elif "stage==5">
+
+  <p>If someone does not enter a <b>type</b> or an <b>urgency</b> what should be 
+  set by default.</p>
+
+  
+  <table cellpadding=5 border=0>
+    <tr>
+      <th align="left">Default type</th>
+      <th><dtml-var "'&nbsp;'*12"></th>
+      <th align="left">Default urgency</th>
+    </tr>
+    <tr>
+    <td valign="top"><p>
+    <dtml-let this_types=types>
+    	<dtml-in this_types>
+          <input type="radio" id="type<dtml-var sequence-index>"
+           value="<dtml-var sequence-item>" name="default_type"
+           <dtml-if "_['sequence-item']==default_type">checked="checked"</dtml-if>
+           <label for="type<dtml-var sequence-index>"
+            class="<dtml-var "getUrgencyCSSSelector(_['sequence-item'])">"><dtml-var sequence-item html_quote></label>
+           <br />
+  	    </dtml-in>
+    </dtml-let>    
+    </td>         
+    <td>&nbsp;</td>
+    <td valign="top"><p>
+      <dtml-let this_urgencies=urgencies>
+	      <dtml-in this_urgencies>
+            <input type="radio" id="urgency<dtml-var sequence-index>"
+             value="<dtml-var sequence-item>" name="default_urgency"
+             <dtml-if "_['sequence-item']==default_urgency">checked="checked"</dtml-if>>
+	         <label for="urgency<dtml-var sequence-index>"
+              class="<dtml-var "getUrgencyCSSSelector(_['sequence-item'])">"><dtml-var sequence-item html_quote></label>
+             <br />
+  	      </dtml-in>
+      </dtml-let>     
+      </td>
+    </tr>
+  </table>
+
+
+<dtml-elif "stage==6">
+
+  <p>How should issues be sorted if not sorted by anything
+explicitly? By <b>creation date</b> or by <b>modification date</b>?</p>
+
+  <p><input type="radio" name="default_sortorder" value="issuedate"
+      <dtml-if "getDefaultSortorder()=='issuedate'">checked="checked"</dtml-if> />
+      (Recommended)
+     When sorted by <b>creation date</b> then posting of followups does
+     not affect the default sort order in <a href="ListIssues">List
+     Issues</a> (or <a href="CompleteList">Complete List</a>). This is
+     similar to how <a href="http://gmail.google.com">Gmail</a> sorts
+     the inbox.</p>
+     
+  <p><input type="radio" name="default_sortorder" value="modifydate" 
+      <dtml-if "getDefaultSortorder()=='modifydate'">checked="checked"</dtml-if> />
+      (Original)
+     When sorted by <b>modification date</b> then old issues can appear at 
+     the top of the <a href="ListIssues">List Issues</a> (or <a
+href="CompleteList">Complete list</a>) even though added a long time
+     ago. The modification date of the issue is the same as the
+     creation date of the latest followup.</p>
+
+<dtml-elif "stage==7">
+
+  <p>Are there people in your organization who might use these issue trackers a lot?<br />
+     You can set up so called <b>notifyables</b> which simply maps a name to an email address
+     and a group. Once these are set up you will be able to enter these people's names instead of 
+     having to remember their email address for settings and for the Tell-a-friend feature.</p>
+  
+  <p>You can either define notifyables globally or locally. When defined globally (recommended) 
+     it will work for all inherent issue tracker instances. You can also define them locally which 
+     is useful if you want to contain everything in one single place.</p>
+
+  <p>(<b>Tip!</b> open these links in a new window and return here after)<br /><br />
+    
+    <dtml-if hasGlobalContainer>
+       You already have a global container for notifyables. 
+       <a href="<dtml-var "getGlobalContainer().absolute_url()">/manage_GlobalManagementForm">Manage it here</a>.
+    <dtml-else>
+       Set up a <em>global</em> notifyables container in...<br />
+        <dtml-in "_.string.split(_.string.replace(REQUEST.URL1, REQUEST.BASE0, ''), '/')">
+          
+          <dtml-if sequence-start>
+            <ul>
+             <li><a href="<dtml-var "REQUEST.BASE0">/manage_addProduct/IssueTrackerProduct/addNotifyableContainerForm?goto_after=1"><em>Root</em></a></li>
+             <dtml-call "REQUEST.set('bits',REQUEST.BASE0)">
+          <dtml-elif sequence-end>
+            </ul>
+          <dtml-else>
+             <dtml-call "REQUEST.set('bits', REQUEST.get('bits')+'/'+_['sequence-item'])">
+             <li><a href="<dtml-var "REQUEST.get('bits')">/manage_addProduct/IssueTrackerProduct/addNotifyableContainerForm?goto_after=1"
+                 ><dtml-var "_.string.replace(REQUEST.get('bits'),REQUEST.BASE0,  '')"></a></li>
+          </dtml-if>
+
+        </dtml-in>
+    </dtml-if>
+
+    <p>
+    <dtml-if "getNotifyables(only='local')">
+       You already have a few <em>local</em> notifyables set up here in this issue tracker.<br />
+       <a href="manage_ManagementNotifyables">Manage them here.</a>
+    <dtml-else>
+       To set up <em>local</em> notifyables, <a href="manage_ManagementNotifyables">follow this link</a>.
+    </dtml-if>
+
+
+<dtml-elif "stage==8">
+
+  <script>
+  function appendWord(word) {
+    var t = document.form1['always_notify:lines'].value;
+    if (t!="") {
+       t += "\n";
+    }
+    var nt = t+word;
+    document.form1['always_notify:lines'].value = nt;
+  }
+  </script>
+
+
+  <p>Are there people who should get an <b>email notification</b> on all added issues?<br />
+     Write the email addresses line by line or if you have defined <b>notifyables</b> you 
+     can just enter their name.
+  </p>
+  <table>
+    <tr>
+      <td valign="top">
+        <textarea name="always_notify:lines" rows="6" cols="35"><dtml-var "_.string.join(getAlwaysNotify(), '\n')" html_quote></textarea><br />
+         <dtml-var "ShowError(error, 'always_notify')">
+      </td>
+      <td valign="top">
+      <dtml-in getNotifyables>
+       <dtml-if sequence-start>
+       <p class="smaller">Remember that you already have the following notifyables set up:</p>
+       <p>
+       </dtml-if>
+       <a href="#" title="Click to add to the list on the left" 
+        onclick="javascript:this.style['display']='none';appendWord('<dtml-var "_.string.replace(getTitle(),'\'','\\\'')">');"><dtml-var getTitle>
+        <dtml-in "getGroupsByIds(groups)">
+         <dtml-if sequence-start> (</dtml-if><dtml-var title html_quote><dtml-unless sequence-end>, </dtml-unless><dtml-if sequence-end>)</dtml-if>
+        </dtml-in></a><br>
+      <dtml-else>
+        <p class="smaller">It seems that you have not set up any <b>notifyables</b> here. It is generally a useful thing to have
+         because you can partly remember only the name and also if a notifyable person changes email address the name will still work as before.<br />
+         Do this, <a href="">define local notifyables</a> (names will only be defined then for this issuetracker)
+         or <a href="">create global notifyables container</a> in which you can 
+         
+      </dtml-in>
+     </td>
+   </tr>
+  </table>
+
+
+<dtml-elif "stage==9">
+
+
+  <p>Who's running this issue tracker?</p>
+  <p class="smaller">The <b>name</b> is shown in email send-outs in the signature
+  and the <b>email</b> is what the email comes from.</p>
+
+
+  <table>
+    <tr>
+      <td><p><b>Name:</b></td>
+      <td><input type="text" name="sitemaster_name:string" size="35"
+           value="<dtml-var "REQUEST.get('sitemaster_name',sitemaster_name)" html_quote>">
+          <dtml-var "ShowError(error, 'sitemaster_name')">
+      </td>
+    </tr>
+
+    <tr>
+      <td valign="top"><p><b>Email:</b></td>
+      <td><input type="text" name="sitemaster_email:string" size="35"
+           value="<dtml-var "REQUEST.get('sitemaster_email',sitemaster_email)" html_quote>">
+          <dtml-var "ShowError(error, 'sitemaster_email')">
+          <dtml-if "not ValidEmailAddress(REQUEST.get('sitemaster_email',sitemaster_email))">
+            <span style="color:red;font-family:Arial,Verdana;font-size:0.7em">The one you have now is invalid and this 
+            can cause problems with send-outs which are not followups.</span>
+          </dtml-if>
+          
+      </td>
+    </tr>
+  </table>
+
+
+<dtml-elif "stage==10">
+
+  <p>Some minor details about the <b>display</b> and <b>submission</b> of issues.</p>
+
+  <table>
+    <tr>
+      <td colspan="2"><p><b>File attachments</b></td>
+    </tr>
+    <tr>
+      <td><p>Adding issues:</td>
+      <td><input name="no_fileattachments" maxlength="2" size="2" 
+           value="<dtml-var "REQUEST.get('no_fileattachments', getNoFileattachments())">" />
+          <dtml-var "ShowError(error, 'no_fileattachments')">
+      </td>
+    </tr>
+    <tr>
+      <td><p>Posting followups:</td>
+      <td><input name="no_followup_fileattachments" maxlength="2" size="2" 
+           value="<dtml-var "REQUEST.get('no_followup_fileattachments', getNoFollowupFileattachments())">" />
+          <dtml-var "ShowError(error, 'no_followup_fileattachments')">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+      <p>Setting these to 0 switches the feature off.
+      </td>
+    </tr>
+  </table>
+
+  <br />
+
+  <p><b>Date format:</b></p>
+  <select name="display_date">
+    <dtml-let dd="REQUEST.get('display_date',display_date)">
+      <dtml-in getDisplayDateFormatOptions>
+        <option value="<dtml-var sequence-item>"
+         <dtml-if "dd==_['sequence-item']">selected="selected"</dtml-if>
+         ><dtml-var "ZopeTime().strftime(_['sequence-item'])"></option>
+      </dtml-in>
+    </dtml-let>
+  </select>
+  
+  <p><b>Use "clever" date display:</b></p>
+  <p>
+  <dtml-let show="ShowDatesCleverly()">
+  <input type="radio" name="show_dates_cleverly:int" value="1"
+   <dtml-if show>checked="checked"</dtml-if>  
+   id="sdc1" /> <label for="sdc1">Yes</label> &nbsp;
+  <input type="radio" name="show_dates_cleverly:int" value="0"
+   <dtml-unless show>checked="checked"</dtml-unless>
+   id="sdc0" /> <label for="sdc0">No</label>
+  </dtml-let>
+  
+
+
+<dtml-elif "stage==11">
+
+  <p>And now for some simple Yes/No questions.</p>
+
+  <table cellpadding="5">
+    <tr>
+      <td><p>Should Managers be able to change attributes of an issue once submitted?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('allow_issueattrchange', allow_issueattrchange)">
+       <input type="radio" name="allow_issueattrchange:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allow1" /> <label for="allow1">Yes</label>
+       &nbsp;
+       <input type="radio" name="allow_issueattrchange:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allow0" /> <label for="allow0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+
+    <tr>
+      <td><p>Should people be able use the Tell a friend widget?</td>
+      <td><p>
+       <dtml-let use="REQUEST.get('use_tellafriend', UseTellAFriend())">
+       <input type="radio" name="use_tellafriend:int" value="1"
+        <dtml-if use>checked="checked"</dtml-if> id="uses1" /> <label for="uses1">Yes</label>
+       &nbsp;
+       <input type="radio" name="use_tellafriend:int" value="0"
+        <dtml-unless use>checked="checked"</dtml-unless> id="uses0" /> <label for="uses0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+    
+    <tr>
+      <td><p>Should people be able to subscribe to issues?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('allow_subscription', allow_subscription)">
+       <input type="radio" name="allow_subscription:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allows1" /> <label for="allows1">Yes</label>
+       &nbsp;
+       <input type="radio" name="allow_subscription:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allows0" /> <label for="allows0">No</label>
+       </dtml-let>
+      </td>
+    </tr>    
+
+    <tr>
+      <td><p>Should only the Manager be able to see the Statistics page?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('private_statistics', private_statistics)">
+       <input type="radio" name="private_statistics:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allowp1" /> <label for="allowp1">Yes</label>
+       &nbsp;
+       <input type="radio" name="private_statistics:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allowp0" /> <label for="allowp0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+
+    <tr>
+      <td><p>Should email address be encoded to prevent spam-bots?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('encode_emaildisplay', encode_emaildisplay)">
+       <input type="radio" name="encode_emaildisplay:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allowe1" /> <label for="allowe1">Yes</label>
+       &nbsp;
+       <input type="radio" name="encode_emaildisplay:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allowe0" /> <label for="allowe0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+
+    <tr>
+      <td><p>Show (if applicable) what people were notified when submitting an issue?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('show_always_notify_status', show_always_notify_status)">
+       <input type="radio" name="show_always_notify_status:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allown1" /> <label for="allown1">Yes</label>
+       &nbsp;
+       <input type="radio" name="show_always_notify_status:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allown0" /> <label for="allown0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+
+    <tr>
+      <td><p>Show "Confidential issue" option?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('show_confidential_option', show_confidential_option)">
+       <input type="radio" name="show_confidential_option:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allowc1" /> <label for="allowc1">Yes</label>
+       &nbsp;
+       <input type="radio" name="show_confidential_option:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allowc0" /> <label for="allowc0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+
+    <tr>
+      <td><p>Show "Hide me" option?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('show_hideme_option', show_hideme_option)">
+       <input type="radio" name="show_hideme_option:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allowh1" /> <label for="allowh1">Yes</label>
+       &nbsp;
+       <input type="radio" name="show_hideme_option:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allowh0" /> <label for="allowh0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+
+    <tr>
+      <td><p>Show "URL" option?</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('show_issueurl_option', ShowIssueURLOption())">
+       <input type="radio" name="show_issueurl_option:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allowu1" /> <label for="allowu1">Yes</label>
+       &nbsp;
+       <input type="radio" name="show_issueurl_option:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allowu0" /> <label for="allowu0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+    
+    <tr>
+      <td><p>Allow adding new sections</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('can_add_new_sections', can_add_new_sections)">
+       <input type="radio" name="can_add_new_sections:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allowns1" /> <label for="allowns1">Yes</label>
+       &nbsp;
+       <input type="radio" name="can_add_new_sections:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allowns0" /> <label for="allowns0">No</label>
+       </dtml-let>
+      </td>
+    </tr>
+    
+    <tr>
+      <td><p>Use images in the menu</td>
+      <td><p>
+       <dtml-let allow="REQUEST.get('images_in_menu', images_in_menu)">
+       <input type="radio" name="images_in_menu:int" value="1"
+        <dtml-if allow>checked="checked"</dtml-if> id="allowim1" /> <label for="allowim1">Yes</label>
+       &nbsp;
+       <input type="radio" name="images_in_menu:int" value="0"
+        <dtml-unless allow>checked="checked"</dtml-unless> id="allowim0" /> <label for="allowim0">No</label>
+       </dtml-let>
+      </td>
+    </tr>    
+
+  </table>
+
+<dtml-elif "stage==12">
+
+  <p><b>Finished!</b>
+
+  <p>No, not quite actually. If you want to use <b>Issue Assignment</b> so issues can be assigned to
+  Issue Tracker Users you will have to use the <a href="manage_ManagementUsers"><b>User Management</b></a>
+  management page.
+
+  <p>Other than that, you can now <a href="index_html">start using this issue tracker</a> or 
+  review the <a href="manage_editIssueTrackerPropertiesForm">Properties tab</a> further. 
+
+</dtml-if>
+
+
+<dtml-if "stage < 12">
+  <br /><br />
+  <input type="submit" value=" Save and Continue "
+   onClick="javascript:this.value='Saving properties...'" />
+
+</dtml-if>
+
+</form>
+
+
+
+<dtml-comment>
+<dtml-unless "REQUEST.has_key('goto')">
+    <dtml-call "REQUEST.set('goto',1)">
+</dtml-unless>
+
+<table style="border:1px solid black;" cellpadding=5><tr><td><p>
+<dtml-if "goto==9">
+Complete
+<dtml-else>
+Step <dtml-var goto> out of 8
+</dtml-if>
+</p></td></tr></table>
+
+
+<dtml-if "goto==10">
+
+<dtml-call "PropertiesWizardRemember(default_batch_size=REQUEST.get('default_batch_size'), no_fileattachments=REQUEST.get('no_fileattachments'), allow_issueattrchange=REQUEST.get('allow_issueattrchange'))">
+<dtml-call "MoveWizardSession2REQUEST()">
+<dtml-call "manage_editIssueTrackerProperties(carefulbooleans=1)">
+
+<p>Great! All properies set.</p>
+
+<p>To set more properties or change anything, visit the <a style="text-decoration:underline;" 
+href="manage_editIssueTrackerPropertiesForm?r=<dtml-var "_.str(_.int(ZopeTime()))[4:-1]">">Properties again</a>.
+<br>Or<br>
+<a style="text-decoration:underline;" href="manage_main">Contents</a>
+<br>Or<br>
+<a style="text-decoration:underline;" href="<dtml-var "getRootURL()">">Start using <dtml-var title></a>
+<a style="text-decoration:underline;" href="<dtml-var "getRootURL()">" target="_blank">(in a new window)</a>
+
+
+<dtml-elif "goto==9">
+
+<dtml-call "PropertiesWizardRemember(sitemaster_name=REQUEST.get('sitemaster_name'), sitemaster_email=REQUEST.get('sitemaster_email'), display_date=REQUEST.get('display_date'))">
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="9">
+
+<p>Lastly, some simple integer properties:</p>
+
+<p>How many issues do you want to display page batched page in List Issues?:<br>
+      <input type="text" name="default_batch_size:int" size="5" value="<dtml-var default_batch_size>">
+</p>
+
+<p>How many files can be uploaded when you add an issue?:<br>
+      <input type="text" name="no_fileattachments:int" size="5"
+   value="<dtml-var getNoFileattachments>">
+   ...and for followups
+         <input type="text" name="no_followup_fileattachments:int" size="5"
+   value="<dtml-var getNoFollowupFileattachments>">
+</p>
+
+<p>Do you want that Managers can change the attributes of an issue after it has been submitted:<br>
+	<input type="checkbox" name="allow_issueattrchange:boolean" <dtml-if "AllowIssueAttributeChange()">CHECKED</dtml-if>>
+</p>
+   
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+</form>
+
+
+<dtml-elif "goto==7">
+
+<dtml-call "PropertiesWizardRemember(odd_bgcolor=REQUEST.get('odd_bgcolor'), even_bgcolor=REQUEST.get('even_bgcolor'), issueprefix=REQUEST.get('issueprefix'))">
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="8">
+
+<p>Sitemaster name:<br>
+      <input type="text" name="sitemaster_name:string" size="35"
+   value="<dtml-var sitemaster_name html_quote>">
+</p>
+
+<p>Sitemaster email:<br>
+      <input type="text" name="sitemaster_email:string" size="35"
+   value="<dtml-var sitemaster_email html_quote>">
+<dtml-if "not ValidEmailAddress(sitemaster_email)">
+<span style="color:red;">The one you have now is invalid and this 
+can cause problems with notifcations when people don't want to reveal their 
+own email addresses.</span>
+</dtml-if>
+</p>
+
+<p>Display dateformat:<br>
+<select name="display_date:string">
+<dtml-in getDisplayDateFormatOptions>
+<option value="<dtml-var sequence-item>"
+<dtml-if "display_date==_['sequence-item']">SELECTED</dtml-if>
+><dtml-var "ZopeTime('12/13/%s 22:15'%ZopeTime().strftime('%Y')).strftime(_['sequence-item'])"></option>
+</dtml-in>
+</select>
+</p>
+   
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+</form>
+
+<dtml-elif "goto==6">
+
+<dtml-call "PropertiesWizardRemember(always_notify=REQUEST.get('always_notify'), allow_subscription=REQUEST.get('allow_subscription',0), private_statistics=REQUEST.get('private_statistics',0))">
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="7">
+<p>Now, let's set some simple string properties:</p>
+
+<p>Which HTML colour do you want to use for Odd (1,3,5...) rows in List Issues?<br>
+      <input type="text" name="odd_bgcolor:string" size="20"
+   value="<dtml-var odd_bgcolor html_quote>">
+<table bgcolor="<dtml-var odd_bgcolor html_quote>"><tr><td><dtml-var "'&nbsp;'*10"></td></tr></table></p>
+
+<p>Which HTML colour do you want to use for Even (2,4,6...) rows in List Issues?<br>
+      <input type="text" name="even_bgcolor:string" size="20"
+   value="<dtml-var even_bgcolor html_quote>">
+<table bgcolor="<dtml-var even_bgcolor html_quote>"><tr><td><dtml-var "'&nbsp;'*10"></td></tr></table></p>
+
+<p>Do you want to stick a prefix to the id of issue objects, if not leave empty?<br>
+E.g. <code>/mytracker/admin-0007</code> instead of just <code>/mytracker/0007</code><br>
+      <input type="text" name="issueprefix:string" size="35"
+   value="<dtml-var issueprefix html_quote>">
+</p>
+
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+</form>
+
+<dtml-elif "goto==5">
+
+<dtml-call "PropertiesWizardRemember(default_type=REQUEST.get('default_type'), default_urgency=REQUEST.get('default_urgency'))">
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="6">
+<p>Are there people who should get an email notification on all added issues?</p>
+<table>
+<tr><td valign="top">
+      <textarea name="always_notify:lines" rows="6" cols="35"><dtml-var "_.string.join(getAlwaysNotify(), '\n')" html_quote></textarea>
+</td><td valign="top">
+<dtml-in getNotifyables>
+<dtml-if sequence-start>
+<p>Remember that you already have the following notifyables set up:</p>
+</dtml-if>
+<dtml-if alias><dtml-var alias><dtml-else><dtml-var email></dtml-if>
+<dtml-in "getGroupsByIds(groups)">
+<dtml-if sequence-start> (</dtml-if><dtml-var title html_quote><dtml-unless sequence-end>, </dtml-unless><dtml-if sequence-end>)</dtml-if>
+</dtml-in> <br>
+</dtml-in>
+</td>
+</tr>
+</table>
+
+<p>Should people be able to subscribe to issues?<br>
+	<input type="checkbox" name="allow_subscription:boolean" <dtml-if "AllowIssueSubscription()">CHECKED</dtml-if>>
+</p>
+
+<p>Should only the Manager be able to see the Statistics page?<br>
+	<input type="checkbox" name="private_statistics:boolean" <dtml-if "PrivateStatistics()">CHECKED</dtml-if>>
+</p>
+
+
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+</form>
+
+
+<dtml-elif "goto==4">
+
+<dtml-call "PropertiesWizardRemember(types=REQUEST.get('types'), urgencies=REQUEST.get('urgencies'))">
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="5">
+
+<p>Now, select which ones of these are default ones:</p>
+<table cellpadding=5>
+<tr>
+<th>Default type</th>
+<th>Default urgency</th>
+</tr>
+<tr>
+<td valign="top">
+<dtml-let this_types="REQUEST.get('types', types)">
+    <select name="default_type:string" size="<dtml-var "_.len(this_types)">">
+	<dtml-in this_types>
+	    <option <dtml-if "_['sequence-item']==default_type">SELECTED</dtml-if>
+	    ><dtml-var sequence-item html_quote></option>
+	</dtml-in>
+    </select>
+</dtml-let>    
+</td>
+<td valign="top">
+<dtml-let this_urgencies="REQUEST.get('urgencies', urgencies)">
+    <select name="default_urgency:string" size="<dtml-var "_.len(this_urgencies)">">
+	<dtml-in this_urgencies>
+	    <option <dtml-if "_['sequence-item']==default_urgency">SELECTED</dtml-if>
+	    ><dtml-var sequence-item html_quote></option>
+	</dtml-in>
+     </select>
+</dtml-let>     
+</td>
+</tr>
+</table>
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+
+</form>
+
+<dtml-elif "goto==3">
+
+<dtml-call "PropertiesWizardRemember(defaultsections=REQUEST.get('defaultsections'))">
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="4">
+
+<p>Now enter the types and urgencies you want that issues can have:</p>
+<table cellpadding=5>
+<tr>
+<th>Types</th>
+<th>Urgencies</th>
+</tr>
+<tr>
+<td>
+      <textarea name="types:lines" rows="6" cols="35"><dtml-var "_.string.join(types, '\n')" html_quote></textarea>
+</td>
+<td>
+      <textarea name="urgencies:lines" rows="6" cols="35"><dtml-var "_.string.join(urgencies, '\n')" html_quote></textarea>
+</td>
+</tr>
+</table>
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+</form>
+
+
+<dtml-elif "goto==2">
+
+<dtml-call "PropertiesWizardRemember(sections_options=REQUEST.get('sections_options'))">
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="3">
+<p>Which one (or which ones) of these do you want to be default. I.e. chosen if none is chosen when an issue is added:</p>
+<dtml-let this_sections_options="REQUEST.get('sections_options',sections_options)">
+          <select name="defaultsections:list" multiple size="<dtml-var "_.min(7, _.len(this_sections_options))">">
+	      <dtml-in this_sections_options>
+               <option <dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>
+               ><dtml-var sequence-item html_quote></option>
+	      </dtml-in>
+          </select>
+</dtml-let>	  
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+</form>
+
+<dtml-else>
+
+<form action="PropertiesWizard" method="post">
+<input type="hidden" name="goto:int" value="2">
+<p>Please enter what various Sections you want to employ:</p>
+<textarea name="sections_options:lines" rows="6" cols="35"><dtml-var "_.string.join(sections_options,'\n')" html_quote></textarea>
+<br><input type="submit" value=" Continue &gt;&gt; ">      
+</form>
+
+</dtml-if>
+
+</dtml-comment>
+
+
+<dtml-var manage_page_footer>

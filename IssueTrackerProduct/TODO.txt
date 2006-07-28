@@ -1,0 +1,19 @@
+Complete Draft feature for followups and QuickAddIssue.
+----
+More work on the tell-a-friend feature. Especially making sure the error/success messages
+are shown up properly after. The URL might need better handling of the #i anchor link.
+Is saveEmailfriends() working properly?
+----
+IssueTracker Manager and IssueTracker User should automatically have
+the IssueTracker Access permission. Hmm... how does one do that?
+----
+Additional options at the bottom of Add Issue. These should be shown
+below the submit&preview buttons. The additional options could very
+well be:
+
+ - Confidential option
+ - Hide me option
+ - Version number input
+ - First status
+
+These should all be disabled by default.

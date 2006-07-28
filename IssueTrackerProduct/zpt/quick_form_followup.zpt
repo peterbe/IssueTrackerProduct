@@ -1,0 +1,4 @@
+<div align="center" class="formfollowup">
+<br tal:define="dummy python:request.set('minimalformfollowup',1)" 
+    tal:replace="structure here/form_followup" />
+</div>

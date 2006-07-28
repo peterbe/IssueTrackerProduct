@@ -1,0 +1,132 @@
+<html metal:use-macro="here/getHeader">
+<div metal:fill-slot="body">
+
+
+
+<tal:block tal:condition="python:not here.hasManagerRole() and here.PrivateStatistics()">
+<p>The Quick Statistics is only for <a tal:define="randit python:str(int(here.ZopeTime()))"
+	   href="/login"
+	   tal:attributes="href here/ManagerLink">Managers</a></p>
+</tal:block>
+
+<tal:block tal:condition="python:here.hasManagerRole() or not here.PrivateStatistics()"
+ tal:define="url_quote_plus nocall:modules/Products/PythonScripts/standard/url_quote_plus">
+
+
+<table tal:define="statuslist here/CountStatuses; 
+                   statuslist_count python:here.totalCountStatus(statuslist)" 
+       tal:condition="python:len(statuslist)>0"
+       border="0" cellspacing="0" cellpadding="3">
+  <thead>
+	<tr class="lhead">
+		<td>Issue status&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td>Count</td>
+                <td align="center">Percentage</td>
+	</tr>
+  </thead>
+
+  <tbody tal:condition="statuslist_count"
+         tal:repeat="statuscount statuslist" tal:attributes="class python:test(path('repeat/statuscount/odd'), 'lodd','leven')">
+      <tr tal:define="percentage python:int(round(float(statuscount[1])/statuslist_count*100))">
+        <td><a tal:define="status python:statuscount[0]; status_url_quoted python:url_quote_plus(status)"
+        tal:attributes="href python:here.getStatus2ListLink(status)" tal:content="python:status.capitalize()">Status</a></td>
+        <td align="left">&nbsp;
+	  <span tal:replace="python:statuscount[1]">count</span>
+          
+
+	</td>
+        <td>
+          <img src="/misc_/IssueTrackerProduct/bar.gif" height="17"
+	   tal:attributes="alt python:statuscount[1]; 
+                           width python:int(500 * (float(percentage)/100))"
+                        />
+          <span class="bd" tal:content="string:($percentage%)"></span>
+        </td>
+      </tr>
+      </tbody>
+	
+  <tbody>
+	<tr class="lhead" tal:define="status_values here/getStatusScoreValues;
+                                      has_status_values python:here.hasStatusValues(status_values)">
+		<td class="issuelistheading">Total</td>
+		<td class="strong" tal:content="statuslist_count"></td>
+                <td tal:condition="has_status_values">
+                  <span tal:define="calculated_average python:here.calculateStatusScoreProgress(status_values)"
+                  >Overall status progress: <b tal:content="python:'%.1f'%calculated_average + '%'"></b>
+                  </span>
+                </td>
+                <td tal:condition="not:has_status_values">&nbsp;</td>
+	</tr>
+  </tbody>
+</table>
+
+
+<p>&nbsp;</p>        
+
+<table tal:define="sectionslist here/CountSections" border="0" cellspacing="0" cellpadding="4">
+  <thead>
+	<tr class="lhead">
+		<td>Issues by sections</td>
+		<td width="75" align="center"
+		tal:repeat="status here/getStatuses"><a 
+		tal:define="status_url_quoted python:url_quote_plus(status)"
+        tal:attributes="href python:here.getStatus2ListLink(status)" tal:content="python:status.capitalize()">Status</a>
+		
+		</td>
+		<td width="75" align="center">Total</td>
+	</tr>
+  </thead>
+  <tbody tal:repeat="sectioncount sectionslist" tal:attributes="class python:test(path('repeat/sectioncount/odd'), 'lodd','leven')">
+      <tr>
+	  	<td><a tal:define="section python:sectioncount[0]; section_url_quoted python:url_quote_plus(section)" 
+		tal:attributes="href python:here.getSection2ListLink(section)" tal:content="section">Something</a></td>
+		<td tal:repeat="status here/getStatuses" align="center">
+		<span tal:replace="python:sectioncount[1][status]"></span>
+		</td>
+		<td align="center" class="strong" tal:content="python:here.totalCountSections(sectioncount[1])"></td>
+      </tr>
+
+  </tbody>
+</table>
+
+<p>&nbsp;</p>
+
+<form tal:attributes="action here/ActionURL" tal:condition="python:here.hasAnyIssues() and (here.ZopeTime()-here.ageOfOldestIssue()) > int(request.get('period', 7))">
+<a name="byperiod"></a>
+<table border="0" cellspacing="0" cellpadding="2" 
+  tal:define="influxdata python:here.issueInfluxbyPeriod(request.get('period', 7));
+              issueinfluxes python:influxdata[0];
+	      highest python:influxdata[1];
+       	      width python:int(600/len(issueinfluxes))">
+  <tr class="lhead" style="background-color:#A9A9A9"
+		tal:define="len_issueinfluxes python:len(issueinfluxes); first_half python:int(len_issueinfluxes/2); second_half python:len_issueinfluxes-first_half">
+			<td tal:attributes="colspan python:first_half"> Issues per <strong tal:content="python:request.get('period', 14)">x</strong> days period</td>
+			<td align="right" class="issuelistheading" tal:attributes="colspan python:second_half"><select name="period"
+			tal:attributes="onchange string:location.href='${here/ActionURL}?period='+this.options[this.selectedIndex].value+'#byperiod'">
+			<option tal:repeat="item python:[4,7,14,21,28]"
+			tal:attributes="value item; selected python:item==int(request.get('period',14))" tal:content="string:$item days"></option>
+			</select>
+			<input type="submit" value="Change period" /></td>
+			
+		</tr>
+		<tr style="background-color:gainsboro">
+			<td tal:repeat="issueinflux issueinfluxes" valign="bottom" align="center"><div tal:content="python:issueinflux['influx']">
+			</div><img src="/misc_/IssueTrackerProduct/bar.gif" tal:define="height python:int(issueinflux['influx']/float(highest)*300.0);height python:test(height > 0, height, 1)"
+			tal:attributes="alt python:issueinflux['influx']; width width;height height" /></td>
+		</tr>
+		<tr tal:replace="nothing">
+			<td tal:repeat="issueinflux issueinfluxes" align="center" style="font-size:80%">
+			<div tal:replace="python:issueinflux['from'].strftime('%d/%m')"></div><br>
+			<div tal:replace="python:issueinflux['from'].strftime('%Y')"></div>			
+			</td>
+		</tr>
+		<tr tal:replace="structure python:here.showTableRowsOfDates(issueinfluxes)">
+		</tr>
+	</table>
+	</form>
+		
+
+</tal:block>
+
+</div>
+</html>

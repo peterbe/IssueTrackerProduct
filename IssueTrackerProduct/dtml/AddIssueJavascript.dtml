@@ -1,0 +1,69 @@
+<dtml-call "doCache(hours=48)"><dtml-call "RESPONSE.setHeader('Content-type','application/x-javascript')">
+// Useful functions for Adding issue
+
+function askNoti(checkit, youare) { el=$('asi-noti');
+var extrahtml = "<input type=\"checkbox\" name=\"notify-assignee\" ";
+if (checkit!=youare) extrahtml += "checked=\"checked\" ";
+extrahtml += "value=\"1\"/>";
+extrahtml += "Send notification to assignee";
+extrahtml += "<input type=\"hidden\" name=\"asked-notify-assignee\" value=\"1\"/>";
+el.innerHTML=extrahtml; }
+
+function shownewsection() {
+  var a=$('sections');a.size = a.size-1;
+  var b=$('newsection');b.className="";
+}
+<dtml-if "SaveDrafts() and UseAutoSave()">
+function _done(jx,f) { 
+  if (jx.response) f.draft_issue_id.value=jx.response;
+}
+function autosave() {
+  var f = document.ai;
+  var d = form2querystring(f); //js-core.js   
+  var ajax = new sack('AutoSaveDraftIssue');
+  ajax.AjaxFailedAlert=null;
+  ajax.encodeURIString = false;
+  ajax.onCompletion = function() { _done(ajax,f); };
+  ajax.runAJAX(d);
+}
+
+
+var as_timer;
+stopautosave=function() {  
+  if (as_timer) clearTimeout(as_timer);
+};
+startautosave=function() {
+  autosave(); 
+  as_timer=window.setTimeout("startautosave()", <dtml-var getAutosaveInterval>*1000);
+};
+</dtml-if>
+
+function bigup(){
+ var t=document.ai['description:text'];t.cols=80;t.rows=20;
+ var s=$('tsizer');s.innerHTML='<a href="#" onclick="smalldown();return false">&ndash; smaller<'+'/a>';
+}
+function smalldown(){
+  var t=document.ai['description:text'];t.cols=60;t.rows=10;
+  var s=$('tsizer');
+  s.innerHTML='<a href="#" onclick="bigup();return false">+bigger<'+'/a>';
+}
+
+var enabled_tsizer=false;
+function enableTsizer(){
+  var s=$('tsizer');
+  s.innerHTML='<a href="#" onclick="bigup();return false">+bigger<'+'/a>';
+  enabled_tsizer=true;
+}
+
+function deldraft(draftid) {
+  // return true if the AJAX request failed, 
+  // return false if everything went fine.
+  var d = 'id='+draftid +'&return_show_drafts_simple=1';
+  var a = new sack('DeleteDraftIssue');
+  a.AjaxFailedAlert=null;
+  a.encodeURIString = false;
+  a.runAJAX(d);
+  a.onCompletion = function() { $('issuedraftsouter').innerHTML=a.response; };
+  if (a.failed) return true;
+  return false;  
+}

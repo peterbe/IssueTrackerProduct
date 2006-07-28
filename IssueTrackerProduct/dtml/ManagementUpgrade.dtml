@@ -1,0 +1,66 @@
+<dtml-var manage_page_header>
+<dtml-with "_(management_view='Management')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+
+
+<dtml-var "ManagementTabs('Upgrade')">
+
+<style type="text/css">
+div.good { border:1px solid green;padding:5px }
+div.bad { border:1px solid red;padding:5px }
+</style>
+
+
+<dtml-if manage_canUpgrade>
+  <div class="good">
+    <p style="font-weight:bold;color:green">Yes! You can upgrade your IssueTrackerProduct</p>
+  
+    <dtml-let info="manage_getUpgradeInfo()">
+      <p>The latest available version of the IssueTrackerProduct is 
+        <b><dtml-var "info['version']"></b> from <a href="<dtml-var "info['url']">"><dtml-var "info['url']"></a>.
+      </p>
+    </dtml-let>
+  
+    <form action="manage_doUpgrade">
+      <input type="submit" value="Perform the upgrade" 
+       onclick="this.value='Performing the upgrade...';document.getElementById('pleasewait').innerHTML='Please wait...'" />
+      <div id="pleasewait" style="font-style:italic;font-family:sans-serif;"></div>
+    </form>
+  </div>
+  
+<dtml-elif "manage_isUsingCVS()">
+  <div class="bad">
+    <p>You <b>can't upgrade because you're using a CVS version</b> which can't be upgraded via this management system.
+  </div>
+  
+<dtml-else>
+  
+  <dtml-let info="manage_getUpgradeInfo()">
+    <dtml-if "info['version']==getIssueTrackerVersion()">
+      <div class="good">
+        <p>You're currently using the latest version.</p>
+      </div>    
+    <dtml-else>
+      <div class="bad">
+        <p style="color:red;font-weight:bold">You can't upgrade for unknown reason :(</p>
+      </div>
+    </dtml-if>
+  </dtml-let>
+  </div>
+  
+  
+</dtml-if>
+
+<p><b>Your installed version: <em><dtml-var getIssueTrackerVersion></em></b></p>
+
+
+<br>&nbsp;
+
+
+<dtml-var manage_page_footer>

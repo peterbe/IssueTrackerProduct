@@ -1,0 +1,15 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Test')">
+<dtml-var manage_tabs>
+</dtml-with>
+
+
+<p>To test this report, select the method of representation below</p>
+
+<p style="font-weight:bold">
+<a href="<dtml-var getRootURL>/ListIssues/report-<dtml-var getId url_quote_plus>">List Issues</a>
+<br /><br />
+<a href="<dtml-var getRootURL>/CompleteList/report-<dtml-var getId url_quote_plus>">Complete list</a>
+</p>
+
+<dtml-var manage_page_footer>

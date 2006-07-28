@@ -1,0 +1,31 @@
+<tal:block tal:define="drafts here/getMyIssueDrafts; followupdrafts here/getMyFollowupDrafts">
+
+<div tal:condition="python:here.SaveDrafts() and drafts">
+       <h4>Draft issues</h4>
+       <ul>
+         <li tal:repeat="issuedraft drafts">
+          <span tal:condition="issuedraft/isAutosave">(autosave) </span><a tal:attributes="href string:AddIssue?draft_issue_id=${issuedraft/getId}"
+   tal:content="structure python:issuedraft.shortDescription(maxlength=50)"></a>
+          <small> (<a tal:attributes="href string:DeleteDraftIssue?id=${issuedraft/getId}&back=Home;
+                                      onclick string:return deldraft('${issuedraft/getId}')"
+           >delete this draft</a>)</small>
+         </li>
+       </ul>
+</div>
+
+<div tal:condition="python:here.SaveDrafts() and followupdrafts">
+       <h4>Draft followups</h4>
+       <ul>
+         <li tal:repeat="draft followupdrafts">
+          <span tal:condition="draft/isAutosave">(autosave) </span>
+          <a tal:attributes="href string:${draft/getIssuePath}?draft_followup_id=${draft/getId}"
+   tal:content="structure python:draft.shortDescription(maxlength=50)"></a>
+          <small> (<a tal:attributes="href string:DeleteDraftFollowup?id=${draft/getId}&back=Home;
+                                      onclick string:return deldraftfollowup('${draft/getId}')"
+           >delete this draft</a>)</small>
+         </li>
+       </ul>
+</div>
+
+
+</tal:block>

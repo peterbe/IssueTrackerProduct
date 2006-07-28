@@ -1,0 +1,141 @@
+<html metal:use-macro="here/getHeader">
+
+
+<metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
+
+<script type="text/javascript"
+ tal:attributes="src string:$ru/quickaddissue.js"></script>
+ 
+<script 
+ tal:define="conf here/getWYSIWYGEditor"
+ tal:condition="python:here.getSavedTextFormat()=='html' and conf"
+ tal:replace="structure conf"></script>
+</metal:script>
+
+<style type="text/css" metal:fill-slot="extracss">
+div#previewsubmit {
+  border:4px solid #ff6666;
+}
+</style>
+
+ 
+<div metal:fill-slot="body" tal:omit-tag="">
+
+
+<span tal:condition="python:options.get('SubmitError')"
+ tal:replace="structure here/show_submissionerror_message">
+</span>
+
+
+<form method="post" name="ai" enctype="multipart/form-data"
+	tal:attributes="action string:${here/relative_url}/" tal:define="global emptylist python:[]; global emptystring string:"
+>
+
+
+
+<h3 class="pagetitle">Quick Add Issue</h3>
+
+<p class="quickadd_note">
+For more adding options such as <em>urgency</em>, <em>type</em>, <em>URL</em>, 
+<em>privacy</em> and Preview-before-save use the <a href="AddIssue" onclick="softsubmit();return false;" onkeypress="softsubmit();return false;">Add Issue</a>
+</p>
+
+<span tal:condition="python:not request.has_key('sections') and request.has_key('section')">
+<span tal:define="dummy python:request.set('sections',[request['section']])"
+tal:replace="nothing">
+here's a special script that converts 'section' into ['section'] if present and 'sections' is not present
+</span>
+</span>
+
+
+<table border="0" tal:define="issueuser here/getIssueUser;emptystring python:'';
+                              fromname python:here.getSavedUser('fromname');
+                              email python:here.getSavedUser('email');
+                              display_format python:here.getSavedTextFormat(no_default=1);
+                              use_autosave python:here.SaveDrafts() and here.UseAutoSave()">
+	<tr>
+		<td><b>Subject:</b></td>
+		<td><input name="title" tabindex="1" size="40" maxlength="70" 
+                      tal:attributes="value python:request.get('title','');
+                                      onfocus python:test(use_autosave, 'startautosave()');
+                                      onblur python:test(use_autosave, 'stopautosave()')" />
+            <span class="submiterror" 
+             tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>  
+        </td>
+
+	</tr>
+    <tr tal:condition="issueuser">
+        <td><b>User:</b></td>
+        <td tal:content="structure python:here.ShowNameEmail(issueuser.getFullname(), issueuser.getEmail(), highlight=0)"></td>
+    </tr>
+	<tr tal:condition="python:not issueuser and not fromname">
+		<td><b>Name:</b></td>
+		<td><input name="fromname" tabindex="2" value="" size="30" /></td>
+	</tr>
+	<tr tal:condition="python:not issueuser and not email">
+		<td><b>Email:</b></td>
+		<td><input name="email" tabindex="3" value="" size="30" />
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<b>Description:</b><span id="tsizer"></span><br />
+			<textarea name="description:text" tabindex="4" rows="8" cols="50" tal:content="python:request.get('description','')"
+                        tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
+                                        onblur python:test(use_autosave, 'stopautosave()')"
+                         onkeypress="if (!enabled_tsizer && this.value.length>600){enableTsizer();}"></textarea>
+
+		<input tal:condition="not:python:test(display_format =='')" type="hidden" name="display_format:string" value=""
+       tal:attributes="value here/getSavedTextFormat" />
+		</td>
+	</tr>
+	<tr tal:condition="python:test(display_format =='')">
+	    <td><b>Display format:</b></td>
+	    <td tal:define="display_format here/getSavedTextFormat">
+		<input type="radio" name="display_format" tabindex="5" value="plaintext" tal:attributes="checked python:display_format=='plaintext'" />Plain as it's written
+		<input type="radio" name="display_format" tabindex="6" value="structuredtext" tal:attributes="checked python:display_format=='structuredtext'" />
+		<a href="What-is-StructuredText">Structured Text</a>
+	    </td>
+	</tr>
+	<tr>
+		<td><b>Section(s):</b></td>
+		<td colspan="2">
+			<table>
+				<tr>
+					<td>
+						<select name="sections:list" tabindex="7" multiple="multiple" size="7" tal:define="emptylist python:[];sections request/sections | here/defaultsections | emptylist"
+						tal:attributes="size python:min(6, len(here.sections_options))">
+							<option tal:repeat="option here/sections_options" value="" tal:attributes="value option; selected python:option in sections" tal:content="option">
+							Section</option>
+						</select>
+					</td>
+					<td align="center">
+                        <input type="hidden" name="addform" value="quick" />
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="submit" name="SubmitIssue:method" tabindex="8" value="  Save Issue  " class="submitbutton"
+                         onclick="javascript:this.value='Saving Issue...'" />
+					</td>
+				</tr>
+			</table>
+			
+		</td>
+
+	</tr>
+</table>
+
+<input type="hidden" name="type" value="" tal:attributes="value here/default_type" />
+<input type="hidden" name="urgency" value="" tal:attributes="value here/default_urgency" />
+
+<input type="hidden" name="draft_issue_id" 
+ tal:define="draft_issue_id python:options.get('draft_issue_id', request.get('draft_issue_id', ''))"
+ tal:attributes="value draft_issue_id" />
+
+</form>
+
+<tal:block define="useaccesskeys here/useAccessKeys">
+<script type="text/javascript" tal:condition="not:useaccesskeys">document.ai.title.focus();</script>
+<script type="text/javascript" tal:condition="useaccesskeys">document.ai.title.focus();disableKS();</script>
+</tal:block>
+
+</div>
+</html>

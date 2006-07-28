@@ -1,0 +1,128 @@
+<html metal:use-macro="here/getHeader">
+
+
+<metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
+
+<script type="text/javascript"
+ tal:attributes="src string:$ru/quickaddissue.js"></script>
+ 
+<tal:test tal:condition="python:here.getSavedTextFormat()=='html' and here.hasWYSIWYGEditor()">
+<script type="text/javascript" tal:attributes="src string:$ru/tinymce/tiny_mce.js"></script>
+<script type="text/javascript" tal:attributes="src string:$ru/tiny_mce_itp.js"></script>
+</tal:test>
+</metal:script>
+
+<style type="text/css" metal:fill-slot="extracss">
+div.part { 
+  margin-bottom:20px;
+}
+div.textinput {float:left; margin-right:15px; }
+div.selectinput { }
+</style>
+
+ 
+<div metal:fill-slot="body" tal:omit-tag="">
+
+
+<span tal:condition="python:options.get('SubmitError')"
+ tal:replace="structure here/show_submissionerror_message">
+</span>
+
+
+<form method="post" name="ais" enctype="multipart/form-data"
+ tal:define="use_autosave python:here.SaveDrafts() and here.UseAutoSave()"
+ tal:attributes="action string:${here/relative_url}/"
+ >
+
+<h3 class="pagetitle">Add Many Issues</h3>
+
+
+<table tal:define="issueuser here/getIssueUser;
+                   fromname python:here.getSavedUser('fromname');
+		   email python:here.getSavedUser('email')"
+       tal:condition="not:issueuser">
+    <tr tal:condition="not:fromname">
+        <td><b>Name:</b></td>
+	<td><input name="fromname" tabindex="2" value="" size="30" /></td>
+    </tr>
+    <tr tal:condition="not:email">
+        <td><b>Email:</b></td>
+	<td><input name="email" tabindex="3" value="" size="30" /></td>
+    </tr>
+</table>
+
+
+<div tal:repeat="i python:range(3)" class="part">
+  <div class="textinput">
+    <b>Subject:</b>&nbsp;
+    <input name="title" tabindex="1" size="40" maxlength="70"
+     tal:define="ikey string:title$i"
+     tal:attributes="value python:request.get(ikey,'');
+                     onfocus python:test(use_autosave, 'startautosave()');
+		     onblur python:test(use_autosave, 'stopautosave()');
+		     name ikey" />
+    <br />
+    <textarea name="description" tabindex="4" rows="8" cols="50"
+     tal:define="ikey string:description$i"
+     tal:content="python:request.get('description','')"
+     tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
+                     onblur python:test(use_autosave, 'stopautosave()');
+		     name ikey"></textarea>
+    
+  </div>
+  <div class="selectinput">
+    <b>Section(s):</b><br />
+    <select  tabindex="7" multiple="multiple"
+     tal:define="emptylist python:[];
+                 ikey string:sections$i;
+                 sections request/ikey | here/defaultsections | emptylist"
+     tal:attributes="size python:min(5, len(here.sections_options));
+                     name string:$ikey:list">
+       <option tal:repeat="option here/sections_options" 
+               tal:attributes="value option; selected python:option in sections" 
+	       tal:content="option">Section</option>
+    </select>
+    
+    <br />
+<!--    <b>Type:</b><br />-->
+    <select tal:attributes="name ikey"
+            tal:define="types here/types;
+                        ikey string:type$i;
+	                type request/type | here/default_type | emptystring">
+        <option value="">Type:</option>
+        <option 
+	 tal:repeat="option types" 
+	 tal:attributes="value option;selected python:option == type" 
+	 tal:content="option">Types</option>
+    </select>
+    
+    <br />    
+    
+<!--    <b>Urgency:</b><br /> -->
+    <select tal:attributes="name ikey"
+       tal:define="urgencies here/urgencies;
+                   ikey string:urgency$i;
+                   urgency request/ikey | here/default_urgency | emptystring">
+       <option value="">Urgency:</option>
+       <option  
+        tal:repeat="option urgencies" 
+	tal:attributes="value option; selected python:urgency == option" 
+        tal:content="option">Urgencies</option>
+     </select>
+    
+  </div>
+  <div class="clearer">&nbsp;</div>
+</div>
+
+
+
+
+</form>
+
+<tal:block define="useaccesskeys here/useAccessKeys">
+<script type="text/javascript" tal:condition="not:useaccesskeys">document.ais.title.focus();</script>
+<script type="text/javascript" tal:condition="useaccesskeys">document.ais.title.focus();disableKS();</script>
+</tal:block>
+
+</div>
+</html>

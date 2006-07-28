@@ -1,0 +1,115 @@
+# IssueTrackerProduct
+#
+# Peter Bengtsson <mail@peterbe.com>
+# License: ZPL
+#
+
+# python
+
+
+# Zope
+from Globals import InitializeClass
+from OFS import SimpleItem
+from AccessControl import ClassSecurityInfo
+from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
+from DateTime import DateTime
+
+
+# Product
+from IssueTracker import IssueTracker
+from Constants import *
+import Utils
+
+#----------------------------------------------------------------------------
+
+class IssueTrackerNotification(SimpleItem.SimpleItem,
+                               IssueTracker
+                               ):
+    """ Issue Tracker Notification """
+
+    meta_type = NOTIFICATION_META_TYPE
+    icon = '%s/notification.gif'%ICON_LOCATION
+
+    security=ClassSecurityInfo()
+    
+    _properties=({'id':'title',       'type': 'string',  'mode':'w'},
+                 {'id':'change',      'type': 'string',  'mode':'w'},
+                 {'id':'issueID',     'type': 'string',  'mode':'w'},
+                 {'id':'comment',     'type': 'text',    'mode':'w'},
+                 {'id':'emails',      'type': 'lines',   'mode':'w'},
+                 {'id':'success_emails','type':'lines',  'mode':'w'},
+                 {'id':'anchorname',  'type': 'string',  'mode':'w'},
+                 {'id':'fromname',    'type': 'string',  'mode':'w'},
+                 {'id':'date',        'type': 'date',    'mode':'w'},
+                 {'id':'dispatched',  'type': 'boolean', 'mode':'w'},
+                 )
+
+    manage_options = (
+        {'label':'Properties', 'action':'manage_propertiesForm'},
+        )
+
+    def __init__(self, id, title, change, issueID, comment, emails,
+                 anchorname, fromname, date=None, dispatched=False, REQUEST=None):
+        """ create notification """
+        self.id = str(id)
+        self.title = title
+        self.change = change
+        self.issueID = str(issueID)
+        self.comment = comment
+        self.emails = emails
+        self.success_emails = []
+        self.anchorname = anchorname
+        self.fromname = fromname
+        self.dispatched = dispatched
+        if date is None:
+            date = DateTime()
+        self.date = date
+        
+    def getTitle(self):
+        """ return title of the notification """
+        return self.title
+    
+    def getIssueID(self):
+        """ return issueID of the notification """
+        return self.issueID
+    
+
+    def isDispatched(self):
+        """ return dispatched """
+        return not not self.dispatched
+    
+    def dispatch(self):
+        """ dispatch self """
+        self.dispatcher([self])
+        
+        
+    def setSuccessEmail(self, email):
+        """ set an email that was a success to send to.
+        
+        The email must exist in self.emails and not already a success 
+        """
+        emails = self.getEmails()
+        success_emails = self.getSuccessEmails()
+        if Utils.ss(email) in [Utils.ss(each) for each in emails]:
+            if Utils.ss(email) not in [Utils.ss(each) for each in success_emails]:
+                success_emails.append(email)
+        self.success_emails = success_emails
+                
+    def getEmails(self):
+        """ return the list of emails to send to """
+        return self.emails
+    
+    def getSuccessEmails(self):
+        """ return list of emails that have successfully been sent to """
+        
+        # due to legacy, if the success_emails attribute doesn't exist,
+        # it must be because this self is an object that was created
+        # _before_ the 'success_emails' attribute was introduced. 
+        # If that's the case, return 'emails' instead
+        return getattr(self, 'success_emails', self.getEmails())
+        
+    def MarkNotificationDispatch(self):
+        """ set as dispatched """
+        self.dispatched = True
+        
+InitializeClass(IssueTrackerNotification)

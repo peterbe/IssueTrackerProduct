@@ -1,0 +1,218 @@
+<script type="text/javascript"><!--
+function swapFilterLogic() {
+  //var link = document.getElementById('changefilterlogic');
+  //var label = document.getElementById('currentfilterlogic');
+  var link = $('changefilterlogic');
+  var label = $('currentfilterlogic');
+  var hidden = document.filter.Filterlogic
+  var was = hidden.value;
+  if (was=='show') {
+    hidden.value='block';
+    label.innerHTML='Do not show';
+    link.href=link.href.replace('=show','=block');
+    link.innerHTML='Do only show...';
+  } else {
+    hidden.value='show';
+    label.innerHTML='Do only show';
+    link.href=link.href.replace('=block','=show');
+    link.innerHTML='Do not show...';
+  }
+}
+
+function _doload(url, d, outid) {
+  // do the actual ajax stuff
+  var a = new sack(url);
+  a.AjaxFailedAlert = null;
+  a.encodeURIString = false;
+  a.runAJAX(d);
+  a.onCompletion = function() { $(outid).innerHTML=a.response; };
+  if (a.failed) return true;
+  return false;
+}
+
+function loadfilteroptions(f) {
+  var d = 'force_filtervaluer_update=1&';
+  for (i=0;i < f.elements.length;i++) {
+    ob = f.elements[i];
+    if (ob.type=='text'||ob.type=='hidden') d += ob.name +'='+ escape(ob.value) +'&';
+  }
+  var url = f.action.replace(/\/ListIssues|\/CompleteList/,'/filter_options');
+  if (url.indexOf('?')>-1) { d += url.substring(url.indexOf('?')+1, url.length-1); url = url.substring(0, url.indexOf('?')); }
+  return _doload(url, d, 'filteroptions');
+}
+
+function unloadfilteroptions(f) {
+  return _doload(f.action+'filter_options', 'ShowFilterOptions:int=0&', 'filteroptions');
+}
+//--></script>
+<div tal:condition="not:request/ShowFilterOptions|nothing" id="filteroptions">
+<form 
+tal:define="start python:request.get('start');
+            action python:here.BatchedQueryString(test(start,{'start':start},{}))"
+tal:attributes="action action">
+
+ <div style="float:right">
+
+<tal:block tal:define="saved_filter_id python:here.getCurrentlyUsedSavedFilter(request_only=0)">
+  <em tal:condition="saved_filter_id" tal:content="python:here.getSavedFilterObject(saved_filter_id).getTitle()"></em>
+  <em tal:condition="python:not saved_filter_id and here.hasFilter()">Filters are currently being used</em>
+</tal:block>
+
+<input type="hidden" name="ShowFilterOptions" value="1" />
+<input type="hidden" name="i" tal:condition="request/i|nothing"
+ tal:attributes="value request/i"/>
+<input type="hidden" name="report" tal:condition="request/report|nothing"
+ tal:attributes="value request/report"/>
+  <input type="submit" value="Show filter options" 
+   onclick="this.value='Opening options...';return loadfilteroptions(this.form)" 
+   onkeypress="this.value='Opening options...';return loadfilteroptions(this.form)" />
+
+  </div>
+  
+</form>
+</div>
+
+
+
+<div tal:condition="request/ShowFilterOptions|nothing" id="filteroptions">
+<tal:block condition="request/force_filtervaluer_update|nothing">
+  <span tal:define="dummy here/forceFilterValuerUpdate" 
+      tal:replace="nothing">
+  <!--
+  This is a bit of a hack. Every time you load ListIssues or CompleteList it makes a
+  call to ListIssuesFiltered() which subsequently calls _filterIssues(). That method
+  will make sure that if there is a sessioned savedfilter (key='last_savedfilter_id')
+  this saved filter's values are populated in the REQUEST. If you run filter_options
+  without having previously run ListIssuesFiltered() in the same request your REQUEST
+  will NOT have the right copy of the filter values which will result in this form 
+  below appearing unused.
+  If the request variable 'force_filtervaluer_update' is true, we are instructed to make
+  a call to forceFilterValuerUpdate() which basically finds any last used filtervaluer 
+  from the session and populates it's values into our current REQUEST object.
+  -->
+  </span>
+</tal:block>
+
+<a name="filteroptions"></a>
+
+
+
+<form method="get" name="filter"
+ tal:define="rooturl here/getRootURL; 
+             page python:test(here.whichList()=='CompleteList','CompleteList', 'ListIssues');
+             filterlogic here/getFilterlogic" name="foptions"
+tal:attributes="action string:${rooturl}/"	     >
+
+<input type="hidden" name="i" tal:condition="request/i|nothing"
+ tal:attributes="value request/i"/>
+<input type="hidden" name="report" tal:condition="request/report|nothing"
+ tal:attributes="value request/report"/>
+
+
+
+
+ 
+<table border="0" cellspacing="0" style="background-color:#dedede;border:1px solid #666" cellpadding="7" align="center">
+	<tr tal:define="saved_filters python:here.getMySavedFilters(howmany=15); currently_used python:here.getCurrentlyUsedSavedFilter(request_only=0)">
+		<td colspan="3" tal:define="rooturl here/getRootURL"
+		 tal:attributes="colspan python:test(saved_filters, 2, 3)">
+            <span tal:condition="python:filterlogic=='block'">
+                        <input type="hidden" name="Filterlogic" value="block" />
+			<b id="currentfilterlogic">Do not show...</b>
+            (switch logic to <a id="changefilterlogic" tal:attributes="href string:${rooturl}/${page}?Filterlogic=show&amp;ShowFilterOptions=1#filteroptions"
+             onclick="swapFilterLogic();return false;" onkeypress="swapFilterLogic();return false;">Do only show</a>)
+            </span>
+            <span tal:condition="python:filterlogic=='show'">
+                        <input type="hidden" name="Filterlogic" value="show" />
+			<b id="currentfilterlogic">Do only show...</b>
+            (switch logic to <a id="changefilterlogic" tal:attributes="href string:${rooturl}/${page}?Filterlogic=block&amp;ShowFilterOptions=1#filteroptions"
+             onclick="swapFilterLogic();return false;" onkeypress="swapFilterLogic();return false;">Do not show</a>)
+            </span>
+		</td>
+		<td align="right" colspan="2" tal:attributes="colspan python:test(saved_filters, 3, 2)">
+
+		<select name="saved_filter" 
+		 tal:condition="saved_filters"
+		 tal:attributes="onchange string:if(this.options[this.selectedIndex].value){location.href='$rooturl/$page?saved-filter='+this.options[this.selectedIndex].value}">
+		<option value="" style="color:#666;">Previously applied filters...</option>
+		<option tal:repeat="saved_filter saved_filters"
+		 tal:attributes="value saved_filter/getId; 
+                                 selected python:test(currently_used==saved_filter.getId())"
+		 tal:content="python:saved_filter.getTitle(length_limit=55)">Takens ones that are urgent</option> 
+		</select>
+		
+		<span class="hidden"><input type="submit" name="useFilterName:method" value="Go" /></span>
+		</td>		
+	</tr>
+	<tr>
+		<td valign="top" tal:define="preval python:here.getFilterValue('statuses', filterlogic, default=[])">
+            <div class="ftitle">Statuses</div>
+            <div tal:repeat="status here/statuses">
+                <input type="checkbox" name="f-statuses"
+                 tal:attributes="value status; checked python:test(status in preval); id string:s${repeat/status/index}" /> 
+                <label tal:attributes="for string:s${repeat/status/index}" tal:content="status"></label>
+            </div>
+		</td>
+		<td valign="top">
+            <div class="ftitle">Sections</div>
+            <select name="f-sections" multiple="multiple" tal:define="sections here/sections_options;preval python:here.getFilterValue('sections', filterlogic, default=[])"
+              tal:attributes="size python:min(6, len(sections))">
+              <option tal:repeat="section sections" tal:attributes="value section;selected python:section in preval" tal:content="section">section</option>
+            </select>
+		</td>
+		<td valign="top">
+            <div class="ftitle">Urgencies</div>
+            <select name="f-urgencies" multiple="multiple" tal:define="urgencies here/urgencies;preval python:here.getFilterValue('urgencies', filterlogic, default=[])"
+              tal:attributes="size python:min(6, len(urgencies))">
+              <option tal:repeat="urgency urgencies" tal:attributes="value urgency; selected python:urgency in preval " tal:content="urgency">urgency</option>
+            </select>
+		</td>
+		<td valign="top">
+            <div class="ftitle">Types</div>
+            <select name="f-types" multiple="multiple"
+                    tal:define="types here/types;preval python:here.getFilterValue('types', filterlogic, default=[])"
+              tal:attributes="size python:min(6, len(types))">
+              <option tal:repeat="type types" value="" tal:attributes="value type; selected python:type in preval" tal:content="type">type</option>
+            </select>
+					
+		</td>
+		<td valign="top">
+            <div class="ftitle">From</div>
+            
+            <table>
+              <tr>
+                <td><b>Name </b></td>
+                <td>
+                  <input name="f-fromname" size="25" tal:attributes="value python:here.getFilterValue('fromname', filterlogic, default='')" />
+                </td>
+              </tr>
+              <tr>
+                <td><b>Email </b></td>
+                <td>
+                  <input name="f-email" size="25" tal:attributes="value python:here.getFilterValue('email', filterlogic, default='')" />
+                </td>
+              </tr>
+            </table>
+          </td>
+	</tr>
+	<tr>
+
+		<td colspan="4" align="center">
+			<input type="hidden" name="filteroptions" value="1" />
+			<input type="submit" value="Apply filter settings"
+			tal:attributes="name string:${page}:method" />
+
+		</td>
+		<td align="right">
+			<input type="hidden" name="page" tal:attributes="value page" />
+			<input type="submit" name="ResetFilter:method" value="Reset filter"
+			tal:condition="python:here.hasFilter() or here.getCurrentlyUsedSavedFilter()" />
+			<input type="submit" name="HideFilter:method" value="Hide filter options"
+                         onclick="this.value='Hiding options...';return unloadfilteroptions(this.form)" 
+                         onkeypress="this.value='Hiding options...';return unloadfilteroptions(this.form)"/>
+		</td>
+	</tr>	
+</table>
+</form>
+</div>
+

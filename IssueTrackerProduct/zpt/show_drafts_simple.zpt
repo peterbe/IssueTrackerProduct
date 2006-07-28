@@ -1,0 +1,10 @@
+<div tal:define="issuedrafts python:here.getMyIssueDrafts(skip_draft_issue_id=options.get('draft_issue_id', request.get('draft_issue_id')))"
+     tal:condition="python:not request.get('previewissue') and issuedrafts" id="issuedrafts">
+<p><b>Drafts</b></p>
+<p tal:repeat="issuedraft issuedrafts">
+<span tal:condition="issuedraft/isAutosave">(autosave) </span><a tal:attributes="href string:?draft_issue_id=${issuedraft/getId}" 
+   tal:content="structure python:issuedraft.shortDescription(maxlength=37)"></a>
+<small> (<a tal:attributes="href string:DeleteDraftIssue?id=${issuedraft/getId};
+                            onclick string:return deldraft('${issuedraft/getId}')">delete this draft</a>)</small>
+</p>
+</div>

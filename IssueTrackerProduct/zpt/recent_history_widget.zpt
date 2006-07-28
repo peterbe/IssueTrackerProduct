@@ -1,0 +1,39 @@
+<div id="recent" metal:define-macro="recent_history"
+ tal:condition="here/hasRecentHistory">
+
+  <div class="rblock" id="rblock-issues"
+   tal:condition="here/hasRecentIssues">
+  <h4>Recent issues</h4>
+    <ul class="r" tal:define="htmlchunks python:here.getNiceRecentIssues(length=10)">
+	<li tal:repeat="chunk htmlchunks"
+            tal:content="structure chunk">
+            
+	</li>
+    </ul>
+  </div>
+  
+  
+
+  <div class="rblock" id="rblock-search"
+   tal:condition="here/hasRecentSearchTerms">
+  <h4>Recent searches</h4>
+	    <ul class="r" tal:define="terms python:here.getRecentSearchTerms(length=10)">
+		<li tal:repeat="term python:here.getNiceRecentSearchTerms(terms)"
+            tal:content="structure term">
+		    
+		</li>
+	    </ul>
+  </div>
+  
+  <div class="rblock" id="rblock-reports"
+   tal:condition="here/hasRecentReportRuns">
+  <h4>Recent report runs</h4>
+	    <ul class="r" tal:define="reports python:here.getRecentReportRuns(length=10)">
+		<li tal:repeat="report python:here.getNiceRecentReportRuns(reports)"
+                    tal:content="structure report">
+		</li>
+	    </ul>
+  </div>  
+
+
+</div>

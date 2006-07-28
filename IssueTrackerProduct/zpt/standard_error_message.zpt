@@ -1,0 +1,136 @@
+<html metal:use-macro="here/getHeader">
+<style type="text/css" metal:fill-slot="extracss">
+.infobox {
+  margin:10px;
+  padding:5px 30px;
+  margin-bottom:35px;
+}
+a.shaded {
+  text-decoration:none;
+  color:#a6a6a6;
+}
+
+li.url {
+  margin-bottom:6px;
+}
+
+
+</style>
+<div metal:fill-slot="body" tal:omit-tag="">
+
+<div tal:condition="python:options.get('error_type')=='NotFound'" class="infobox">
+<h2>Page Not Found, 404</h2>
+
+<code tal:content="python:request.get('URL').replace(here.getRootURL(),'')"></code>
+
+<p>Oops! Page can not be found.<br />
+Please double check the web address or use the search function on 
+this page to find what you are looking for.</p>
+ 
+<p>If you know you have the correct web address but are encountering 
+an error, please send a email to the administrator of this site.</p>
+
+  <div tal:define="guess_pages here/guessPages" tal:condition="guess_pages">
+    <p>Perhaps it was one of these pages you were after:</p>
+    <ul>
+      <li tal:repeat="page guess_pages" class="url">
+        <a tal:define="url python:page[0]; title python:page[1]"
+        tal:attributes="href url" tal:content="structure python:here.safe_html_quote(title)"></a><br />
+        <a tal:define="url python:page[0]" class="shaded"
+        tal:attributes="href url" tal:content="python:here.showBriefURL(url)"></a>
+	
+
+      </li>
+    </ul>
+    
+
+  </div>
+
+</div>
+
+<div tal:condition="not:python:options.get('error_type')=='NotFound'"
+    tal:define="err_type options/error_type|nothing;
+                err_message options/error_message|nothing;
+		err_tb options/error_tb|nothing;
+		err_value options/error_value|nothing;
+		err_traceback options/error_traceback|nothing;
+		err_log_url options/error_log_url|nothing;"
+ class="infobox">
+<h2>System error</h2>
+<p>The IssueTrackerProduct encountered a system error that was
+unexpected. The errors were:</p>
+
+<p>
+  <b>Error type:</b>
+  <code tal:content="structure err_type"></code>
+  <br />
+  
+  <tal:error condition="err_message">
+  <b>Error Message:</b>
+  <code tal:content="structure err_message|nothing"></code>
+  <br />
+  </tal:error>
+  
+  <tal:value condition="python:test(err_value and (err_value != err_message), 1, 0)">
+  <b>Error value:</b>
+  <code tal:content="structure err_value"></code><br />
+  </tal:value>
+</p>  
+
+<p tal:condition="python:str(err_type)=='AttributeError'">
+It appears that the system has tried to access a variable or 
+attribute called <b tal:content="python:str(err_value)"></b> that does not exist.
+<br />
+<tal:mng tal:condition="here/hasManagerRole">
+If you have upgraded your instance of the IssueTrackerProduct 
+make sure you have pressed the 
+<a tal:attributes="href string:${here/getRootURL}/UpdateEverything">Update Everything</a>
+button under the <a tal:attributes="href string:${here/getRootURL}/manage_ManagementForm">Management tab</a>.
+You need to have management access rights to be able to do this.
+</tal:mng>
+</p>
+
+<p tal:condition="python:str(err_type)=='ValueError'">
+It appears that the system has tried to use one value for a missmatching purpose like 
+type casting that should not work. 
+</p>
+
+<p tal:condition="python:str(err_type)=='NameError'">
+It appears that the system has tried to access an attribute or variable that is not 
+defined in either the local or the global namespaces. This is quite typically a 
+programming bug where the code assumes the presence of a variable from that in fact 
+has not been defined in that block of code.
+</p>
+
+<div tal:condition="here/doDebug">
+  <br tal:replace="structure err_traceback" />
+  <p><a tal:attributes="href err_log_url">Error log details</a></p>
+</div>
+
+<div tal:condition="not:here/doDebug">
+  <h3>How to report this error</h3>
+  <p>If this error is highly unexpected you might want to contribute to the 
+  IssueTrackerProduct project how you encountered the error and its presence. To do this, you need to 
+  report it back to the 
+  <a tal:define="homeurl here/project_homepage" tal:attributes="href homeurl">IssueTrackerProduct website</a> on the 
+  <a href="http://real.issuetrackerproduct.com/AddIssue"
+   tal:attributes="href python:here.bugreportingURL(err_type, err_value, err_traceback)">Real Issue Tracker</a>.
+  </p>
+  <p tal:define="errorfileobject python:here.createErrorFileObject(options)" tal:condition="errorfileobject">
+    Download this file and attach it together with the bug report when you submit it:<br />
+    <a tal:attributes="href errorfileobject/absolute_url"
+     ><img tal:attributes="src python:here.getFileIconpath(errorfileobject.getId())" 
+      border="0" width="16" height="16" alt="Download this file and submit with your bug report" />
+      <br tal:replace="errorfileobject/getId" /></a><br />
+    You can submit your bug report confidentially and you can edit the 
+    content of this error file if you want to.
+  </p>
+</div>
+
+
+
+
+</div>
+
+</div>
+</html>

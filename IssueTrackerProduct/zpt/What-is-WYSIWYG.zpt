@@ -1,0 +1,33 @@
+<html metal:use-macro="here/getHeader">
+<div metal:fill-slot="body">
+
+<h3><em>WYSIWYG</em> = <em>W</em>hat <em>Y</em>ou <em>S</em>ee <em>I</em>s <em>W</em>hat <em>Y</em>ou <em>G</em>et</h3>
+
+
+<div class="bumf">
+<p style="font-weight:bold;">
+Rich text editing is when you enter text with formatting
+as part of what you are writing. You can yourself select which words should be bold
+or italic for example.</p>
+
+
+<p>If you select the WYSIWYG display format a JavaScript driven widget will appear where 
+there used to be larger input boxes such as where you enter the description when you 
+submit a new issue. This JavaScript widget will load dynamically into your webbrowser
+and will therefore appear a bit slow the first time you load it on a computer you have
+not used it on before. Once loaded all the dynamic JavaScript files will locally 
+cached on your computer for subsequent use.</p>
+
+
+<p>The WYSIWYG editor that the IssueTrackerProduct uses is 
+<a href="http://tinymce.moxiecode.com/">TinyMCE</a> developed under LGPL by
+<a href="http://www.moxiecode.com/">Moxiecode Systems AB</a>.
+This JavaScript widget is only supported with certain browsers (most common and modern ones).
+If you are experiencing problems, check that your browser is OK on this 
+<a href="http://tinymce.moxiecode.com/tinymce/docs/compatiblity_chart.html">Compatiblity Chart</a>.
+</p>
+</div>
+
+
+</div>
+</html>

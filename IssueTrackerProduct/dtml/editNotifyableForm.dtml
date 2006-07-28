@@ -1,0 +1,65 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Properties')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+<p class="form-title">IssueTracker Notifyable</p>
+
+<dtml-if isGlobalHere>
+<form action="manage_GlobalManagementForm" method="get">
+<input type="submit" value="Return to Notifyables management" />
+</form>
+<dtml-else>
+<form action="manage_ManagementNotifyables" method="get">
+<input type="submit" value="Return to Notifyables management" />
+</form>
+</dtml-if>
+
+<dtml-let notify_groups="getNotifyableGroups()">
+
+<form action="<dtml-var URL1>" method="post">
+<input type="hidden" name="id" value="<dtml-var id>">
+<dtml-if "REQUEST.has_key('back_url')">
+<input type="hidden" name="back_url" value="<dtml-var "REQUEST['back_url']">">
+</dtml-if>
+<table>
+	<tr>
+		<td><div class="form-label">Alias</div></td>
+		<td><input name="alias" value="<dtml-var alias html_quote>" maxlength="50" size="40"></td>
+	</tr>
+	<tr>
+		<td><div class="form-label">Email</div></td>
+		<td><input name="email" value="<dtml-var email html_quote>" maxlength="50" size="40"></td>
+	</tr>
+	<dtml-if "_.len(notify_groups)">
+	<tr>
+		<td><div class="form-label">Groups</div></td>
+		<td>
+			<select name="groups:list" multiple="multiple" size="<dtml-var "_.len(notify_groups)">">
+            <dtml-let this_groups="getGroups()">
+			<dtml-in notify_groups>
+			<option value="<dtml-var getId>"
+              <dtml-if "getId() in this_groups">selected</dtml-if>
+			><dtml-var title></option>
+			</dtml-in>
+            </dtml-let>
+			</select>
+		</td>
+	</tr>	
+	</dtml-if>
+	<tr>
+		<td colspan="2" align="center">
+		<input type="submit" value="Save Changes" name="manage_editNotifyable:method">
+		</td>
+	</tr>
+</table>
+
+</form>
+
+</dtml-let>
+
+<dtml-var manage_page_footer>

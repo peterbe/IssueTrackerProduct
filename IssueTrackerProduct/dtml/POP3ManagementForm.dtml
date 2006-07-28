@@ -1,0 +1,581 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='POP3')">
+<dtml-var manage_tabs>
+</dtml-with>
+<dtml-if Principia-Version>
+<p> <em>You are currently working in version 
+  <dtml-var Principia-Version>
+  </em> </p>
+</dtml-if Principia-Version>
+
+<style type="text/css">
+.accountsection {
+}
+.accountsection h4 {
+  background-color:#ccc;
+  padding:5px;
+  font-size:80%;
+  font-family:arial, sans-serif;
+}
+#testaccountform {
+  margin:0 10px;
+}
+#editaccount {
+  float:left;
+  margin-right:15px;
+}
+#headsup {
+  float:right;
+  width:45%;
+  margin:7px;
+  padding-left:10px;  padding-bottom:5px;
+  border:1px solid #666;
+  border-bottom:1px solid #666;
+}
+</style>
+
+<dtml-comment>
+  Hack: If there is only one POP3 Account we might as well show all
+  about it all the time.
+</dtml-comment>
+<dtml-if "not REQUEST.has_key('pop3accountid') and _.len(getPOP3Accounts())==1">
+<dtml-call "RESPONSE.redirect(getRootURL()+'/manage_POP3ManagementForm?pop3accountid=%s'%getPOP3Accounts()[0].getId())">
+</dtml-if>
+
+<dtml-unless "manage_hasEmailRepliesPossible()">
+<div id="headsup">
+<p><strong>Do you want to be able to reply to email notifications?</strong><br />
+For that to work you need to make the "Sitemaster email" property be the same email address
+as one accepting email defined below. It is also highly recommended that your new-issue-notifications
+contain the full description of the issue and not just the title.</p>
+<dtml-if "getPOP3Accounts()">
+<form action="manage_enableEmailRepliesSetting">
+  <input type="hidden" name="pop3accountid" value="<dtml-var "REQUEST.get('pop3accountid')">" />
+  <dtml-if "REQUEST.has_key('pop3accountid') and hasAcceptingEmails(REQUEST['pop3accountid'])">
+  
+  <p>Change Sitemaster email to:
+  <select name="email">
+  
+  <dtml-in "getAcceptingEmails(REQUEST['pop3accountid'])">
+    <option value="<dtml-var email_address>"><dtml-var email_address></option>
+  </dtml-in>
+    
+  </select>
+  <dtml-else>
+    <dtml-if "ValidEmailAddress(getSitemasterEmail())">
+      <p>Create an accepting email for <code><dtml-var getSitemasterEmail></code>
+      <input type="hidden" name="email" value="<dtml-var getSitemasterEmail>" />
+    <dtml-else>
+      <p><strong style="color:red"><dtml-var getSitemasterEmail> is <em>not</em> a valid email address.</strong>
+      <a href="manage_editIssueTrackerPropertiesForm">Change it first</a>.
+    </dtml-if>
+    
+  </dtml-if>
+  <br />
+  <input type="checkbox" name="include_description_in_notifications" value="1"
+   checked="checked" />
+  and include full description in email notifications about new issues.
+  <br />
+  <input type="submit" value="Make it possible to reply to notifications" />
+  
+  <dtml-unless "manage_hasFormatFlowedInstalled()">
+  <p>It is highly recommended that you first install 
+  <a href="http://www.zopatista.com/projects/formatflowed">formatflowed.py
+  from Zopatista.com</a> on your system to better parse the email replies.
+  </p>
+  </dtml-unless>
+  
+</form>
+<dtml-else>
+  <p>For this to work you first have to create at least one POP3 account.</p>
+</dtml-if>
+</div>
+</dtml-unless>
+
+<p><strong>This is how it works:</strong><br>
+You create one or more POP3 accounts.<br>
+For each account you define one or more email address which is dedicated
+to accepting emails into the IssueTracker.<br>
+For each email address you define what Sections, Type and Urgency the 
+issue should take if it's not obvious from the subject line of the email.<br>
+The email sender can override these by mentioning certain
+words in the subject line in a special format.<br>
+It is your responsibility to periodically trigger the search for new emails.</p>
+
+<p>Read more about <a href="#cronjob">periodically checking for email</a> and for a list of examples of how the email sender can compose the 
+subject of the email see the <a href="#examplelist">bottom of this page</a>.
+
+
+<dtml-if "REQUEST.has_key('pop3accountid')">
+
+
+
+<dtml-with "getPOP3Account(REQUEST['pop3accountid'])">
+<p class="form-title">POP3 Account <em><dtml-var getHostname></em></p>
+
+<div id="accountdetails" class="accountsection">
+<h4>POP3 Account details</h4>
+
+
+<div id="editaccount">
+<form action="manage_editPOP3Account" autocomplete="off">
+
+<input type="hidden" name="id" value="<dtml-var "REQUEST['pop3accountid']">" />
+<table>
+<tr>
+	<td><p><strong>Hostname:Port</strong></p></td>
+	<td><input name="hostname" value="<dtml-var getHostname>" /> <b>:</b> <input name="portnr:int" value="<dtml-var getPort>" size="3"></td>
+</tr>
+<tr>
+	<td><p><strong>Username</strong></p></td>
+	<td><input name="username" value="<dtml-var getUsername>" /></td>
+</tr>
+<tr>
+	<td><p><strong>Password</strong></p></td>
+	<td><input name="password" type="password" value="password" /></td>
+</tr>
+
+<tr>
+	<td><p><strong>Delete emails after</strong></p></td>
+	<td><input name="delete_after" type="checkbox" value="1" <dtml-if "doDeleteAfter()">checked="checked"</dtml-if> /></td>
+</tr>
+<tr>
+	<td>&nbsp;
+	<input type="hidden" name="password_dummy" value="password" />
+	</td>
+	<td><input type="submit" value="Save Changes" /></td>
+</tr>
+</table>
+</form>
+</div>
+
+<div id="testaccountform">
+
+<dtml-if "REQUEST.get('connectiontest_result')">
+  <dtml-let result="REQUEST.get('connectiontest_result')">
+    <dtml-if "result.find('+OK') > -1">
+      <p style="font-weight:bold;color:green"><code><dtml-var result html_quote></code></p>
+    <dtml-else>
+      <p style="font-weight:bold;color:red"><code><dtml-var result html_quote></code></p>    
+    </dtml-if>
+  </dtml-let>
+<dtml-else>
+  <p>If you want to you can test the account. To see if we can connect and get the POP3 servers welcome message.</p>
+</dtml-if>
+
+<form action="manage_testPOP3Account" method="get">
+  <input type="hidden" name="accountid" value="<dtml-var "REQUEST['pop3accountid']">" />
+  <input type="submit" value="Test connection" />
+</form>
+</div>
+
+<br clear="left" />&nbsp;
+</div>
+
+<div id="newacceptingemail" class="accountsection">
+<h4>Create new accepting email on this account</h4>
+
+<form action="createAcceptingEmail">
+<input type="hidden" name="id" value="<dtml-var "REQUEST['pop3accountid']">">
+<table border="0">
+  <tr>
+    <td valign="top"><p>Email address</p>
+	<input name="email_address" size="35" />
+	<p><input type="checkbox" name="send_confirm:boolean" value="1" <dtml-if "doSendConfirmSuggestion()">checked="checked"</dtml-if> />
+	Send confirmation message<br/>
+        <input type="checkbox" name="reveal_issue_url:int" value="1" checked="checked" />
+	<acronym title="If checked, confirmation messages will contain the full URL to the newly created issued."
+         >Reveal issue URL</acronym><br/>
+    </td>
+    <td valign="top" rowspan="2"><p>Default sections</p>
+	<select name="defaultsections:list" size="<dtml-var "_.min(5, _.len(sections_options))">" multiple="multiple">
+	<dtml-in sections_options>
+	<option value="<dtml-var sequence-item>"
+	<dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>><dtml-var sequence-item></option>
+	</dtml-in>
+	</select>
+    </td>
+    <td valign="top"><p>Default type</p>
+	<select name="default_type">
+	<dtml-in types>
+	<option <dtml-if "_['sequence-item']==default_type">SELECTED</dtml-if>
+	><dtml-var sequence-item></option>
+	</dtml-in>
+	</select>
+    </td>
+    <td valign="top"><p>Default urgency</p>
+	<select name="default_urgency">
+	<dtml-in urgencies>
+	<option <dtml-if "_['sequence-item']==default_urgency">SELECTED</dtml-if>
+	><dtml-var sequence-item></option>
+	</dtml-in>
+	</select>
+    </td>
+  </tr>
+  <tr>
+	<td>&nbsp;</td>
+	<td colspan="2" align="center"><input type="submit" value="Save accepting email" /></td>
+  </tr>
+</table>
+
+</form>
+<br>&nbsp;
+
+</div>
+
+
+<dtml-if "hasAcceptingEmails(getId())">
+<div id="existingacceptingemails" class="accountsection">
+<h4>Existing accepting emails</h4>
+
+<form action="<dtml-var getRootURL>" method="post">
+<input type="hidden" name="id" value="<dtml-var "REQUEST['pop3accountid']">" />
+<table border="0" cellspacing="0" cellpadding="4">
+  <thead>
+  <tr>
+	<td>&nbsp;</td>
+	<td><p><strong>Email address</strong></p></td>
+	<td><p><strong>Default sections</strong></p></td>
+	<td><p><strong>Default type</strong></p></td>
+	<td><p><strong>Default urgency</strong></p></td>
+  </tr>
+  </thead>
+  
+<dtml-in getAcceptingEmails sort=bobobase_modification_time reverse>
+
+<tbody <dtml-if sequence-even>style="background-color:#E5E5E5;"</dtml-if>>
+<tr id="ae<dtml-var getId>">
+	<td valign="top"><input type="checkbox" name="ids:list" value="<dtml-var getId>"></td>
+	<td valign="top"><input name="email_address-<dtml-var getId>" size="35" value="<dtml-var getEmailAddress>">
+	<input type="hidden" name="allids:list" value="<dtml-var getId>">
+	
+	<p><input type="checkbox" name="send_confirm-<dtml-var getId>:boolean" value="1" 
+            <dtml-if doSendConfirm>checked="checked"</dtml-if> />
+	Send confirmation message<br/>
+        <input type="checkbox" name="reveal_issue_url-<dtml-var getId>:boolean" value="1" 
+         <dtml-if revealIssueURL>checked="checked"</dtml-if> />
+	Reveal issue URL<br/>
+          <a href="manage_POP3ManagementForm?pop3accountid=<dtml-var "REQUEST['pop3accountid']" url_quote>&amp;blackwhitelist=<dtml-var getId url_quote>#ae<dtml-var getId>"
+           >Manage white- and blacklists</a>
+	</td>
+	<td><select name="defaultsections-<dtml-var getId>:list" size="<dtml-var "_.min(5, _.len(sections_options))">" multiple>
+	<dtml-in sections_options>
+	<option value="<dtml-var sequence-item>"
+	<dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>><dtml-var sequence-item></option>
+	</dtml-in>
+	</select></td>
+	<td valign="top"><select name="default_type-<dtml-var getId>">
+	<dtml-in types>
+	<option <dtml-if "_['sequence-item']==default_type">SELECTED</dtml-if>
+	><dtml-var sequence-item></option>
+	</dtml-in>
+	</select></td>
+	<td valign="top"><select name="default_urgency-<dtml-var getId>">
+	<dtml-in urgencies>
+	<option <dtml-if "_['sequence-item']==default_urgency">SELECTED</dtml-if>
+	><dtml-var sequence-item></option>
+	</dtml-in>
+	</select></td>
+</tr>
+<dtml-if "REQUEST.get('blackwhitelist')==getId() or getWhitelistEmails() or getBlacklistEmails()">
+<tr>
+<td colspan="5">
+
+<dtml-if "REQUEST.get('blackwhitelist')==getId()">
+  <input type="hidden" name="acceptingemail_id" value="<dtml-var "REQUEST.get('blackwhitelist')">" />
+  <table>
+    <tr>
+      <th>Blacklist</th>
+      <th>Whitelist</th>
+    </tr>
+    <tr>
+      <td>
+        <textarea name="blacklist_emails:lines" rows="4" cols="40"
+         ><dtml-var "'\n'.join(getBlacklistEmails())"></textarea>
+      </td>
+      <td>
+        <textarea name="whitelist_emails:lines" rows="4" cols="40"
+         ><dtml-var "'\n'.join(getWhitelistEmails())"></textarea>
+      </td>
+    </tr>
+  </table>
+  <input type="submit" name="manage_saveBlackWhitelist:method" value="Save changes"
+   style="font-weight:bold" />
+   
+  <input type="button" value="Cancel" 
+   onclick="location.href='<dtml-var URL1>/manage_POP3ManagementForm?pop3accountid=<dtml-var "REQUEST['pop3accountid']">'"/>   
+   
+  <p class="small">Enter one email address per line. You can use * as a wildcard 
+  (<em>eg. *@issuetrackerproduct.com</em>). Default is to accept all emails.</p>
+
+<dtml-else>
+
+  <dtml-if "getWhitelistEmails() or getBlacklistEmails()">
+  <p>
+    <dtml-if "getWhitelistEmails()">
+        <b>Whitelist:</b>
+        <dtml-var "', '.join([x for x in getWhitelistEmails()])"><br />
+    </dtml-if>
+    <dtml-if "getBlacklistEmails()">
+        <b>Blacklist:</b>
+        <dtml-var "', '.join([x for x in getBlacklistEmails()])">
+    </dtml-if>
+  </p>
+  </dtml-if>
+  
+</dtml-if>  
+
+</td>
+</tr>
+</dtml-if>
+</tbody>
+
+<dtml-if sequence-end>
+<dtml-unless "REQUEST.get('blackwhitelist')">
+<tbody>
+<tr>
+	<td colspan=2><input type="submit" name="manage_delAcceptingEmails:method" value="Delete selected"></td>
+	<td colspan=3 align="right">
+	<input type="submit" value="Save changes" name="saveAcceptingEmails:method"></td>
+</tr>
+</tbody>
+</dtml-unless>
+</dtml-if>
+</dtml-in>
+
+</table>
+</form>
+
+</div>
+</dtml-if>
+
+
+<br />&nbsp;
+</dtml-with>
+</dtml-if>
+
+<p class="form-title">POP3 Mangement</p>
+
+<table width="100%" cellpadding="4" border=0>
+	<tr class="list-header">
+		
+		<th>
+		<img src="/misc_/IssueTrackerProduct/issuetracker_pop3account.gif" alt="Issue Tracker POP3 Account" 
+   title="Issue Tracker POP3 Account" border="0" align="left" />Existing POP3 Accounts</th>
+   		<th>Create New POP3 Account</th>
+   
+	</tr>
+	<tr>
+	<td valign="top">
+	<dtml-in getPOP3Accounts>
+		<dtml-if sequence-start>
+		<form action="<dtml-var URL1>" method="post">
+		<table>
+		</dtml-if>
+		<tr>
+		<td><input type="checkbox" name="ids:list" value="<dtml-var getId>"></td>
+		<td><a href="<dtml-var ActionURL>?pop3accountid=<dtml-var getId>" 
+		style="text-decoration:underline" title="Click to edit this POP3 Account"><dtml-var getTitle> (<dtml-var getUsername>)</a></td>
+		<td><p><em style="font-size:80%">
+		<dtml-in getAcceptingEmails><dtml-var getEmailAddress><dtml-unless sequence-end>, </dtml-unless></dtml-in></em></p></td>
+		</tr>
+		<dtml-if sequence-end>
+		<tr>
+		<td colspan=3><input type="submit" name="manage_delPOP3Accounts:method" value="Delete selected"></td>
+		</tr>
+		</table>
+		</form>
+		</dtml-if>
+	<dtml-else>
+		<p><em>None</em></p>
+	</dtml-in>
+
+	</td>
+	<td valign="top">
+
+		<form action="createPOP3Account">
+		<table>
+		<tr>
+			<td><p><strong>Hostname</strong></p></td>
+			<td><input name="hostname"></td>
+		</tr>
+		<tr>
+			<td><p><strong>Port</strong></p></td>
+			<td><input name="portnr:int" size="3" value="110"></td>
+		</tr>
+		<tr>
+			<td><p><strong>Username</strong></p></td>
+			<td><input name="username"></td>
+		</tr>
+		<tr>
+			<td><p><strong>Password</strong></p></td>
+			<td><input name="password" type="password"></td>
+		</tr>
+                <tr>
+                	<td><p><strong>Delete emails after</strong></p></td>
+                        <td><input name="delete_after" type="checkbox" value="1" checked="checked" />
+                        </td>
+                </tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><input type="submit" value="Create POP3 Account"></td>
+		</tr>
+		</table>
+		</form>
+	
+	</td>
+	</tr>
+</table>
+
+
+
+
+
+<br>&nbsp;
+
+<style>
+td.code {
+	font-family: 'Courier New', Courier;
+	font-size:80%;
+	border-bottom:1px solid #CCCCCC;
+}
+span.code {
+	font-family: 'Courier New', Courier;
+	font-size:80%;
+}
+.expl {
+	font-family: Verdana, Helvetica, sans-serif;
+	font-size:70%;
+	color:#333333;
+	border-bottom:1px solid #CCCCCC;	
+}
+</style>
+<a name="examplelist"></a>
+<p class="form-title">Examples of subject lines</p>
+<table cellpadding=3>
+	<tr class="list-header">
+		<td><p><strong>&nbsp;Example</strong></p></td>
+		<td><p><strong>&nbsp;Yield</strong></p></td>
+		<td><p><strong>&nbsp;Condition</strong></p></td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Office: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: There is a bug...<br>
+			Sections: "Office"<br>
+			Type: &lt;whatever is default&gt;<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">Section called "Office" defined</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Office: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: Office: There is a bug...<br>
+			Sections: &lt;whatever is default&gt;<br>
+			Type: &lt;whatever is default&gt;<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">No section called "Office"</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Office, stationary: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: There is a bug...<br>
+			Sections: [Office, Stationary]<br>
+			Type: &lt;whatever is default&gt;<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">Sections called "Office" and "Stationary" defined</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Office, stationary: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: stationary: There is a bug...<br>
+			Sections: "Office"<br>
+			Type: &lt;whatever is default&gt;<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">Section called "Office" defined but not "Stationary"</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">General: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: There is a bug...<br>
+			Sections: "General"<br>
+			Type: &lt;whatever is default&gt;<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">Section called "General" and type called "general"</td>
+	</tr>	
+	<tr>
+		<td valign="top" class="code">Bug report, Office: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: There is a bug...<br>
+			Sections: "Office"<br>
+			Type: "bug report"<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">Section called "Office" and a type called "bug report"</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Bug Report, Office: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: There is a bug...<br>
+			Sections: &lt;whatever is default&gt;<br>
+			Type: "bug report"<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">A type called "bug report" but no section called "Office"</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Urgent: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: There is a bug...<br>
+			Sections: &lt;whatever is default&gt;<br>
+			Type: &lt;whatever is default&gt;<br>
+			Urgency: "urgent"</td>
+		<td valign="top" class="expl">An urgency called "urgent"</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Bug report, Feature request: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: Feature request: There is a bug...<br>
+			Sections: &lt;whatever is default&gt;<br>
+			Type: "bug report"<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">At least a type called "bug report" nomatter if a you have<br> 
+		type called "feature request"</td>
+	</tr>
+	<tr>
+		<td valign="top" class="code">Feature request, Bug report: There is a bug...</td>
+		<td valign="top" class="expl">Issue title: Bug report: There is a bug...<br>
+			Sections: &lt;whatever is default&gt;<br>
+			Type: "feature request"<br>
+			Urgency: &lt;whatever is default&gt;</td>
+		<td valign="top" class="expl">At least a type called "feature request" nomatter if a you have<br> 
+		type called "bug report"</td>
+	</tr>
+</table>
+
+<p><strong>Note:</strong>
+<ul>
+<li><p>Case does <strong>not</strong> matter.</p></li>
+<li><p>A <code>:</code> sign (or <code>[square brackets]</code>) must be present for any interesting extraction</p></li>
+<li><p><span class="code">Office, Urgent: There is a bug...</span> and
+<span class="code">[Office, Urgent] There is a bug...</span> yields exactly the same result</p></li>
+<li><p>Data is extracted in the order: sections -&gt; type -&gt; urgency. So if there are words that belong to more than
+one, this order is respected.</p></li>
+</ul>
+
+<br>&nbsp;
+
+
+<p class="form-title">Periodically checking for email</p>
+<a name="cronjob"></a>
+<p>The URL you must periodically invoke to check for new emails is:<br>
+<code><a href="<dtml-var getRootURL>/check4MailIssues"
+><dtml-var getRootURL>/check4MailIssues</a></code>
+(or <a href="<dtml-var getRootURL>/check4MailIssues?verbose=1"
+>same but more verbose</a>)
+</p>
+
+<p>If you're uncertain about how to set up a cron job, 
+then try <a href="http://www.issuetrackerproduct.com/Documentation/How-Tos/cronjob-email-check">this mini-howto</a> for how to setup crontab on Linux.<br />
+
+Alternatively you can <a href="http://dev.legco.biz/products/ZopeScheduler">download and install ZopeScheduler</a> but for that to work 
+you need to have a persistent ZODB object that the ZopeScheduler can trigger. To do that, simply 
+<a href="manage_addProduct/PythonScripts/manage_addPythonScript?id=TriggerInbounceEmailCheck&amp;submit=+Add+and+Edit+">create a Python Script</a> that can contain this code:
+<pre>
+context.check4MailIssues(verbose=True)</pre>
+</p>
+
+<br>&nbsp;
+
+
+
+<dtml-var manage_page_footer>

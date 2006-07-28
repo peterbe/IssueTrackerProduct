@@ -1,0 +1,1336 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Properties')">
+<dtml-var manage_tabs>
+</dtml-with>
+
+<script type="text/javascript" src="tabtastic-combined.js"></script>
+<style type="text/css">
+.tabset_tabs a { font-size:10pt; }
+/* Taken from Gavin Kistner's Tabtastic (tabtastic.css) */
+.tabset_tabs	{ margin:0; padding:0; list-style-type:none; position:relative; z-index:2; white-space:nowrap }
+.tabset_tabs li	{ margin:0; padding:0; display:inline }
+.tabset_tabs a	{ color:#999 ! important; background-color:#fff ! important; border:1px solid #99c; 
+                  text-decoration:none; padding:0 0.6em; border-left-width:1px;
+		  border-bottom:none;
+		  }
+.tabset_tabs a:hover	{ color:#000 ! important; background-color:#fff ! important }
+.tabset_tabs a.active	{ color:black ! important; background-color:#efefef ! important; 
+                          border-color:black; border-left-width:1px; cursor:default;
+			  padding-top:1px; padding-bottom:1px;
+			  border-bottom:1px solid #efefef;
+			  /*border-bottom:none;*/
+			  } /* the last border-bottom should ideally be value 'none' but since
+			       MSIE fails on that we have to set it to something. */
+			  
+.tabset_tabs li.firstchild a	{ border-left-width:1px }
+.tabset_content	{ border:1px solid black; background-color:#efefef; position:relative; z-index:1; 
+                  padding:0.5em 1em; display:none }
+.tabset_label	{ display:none }
+.tabset_content_active	{ display:block }
+@media aural{
+	.tabset_content,
+	.tabset_label	{ display:block }
+}
+</style>
+
+<div style="text-align:right;font-size:10px; padding:6px">
+  <a href="manage_PropertiesWizard" style="text-decoration:underline">Properties Wizard</a> |
+  <a href="manage_configureMenuForm" style="text-decoration:underline">Configure the menu</a>
+</div>
+
+
+
+
+<form action="<dtml-var URL1>" method="post">
+
+<dtml-unless activetab>
+  <dtml-comment>'activetab' defines which tab should be enabled
+  when you first load the Properties tab. This can be set from the 
+  REQUEST or by parameter (what's called 'options' in ZPT).
+  This dtml-unless and REQUEST.set asserts that we have the variable 
+  available for testing.
+  </dtml-comment>
+  <dtml-call "REQUEST.set('activetab', 'basic')">
+</dtml-unless>
+
+<ul class="tabset_tabs">
+  <li><a href="#basic" <dtml-if "activetab=='basic'">class="active"</dtml-if>
+       onclick="document.forms[0].activetab.value='basic';return false">Basic</a></li>
+  <li><a href="#advanced" <dtml-if "activetab=='advanced'">class="active"</dtml-if>
+       onclick="document.forms[0].activetab.value='advanced';return false">Advanced</a></li>
+  <li><a href="#custom" <dtml-if "activetab=='custom'">class="active"</dtml-if>
+       onclick="document.forms[0].activetab.value='custom';return false">Custom</a></li>
+</ul>
+
+<input type="hidden" name="activetab" value="<dtml-var activetab>" />
+
+<div id="basic" class="tabset_content">
+<h3 class="tabset_label">Basic properties</h3>
+
+<table cellspacing="0" cellpadding="3" border="0" summary="Basic properties">
+<dtml-with "propertysheets.get('properties')">
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-title">Title</label>
+  </div>
+
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="title:string" size="35"
+   value="<dtml-var title html_quote>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+      The name of the whole instance
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-sections_options">Section options</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <textarea name="sections_options:lines" rows="6" cols="37"><dtml-var "_.string.join(sections_options,'\n')" html_quote></textarea>
+
+      </td>
+
+  <td align="left" valign="top">
+  <p>
+    Enter as many different sections with which this issue tracker might be used. 
+    Further down on this page you can enable new ones to be added outside the Properties tab
+    with the <b>Allow adding new sections</b> option.
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-defaultsections">Default sections</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+    <div class="form-element">
+          <select name="defaultsections:list" multiple size="<dtml-var "_.min(7, _.len(sections_options))">">
+	      <dtml-in sections_options>
+               <option <dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>
+               ><dtml-var sequence-item html_quote></option>
+	      </dtml-in>
+          </select>
+        </div>
+      </td>
+  <td align="left" valign="top">
+    <p>
+      If somebody enters an issue without specifying sections, these
+      are used.
+    </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-types">Types</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <textarea name="types:lines" rows="6" cols="37"><dtml-var "_.string.join(types, '\n')" html_quote></textarea>
+
+      </td>
+  <td align="left" valign="top">
+  <p>&nbsp;</p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-default_type">Default type</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+        <div class="form-element">
+    <select name="default_type:string">
+	<dtml-in types>
+	    <option <dtml-if "_['sequence-item']==default_type">SELECTED</dtml-if>
+	    ><dtml-var sequence-item html_quote></option>
+	</dtml-in>
+          </select>
+    </div>
+    
+      </td>
+  <td align="left" valign="top">
+  <p>
+    If a type is not selected when entering an issue this is used.  
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-urgencies">Urgencies</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <textarea name="urgencies:lines" rows="6" cols="37"><dtml-var "_.string.join(urgencies, '\n')" html_quote></textarea>
+
+      </td>
+  <td align="left" valign="top">
+  <p>&nbsp;</p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-default_urgency">Default urgency</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+   <div class="form-element">
+    <select name="default_urgency:string">
+	<dtml-in urgencies>
+	    <option <dtml-if "_['sequence-item']==default_urgency">selected="selected"</dtml-if>
+	    ><dtml-var sequence-item html_quote></option>
+	</dtml-in>
+     </select>
+    </div>
+    
+      </td>
+  <td align="left" valign="top">
+  <p>
+    If an urgency is not selected when entering an issue this is used.    
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-always_notify">Always notify</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <textarea name="always_notify:lines" rows="6" cols="37"><dtml-var "_.string.join(getAlwaysNotify(), '\n')" html_quote></textarea>
+
+      </td>
+  <td align="left" valign="top">
+  <p>
+      The people who get notifications about everything, one per line.
+      Enter either a username or an email address. If what you enter is not an email 
+      address but a username, the system will try to find the user and instead show
+      the username and fullname.
+  </p>
+  </td> 
+</tr>
+
+
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-allow_issuesubscription">Allow issue subscription</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="allow_subscription:boolean" 
+        <dtml-if "AllowIssueSubscription()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  With this there's a form when viewing an issue to subscribe to changes to it.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-use_tellafriend">Use Tell a Friend</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="use_tellafriend:boolean" <dtml-if "UseTellAFriend()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If you enable the Tell a Friend widget people will be able to quickly inform
+  other people about issues simply by entering their email address or username.
+  </p>
+  </td> 
+</tr>
+
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-save_drafts">Save drafts</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="save_drafts:boolean" <dtml-if "SaveDrafts()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If this is true, when adding issues (or followups) it becomes possible to 
+  pre-save them as draft objects.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_id_with_title">Show Id with title</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="checkbox" name="show_id_with_title:boolean" value="1"
+       <dtml-if "ShowIdWithTitle()">checked="checked"</dtml-if> />
+      </td>
+  <td align="left" valign="top">
+  <p>
+      If true, the Id is always shown next to the title
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-default_sortorder">Default sort order</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+<select name="default_sortorder:string">
+<dtml-in getDefaultSortorderOptions>
+<option value="<dtml-var sequence-item>"
+<dtml-if "getDefaultSortorder()==_['sequence-item']">selected</dtml-if>
+><dtml-var "translateSortorderOption(_['sequence-item'])"></option>
+</dtml-in>
+</select>
+      </td>
+  <td align="left" valign="top">
+  <p>If by modification date, follow ups to old issues pushes the
+issue towards the top of List Issues.
+  </p>
+  </td> 
+</tr>
+
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-display_date">Display date format</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+<select name="display_date:string">
+<dtml-in getDisplayDateFormatOptions>
+<option value="<dtml-var sequence-item>"
+<dtml-if "display_date==_['sequence-item']">SELECTED</dtml-if>
+><dtml-var "ZopeTime('%s-12-13 22:15'%ZopeTime().strftime('%Y')).strftime(_['sequence-item'])"></option>
+</dtml-in>
+</select>
+      </td>
+  <td align="left" valign="top">
+  <div class="list-item">
+      The usual syntax.
+  </div>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-sitemaster_name">Sitemaster name</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="sitemaster_name:string" size="35"
+   value="<dtml-var sitemaster_name html_quote>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+      Admin, webmaster of this IssueTracker instance.
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-sitemaster_email">Sitemaster email</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="sitemaster_email:string" size="35"
+   value="<dtml-var sitemaster_email html_quote>">
+      </td>
+  <td align="left" valign="top">
+  <p>&nbsp; 
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-default_batch_size">Default batch size</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="default_batch_size:int" size="3" value="<dtml-var default_batch_size>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+    How many issues to list in List Issues  
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-no_fileattachments">No. file attachments</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="no_fileattachments:int" size="3"
+   value="<dtml-var getNoFileattachments>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+  Number of possible file attachments when adding issue.
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-no_followup_fileattachments">...and for followups</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="no_followup_fileattachments:int" size="3"
+   value="<dtml-var getNoFollowupFileattachments>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+  Number of possible file attachments when adding some sort of
+  followup.
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-allow_issueattrchange">Allow issue attribute change</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="allow_issueattrchange:boolean" <dtml-if "AllowIssueAttributeChange()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  Whether you, as Manager, can change the attributes of an issue once created or not.
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-use_issue_assignment">Use Issue Assignment</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="use_issue_assignment:boolean" <dtml-if "UseIssueAssignment()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  Use the <a href="manage_ManagementUsers">User Management page</a> instead.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-images_in_menu">Show images in menu</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="images_in_menu:boolean" <dtml-if "imagesInMenu()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  When true, the menu items will be shown together with a little icon image. 
+  Makes every page 1.9Kb bigger in size.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-can_add_new_sections">Allow adding new sections</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="can_add_new_sections:boolean" <dtml-if "CanAddNewSections()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+
+  <td align="left" valign="top">
+  <p>
+  When true makes it possible to add a new section when adding an issue instead of
+  being restricted to the existing list of sections. 
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-signature_text">Email signature</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+    <div class="form-element">
+      <textarea name="signature_text:text" rows="6" cols="37"><dtml-var getSignature html_quote></textarea>
+    </div>
+  </td>
+  <td align="left" valign="top">
+  <p>
+  Templating variables available are:<br />
+  <code>[title]</code>,  <code>[url]</code>, <code>[date]</code>,<br />
+  <code>[sitemaster name]</code>, <code>[sitemaster email]</code>
+  <br />
+  This is used for email send outs and the variables are replaced with their real values just before
+  the email is sent out. 
+  </p>
+  </td> 
+</tr>
+</table>
+
+<div class="submitarea" align="center">
+        <input type="submit" value="Save Changes" name="manage_editIssueTrackerProperties:method">
+</div>	
+
+
+</div><!-- /basic -->
+
+<div id="advanced" class="tabset_content">
+<h3 class="tabset_label">Advanced properties</h3>
+
+<table cellspacing="0" cellpadding="3" border="0" summary="Advanced properties">
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-outlook_batch_size">Homepage batch size</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="outlook_batch_size:int" size="3" value="<dtml-var getOutlookBatchSize>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+    How many issues to list in the summary on the home page
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-disallow_duplicate_issue_subjects">Disallow duplicate issue subjects</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="disallow_duplicate_issue_subjects:boolean" <dtml-if "DisallowDuplicateIssueSubjects()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If enabled, won't allow new issues with the exact (case insensitive) same subject if it has been used before
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-use_estimated_time">Use 'Estimated time'</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="use_estimated_time:boolean" <dtml-if "UseEstimatedTime()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  <dtml-if "AllowIssueAttributeChange()">When you click change the issue attributes you can enter a numeral for the number of hours you estimate <em>it will</em>
+    <dtml-if "getStatuses()[-1].lower()=='completed'">
+     take to become completed.
+    <dtml-else>
+     take to become "<dtml-var "getStatuses()[-1].capitalize()">".
+    </dtml-if>
+   
+  <dtml-else>
+  This property only applies if you have "Allow issue attribute change" enabled.
+  </dtml-if>
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-use_actual_time">Use 'Actual time'</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="use_actual_time:boolean" <dtml-if "UseActualTime()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  <dtml-if "AllowIssueAttributeChange()">When you click change the issue attributes you can enter a numeral for the number of hours <em>it took</em>
+    <dtml-if "getStatuses()[-1].lower()=='completed'">
+     take to become completed.
+    <dtml-else>
+     take to become "<dtml-var "getStatuses()[-1].capitalize()">".
+    </dtml-if>
+   
+  <dtml-else>
+  This property only applies if you have "Allow issue attribute change" enabled.
+  </dtml-if>
+  </p>
+  </td> 
+</tr>
+
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-statuses">Statuses</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <textarea name="statuses-and-verbs:lines" rows="6" cols="37"><dtml-var "_.string.join(getStatusesMerged(cleaned=1), '\n')" html_quote></textarea>
+
+      </td>
+  <td align="left" valign="top">
+  <p>
+  	Here you define the statuses issue can have and the captions for going into that
+	status. Each line should be separated by a , comma like this 
+	<code>&lt;state&gt;, &lt;verb&gt;</code>.<br />
+        <a href="manage_PropertiesStatusScores">Set a score on each status as a measure of progress</a>
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-manage_roles">Manager roles</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <textarea name="manager_roles:lines"
+	 rows="6" cols="37"><dtml-var "_.string.join(getManagerRoles(), '\n')" html_quote></textarea>
+      </td>
+  <td align="left" valign="top">
+  <p>
+    What makes a user a "IssueTracker Manager"
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-default_display_format">Default display format</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+    <select name="default_display_format:string">
+	<dtml-in display_formats>
+	    <option <dtml-if "_['sequence-item']==default_display_format">SELECTED</dtml-if>
+	    ><dtml-var sequence-item html_quote></option>
+	</dtml-in>
+    </select>
+    </div>
+      </td>
+  <td align="left" valign="top">
+  <p>&nbsp;</p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-dispatch_on_submit">Dispatch on submit</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="dispatch_on_submit:boolean" <dtml-if "doDispatchOnSubmit()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  Send out emails after notifications have been created.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-private_statistics">Private statistics</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="private_statistics:boolean" <dtml-if "PrivateStatistics()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If this is true, then only Managers can see the statistics.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-private_reports">Private reports</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="private_reports:boolean" <dtml-if "PrivateReports()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If this is true, then only Managers can see the reports.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_dates_cleverly">Use "clever" date display</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="show_dates_cleverly:boolean" <dtml-if "ShowDatesCleverly()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If on when listing or viewing issues it will show the date cleverly depending on how far it is from today's date in a more human form. 
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-stop_cache">Stop cache</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="stop_cache:boolean" <dtml-if "doStopCache()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If true, headers are set so that no caching happens.
+  </p>
+  </td> 
+</tr>
+
+
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_confidential_option">Show "Confidential issue" option</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="show_confidential_option:boolean" <dtml-if "ShowConfidentialOption()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If true, in Add Issue, users can set if an issue should be confidential or not.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_hideme_option">Show "Hide me" option</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="show_hideme_option:boolean" <dtml-if "ShowHideMeOption()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If true, in Add Issue, users can set if their name and email should be hidden.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_issueurl_option">Show "URL" option</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="show_issueurl_option:boolean" 
+         <dtml-if "ShowIssueURLOption()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If true, in Add Issue, you can specify a URL which is related to the
+issue.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_download_button">Show "Download" button</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="show_download_button:boolean" <dtml-if "ShowDownloadButton()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If true, when viewing an issue users can click the Download button
+  to get the issue as a text file.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-encode_emaildisplay">Encode email links</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="encode_emaildisplay:boolean" <dtml-if "EncodeEmailDisplay()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If true, all hyperlinked email addresses are display as an encoded
+  JavaScript script.
+  </p>
+  </td> 
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_always_notify_status">Show Always notify status</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="show_always_notify_status:boolean" <dtml-if "doShowAlwaysNotifyStatus()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  When true, a list is displayed after an issue is added to say who 
+  has been notified.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-randomid_length">Id length</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="randomid_length:int" size="3" value="<dtml-var randomid_length>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+      How many numbers in the Id of issues.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-issueprefix">Issueprefix</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+      <input type="text" name="issueprefix:string" size="35"
+   value="<dtml-var issueprefix html_quote>">
+      </td>
+  <td align="left" valign="top">
+  <p>
+  String you might want issues id to start with.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_use_accesskeys_option">Accesskeys option</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <input type="checkbox" name="show_use_accesskeys_option:boolean" value="1"
+       <dtml-if "ShowAccessKeysOption()">checked="checked"</dtml-if> />
+  </td>
+  <td align="left" valign="top">
+  <p>
+  With this on users can enable access keys to keyboard shortcuts
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_remember_savedfilter_persistently_option">Persistent filters option</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <input type="checkbox" name="show_remember_savedfilter_persistently_option:boolean" value="1"
+       <dtml-if "ShowRememberSavedfilterPersistentlyOption()">checked="checked"</dtml-if> />
+  </td>
+  <td align="left" valign="top">
+  <p>Allows acl users of an Issue User Folder to set their filters to be remembered persistently, 
+  meaning their last used filter is still on even if they restart their browser.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-use_autosave">Autosave drafts</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <input type="checkbox" name="use_autosave:boolean" value="1"
+       <dtml-if "UseAutoSave()">checked="checked"</dtml-if> />
+  </td>
+  <td align="left" valign="top">
+  <p>
+  Only applies if you enable Save drafts. 
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-show_csvexport_link">CSV export link</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <input type="checkbox" name="show_csvexport_link:boolean" value="1"
+       <dtml-if "ShowCSVExportLink()">checked="checked"</dtml-if> />
+  </td>
+  <td align="left" valign="top">
+  <p>
+  If enabled will show a link at the bottom of <a href="ListIssues">List Issues</a>
+  to export the current unbatched issues to CSV.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-include_description_in_notifications">Include issue description in notifications</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <input type="checkbox" name="include_description_in_notifications:boolean" value="1"
+       <dtml-if "IncludeDescriptionInNotifications()">checked="checked"</dtml-if> />
+  </td>
+  <td align="left" valign="top">
+  <p>If checked, email notifications will be sent out with the issue description included in the email. <br />
+  An advantage with having this checked is that email notifyees don't have to visit the issuetracker to read the whole text.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-plugin_paths">Plugin paths</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <textarea name="plugin_paths:lines"
+	 rows="4" cols="37"><dtml-var "_.string.join(getPluginPaths(), '\n')" html_quote></textarea>
+  </td>
+  <td align="left" valign="top">
+  <p>A plugin is an adjacent instance object that can be linked to from the issuetracker.
+  Enter the path of the plugin (eg. somefolder/someobject)
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-brother_issuetracker_paths">Join-in issue trackers</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <dtml-let potentialbrothers="manage_findPotentialBrothers()"
+                brotherpaths="getBrotherPaths()">
+        <dtml-if potentialbrothers>
+          <select name="brother_issuetracker_paths:list" multiple="multiple"
+           size="<dtml-var "_.min(5, _.len(potentialbrothers))">"
+           <dtml-if "_.len(potentialbrothers)>5">
+            onfocus="this.size=<dtml-var "_.len(potentialbrothers)">"
+            onblur="this.size=5"</dtml-if>
+           >
+            <dtml-in potentialbrothers>
+              <option value="<dtml-var "'/'.join(getPhysicalPath())">"
+               <dtml-if "'/'.join(getPhysicalPath()) in brotherpaths">selected="selected"</dtml-if>
+               ><dtml-var "getTitle()"> (<dtml-var "absolute_url_path()">)</option>
+            </dtml-in>
+          </select>
+        <dtml-else>
+          <input type="hidden" name="brother_issuetracker_paths:lines" value="" />
+          <em>No adjacent issue trackers found</em>
+        </dtml-if>
+      
+      </dtml-let>
+  </td>
+  <td align="left" valign="top">
+  <p>These are issue trackers found in the proximity. You can select several issue trackers
+  from this list and then all of their issues will be counted, listed and shown next to the issues
+  of this issue tracker. Useful if you want to monitor several issue trackers from one 
+  single instance.
+  </p>
+  </td> 
+</tr>
+
+</table>
+
+</dtml-with>
+
+<div class="submitarea" align="center">
+        <input type="submit" value="Save Changes" name="manage_editIssueTrackerProperties:method">
+</div>	
+
+
+</div><!-- /advanced -->
+
+<div id="custom" class="tabset_content">
+<h3 class="tabset_label">Custom properties</h3>
+
+<dtml-in propertyMap mapping>
+<dtml-if sequence-start>
+  <table cellspacing="0" cellpadding="3" border="0" summary="Custom properties">
+  <tr class="list-header">
+    <td align="left" valign="top" width="8">
+    &nbsp;
+    </td>
+    <td align="left" valign="top">
+    <div class="form-label">
+    Name
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <div class="form-label">
+    Value
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <div class="form-label">
+    Info
+    </div>
+    </td>
+  </tr>
+</dtml-if>
+
+<dtml-unless "id in native_properties">
+<tr>
+  <td align="left" valign="top" width="8">
+  <dtml-if "'d' in _['sequence-item'].get('mode', 'awd')">
+  <input type="checkbox" name="ids:list" value="<dtml-var id html_quote>" 
+   id="cb-<dtml-var id>">
+  <dtml-else>
+  </dtml-if>
+  </td>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-<dtml-var id>"><dtml-var "propertyLabel(id)"></label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+  <dtml-if "'w' in _['sequence-item'].get('mode', 'awd')">
+  <dtml-if "type == 'int'">
+  <input type="text" name="<dtml-var id>:<dtml-var 
+   type>" size="35" value="<dtml-if "hasProperty(id)"><dtml-var 
+   "'%s' % getProperty(id)" html_quote></dtml-if>">
+  <dtml-elif "type == 'long'">
+  <input type="text" name="<dtml-var id>:<dtml-var type>" size="35"
+   value="<dtml-if "hasProperty(id)"><dtml-var 
+   "('%s' % getProperty(id))[:-1]" html_quote></dtml-if>">
+  <dtml-elif "type in ('float', 'date')">
+  <input type="text" name="<dtml-var id>:<dtml-var type>" size="35"
+   value="<dtml-var "getProperty(id)" html_quote>">
+  <dtml-elif "type=='string'">
+  <input type="text" name="<dtml-var id>:string" size="35"
+   value="<dtml-var "getProperty(id)" html_quote>">
+  <dtml-elif "type=='boolean'">
+  <input type="checkbox" name="<dtml-var id>:boolean" size="35"
+   <dtml-if "getProperty(id)">CHECKED</dtml-if>>
+  <dtml-elif "type=='tokens'">
+  <input type="text" name="<dtml-var id>:tokens" size="35"
+   value="<dtml-in "getProperty(id)"><dtml-var sequence-item html_quote> </dtml-in>">
+  <dtml-elif "type=='text'">
+  <textarea name="<dtml-var id>:text" rows="6" cols="37"><dtml-var 
+   "getProperty(id)" html_quote></textarea>
+  <dtml-elif "type=='lines'">
+  <textarea name="<dtml-var id>:lines" rows="6" cols="37"><dtml-in
+  "getProperty(id)"><dtml-var sequence-item html_quote><dtml-if
+   sequence-end><dtml-else><dtml-var "'\n'"></dtml-if></dtml-in></textarea>
+
+  <dtml-elif "type=='selection'">
+
+    <dtml-if "hasProperty(select_variable)">
+    <div class="form-element">
+    <select name="<dtml-var id>">
+      <dtml-in "getProperty(select_variable)">
+         <option
+          <dtml-if "_['sequence-item']==getProperty(id)">SELECTED</dtml-if>
+          ><dtml-var sequence-item html_quote></option>
+      </dtml-in>
+    </select>
+    </div>
+    <dtml-elif "_.has_key(select_variable)">
+    <div class="form-element">
+    <select name="<dtml-var id>">
+      <dtml-in "_[select_variable]">
+         <option
+          <dtml-if "_['sequence-item']==getProperty(id)">SELECTED</dtml-if>
+          ><dtml-var sequence-item html_quote></option>
+      </dtml-in>
+    </select>
+    </div>
+    <dtml-else>
+    <div class="form-text">
+       No value for <dtml-var select_variable>.
+    </div>
+    </dtml-if>
+
+  <dtml-elif "type=='multiple selection'">
+
+    <dtml-if "hasProperty(select_variable)">
+    <div class="form-element">
+    <select name="<dtml-var id>:list" multiple
+      size="<dtml-var "_.min(7, _.len(getProperty(select_variable)))">">
+      <dtml-in "getProperty(select_variable)">
+         <option<dtml-if 
+         "getProperty(id) and (_['sequence-item'] in getProperty(id))"
+         > SELECTED</dtml-if
+         >><dtml-var sequence-item html_quote></option>
+      </dtml-in>
+    </select>
+    </div>
+    <dtml-elif "_.has_key(select_variable)">
+    <div class="form-element">
+    <select name="<dtml-var id>:list" multiple
+      size="<dtml-var "_.min(7, _.len(_[select_variable]))">">
+      <dtml-in "_[select_variable]">
+         <option<dtml-if 
+         "getProperty(id) and (_['sequence-item'] in getProperty(id))"
+         > SELECTED</dtml-if
+         >><dtml-var sequence-item html_quote></option>
+      </dtml-in>
+    </select>
+    </div>
+    <dtml-else>
+    <div class="form-text">
+    No value for <dtml-var select_variable>.
+    </div>
+    </dtml-if>
+  <dtml-else>
+  <em>Unknown property type</em>
+  </dtml-if>
+  <dtml-else>
+  <table border="1">
+  <tr><td><dtml-var "getProperty(id)" html_quote></td></tr>
+  </table>
+  </dtml-if>
+  </td>
+  <td align="left" valign="top">
+  <div class="list-item">
+  &dtml-type;
+  </div>
+  </td>
+  <td align="left" valign="top">
+  <div class="list-item">
+  
+  </div>
+  </td> 
+</tr>
+
+</dtml-unless>
+<dtml-if sequence-end>
+
+  <tr>
+    <td colspan="2">&nbsp;</td>
+    <td align="left" valign="top" colspan="2">
+      <div class="form-element">
+       <input name="manage_editProperties:method" type="submit" 
+  	   class="form-element" value="Save Changes" />
+       <input name="manage_delOtherProperties:method" type="submit" 
+             class="form-element" value="Delete" />
+      </div>
+    </td>
+  </tr>
+  </table>
+</dtml-if>
+
+</dtml-in>
+
+  <p class="form-help"> To add a new property, enter a name, type and value for 
+    the new property and click the &quot;Add&quot; button. </p>
+  <table>
+    <tr> 
+      <td align="left" valign="top"> 
+        <div class="form-label"> Name </div>
+      </td>
+      <td align="left" valign="top"> 
+        <input type="text" name="id" size="30" value=""/>
+      </td>
+      <td align="left" valign="top" class="form-label"> Type </td>
+      <td align="left" valign="top"> 
+        <div class="form-element"> 
+          <select name="type">
+            <option>boolean</option>
+            <option>date</option>
+            <option>float</option>
+            <option>int</option>
+            <option>lines</option>
+            <option>long</option>
+            <option selected>string</option>
+            <option>text</option>
+            <option>tokens</option>
+            <option>selection</option>
+            <option>multiple selection</option>
+          </select>
+        </div>
+      </td>
+    </tr>
+    <tr> 
+      <td align="left" valign="top"> 
+        <div class="form-label"> Value </div>
+      </td>
+      <td colspan=2 align="left" valign="top"> 
+        <input type="text" name="value" size="30" />
+      </td>
+      <td align="right" valign="top"> 
+        <div class="form-element"> 
+          <input class="form-element" type="submit" name="manage_addOtherProperty:method" value=" Add "
+	   />
+        </div>
+      </td>
+    </tr>
+  </table>
+
+</div>
+
+</form>
+
+
+<dtml-var manage_page_footer>
