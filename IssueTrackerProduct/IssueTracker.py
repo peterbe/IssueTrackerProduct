@@ -1965,11 +1965,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         standards_home = osj(package_home(globals()),'standards')
         self._deployImages(root, standards_home,
                            t=t, remove_oldstuff=remove_oldstuff,
-                           skipfolders=('mainbuttons','actionbuttons'))
+                           skipfolders=('mainbuttons','actionbuttons','.svn'))
 
         www_home = osj(standards_home,'www')
         self._deployImages(root.www, www_home,
-                           t=t, remove_oldstuff=remove_oldstuff)
+                           t=t, remove_oldstuff=remove_oldstuff,
+                           skipfolders=('svn.',))
                                
         ##home = osj(standards_home, 'tinymce')
         ##self._deployImages(root.tinymce, home,
@@ -11585,6 +11586,56 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             subwords.sort()
             checked.append(Utils.iuniqify(subwords))
             
+        def merge_duplicates(list_of_lists):
+            """ suppose you have a list like this:
+                ['foo',
+                 'Key1', ['a','b','c'],
+                 'bar',
+                 'Key1', ['d','e','f']
+                 'foobar',
+                 ...
+            That means that the values of the two Key1 can be merged into one:
+                ['foo',
+                 'Key1', ['a','b','c','d','e','f'],
+                 'bar',
+                 'foobar',
+                 ...
+            """
+            all = {}
+            listtest = lambda x: isinstance(x, list)
+            skip_next = False
+            for i, item in enumerate(list_of_lists):
+                if skip_next:
+                    skip_next = False
+                    continue
+                
+                try:
+                    next_item = list_of_lists[i+1]
+                    if listtest(next_item):
+                        p = all.get(item, [])
+                        p.extend(next_item)
+                        all[item] = p
+                        skip_next = True
+                    else:
+                        print repr(item)
+                        all[item] = []
+                except IndexError:
+                    # we're at the last item
+                    all[item] = []
+            
+    
+            _keys = all.keys()
+            _keys.sort()
+            new_list_of_lists = []
+            for k in _keys:
+                v = all[k]
+                new_list_of_lists.append(k)
+                if v:
+                    new_list_of_lists.append(v)
+                    
+            return new_list_of_lists
+            
+        checked = merge_duplicates(checked)
         self.spam_keywords = checked
         
         if REQUEST is not None:
