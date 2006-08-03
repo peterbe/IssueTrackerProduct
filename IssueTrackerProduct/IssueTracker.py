@@ -11617,7 +11617,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         all[item] = p
                         skip_next = True
                     else:
-                        print repr(item)
                         all[item] = []
                 except IndexError:
                     # we're at the last item
@@ -11625,7 +11624,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
     
             _keys = all.keys()
-            _keys.sort()
+            _keys.sort(lambda x,y:cmp(x.lower(), y.lower()))
             new_list_of_lists = []
             for k in _keys:
                 v = all[k]
