@@ -401,6 +401,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.use_actual_time = DEFAULT_USE_ACTUAL_TIME
         self.include_description_in_notifications = DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS
         self.spam_keywords = DEFAULT_SPAM_KEYWORDS
+        self.show_spambot_prevention = DEFAULT_SHOW_SPAMBOT_PREVENTION
 
         self.acl_cookienames = {}
         self.acl_cookieemails = {}
@@ -747,6 +748,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return outlook_batch_size (used in zpt/index_html.zpt) """
         default = DEFAULT_OUTLOOK_BATCH_SIZE
         return getattr(self, 'outlook_batch_size', default)
+    
+    def ShowSpambotPrevention(self):
+        """ return show_spambot_prevention """
+        default = DEFAULT_SHOW_SPAMBOT_PREVENTION
+        return getattr(self, 'show_spambot_prevention', default)
 
     def getSitemasterEmail(self):
         """ return sitemaster_email """

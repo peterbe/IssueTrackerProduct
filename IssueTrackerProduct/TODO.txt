@@ -1,4 +1,5 @@
-Complete Draft feature for followups and QuickAddIssue.
+ShowSpambotPrevention into Advanced tab of Properties and complete
+work in AddIssue on it.
 ----
 More work on the tell-a-friend feature. Especially making sure the error/success messages
 are shown up properly after. The URL might need better handling of the #i anchor link.

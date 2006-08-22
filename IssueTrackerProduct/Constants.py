@@ -127,6 +127,7 @@ DEFAULT_USE_ACTUAL_TIME = False
 DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS = False
 DEFAULT_USE_TELLAFRIEND = True
 DEFAULT_SHOW_DATES_CLEVERLY = False
+DEFAULT_SHOW_SPAMBOT_PREVENTION = False
 DEFAULT_SPAM_KEYWORDS = ['poker-stadium.com',
                          '<a href=', ['roulette.html','cialisonline','buy-viagra'],
                          'diet-pills.com',

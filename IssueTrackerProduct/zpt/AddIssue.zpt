@@ -204,7 +204,7 @@
     <tr>
       <td colspan="2">&nbsp;</td>
     </tr>
-    <tr>
+    <tr tal:condition="here/ShowSpambotPrevention">
       <td>
         <b>Spambot prevention:</b>
       </td>
