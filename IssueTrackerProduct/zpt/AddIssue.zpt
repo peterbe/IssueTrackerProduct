@@ -205,7 +205,23 @@
       <td colspan="2">&nbsp;</td>
     </tr>
     <tr>
+      <td>
+        <b>Spambot prevention:</b>
+      </td>
+      <td>
+        
+        <br tal:replace="structure python:here.getCaptchaNumbersHTML(request.get('captchas'), howmany=4)" />
+      
+      <input name="captcha_numbers" size="4"
+       tal:attributes="value python:request.get('captcha_numbers','')"
+       onkeypress="checkCaptchaValue(this, 'Only numbers', 4)"
+       onchange="checkCaptchaValue(this, 'Only numbers', 4)" />
+      </td>
+    </tr>
+    <tr>
       <td>&nbsp;</td>
+
+      
       <td align="right" tal:define="previewissue python:request.get('previewissue')">
     <input type="hidden" name="previewissue" value="1" />
 	<input type="submit" name="AddIssue:method" value=" Preview again "

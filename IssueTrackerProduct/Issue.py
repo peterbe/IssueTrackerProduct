@@ -2291,14 +2291,14 @@ class IssueTrackerIssue(IssueTracker):
         if issueuser and issueuser.getEmail():
             email = issueuser.getEmail()
         elif not request.get('email') and self.has_cookie(email_cookiekey):
-            email = get_cookie(email_cookiekey)
+            email = self.get_cookie(email_cookiekey)
         else:
             email = request.get('email','')
             
         if issueuser and issueuser.getFullname():
             fromname = issueuser.getFullname()
         elif not request.get('fromname') and self.has_cookie(name_cookiekey):
-            fromname = get_cookie(name_cookiekey)
+            fromname = self.get_cookie(name_cookiekey)
         else:
             fromname = request.get('fromname','')
 

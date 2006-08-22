@@ -30,6 +30,9 @@ function $() {
   }
   return elements;
 }
+function stripSpaces(x) {
+   return x.replace(/^\s+|\s+$/g,'');
+}
 
 function econvert(s) {
 return s.replace(/%7E/g,'~').replace(/%28/g,'(').replace(/%29/g,')').replace(/%20/g,' ').replace(/_dot_| dot |_\._|\(\.\)/gi, '.').replace(/_at_|~at~/gi, '@');}
@@ -67,4 +70,16 @@ function form2querystring(f) {
 }
 function G(p) {
   location.href=p;
+}
+
+function checkCaptchaValue(elm, msg, maxlength) {
+   var v = stripSpaces(elm.value);
+   if (v) {
+      if (v.search(/\D/)>-1)
+        alert(msg);
+      v = v.replace(/\D/g,'');
+      if (v.length >= maxlength) 
+        v = v.substring(0, maxlength);
+      elm.value = v;
+   }
 }

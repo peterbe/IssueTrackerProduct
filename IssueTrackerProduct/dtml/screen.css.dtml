@@ -407,6 +407,10 @@ img.fileatt {
   padding:3px;
 }
 
+img.captcha {
+  padding:2px;
+}
+
 
 
 

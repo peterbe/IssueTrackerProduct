@@ -85,6 +85,7 @@ from Products.ZCatalog.CatalogAwareness import CatalogAware
 from Acquisition import aq_inner, aq_parent
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
+from App.ImageFile import ImageFile
 
 # Is CMF installed?
 try:
@@ -3768,7 +3769,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         msg, to, fr, subject = tosend
         
         issueid_header = issue.getGlobalIssueId()
-        
 
         if to is not None:
             email = ss(str(email))
@@ -11496,6 +11496,33 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     ## Spam protection stuff
     ##
     
+    def getCaptchaNumbersHTML(self, keys=None, howmany=4):
+        """ return the HTML needed to be included in the forms to catch out
+        spambots. 
+        """
+        skey = ALREADY_NOT_SPAMBOT_SESSION_KEY
+        if self.get_session(skey):
+            return ''
+        
+        parts = []
+        if keys:
+            for key in keys:
+                src = key
+                parts.append('<img src="%s" class="captcha" alt="number?" />' % src)
+                parts.append('<input type="hidden" name="captchas" value="%s" />' % src)
+        else:
+            keys = self.captcha_numbers_map.keys()
+            random.shuffle(keys)
+            for i in range(howmany):
+                src = keys[i % len(keys)]
+                parts.append('<img src="%s" class="captcha" alt="number?" />' % src)
+                parts.append('<input type="hidden" name="captchas" value="%s" />' % src)
+        return ''.join(parts)
+            
+            
+        
+        
+    
     def containsSpamKeywords(self, text, verbose=False):
         """ find any spam keywords in the text if possible. """
         keywords = self.getSpamKeywords()
@@ -11776,6 +11803,22 @@ dtmls = ({'f':'dtml/screen.css', 'optimize':OPTIMIZE and 'css'},
          
 
          
+# Attach some tiny GIFs that are numbers. Make the Id's slightly more random 
+# so that spambots can't work out that:
+# <img src="0.gif"><img src="4.gif"><img src="1.gif"> == 041
+
+numbers_map = {}
+_home = package_home(globals())
+_imageshome = os.path.join(_home,'www/numbers')
+for e in [x for x in os.listdir(_imageshome) if x.endswith('.gif')]:
+    attribute_id = Utils.getRandomString(3)+'.gif'
+    while numbers_map.has_key(attribute_id):
+        attribute_id = Utils.getRandomString(4)+'.gif'
+    setattr(IssueTracker, attribute_id, ImageFile(os.path.join(_imageshome, e)))
+    numbers_map[attribute_id] = int(e.replace('.gif',''))
+setattr(IssueTracker, 'captcha_numbers_map', numbers_map)
+    
+         
 all = list(dtmls+zpts)
 if not DEBUG:
     all.append('zpt/standard_error_message')
@@ -11994,3 +12037,4 @@ addTemplates2Class(ReportsContainer, zpts, extension='zpt')
     
     
 InitializeClass(ReportsContainer)    
+

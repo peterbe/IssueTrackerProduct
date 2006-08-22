@@ -7,6 +7,7 @@ function $(){var elements=new Array();for(var i=0;i < arguments.length;i++){var 
 element=document.getElementById(element);if(arguments.length==1) 
 return element;elements.push(element);}
 return elements;}
+function stripSpaces(x){return x.replace(/^\s+|\s+$/g,'');}
 function econvert(s){return s.replace(/%7E/g,'~').replace(/%28/g,'(').replace(/%29/g,')').replace(/%20/g,' ').replace(/_dot_| dot |_\._|\(\.\)/gi, '.').replace(/_at_|~at~/gi, '@');}
 function AEHit(){var sp=document.getElementsByTagName("span");for(i=0;i< sp.length;i++)if(sp[i].className=="aeh") 
 sp[i].innerHTML=econvert(sp[i].innerHTML);}
@@ -16,3 +17,6 @@ d+=ob.name +'='+ escape(ob.value) +'&';}else if(ob.type=='select-one'){d+=ob.nam
 d+=ob.name +'='+ escape(ob.options[y].value) +'&';}else if(ob.type=='checkbox'){if(ob.checked) d+=ob.name +'=1&';else d+=ob.name +'=False&';}}
 return d;}
 function G(p){location.href=p;}
+function checkCaptchaValue(elm,msg,maxlength){var v=stripSpaces(elm.value);if(v){if(v.search(/\D/)>-1)
+alert(msg);v=v.replace(/\D/g,'');if(v.length >= maxlength) 
+v=v.substring(0,maxlength);elm.value=v;}}

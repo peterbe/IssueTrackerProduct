@@ -161,6 +161,7 @@ TEMPFOLDER_REQUEST_KEY = 'Tempfolder_fileattachments'
 WHICHLIST_SESSION_KEY = 'WhichListView' # XXX used anymore?
 WHICHSUBLIST_SESSION_KEY = 'WhichSubListView' # XXX used anymore?
 USE_FILTER_IN_SEARCH_SESSION_KEY = 'FilterInSearch'
+ALREADY_NOT_SPAMBOT_SESSION_KEY = 'AlreadyNotSpambot'
 EMAIL_ISSUEID_HEADER = 'IssueTrackerProduct_IssueID'
 
 # Language constants

@@ -1,3 +1,6 @@
+    Bug fixed: get_cookie() typo should have been self.get_cookie().
+    Thanks Greg Baker (Real#0312)
+    
     Bug fixed: Javascript autorefresh didn't work with URLs ending in
     'index_html'. Thanks Maheshg Real#0298
     
