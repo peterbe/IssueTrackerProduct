@@ -1,3 +1,7 @@
+    Bug fixed: When using IssueTrackerProduct on top of Plone the
+    authenticated member was selected incorrectly. Thanks Greg Baker
+    (Real#0315)
+    
     Bug fixed: get_cookie() typo should have been self.get_cookie().
     Thanks Greg Baker (Real#0312)
     

@@ -114,7 +114,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
                     return issueuserobj.getFullname() or self.fromname
             elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
                 mtool = CMF_getToolByName(self, 'portal_membership')
-                authenticated_member = mtool.getAuthenticatedMember()
+                authenticated_member = mtool.getMemberById(name)
                 if authenticated_member.getProperty('fullname'):
                     return authenticated_member.getProperty('fullname')                
             
@@ -141,7 +141,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
                     return issueuserobj.getEmail() or self.email
             elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
                 mtool = CMF_getToolByName(self, 'portal_membership')
-                authenticated_member = mtool.getAuthenticatedMember()
+                authenticated_member = mtool.getMemberById(name)
                 if authenticated_member.getProperty('email'):
                     return authenticated_member.getProperty('email')                
             
