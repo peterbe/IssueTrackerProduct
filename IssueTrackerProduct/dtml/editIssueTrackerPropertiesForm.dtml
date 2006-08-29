@@ -712,6 +712,26 @@ issue towards the top of List Issues.
 <tr>
   <td align="left" valign="top">
   <div class="form-label">
+  <label for="cb-show_spambot_prevention">Enable spambot prevention</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="show_spambot_prevention:boolean" <dtml-if "ShowSpambotPrevention()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If enabled, posting issues or followups won't be possible unless the user verifies 
+  being human by recognizing the text in a set of images. Like captchas.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
   <label for="cb-dispatch_on_submit">Dispatch on submit</label>
   </div>
   </td>

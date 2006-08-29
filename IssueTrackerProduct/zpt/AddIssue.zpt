@@ -19,7 +19,8 @@
 </span>
 
 
-<form method="post" name="ai" tal:attributes="action string:${here/relative_url}/" enctype="multipart/form-data">
+<form method="post" name="ai" tal:attributes="action string:${here/relative_url}/" enctype="multipart/form-data"
+ tal:define="errors python:options.get('SubmitError',{})">
 
 <div id="addpreview" tal:condition="request/previewissue|nothing"
  tal:replace="structure here/preview_issue">
@@ -50,7 +51,8 @@
           tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                           onblur python:test(use_autosave, 'stopautosave()');
                           value python:request.get('title','')" />
-         <span class="submiterror" tal:condition="options/title|nothing"
+                          
+         <span class="submiterror" tal:condition="errors/title|nothing"
 	     tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>
       </td>
       </tr>
@@ -86,7 +88,7 @@
                 tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                                 onblur python:test(use_autosave, 'stopautosave()')"
 		onkeypress="if (!enabled_tsizer && this.value.length>600){enableTsizer();}"></textarea>
-		<span class="submiterror" tal:condition="options/description|nothing"
+		<span class="submiterror" tal:condition="errors/description|nothing"
 		  tal:content="python:here.ShowSubmitError(options, 'description')"></span>
 
 		</td>
@@ -189,7 +191,8 @@
                  tal:content="python:user['user'].getFullname()">
 				Statuses</option>
 			</select>
-            <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'assignee')"></span>
+            <span class="submiterror" tal:condition="options/SubmitError|nothing" 
+                  tal:content="python:here.ShowSubmitError(options, 'assignee')"></span>
             <span id="asi-noti" class="note">
             <span tal:condition="request/asked-notify-assignee|nothing" tal:omit-tag="">
               <input type="checkbox" name="notify-assignee" checked="checked" value="1" tabindex="31"
@@ -204,7 +207,7 @@
     <tr>
       <td colspan="2">&nbsp;</td>
     </tr>
-    <tr tal:condition="here/ShowSpambotPrevention">
+    <tr tal:condition="here/useSpambotPrevention">
       <td>
         <b>Spambot prevention:</b>
       </td>
@@ -216,6 +219,10 @@
        tal:attributes="value python:request.get('captcha_numbers','')"
        onkeypress="checkCaptchaValue(this, 'Only numbers', 4)"
        onchange="checkCaptchaValue(this, 'Only numbers', 4)" />
+         <span class="submiterror" tal:condition="errors/captcha_numbers|nothing"
+	     tal:content="structure python:here.ShowSubmitError(options, 'captcha_numbers')"></span>
+         <tal:block condition="not:errors/captcha_numbers|nothing">enter these numbers</tal:block>
+         
       </td>
     </tr>
     <tr>

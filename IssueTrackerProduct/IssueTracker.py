@@ -1168,6 +1168,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'use_actual_time',
                     'include_description_in_notifications',
                     'show_dates_cleverly',
+                    'show_spambot_prevention',
                     ]
         dict = self.__dict__
         for each in strings:
@@ -3262,6 +3263,30 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             m = _("Filename entered but no actual file content")
             SubmitError['fileattachment'] = m
             
+        # Check the spambot prevention
+        if self.useSpambotPrevention():
+            captcha_numbers = request.get('captcha_numbers','').strip()
+            captchas_used = request.get('captchas')
+            if isinstance(captchas_used, basestring):
+                captchas_used = [captchas_used]
+                
+            if not captcha_numbers:
+                m = _("Enter the numbers shown to that you are not a spambot")
+                SubmitError['captcha_numbers'] = m
+            else:
+                errors = None
+                for i, nr in enumerate(captcha_numbers):
+                    if int(nr) != int(self.captcha_numbers_map.get(captchas_used[i])):
+                        errors = True
+                        break
+                    
+                if errors:
+                    m = _("Incorrect numbers matching")
+                    SubmitError['captcha_numbers'] = m
+                else:
+                    self._rememberProvenNotSpambot()
+            
+            
 
         if SubmitError:
             if request.get('previewissue'):
@@ -3564,6 +3589,30 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 fakes.append(id)
 
         return fakes
+    
+    
+    def useSpambotPrevention(self):
+        """ return true if spambot prevention should be used """
+        if self.ShowSpambotPrevention():
+            if self.getIssueUser() or self.getZopeUser() or self.getCMFUser():
+                return False
+            skey = ALREADY_NOT_SPAMBOT_SESSION_KEY
+            if self.get_session(skey, False):
+                return False
+            
+            return True
+        
+        return False
+                
+            
+    def _rememberProvenNotSpambot(self):
+        """ set a session variable on this user that proves that she's not a 
+        spambot. 
+        """
+        # XXX Perhaps this should be a cookie??
+        skey = ALREADY_NOT_SPAMBOT_SESSION_KEY
+        self.set_session(skey, True)
+
                 
 
     def generateID(self, length, prefix='', meta_type=ISSUE_METATYPE,
