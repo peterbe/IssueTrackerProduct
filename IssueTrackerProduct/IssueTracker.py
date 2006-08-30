@@ -3276,11 +3276,21 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             else:
                 errors = None
                 for i, nr in enumerate(captcha_numbers):
-                    if int(nr) != int(self.captcha_numbers_map.get(captchas_used[i])):
+                    try:
+                        if int(nr) != int(self.captcha_numbers_map.get(captchas_used[i])):
+                            errors = True
+                            break
+                    except ValueError:
                         errors = True
                         break
+                
                     
                 if errors:
+                    # use this oppurtunity to clean up what they tried to enter
+                    captcha_numbers = request.get('captcha_numbers','').strip()
+                    captcha_numbers = re.sub('[^\d]','', captcha_numbers).strip()
+                    request.set('captcha_numbers', captcha_numbers)
+                    
                     m = _("Incorrect numbers matching")
                     SubmitError['captcha_numbers'] = m
                 else:

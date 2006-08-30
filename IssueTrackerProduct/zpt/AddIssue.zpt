@@ -217,8 +217,8 @@
       
       <input name="captcha_numbers" size="4"
        tal:attributes="value python:request.get('captcha_numbers','')"
-       onkeypress="checkCaptchaValue(this, 'Only numbers', 4)"
-       onchange="checkCaptchaValue(this, 'Only numbers', 4)" />
+       onkeydown="this.value=checkCaptchaValue(this.value, 'Only numbers', 4)"
+        />
          <span class="submiterror" tal:condition="errors/captcha_numbers|nothing"
 	     tal:content="structure python:here.ShowSubmitError(options, 'captcha_numbers')"></span>
          <tal:block condition="not:errors/captcha_numbers|nothing">enter these numbers</tal:block>

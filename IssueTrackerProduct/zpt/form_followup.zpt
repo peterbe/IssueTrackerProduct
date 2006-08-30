@@ -10,7 +10,8 @@
              issueuser here/getIssueUser;
              cmfuser here/getCMFUser;
              zopeuser here/getZopeUser;
-             loggedin python:issueuser or (zopeuser and here.getSavedUser('fromname') and here.getSavedUser('email'))">
+             loggedin python:issueuser or (zopeuser and here.getSavedUser('fromname') and here.getSavedUser('email'));
+	     errors python:options.get('SubmitError',{})">
 
 <input type="hidden" name="action" value="AddFollowup"
        tal:attributes="value request/otherAction | default" />
@@ -27,7 +28,9 @@
 		<td colspan="2">
 		<div tal:condition="python:request.has_key('otherComment')">
 		<b tal:content="request/otherComment | default">Other title</b></div>
-        <span class="submiterror" tal:content="structure python:here.ShowSubmitError(options, 'comment', linebreak=1)"></span>
+                <span class="submiterror" 
+	         tal:condition="errors/comment|nothing" 
+      	         tal:content="structure python:here.ShowSubmitError(options, 'comment', linebreak=1)"></span>
 		<textarea tabindex="1" name="comment" id="textarea" rows="10" cols="70"
 		tal:attributes="rows python:test(minimalformfollowup, 5, 10);
                                 cols python:test(minimalformfollowup, 70, 70);
@@ -42,10 +45,10 @@
 		<td colspan="2" align="center">
 		<b>Display format:</b>
 		<span tal:define="display_format request/display_format | here/getSavedTextFormat">
-			<input type="radio" name="display_format:string"
+			<input type="radio" tabindex="2" name="display_format:string"
           value="plaintext"
           tal:attributes="checked python:display_format=='plaintext'" />Plain as it's written
-			<input type="radio" name="display_format:string"
+			<input type="radio" tabindex="3" name="display_format:string"
           value="structuredtext"
           tal:attributes="checked python:display_format=='structuredtext'" />
           <a tal:attributes="href string:${here/getRootURL}/What-is-StructuredText">Structured Text</a>
@@ -55,11 +58,11 @@
 	<tr>
 		<td tal:define="fromname request/fromname | python:here.getSavedUser('fromname');email request/email | python:here.getSavedUser('email')">
 		
-			<input type="hidden" name="fromname" value=""
+			<input type="hidden" name="fromname"
 			tal:condition="not:python:minimalformfollowup and fromname=='' or not minimalformfollowup"
 			tal:attributes="value fromname" />
 			
-			<input type="hidden" name="email" value=""
+			<input type="hidden" name="email"
 			tal:condition="not:python:minimalformfollowup and email=='' or not minimalformfollowup"
 			tal:attributes="value email" />
 			
@@ -75,13 +78,29 @@
                 </tr>
 		<tr tal:condition="python:not loggedin and (minimalformfollowup and fromname=='' or not minimalformfollowup)">
 		    <td><b>Name:</b></td>
-                    <td><input tabindex="2" name="fromname" value="" tal:attributes="value fromname"
+                    <td><input tabindex="4" name="fromname" tal:attributes="value fromname"
 			 size="25" /></td>
 		</tr>
 		<tr tal:condition="python:not loggedin and (minimalformfollowup and email=='' or not minimalformfollowup)">
 		    <td><b>Email:</b></td>
-		    <td><input tabindex="3" name="email" tal:attributes="value email" size="25" /></td>
+		    <td><input tabindex="5" name="email" tal:attributes="value email" size="25" /></td>
                 </tr>
+		<tr tal:condition="here/useSpambotPrevention">
+		    <td><b>Spambot prevention:</b></td>
+		    <td>
+		      <br tal:replace="structure python:here.getCaptchaNumbersHTML(request.get('captchas'), howmany=4)" />
+		      <input name="captcha_numbers" size="4" tabindex="6"
+ 		       tal:attributes="value python:request.get('captcha_numbers','')"
+		       onkeydown="this.value=checkCaptchaValue(this.value, 'Only numbers', 4)"
+		       autocomplete="off" />
+
+		      <tal:block condition="not:errors/captcha_numbers|nothing">enter these numbers</tal:block>
+		      <span class="submiterror" 
+	               tal:condition="errors" 
+       	               tal:content="structure python:here.ShowSubmitError(options, 'captcha_numbers')"></span>
+		 
+		    </td>
+                </tr>		
                 <tr tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
                     <td colspan=2><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
                 </tr>

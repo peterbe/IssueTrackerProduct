@@ -19,4 +19,9 @@ return d;}
 function G(p){location.href=p;}
 function checkCaptchaValue(elm,msg,maxlength){var v=stripSpaces(elm.value);if(v){if(v.search(/\D/)>-1)
 alert(msg);v=v.replace(/\D/g,'');if(v.length >= maxlength) 
-v=v.substring(0,maxlength);elm.value=v;}}
+v=v.substring(0,maxlength);}
+return v;}
+function checkCaptchaValue(v,msg,maxlength){v=stripSpaces(""+v);if(v){if(v.search(/\D/)>-1)
+alert(msg);v=v.replace(/\D/g,'');if(v.length >= maxlength) 
+v=v.substring(0,maxlength);}
+return v;}

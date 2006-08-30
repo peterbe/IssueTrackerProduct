@@ -77,9 +77,23 @@ function checkCaptchaValue(elm, msg, maxlength) {
    if (v) {
       if (v.search(/\D/)>-1)
         alert(msg);
+      //alert(v);
+      //alert(typeof v);
       v = v.replace(/\D/g,'');
       if (v.length >= maxlength) 
         v = v.substring(0, maxlength);
-      elm.value = v;
+      //elm.value = v;
    }
+   return v;
+}
+function checkCaptchaValue(v, msg, maxlength) {
+   v = stripSpaces(""+v);
+   if (v) {
+      if (v.search(/\D/)>-1)
+        alert(msg);
+      v = v.replace(/\D/g,'');
+      if (v.length >= maxlength) 
+        v = v.substring(0, maxlength);
+   }
+   return v;
 }

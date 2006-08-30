@@ -866,6 +866,38 @@ class IssueTrackerIssue(IssueTracker):
                 SubmitError['comment'] = err
             elif self.containsSpamKeywords(comment, verbose=True):
                 SubmitError['comment'] = _("Contains spam keywords")
+                
+            # check for spambots
+            if self.useSpambotPrevention():
+                captcha_numbers = request.get('captcha_numbers','').strip()
+                captchas_used = request.get('captchas')
+                if isinstance(captchas_used, basestring):
+                    captchas_used = [captchas_used]
+                
+                if not captcha_numbers:
+                    m = _("Enter the numbers shown to that you are not a spambot")
+                    SubmitError['captcha_numbers'] = m
+                else:
+                    errors = None
+                    for i, nr in enumerate(captcha_numbers):
+                        try:
+                            if int(nr) != int(self.captcha_numbers_map.get(captchas_used[i])):
+                                errors = True
+                                break
+                        except ValueError:
+                            errors = True
+                            break
+                    
+                    if errors:
+                        # use this oppurtunity to clean up what they tried to enter
+                        captcha_numbers = request.get('captcha_numbers','').strip()
+                        captcha_numbers = re.sub('[^\d]','', captcha_numbers).strip()
+                        request.set('captcha_numbers', captcha_numbers)
+                    
+                        m = _("Incorrect numbers matching")
+                        SubmitError['captcha_numbers'] = m
+                    else:
+                        self._rememberProvenNotSpambot()            
 
             fake_fileattachments = self._getFakeFileattachments()
             if fake_fileattachments:

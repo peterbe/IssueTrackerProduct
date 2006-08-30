@@ -1,3 +1,7 @@
+    New feature: Ability to enable a spambot prevention technique to
+    assert that posters are humans. 
+    (see Properties->Advanced->Enable spambot prevention)
+    
     Bug fixed: When using IssueTrackerProduct on top of Plone the
     authenticated member was selected incorrectly. Thanks Greg Baker
     (Real#0315)
