@@ -8633,7 +8633,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             email['reveal_issue_url'] = acceptingemail.revealIssueURL()
 
             extractor = self.preParseEmailString
+            
             email['email'] = extractor(email['from'], allnotifyables=0)
+            
+            assert isinstance(email['email'], basestring), \
+              "email['email'] not string (email['from']=%r)" % email['from']
+              
             f = email['from'].replace(email['email'],'').strip()
             f = f.replace('<','').replace('>','').strip().replace('"','')
             email['fromname'] = f
