@@ -1,3 +1,5 @@
+    Bug fixed: Edit notifyable error. Real#0320
+    
     New feature: Ability to enable a spambot prevention technique to
     assert that posters are humans. 
     (see Properties->Advanced->Enable spambot prevention)

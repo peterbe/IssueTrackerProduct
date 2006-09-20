@@ -410,7 +410,7 @@ class IssueTrackerNotifyable(SimpleItem.SimpleItem):
         if email is not None and Utils.ValidEmailAddress(email.strip()):
             self.email = email.strip()
         if groups is not None:
-            if type(groups) != ListType:
+            if not isinstance(groups, list):
                 groups = [groups]
             self.groups = groups
 
