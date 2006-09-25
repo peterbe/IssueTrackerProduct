@@ -8361,12 +8361,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         text = email['body']
         _character_set = email.get('_character_set','us-ascii')
+        
         if _has_formatflowed_:
             CRLF = '\r\n'
             text = text.replace('\n', CRLF)
             try:
                 text = formatflowed_decode(text, character_set=_character_set)
                 text, old = Utils.parseFlowFormattedResult(text)
+            except LookupError:
+                # _character_set is quite likly 'iso-8859-1;format=flowed'
+                _character_set = _character_set.split(';')[0].strip()
+                text = formatflowed_decode(text, character_set=_character_set)
+                text, old = Utils.parseFlowFormattedResult(text)
+
             except UnicodeDecodeError:
                 try:
                     text = formatflowed_decode(text, 'latin-1')
