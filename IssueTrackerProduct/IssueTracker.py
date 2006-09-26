@@ -8376,7 +8376,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # _character_set is quite likly 'iso-8859-1;format=flowed'
                 _character_set = _character_set.split(';')[0].strip()
                 text = formatflowed_decode(text, character_set=_character_set)
-                text, old = Utils.parseFlowFormattedResult(text)
+                try:
+                    text, old = Utils.parseFlowFormattedResult(text)
+                except AttributeError, msg:
+                    LOG("IssueTrackerProduct._processInboundEmailReply", INFO, text)
+                    raise AttributeError, "%s (_character_set=%r)" %(msg, _character_set)
 
             except UnicodeDecodeError:
                 try:
