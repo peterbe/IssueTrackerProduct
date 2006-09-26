@@ -8366,20 +8366,20 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             CRLF = '\r\n'
             text = text.replace('\n', CRLF)
             try:
-                text = formatflowed_decode(text, character_set=_character_set)
+                textflow = formatflowed_decode(text, character_set=_character_set)
                 try:
-                    text, old = Utils.parseFlowFormattedResult(text)
+                    text, old = Utils.parseFlowFormattedResult(textflow)
                 except AttributeError, msg:
                     raise AttributeError, "%s (_character_set=%r)" %(msg, _character_set)
                     
             except LookupError:
                 # _character_set is quite likly 'iso-8859-1;format=flowed'
                 _character_set = _character_set.split(';')[0].strip()
-                text = formatflowed_decode(text, character_set=_character_set)
+                textflow = formatflowed_decode(text, character_set=_character_set)
                 try:
-                    text, old = Utils.parseFlowFormattedResult(text)
+                    text, old = Utils.parseFlowFormattedResult(textflow)
                 except AttributeError, msg:
-                    LOG("IssueTrackerProduct._processInboundEmailReply", INFO, text)
+                    LOG("IssueTrackerProduct._processInboundEmailReply", INFO, email['body'])
                     raise AttributeError, "%s (_character_set=%r)" %(msg, _character_set)
 
             except UnicodeDecodeError:
