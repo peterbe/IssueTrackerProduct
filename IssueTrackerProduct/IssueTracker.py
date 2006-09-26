@@ -8367,7 +8367,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             text = text.replace('\n', CRLF)
             try:
                 text = formatflowed_decode(text, character_set=_character_set)
-                text, old = Utils.parseFlowFormattedResult(text)
+                try:
+                    text, old = Utils.parseFlowFormattedResult(text)
+                except AttributeError, msg:
+                    raise AttributeError, "%s (_character_set=%r)" %(msg, _character_set)
+                    
             except LookupError:
                 # _character_set is quite likly 'iso-8859-1;format=flowed'
                 _character_set = _character_set.split(';')[0].strip()
