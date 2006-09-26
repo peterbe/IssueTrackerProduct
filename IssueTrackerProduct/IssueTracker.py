@@ -1973,12 +1973,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         standards_home = osj(package_home(globals()),'standards')
         self._deployImages(root, standards_home,
                            t=t, remove_oldstuff=remove_oldstuff,
-                           skipfolders=('mainbuttons','actionbuttons','.svn'))
+                           skipfolders=('mainbuttons','actionbuttons','.svn','CVS'))
 
         www_home = osj(standards_home,'www')
         self._deployImages(root.www, www_home,
                            t=t, remove_oldstuff=remove_oldstuff,
-                           skipfolders=('svn.',))
+                           skipfolders=('.svn','CVS'))
                                
         ##home = osj(standards_home, 'tinymce')
         ##self._deployImages(root.tinymce, home,
