@@ -8379,7 +8379,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 try:
                     text, old = Utils.parseFlowFormattedResult(textflow)
                 except AttributeError, msg:
-                    LOG("IssueTrackerProduct._processInboundEmailReply", INFO, email['body'])
                     raise AttributeError, "%s (_character_set=%r)" %(msg, _character_set)
 
             except UnicodeDecodeError:
