@@ -1,3 +1,6 @@
+    Bug fixed: ShowIssueData template mixed up ShowIssueURLOption with
+    ShowConfidentialOption. Thanks Peter Eddy. Real#0332
+    
     Bug fixed: Edit notifyable error. Real#0320
     
     New feature: Ability to enable a spambot prevention technique to

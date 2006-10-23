@@ -141,7 +141,7 @@
       <td><a tal:attributes="href python:here.showURL2Issue(here.url2issue, href=1)"
                  tal:content="python:here.showURL2Issue(here.url2issue)">http://url</a></td>
     </tr>
-    <tr tal:condition="python:change and here.ShowConfidentialOption()">
+    <tr tal:condition="python:change and here.ShowIssueURLOption()">
       <td class="ilabel">URL:</td>
       <td>
         <input name="url2issue" tal:attributes="value here/url2issue" size="30" />
