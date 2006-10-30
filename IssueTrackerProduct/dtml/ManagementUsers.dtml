@@ -18,7 +18,7 @@ div.area { background-color:#efefef;
 
 </style>
 
-<p class="form-title">User Mangement</p>
+<p class="form-title">User Management</p>
 
 <div class="area">
 <p><strong>Anonymous access</strong></p>

@@ -3216,8 +3216,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if len(request.get('sections',[])) == 0 and not newsection:
             request['sections'] = self.defaultsections
             
-        
-
         #
         # Check data
         #

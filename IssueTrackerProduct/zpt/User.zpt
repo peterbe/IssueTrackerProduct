@@ -51,8 +51,7 @@ tal:attributes="id python:test(request.get('change'),'rightcorner_change','right
     <td><input name="fullname" tal:condition="issueuser"
          tal:attributes="value request/fullname|issueuser/getFullname" />
         <input name="fullname" tal:condition="cmfuser"
-         tal:define="default python:cmfuser.getProperty('fullname')"
-         tal:attributes="value request/fullname|default" />
+         tal:attributes="value python:request.get('fullname', cmfuser.getProperty('fullname'))" />
         <input name="fullname" tal:condition="not:python:issueuser or cmfuser"
          tal:attributes="value python:request.get('fullname', here.getSavedUser('fullname'))" />
         <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fullname')"></span>
@@ -63,8 +62,7 @@ tal:attributes="id python:test(request.get('change'),'rightcorner_change','right
     <td><input name="email" tal:condition="issueuser"
          tal:attributes="value request/email|issueuser/getEmail" />
         <input name="email" tal:condition="cmfuser"
-         tal:define="default python:cmfuser.getProperty('email')"
-         tal:attributes="value request/email|default" />
+         tal:attributes="value python:request.get('email', cmfuser.getProperty('email'))" />
         <input name="email" tal:condition="not:python:issueuser or cmfuser"
          tal:attributes="value python:request.get('email', here.getSavedUser('email'))" />
         <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'email')"></span></td>
