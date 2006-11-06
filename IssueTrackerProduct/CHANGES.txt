@@ -1,3 +1,7 @@
+    Bug fixed: Redirecting out on duplicate status change would cause
+    a TypeError. This happens when two people simultaneuously for
+    example Take an issue. 
+    
     Bug fixed: Change user details didn't work when you're not logged
     in as a CMF user.
     

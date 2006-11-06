@@ -855,7 +855,9 @@ class IssueTrackerIssue(IssueTracker):
                     # even though it's already set and what's worse, they haven't entered
                     # a comment. Then redirect them out like this...
                     url = issueobject.absolute_url()
-                    url += '#i%s' % len(self.countThreads())
+                    count = self.countThreads()
+                    if count:
+                        url += '#i%s' % count
                     return self.REQUEST.RESPONSE.redirect(url)
                 
             # anything else means that the comment_description
