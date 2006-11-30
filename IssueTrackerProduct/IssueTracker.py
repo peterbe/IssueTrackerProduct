@@ -11944,9 +11944,6 @@ security.apply(IssueTracker)
 
 InitializeClass(IssueTracker)
 
-
-
-
 #----------------------------------------------------------------------------
 
 # Need to import these here otherwise

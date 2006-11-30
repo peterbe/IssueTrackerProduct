@@ -72,6 +72,8 @@ Note:
  
 Changelog:
 
+    0.1.9    Possible to override the usage of checkoutable templates even if installed
+    
     0.1.8    Ability to set TEMPLATEADDER_LOG_USAGE environment variable to debug which
              files get instanciated.
     
@@ -96,19 +98,21 @@ Changelog:
     
 """
 
-__version__='0.1.8'
+__version__='0.1.9'
 
 
 import os
+import time
 
-
+from Globals import DTMLFile
+from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
 try:
     from Products.CheckoutableTemplates import CTDTMLFile as CTD
     from Products.CheckoutableTemplates import CTPageTemplateFile as CTP
 except ImportError:
-    from Globals import DTMLFile as CTD
-    from Products.PageTemplates.PageTemplateFile import PageTemplateFile as CTP
+    CTD = DTMLFile
+    CTP = PageTemplateFile
 
 #------------------------------------------------------------------------------
 
@@ -119,10 +123,20 @@ LOG_USAGE = os.environ.get('TEMPLATEADDER_LOG_USAGE', None)
 #------------------------------------------------------------------------------
     
 
-def addTemplates2Class(Class, templates, extension=None, optimize=None, Globals=globals()):
+def addTemplates2Class(Class, templates, extension=None, optimize=None, 
+                       Globals=globals(), use_checkoutable_templates=True):
+    
+    if use_checkoutable_templates:
+        dtml_adder = CTD
+        zpt_adder = CTP
+    else:
+        # If you don't want to use checkoutable templates, the reassign
+        dtml_adder = DTMLFile
+        zpt_adder = PageTemplateFile
+
     root = ''
     optimize_orgin = optimize
-    
+
     for template in templates:
         optimize = optimize_orgin
         description = ''
@@ -141,10 +155,8 @@ def addTemplates2Class(Class, templates, extension=None, optimize=None, Globals=
             # can't set 'optimize' this way
             dname = template.split('/')[-1]
             
-            
         root = apply(os.path.join, template.split('/'))
         f = root
-        
         
         # now we need to figure out what extension this file is
         if template.startswith('dtml/') or template.endswith('.dtml'):
@@ -165,13 +177,14 @@ def addTemplates2Class(Class, templates, extension=None, optimize=None, Globals=
             
         
         if extension == 'zpt':
-            setattr(Class, dname, CTP(f, Globals, d=description,
-                                      __name__=dname,
-                                      optimize=optimize))
+            setattr(Class, dname, zpt_adder(f, Globals, d=description,
+                                            __name__=dname,
+                                            optimize=optimize))
         elif extension == 'dtml':
-            setattr(Class, dname, CTD(f, Globals, d=description,
-                                      optimize=optimize))
+            setattr(Class, dname, dtml_adder(f, Globals, d=description,
+                                             optimize=optimize))
                                                     
         else:
             raise "UnrecognizedExtension", \
-                  "Can not deal with %s"%extension
+                  "Unrecognized template extension %r" % extension
+                  

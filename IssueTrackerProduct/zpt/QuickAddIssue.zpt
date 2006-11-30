@@ -63,18 +63,18 @@ here's a special script that converts 'section' into ['section'] if present and 
              tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>  
         </td>
 
-	</tr>
+	</tr>        
     <tr tal:condition="issueuser">
         <td><b>User:</b></td>
         <td tal:content="structure python:here.ShowNameEmail(issueuser.getFullname(), issueuser.getEmail(), highlight=0)"></td>
     </tr>
 	<tr tal:condition="python:not issueuser and not fromname">
 		<td><b>Name:</b></td>
-		<td><input name="fromname" tabindex="2" value="" size="30" /></td>
+		<td><input name="fromname" tabindex="2" value="" size="30" tal:attributes="value request/fromname|nothing" /></td>
 	</tr>
 	<tr tal:condition="python:not issueuser and not email">
 		<td><b>Email:</b></td>
-		<td><input name="email" tabindex="3" value="" size="30" />
+		<td><input name="email" tabindex="3" value="" size="30" tal:attributes="value request/email|nothing" />
 		</td>
 	</tr>
 	<tr>
@@ -97,6 +97,26 @@ here's a special script that converts 'section' into ['section'] if present and 
 		<a href="What-is-StructuredText">Structured Text</a>
 	    </td>
 	</tr>
+    <tr tal:condition="here/useSpambotPrevention">
+      <td>
+        <b>Spambot prevention:</b>
+      </td>
+      <td>
+        
+        <br tal:replace="structure python:here.getCaptchaNumbersHTML(request.get('captchas'), howmany=4)" />
+      
+      <input name="captcha_numbers" size="4"
+       tal:attributes="value python:request.get('captcha_numbers','')"
+       onkeydown="this.value=checkCaptchaValue(this.value, 'Only numbers', 4)"
+        />
+        <span class="submiterror" 
+             tal:content="structure python:here.ShowSubmitError(options, 'captcha_numbers')"></span>
+         <tal:block condition="not:python:options.get('SubmitError',{}).get('captcha_numbers')">enter these numbers</tal:block>
+	 
+	 
+         
+      </td>
+    </tr>	
 	<tr>
 		<td><b>Section(s):</b></td>
 		<td colspan="2">
@@ -114,6 +134,16 @@ here's a special script that converts 'section' into ['section'] if present and 
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						<input type="submit" name="SubmitIssue:method" tabindex="8" value="  Save Issue  " class="submitbutton"
                          onclick="javascript:this.value='Saving Issue...'" />
+                         
+                         
+                         <input name="fromname" type="hidden" 
+                                tal:condition="python:not issueuser and fromname"
+                                tal:attributes="value fromname" />
+                                
+                         <input name="email" type="hidden"
+                                tal:condition="python:not issueuser and email"
+                                tal:attributes="value email" />                                
+                         
 					</td>
 				</tr>
 			</table>
