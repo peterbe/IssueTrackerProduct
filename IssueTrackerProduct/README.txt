@@ -11,7 +11,7 @@ IssueTrackerProduct - A bug/issue tracker web application for Zope
  Dependencies
  
   Python 2.3.x or greater
-  Zope: Zope 2.7.x or greater
+  Zope: Zope 2.7 or later but NOT Zope 3. 
   Any operating system where Python runs
   
 
