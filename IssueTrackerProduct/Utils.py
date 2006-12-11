@@ -33,7 +33,7 @@ except ImportError:
 
 
 from addhrefs import addhrefs, __version__ as addhrefs_version
-_major, _minor = addhrefs_version.split('.')
+_major, _minor = addhrefs_version.split('.')[:2]
 try: 
     _major = int(_major)
 except ValueError:
@@ -928,8 +928,10 @@ def ShowDescription(text, display_format='',
     else:
         t = '<p>%s</p>'%safe_html_quote(text)
         t = t.replace('&amp;lt;','&lt;').replace('&amp;gt;','&gt;')
-        t = addhrefs(t)
+        t = addhrefs(t, emaillinkfunction=emaillinkfunction,
+                     urllinkfunction=urllinkfunction)
         t = newline_to_br(t)
+        
         return t
 
 
