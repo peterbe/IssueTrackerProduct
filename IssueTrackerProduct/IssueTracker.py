@@ -2016,7 +2016,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                       check_updates=False,
                       skipfolders=[]):
         """ do the actual deployment of images in a dir """
-        
+    
         # expect 'skipfolders' to be a list of tuple
         if skipfolders is None:
             skipfolders = []
@@ -2040,7 +2040,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 new_destination = getattr(destination, filestr)
                 self._deployImages(new_destination, osj(directory, filestr),
                       extensions=extensions, t=t, remove_oldstuff=remove_oldstuff,
-                      check_updates=check_updates)
+                      check_updates=check_updates,
+                      skipfolders=skipfolders)
                 
                 
             elif self._file_has_extensions(filestr, extensions):

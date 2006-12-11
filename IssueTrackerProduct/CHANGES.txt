@@ -1,5 +1,8 @@
 - 0.7.3
 
+    Bug fixed: .svn and CVS folders could be created when you Update
+    Everything.
+
     New feature: New version of addhrefs.py version 0.9.2.
 
     New feature: QuickAddIssue now shows the spambot prevention if
