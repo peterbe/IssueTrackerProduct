@@ -924,6 +924,30 @@ issue.
   </p>
   </td> 
 </tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-use_tellafriend_for_anonymous">Use 'Tell a friend' for anonymous users</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+  
+        <div class="form-element">
+	<input type="checkbox" name="use_tellafriend_for_anonymous:boolean" 
+        <dtml-if "UseTellAFriendForAnonymous()">checked="checked"</dtml-if> />
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+  If you use the Tell a friend feature, unsetting this will disallow users
+  who have not logged in to use the Tell a friend feature.<br />
+  Tip! If you're running a public issue tracker instance, spambots can use the 
+  Tell a friend to send spam unless you untick this option.
+  </p>
+  </td> 
+</tr>
+
 <tr>
   <td align="left" valign="top">
   <div class="form-label">

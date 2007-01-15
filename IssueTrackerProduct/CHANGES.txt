@@ -1,3 +1,7 @@
+
+    New feature: Possible to disable the 'Tell a friend' feature for
+    anonymous users (eg. spambots for example). Thanks Fred Damberger
+    
 - 0.7.3
 
     Bug fixed: .svn and CVS folders could be created when you Update

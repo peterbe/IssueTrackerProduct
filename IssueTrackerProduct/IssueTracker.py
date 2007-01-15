@@ -375,6 +375,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.stop_cache         = DEFAULT_STOP_CACHE
         self.allow_subscription = DEFAULT_ALLOW_SUBSCRIPTION
         self.use_tellafriend = DEFAULT_USE_TELLAFRIEND
+        self.use_tellafriend_for_anonymous = DEFAULT_USE_TELLAFRIEND_FOR_ANONYMOUS
         self.show_dates_cleverly = DEFAULT_SHOW_DATES_CLEVERLY
         self.private_statistics = DEFAULT_PRIVATE_STATISTICS
         self.private_reports = DEFAULT_PRIVATE_REPORTS
@@ -579,6 +580,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ Determine if we're going to use the tell-a-friend feature on the 
         issue view """
         return getattr(self, 'use_tellafriend', DEFAULT_USE_TELLAFRIEND)
+    
+    def UseTellAFriendForAnonymous(self):
+        """ Determine if we're going to use the tell-a-friend feature on the 
+        issue view even for anonymous users """
+        return getattr(self, 'use_tellafriend_for_anonymous',
+                       DEFAULT_USE_TELLAFRIEND_FOR_ANONYMOUS)
     
     def ShowDatesCleverly(self):
         """ Determine if we're going to show dates differently depending on 
@@ -1148,6 +1155,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         booleans = ['dispatch_on_submit','allow_issueattrchange','stop_cache',
                     'allow_subscription',
                     'use_tellafriend',
+                    'use_tellafriend_for_anonymous',
                     'private_statistics',
                     'private_reports',
                     'show_confidential_option','show_hideme_option',
@@ -2643,7 +2651,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             self.REQUEST.RESPONSE.redirect(url)
         else:
             return msg
-                
+
+    def isAnonymous(self):
+        """ return true if the user is not logged into zope in any way. """
+        username = getSecurityManager().getUser().getUserName()
+        return username.lower().replace(' ','') == 'anonymoususer'
 
     security.declareProtected(VMS, 'isViewPermissionOn')
     def isViewPermissionOn(self):

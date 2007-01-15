@@ -43,7 +43,7 @@
                         tal:attributes="href request/URL1"
                         tal:content="request/URL1">URL1</a></b></p>
 
-	    <form tal:condition="here/UseTellAFriend" 
+	    <form tal:condition="python:here.UseTellAFriend() and (not here.isAnonymous() or here.UseTellAFriendForAnonymous())"
                   tal:replace="structure here/tell_a_friend">
 	    </form>
 
@@ -142,7 +142,7 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 
   <!-- Special options -->
   <table border="0" class="specialoptions"
-   tal:define="use_tellafriend here/UseTellAFriend; 
+   tal:define="use_tellafriend python:here.UseTellAFriend() and (not here.isAnonymous() or here.UseTellAFriendForAnonymous());
                allow_subscription here/AllowIssueSubscription"
    tal:condition="python:use_tellafriend or allow_subscription">
   <tr>
