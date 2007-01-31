@@ -8,7 +8,7 @@
  tal:attributes="checked python:test(here.useFilterInSearch())" />
  
 <tal:block tal:define="saved_filter_id python:here.getCurrentlyUsedSavedFilter(request_only=0)">
-  <acronym tal:condition="saved_filter_id" 
+  <acronym tal:condition="python:saved_filter_id and here.hasSavedFilterObject(saved_filter_id)"
            tal:attributes="title python:here.getSavedFilterObject(saved_filter_id).getTitle()">
   Use current filters in search</acronym>
   <acronym tal:condition="python:not saved_filter_id" tal:replace="default">Use current filters in search </acronym>
