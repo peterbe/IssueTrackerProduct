@@ -1,32 +1,40 @@
 <script type="text/javascript"><!--
 function swapFilterLogic() {
-  //var link = document.getElementById('changefilterlogic');
-  //var label = document.getElementById('currentfilterlogic');
-  var link = $('changefilterlogic');
-  var label = $('currentfilterlogic');
+  //var link = $('changefilterlogic');
+  //var label = $('currentfilterlogic');
   var hidden = document.filter.Filterlogic
   var was = hidden.value;
   if (was=='show') {
     hidden.value='block';
-    label.innerHTML='Do not show';
-    link.href=link.href.replace('=show','=block');
-    link.innerHTML='Do only show...';
+    $('#currentfilterlogic').html('Do not show');
+    //label.innerHTML='Do not show';
+    $('#changefilterlogic').attr("href", function(){
+      return this.href.replace('=show','=block');
+    }).html('Do only show...');
+    //link.href=link.href.replace('=show','=block');
+    //link.innerHTML='Do only show...';
   } else {
     hidden.value='show';
     label.innerHTML='Do only show';
-    link.href=link.href.replace('=block','=show');
-    link.innerHTML='Do not show...';
+    $('#currentfilterlogic').html('Do only show');
+    $('#changefilterlogic').attr("href", function(){
+      return this.href.replace('=block','=show');
+    }).html('Do not show...');
+    //link.href=link.href.replace('=block','=show');
+    //link.innerHTML='Do not show...';
   }
 }
 
 function _doload(url, d, outid) {
+  $($.id(outid)).load(url + '?' +d)
   // do the actual ajax stuff
-  var a = new sack(url);
-  a.AjaxFailedAlert = null;
-  a.encodeURIString = false;
-  a.runAJAX(d);
-  a.onCompletion = function() { $(outid).innerHTML=a.response; };
-  if (a.failed) return true;
+  //var a = new sack(url);
+  //a.AjaxFailedAlert = null;
+  //a.encodeURIString = false;
+  //a.runAJAX(d);
+  //a.onCompletion = function() { $(outid).innerHTML=a.response; };
+  //if (a.failed) return true;
+  
   return false;
 }
 
@@ -36,7 +44,7 @@ function loadfilteroptions(f) {
     ob = f.elements[i];
     if (ob.type=='text'||ob.type=='hidden') d += ob.name +'='+ escape(ob.value) +'&';
   }
-  var url = f.action.replace(/\/ListIssues|\/CompleteList/,'/filter_options');
+  var url = f.action.replace(/\/ListIssues|\/CompleteList/,'/filter_options').split('?')[0];
   if (url.indexOf('?')>-1) { d += url.substring(url.indexOf('?')+1, url.length-1); url = url.substring(0, url.indexOf('?')); }
   return _doload(url, d, 'filteroptions');
 }

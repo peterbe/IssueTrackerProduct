@@ -17,15 +17,15 @@
 <link tal:condition="forced_css" rel="stylesheet" type="text/css" tal:attributes="href forced_css" />
 </tal:block>
 <link rel="Shortcut Icon" href="/favicon.ico" type="image/x-icon" tal:attributes="href string:${root_relative_url}/favicon.ico" />
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-latest.pack.js"></script>
 
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/core.js"></script>
 <script type="text/javascript" tal:condition="here/doDebug">
-function debug(s) {var el=$('dbgout');if(el)el.innerHTML=el.innerHTML+'<br />\n'+s;}
+function debug(s) {if($('#dbgout').size()){ $('#dbgout').html($('#dbgout').html() + '<br />\n'+s)}}
 </script>
 <script type="text/javascript" tal:condition="not:here/doDebug">
 function debug(s){}
 </script>
-<script type="text/javascript" src="/misc_/IssueTrackerProduct/tw-sack.js"></script>
 
 <meta tal:replace="here/testAutoLogin" />
 

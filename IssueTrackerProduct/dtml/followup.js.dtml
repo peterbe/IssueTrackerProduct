@@ -1,4 +1,4 @@
-<dtml-call "doCache(hours=1)"><dtml-call "RESPONSE.setHeader('Content-type','application/x-javascript')">
+<dtml-call "doCache(hours=24)"><dtml-call "RESPONSE.setHeader('Content-type','application/x-javascript')">
 
 var modified_timestamp;
 var _base_url = location.href.split(/[\?\#]/)[0];
@@ -7,54 +7,66 @@ if (_base_url.slice(-10)=='index_html')
 if (_base_url.charAt(_base_url.length-1)=='/')
   _base_url = _base_url.substring(0, _base_url.length-1);
 
-
-addEvent(window, 'load', function(){
-   var ajax = new sack(_base_url+'/getModifyTimestamp');
-   ajax.method="GET";
-   ajax.encodeURIString=false;
-   ajax.runAJAX();
-   ajax.onCompletion=function() {
-      if (ajax.response) modified_timestamp = ajax.response;
-   };
+$(function() {
+   $.get(_base_url+'/getModifyTimestamp', {}, function(resp) {
+      if (resp) modified_timestamp = resp;
+   });
 });
-
 
 function checkRefresh() {
    if (!modified_timestamp) return false;
-   var ajax = new sack(_base_url+'/getModifyTimestamp');
-   ajax.method="GET";
-   ajax.onCompletion=function() {
-      if (ajax.response && modified_timestamp && parseInt(ajax.response) != parseInt(modified_timestamp)) {
-	 modified_timestamp = ajax.response;
-	 var subajax = new sack(_base_url+'/ShowIssueThreads');
-	 subajax.method='GET';
-	 subajax.element = 'threads'
-	   subajax.runAJAX();
-	 var subajax2 = new sack(_base_url+'/ShowIssueData');
-	 subajax2.method='GET';
-	 subajax2.element = 'issuedata'
-	   subajax2.runAJAX();
-	 // change title
-	 if (document.title.indexOf("(automatically refreshed) ")==-1)
-	   document.title = "(automatically refreshed) " + document.title;
-	 
-      } 
-   };
-   ajax.runAJAX();
+   $.get(_base_url+'/getModifyTimestamp',{}, function(resp) {
+      if (resp && modified_timestamp && parseInt(resp) != parseInt(modified_timestamp)) {
+         modified_timestamp = resp;
+         $('#threads').load(_base_url+'/ShowIssueThreads');
+         $('#issuedata').load(_base_url+'/ShowIssueData');
+         if (document.title.indexOf("(automatically refreshed) ")==-1)
+           document.title = "(automatically refreshed) " + document.title;
+      }
+   });
+
+//   var ajax = new sack(_base_url+'/getModifyTimestamp');
+//   ajax.method="GET";
+//   ajax.onCompletion=function() {
+//      if (ajax.response && modified_timestamp && parseInt(ajax.response) != parseInt(modified_timestamp)) {
+//	 modified_timestamp = ajax.response;
+//	 var subajax = new sack(_base_url+'/ShowIssueThreads');
+//	 subajax.method='GET';
+//	 subajax.element = 'threads'
+//	   subajax.runAJAX();
+//	 var subajax2 = new sack(_base_url+'/ShowIssueData');
+//	 subajax2.method='GET';
+//	 subajax2.element = 'issuedata'
+//	   subajax2.runAJAX();
+//	 // change title
+//	 if (document.title.indexOf("(automatically refreshed) ")==-1)
+//	   document.title = "(automatically refreshed) " + document.title;
+//	 
+//      } 
+//   };
+//   ajax.runAJAX();
    
 }
 
 <dtml-if "SaveDrafts() and UseAutoSave()">
-function _done(jx,f) { if (jx.response) f.draft_followup_id.value=jx.response;}
 function autosave() {
-  var f = document.form_followup;
-  var d = form2querystring(f); //js-core.js  
-  var ajax = new sack(_base_url+'/AutoSaveDraftThread');
-  ajax.AjaxFailedAlert=null;
-  ajax.encodeURIString = false;
-  ajax.runAJAX(d);
-  ajax.onCompletion=function(){_done(ajax,f);};
+   $.post(_base_url+'/AutoSaveDraftThread', $(document.form_followup).fastSerialize(), 
+          function(resp) {
+             document.form_followup.draft_followup_id.value=resp;
+          });
+          
+   
 }
+//function _done(jx,f) { if (jx.response) f.draft_followup_id.value=jx.response;}
+//function autosave() {
+//  var f = document.form_followup;
+//  var d = form2querystring(f); //js-core.js  
+//  var ajax = new sack(_base_url+'/AutoSaveDraftThread');
+//  ajax.AjaxFailedAlert=null;
+//  ajax.encodeURIString = false;
+//  ajax.runAJAX(d);
+//  ajax.onCompletion=function(){_done(ajax,f);};
+//}
 
 var as_timer;
 
@@ -66,23 +78,24 @@ stopautosave=function() {
   if (as_timer) window.clearTimeout(as_timer);
 };
 </dtml-if>
+  
 var r_timer;
 function startautorefresh() {
   checkRefresh();
   r_timer=window.setTimeout("startautorefresh()", 40*1000);
 }
-addEvent(window, 'load', startautorefresh);
 
-function stripSpaces(x) {
-  return x.replace(/^\s+|\s+$/g,'');
-}
+$(function() {
+   startautorefresh();
+});
+
 
 
 function af(dest, e, ignoreword) {
   var val=dest.value;
   if (val.indexOf(e)==-1) {
     val = val.replace(ignoreword, "");
-    if (stripSpaces(val).charAt(stripSpaces(val).length-1)!=',') val = val+", ";
+    if ($.trim(val).charAt($.trim(val).length-1)!=',') val = val+", ";
     val = val+e+", "
   } else {
     if (val.indexOf(e+", ")!=-1) {

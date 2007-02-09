@@ -120,6 +120,7 @@ def initialize(context):
         registerIcon('gradtablehead.png')
         registerJS('tw-sack.js')
         registerJS('core.js')
+        registerJS('jquery-latest.pack.js', slim_if_possible=False)
         
         
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())
@@ -185,7 +186,7 @@ def registerIcon(filename, idreplacer={}, epath=None, startpath='www'):
             App.ImageFile.ImageFile(os.path.join(path, filename), globals())
             )
             
-def registerJS(filename, path='js'):
+def registerJS(filename, path='js', slim_if_possible=True):
     product = OFS.misc_.misc_.IssueTrackerProduct
     objectid = filename
     setattr(product,
@@ -194,9 +195,26 @@ def registerJS(filename, path='js'):
             )
     obj = getattr(product, objectid)
     if js_slimmer is not None and OPTIMIZE:
-        slimmed = js_slimmer(open(obj.path,'rb').read())
-        new_path = obj.path + '-slimmed'
-        open(new_path, 'wb').write(slimmed)
-        setattr(obj, 'path', new_path)
+        if slim_if_possible:
+            slimmed = js_slimmer(open(obj.path,'rb').read())
+            new_path = obj.path + '-slimmed'
+            open(new_path, 'wb').write(slimmed)
+            setattr(obj, 'path', new_path)
+    
+
+def registerCSS(filename, path='css', slim_if_possible=True):
+    product = OFS.misc_.misc_.IssueTrackerProduct
+    objectid = filename
+    setattr(product,
+            objectid, 
+            App.ImageFile.ImageFile(os.path.join(path, filename), globals())
+            )
+    obj = getattr(product, objectid)
+    if css_slimmer is not None and OPTIMIZE:
+        if slim_if_possible:
+            slimmed = css_slimmer(open(obj.path,'rb').read())
+            new_path = obj.path + '-slimmed'
+            open(new_path, 'wb').write(slimmed)
+            setattr(obj, 'path', new_path)
     
 

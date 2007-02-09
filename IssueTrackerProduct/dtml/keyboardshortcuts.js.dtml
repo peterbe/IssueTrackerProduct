@@ -94,32 +94,37 @@ function body_onkeypress(evt){
     } else if (s=='s' || s=='/') {
         window.scrollTo(0,0);
 	disableKS();
-        $('q').focus();
-	$('q').select();
+        $('#q').focus();
+	$('#q').select();
     } 
 
     prev_keycode=key;
     return true;
 }
 
-addEvent(document, 'keypress', body_onkeypress);
+$(document).bind("keypress", body_onkeypress);
+//addEvent(document, 'keypress', body_onkeypress);
 
 function toggleInputsKS() {
-  els = [document.getElementsByTagName("INPUT"), document.getElementsByTagName("TEXTAREA"), document.getElementsByTagName("SELECT")];
-  for (i=0; i< els.length; i++)
-    for (j=0; j<els[i].length; j++){
-      addEvent(els[i][j], 'blur', enableKS);
-      addEvent(els[i][j], 'focus', disableKS);
-    }
+   $("input,textarea,select").bind("blur", enableKS).bind("focus", disableKS);
+  //els = [document.getElementsByTagName("INPUT"), document.getElementsByTagName("TEXTAREA"), document.getElementsByTagName("SELECT")];
+  //for (i=0; i< els.length; i++)
+  //  for (j=0; j<els[i].length; j++){
+  //    addEvent(els[i][j], 'blur', enableKS);
+  //    addEvent(els[i][j], 'focus', disableKS);
+  //  }
 }
 
 function findILinks() {
    c=0;
-   links = document.getElementsByTagName('a');
-   for (i=0;i<links.length;i++)
-     if (links[i].className=='ilink') { c++;
-       all_ilinks.push(links[i]);
-     }
+   $('a.ilink').each(function() {
+      all_ilinks.push(this);
+   });
+   //links = document.getElementsByTagName('a');
+   //for (i=0;i<links.length;i++)
+   //  if (links[i].className=='ilink') { c++;
+   //    all_ilinks.push(links[i]);
+   //  }
 }
 
 function highlightILink(el){
@@ -132,7 +137,12 @@ function unhighlightILink(el){
    
 }
 
-addEvent(window, 'load', toggleInputsKS);
-addEvent(window, 'load', findILinks);
+$(function() {
+   toggleInputsKS();
+   findILinks();
+});
+
+//addEvent(window, 'load', toggleInputsKS);
+//addEvent(window, 'load', findILinks);
 
 

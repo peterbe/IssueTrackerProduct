@@ -36,7 +36,7 @@ tal:condition="python:request.get('MoreEmailOptions')">
 
 <script type="text/javascript">
 function bolderCkbox(id,on) {
-  var elem = $(id);
+  var elem = $.id(id);
   if (on) {elem.style.fontWeight='bold';}
   else {elem.style.fontWeight='normal';}
 }
