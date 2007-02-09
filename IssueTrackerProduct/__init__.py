@@ -118,7 +118,6 @@ def initialize(context):
         registerIcon('gradhead.png')
         registerIcon('gradissuehead.png')
         registerIcon('gradtablehead.png')
-        registerJS('tw-sack.js')
         registerJS('core.js')
         registerJS('jquery-latest.pack.js', slim_if_possible=False)
         
