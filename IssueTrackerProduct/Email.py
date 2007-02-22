@@ -34,9 +34,12 @@ class POP3Account(IssueTracker.IssueTrackerFolderBase):
                    {'id':'portnr',       'type': 'int',     'mode':'w'},
                    {'id':'username',     'type': 'string',  'mode':'w'},
                    {'id':'delete_after', 'type': 'boolean', 'mode':'w'},
+                   {'id':'ssl', 'type': 'boolean', 'mode':'w'},
                    )
 
-    delete_after = True # for legacy reasons
+    # for legacy reasons
+    delete_after = True
+    ssl = False
     
     security = ClassSecurityInfo()
 
@@ -44,14 +47,15 @@ class POP3Account(IssueTracker.IssueTrackerFolderBase):
     portnr = 110
     
     def __init__(self, id, hostname, username, password, portnr=110,
-                 delete_after=False):
+                 delete_after=False, ssl=False):
         """ init """
         self.id = str(id)
         self.hostname = str(hostname)
         self.portnr = int(portnr)
         self.username = str(username)
         self._password = str(password)
-        self.delete_after = delete_after
+        self.delete_after = bool(delete_after)
+        self.ssl = bool(ssl)
         
     def getTitle(self):
         """ return hostname for title """
@@ -76,6 +80,10 @@ class POP3Account(IssueTracker.IssueTrackerFolderBase):
     def doDeleteAfter(self):
         """ return delete_after """
         return self.delete_after
+
+    def doSSL(self):
+        """ return ssl """
+        return self.ssl
     
     def getAcceptingEmails(self, ids=0):
         """ return accepting email objects here """
@@ -118,7 +126,7 @@ class POP3Account(IssueTracker.IssueTrackerFolderBase):
     
     security.declareProtected(VMS, 'manage_editAccount')
     def manage_editAccount(self, hostname=None, portnr=None,
-                    username=None, password=None, delete_after=False):
+                    username=None, password=None, delete_after=False, ssl=False):
         """ change the attributes """
         if hostname is not None:
             self.hostname = hostname
@@ -130,6 +138,7 @@ class POP3Account(IssueTracker.IssueTrackerFolderBase):
             self._password = password
             
         self.delete_after = bool(delete_after)
+        self.ssl = bool(ssl)
             
         
     security.declareProtected(VMS, 'createAcceptingEmail')

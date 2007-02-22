@@ -19,6 +19,14 @@ Danny W. Adair of Asterisk Ltd for getRolesInContext(self) bug report and patch.
 import string, os, re, sys
 import random
 import poplib
+
+try:
+    from poplib import POP3, POP3_SSL
+    _has_pop3_ssl = True
+except ImportError:
+    from poplib import POP3
+    _has_pop3_ssl = False
+    
 import cgi
 import cStringIO
 import inspect
@@ -7724,9 +7732,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             return []
     
+        
+    def SupportPOP3SSL(self):
+        """ return true if we're able to support POP3_SSL """
+        return _has_pop3_ssl
+    
     security.declareProtected(VMS, 'createPOP3Account')
     def createPOP3Account(self, hostname, username,
-                          password, portnr=110, 
+                          password, portnr=110,
+                          ssl=False,
                           delete_after=False, REQUEST=None):
         """ create POP3Account object """
         genid = "%s-%s"%(hostname, username)
@@ -7743,7 +7757,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             raise "DuplicateId", "POP3Account already exists"
         
         pop3account = POP3Account(genid, hostname, username, password,
-                                  portnr, delete_after=delete_after)
+                                  portnr,
+                                  ssl=ssl,
+                                  delete_after=delete_after)
         
         root._setObject(genid, pop3account)
         pop3account = getattr(root, genid)
@@ -7854,7 +7870,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     security.declareProtected(VMS, 'manage_editPOP3Account')
     def manage_editPOP3Account(self, id, hostname=None, portnr=None, username=None, 
                         password=None, password_dummy=None, 
-                        delete_after=False, REQUEST=None):
+                        delete_after=False, ssl=False, REQUEST=None):
         """ edit POP3 account details """
         account = self.getPOP3Account(id)
         if hostname is not None and hostname.strip() != '':
@@ -7870,7 +7886,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if password is not None and password.strip() != password_dummy:
             account.manage_editAccount(password=password.strip())
             
-        account.manage_editAccount(delete_after=bool(delete_after))
+        account.manage_editAccount(delete_after=bool(delete_after), ssl=bool(ssl))
             
         if REQUEST is not None:
             # redirect back to POP3 management form
@@ -7884,8 +7900,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ do a welcome test on this POP3 account """
         account = self.getPOP3Account(accountid)
         
+        if account.doSSL():
+            connect_class = POP3_SSL
+        else:
+            connect_class = POP3
+            
         try:
-            M = poplib.POP3(account.getHostname(), port=account.getPort())
+            M = connect_class(account.getHostname(), port=account.getPort())
             M.user(account.getUsername())
             M.pass_(account._password)
             
@@ -8066,8 +8087,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for account in self.getPOP3Accounts():
             v.append('Opening account host %s:%s' % (account.getHostname(),account.getPort()))
             
+            if account.doSSL():
+                connect_class = POP3_SSL
+            else:
+                connect_class = POP3
+            
             try:
-                M = poplib.POP3(account.getHostname(), port=account.getPort())
+                M = connect_class(account.getHostname(), port=account.getPort())
             except poplib.error_proto, msg:
                 return "poplib.error_proto: " + str(msg)
             except socket_error, msg:

@@ -126,6 +126,13 @@ subject of the email see the <a href="#examplelist">bottom of this page</a>.
 	<td><p><strong>Hostname:Port</strong></p></td>
 	<td><input name="hostname" value="<dtml-var getHostname>" /> <b>:</b> <input name="portnr:int" value="<dtml-var getPort>" size="3"></td>
 </tr>
+<dtml-if "SupportPOP3SSL()">
+<tr>
+	<td><p><strong>SSL</strong></p></td>
+	<td><input name="ssl" type="checkbox" value="1" <dtml-if "doSSL()">checked="checked"</dtml-if> />
+        </td>
+</tr>
+</dtml-if>
 <tr>
 	<td><p><strong>Username</strong></p></td>
 	<td><input name="username" value="<dtml-var getUsername>" /></td>
@@ -401,15 +408,22 @@ subject of the email see the <a href="#examplelist">bottom of this page</a>.
 		</tr>
 		<tr>
 			<td><p><strong>Port</strong></p></td>
-			<td><input name="portnr:int" size="3" value="110"></td>
+			<td><input name="portnr:int" size="3" value="110" /></td>
 		</tr>
+                <dtml-if "SupportPOP3SSL()">
+		<tr>
+			<td><p><strong>SSL</strong></p></td>
+			<td><input name="ssl" type="checkbox" value="1" />
+                        </td>
+		</tr>                
+                </dtml-if>
 		<tr>
 			<td><p><strong>Username</strong></p></td>
-			<td><input name="username"></td>
+			<td><input name="username" /></td>
 		</tr>
 		<tr>
 			<td><p><strong>Password</strong></p></td>
-			<td><input name="password" type="password"></td>
+			<td><input name="password" type="password" /></td>
 		</tr>
                 <tr>
                 	<td><p><strong>Delete emails after</strong></p></td>
