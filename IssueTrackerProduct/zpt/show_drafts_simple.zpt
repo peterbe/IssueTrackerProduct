@@ -1,4 +1,5 @@
-<div tal:define="issuedrafts python:here.getMyIssueDrafts(skip_draft_issue_id=options.get('draft_issue_id', request.get('draft_issue_id')))"
+<div tal:define="issuedrafts python:here.getMyIssueDrafts(skip_draft_issue_id=options.get('draft_issue_id', request.get('draft_issue_id')));
+                 dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)"
      tal:condition="python:not request.get('previewissue') and issuedrafts" id="issuedrafts">
 <p><b>Drafts</b></p>
 <p tal:repeat="issuedraft issuedrafts">

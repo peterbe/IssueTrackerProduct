@@ -1,4 +1,6 @@
-<div class="issue" align="left" tal:define="in_completelist python:here.thisInURL('CompleteList')"
+<div class="issue" align="left" 
+     tal:define="in_completelist python:here.thisInURL('CompleteList');
+                 dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)"
  tal:attributes="ondblclick python:test(in_completelist, 'G(\'%s\')'%here.absolute_url_path())">
   <div class="istatus" tal:define="status here/status"
 			        tal:content="python:status.capitalize()">Status</div>

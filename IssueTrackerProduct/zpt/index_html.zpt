@@ -5,15 +5,6 @@ function _deldraft(draftid, method) {
   $.post(method, {id:draftid, return_show_drafts:1}, function(resp) {
     $('#issuedraftsouter').html(resp);
   });
-  //// return true if the AJAX request failed, 
-  //// return false if everything went fine.
-  //var d = 'id='+draftid +'&return_show_drafts=1';
-  //var a = new sack(method);
-  //a.AjaxFailedAlert=null;
-  //a.encodeURIString = false;
-  //a.runAJAX(d);
-  //a.onCompletion = function() { $('issuedraftsouter').innerHTML=a.response; };
-  //if (a.failed) return true;
   return false;  
 }
 function deldraft(draftid) { return _deldraft(draftid, 'DeleteDraftIssue'); }

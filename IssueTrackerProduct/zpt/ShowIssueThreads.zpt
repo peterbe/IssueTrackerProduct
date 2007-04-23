@@ -1,4 +1,7 @@
-<div align="center" tal:define="threads python:here.ListThreads()" tal:condition="threads">
+<div align="center" 
+     tal:define="threads python:here.ListThreads();
+                 dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)" 
+     tal:condition="threads">
 
   <div tal:repeat="thread threads" class="threadbox" align="left">
 

@@ -4212,8 +4212,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 fromname = issue.getFromname()
                 fromemail = issue.getEmail()
                 date = issue.getIssueDate()
+            #if isinstance(title, unicode):
+            #    title = title.encode('ascii','xmlcharrefreplace')
             title = self._prepare_feed(title)
+            #if isinstance(description, unicode):
+            #    description = description.encode('ascii','xmlcharrefreplace')
             description = self._prepare_feed(description)
+                
             date = date.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
             item = '<item rdf:about="%s">\n' % url
