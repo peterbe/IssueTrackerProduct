@@ -14,22 +14,12 @@ function shownewsection() {
   var b=$.id('newsection');b.className="";
 }
 <dtml-if "SaveDrafts() and UseAutoSave()">
-//function _done(jx,f) { 
-//  if (jx.response) f.draft_issue_id.value=jx.response;
-//}
 function autosave() {
    $.post('AutoSaveDraftIssue', $(document.ai).fastSerialize(),
           function(resp) {
              document.form_followup.draft_issue_id.value=resp;
           });
    
-  //var f = document.ai;
-  //var d = form2querystring(f); //js-core.js
-  //var ajax = new sack('AutoSaveDraftIssue');
-  //ajax.AjaxFailedAlert=null;
-  //ajax.encodeURIString = false;
-  //ajax.onCompletion = function() { _done(ajax,f); };
-  //ajax.runAJAX(d);
 }
 
 
@@ -44,11 +34,11 @@ startautosave=function() {
 </dtml-if>
 
 function bigup(){
- var t=document.ai['description:text'];t.cols=80;t.rows=20;
+ var t=$.id('description_text');t.cols=80;t.rows=20;
  var s=$.id('tsizer');s.innerHTML='<a href="#" onclick="smalldown();return false">&ndash; smaller<'+'/a>';
 }
 function smalldown(){
-  var t=document.ai['description:text'];t.cols=60;t.rows=10;
+  var t=$.id('description_text');t.cols=60;t.rows=10;
   var s=$.id('tsizer');
   s.innerHTML='<a href="#" onclick="bigup();return false">+bigger<'+'/a>';
 }
@@ -64,15 +54,6 @@ function deldraft(draftid) {
    $.post('DeleteDraftIssue', {id:draftid, return_show_drafts_simple:1}, function(resp) {
       $('#issuedraftsouter').html(resp);
    });
-  // return true if the AJAX request failed, 
-  // return false if everything went fine.
-  //var d = 'id='+draftid +'&return_show_drafts_simple=1';
-  //var a = new sack('DeleteDraftIssue');
-  //a.AjaxFailedAlert=null;
-  //a.encodeURIString = false;
-  //a.runAJAX(d);
-  //a.onCompletion = function() { $('issuedraftsouter').innerHTML=a.response; };
-  //if (a.failed) return true;
    
   return false;  
 }

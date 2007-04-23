@@ -30,6 +30,11 @@ def getEnvInt(key, default):
     except ValueError:
         return default
     
+def getEnvStr(key, default):
+    """ return a string from the environment variables """
+    value = os.environ.get(key, default)
+    return str(value)
+    
 true = not 0
 false = not true
 try:
@@ -46,6 +51,8 @@ OPTIMIZE = getEnvBool('OPTIMIZE_ISSUETRACKERPRODUCT', True)
 # Debug
 # shows some verbose dev data
 DEBUG = getEnvBool('DEBUG_ISSUETRACKERPRODUCT', False)
+
+UNICODE_ENCODING = getEnvStr('UNICODE_ENCODING_ISSUETRACKERPRODUCT', 'utf8')
 
 # constants
 ICON_LOCATION = 'misc_/IssueTrackerProduct'

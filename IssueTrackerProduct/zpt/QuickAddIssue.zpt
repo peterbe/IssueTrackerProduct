@@ -55,10 +55,11 @@ here's a special script that converts 'section' into ['section'] if present and 
                               use_autosave python:here.SaveDrafts() and here.UseAutoSave()">
 	<tr>
 		<td><b>Subject:</b></td>
-		<td><input name="title" tabindex="1" size="40" maxlength="70" 
+		<td><input name="title" tabindex="1" size="40" maxlength="70" id="title"
                       tal:attributes="value python:request.get('title','');
                                       onfocus python:test(use_autosave, 'startautosave()');
-                                      onblur python:test(use_autosave, 'stopautosave()')" />
+                                      onblur python:test(use_autosave, 'stopautosave()');
+                                      name string:title:${here/UNICODE_ENCODING}:ustring" />
             <span class="submiterror" 
              tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>  
         </td>
@@ -70,7 +71,9 @@ here's a special script that converts 'section' into ['section'] if present and 
     </tr>
 	<tr tal:condition="python:not issueuser and not fromname">
 		<td><b>Name:</b></td>
-		<td><input name="fromname" tabindex="2" value="" size="30" tal:attributes="value request/fromname|nothing" /></td>
+		<td><input name="fromname" tabindex="2" value="" size="30" 
+                           tal:attributes="value request/fromname|nothing;
+                                           name string:fromname:${here/UNICODE_ENCODING}:ustring" /></td>
 	</tr>
 	<tr tal:condition="python:not issueuser and not email">
 		<td><b>Email:</b></td>
@@ -80,9 +83,11 @@ here's a special script that converts 'section' into ['section'] if present and 
 	<tr>
 		<td colspan="2">
 			<b>Description:</b><span id="tsizer"></span><br />
-			<textarea name="description:text" tabindex="4" rows="8" cols="50" tal:content="python:request.get('description','')"
-                        tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
-                                        onblur python:test(use_autosave, 'stopautosave()')"
+			<textarea name="description:text" tabindex="4" rows="8" cols="50" id="description_text"
+                         tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
+                                         onblur python:test(use_autosave, 'stopautosave()');
+                                         name string:description:${here/UNICODE_ENCODING}:utext"
+                         tal:content="python:request.get('description','')"
                          onkeypress="if (!enabled_tsizer && this.value.length>600){enableTsizer();}"></textarea>
 
 		<input tal:condition="not:python:test(display_format =='')" type="hidden" name="display_format:string" value=""
@@ -163,8 +168,8 @@ here's a special script that converts 'section' into ['section'] if present and 
 </form>
 
 <tal:block define="useaccesskeys here/useAccessKeys">
-<script type="text/javascript" tal:condition="not:useaccesskeys">document.ai.title.focus();</script>
-<script type="text/javascript" tal:condition="useaccesskeys">document.ai.title.focus();disableKS();</script>
+<script type="text/javascript" tal:condition="not:useaccesskeys">$.id('title').focus();</script>
+<script type="text/javascript" tal:condition="useaccesskeys">$.id('title').focus();disableKS();</script>
 </tal:block>
 
 </div>

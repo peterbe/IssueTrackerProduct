@@ -25,6 +25,7 @@ except ImportError:
 from Issue import IssueTrackerIssue
 from TemplateAdder import addTemplates2Class
 import Utils
+from Utils import unicodify
 from Constants import *
 from Permissions import VMS
 from I18N import _
@@ -46,10 +47,10 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
     icon = '%s/issuethread.gif'%ICON_LOCATION
     
 
-    _properties=({'id':'title',         'type': 'string', 'mode':'w'},
-                 {'id':'comment',       'type': 'text',   'mode':'w'},
+    _properties=({'id':'title',         'type': 'ustring', 'mode':'w'},
+                 {'id':'comment',       'type': 'utext',   'mode':'w'},
                  {'id':'threaddate',    'type': 'date',   'mode':'w'},
-                 {'id':'fromname',      'type': 'string', 'mode':'w'},
+                 {'id':'fromname',      'type': 'ustring', 'mode':'w'},
                  {'id':'email',         'type': 'string', 'mode':'w'},
                  {'id':'acl_adder',     'type': 'string', 'mode':'w'},
                  {'id':'display_format','type': 'string', 'mode':'w'},
@@ -68,12 +69,12 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
                  display_format=None, acl_adder='', submission_type=''):
         """ create thread """
         self.id = str(id)
-        self.title = title
-        self.comment = comment
+        self.title = unicodify(title)
+        self.comment = unicodify(comment)
         if Utils.same_type(threaddate, 's'):
             threaddate = DateTime(threaddate)
         self.threaddate = threaddate
-        self.fromname = fromname
+        self.fromname = unicodify(fromname)
         self.email = email
         if display_format:
             self.display_format = display_format
@@ -182,7 +183,6 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         comment = self.getComment()
         display_format = self.display_format
         formatted = self.ShowDescription(comment+' ', display_format)
-
         
         if self.getSubmissionType()=='email':
             formatted = Utils.highlight_signature(formatted, 'class="sig"')
@@ -258,6 +258,13 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         if 'filenames' not in idxs and indexes.has_key('filenames'):
             idxs.append('filenames')
         catalog.catalog_object(self, path, idxs=idxs)
+        
+    def getFromname_idx(self):
+        return self.getFromname()
+    
+    def getComment_idx(self):
+        return self.getComment()
+        
 
     def unindex_object(self):
         """A common method to allow Findables to unindex themselves."""

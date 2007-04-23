@@ -23,11 +23,11 @@ startautosave = function() {
 </dtml-if>
 
 function bigup(){
- var t=document.ai['description:text'];t.cols=80;t.rows=20;
+ var t=$.id('description_text');t.cols=80;t.rows=20;
  var s=$.id('tsizer');s.innerHTML='<a href="#" onclick="smalldown();return false">&ndash; smaller<'+'/a>';
 }
 function smalldown(){
-  var t=document.ai['description:text'];t.cols=60;t.rows=10;
+  var t=$.id('description_text');t.cols=60;t.rows=10;
   var s=$.id('tsizer');
   s.innerHTML='<a href="#" onclick="bigup();return false">+bigger<'+'/a>';
 }

@@ -33,6 +33,7 @@ except ImportError:
 from IssueTracker import IssueTracker, debug
 from TemplateAdder import addTemplates2Class
 import Utils
+from Utils import unicodify
 from Constants import *
 from Permissions import VMS, ChangeIssuePermission
 from I18N import _
@@ -52,20 +53,20 @@ class IssueTrackerIssue(IssueTracker):
 
     meta_type = ISSUE_METATYPE
     
-    _properties=({'id':'title',         'type': 'string', 'mode':'w'},
+    _properties=({'id':'title',         'type': 'ustring', 'mode':'w'},
                  {'id':'issuedate',     'type': 'date',   'mode':'w'},
                  {'id':'modifydate',    'type': 'date',   'mode':'w'},
                  {'id':'status',        'type': 'string', 'mode':'w'},
                  {'id':'type',          'type': 'string', 'mode':'w'},
                  {'id':'urgency',       'type': 'string', 'mode':'w'},
                  {'id':'sections',      'type': 'lines',  'mode':'w'},
-                 {'id':'fromname',      'type': 'string', 'mode':'w'},
+                 {'id':'fromname',      'type': 'ustring', 'mode':'w'},
                  {'id':'email',         'type': 'string', 'mode':'w'},
                  {'id':'acl_adder',     'type': 'string', 'mode':'w'},
                  {'id':'url2issue',     'type': 'string', 'mode':'w'},
                  {'id':'confidential',  'type': 'boolean','mode':'w'},
                  {'id':'hide_me',       'type': 'boolean','mode':'w'},
-                 {'id':'description',   'type': 'text',   'mode':'w'},
+                 {'id':'description',   'type': 'utext',   'mode':'w'},
                  {'id':'display_format','type': 'string', 'mode':'w'},
                  {'id':'subscribers',   'type': 'lines',  'mode':'w'},
                  {'id':'submission_type','type':'string', 'mode':'w'},
@@ -93,7 +94,7 @@ class IssueTrackerIssue(IssueTracker):
                  ):
         """ init an Issue object """
         self.id = str(id)
-        self.title = title.strip()
+        self.title = unicodify(title.strip())
         if Utils.same_type(issuedate, 's'):
             issuedate = DateTime(issuedate)
         self.issuedate = issuedate
@@ -102,12 +103,12 @@ class IssueTrackerIssue(IssueTracker):
         self.type = issuetype
         self.urgency = urgency
         self.sections = sections
-        self.fromname = fromname
+        self.fromname = unicodify(fromname)
         self.email = email
         self.url2issue = url2issue
         self.confidential = confidential
         self.hide_me = hide_me
-        self.description = description
+        self.description = unicodify(description)
         if display_format:
             self.display_format = display_format
         else:
@@ -151,11 +152,15 @@ class IssueTrackerIssue(IssueTracker):
 
     def showTitle(self):
         """ return title html quoted """
-        return self.HighlightQ(
-                Utils.html_entity_fixer(
-                 Utils.tag_quote(self.getTitle())
-                )
+        t = self.getTitle()
+        if isinstance(t, str):
+            return self.HighlightQ(
+                    Utils.html_entity_fixer(
+                     Utils.tag_quote(t)
+                    )
                )
+        else:
+            return self.HighlightQ(Utils.tag_quote(t))
                
     def getStatus(self):
         """ return the status of the issue """
@@ -1388,8 +1393,8 @@ class IssueTrackerIssue(IssueTracker):
             if not draft.getTitle() or not draft.getComment(): # odd draft!
                 continue
             
-            draft_title = draft.getTitle()
-            draft_comment = draft.getComment()
+            draft_title = unicodify(draft.getTitle())
+            draft_comment = unicodify(draft.getComment())
             if draft_title == title and draft_comment == comment:
                 self._dropDraftThread(draft.getId())
             elif comment.startswith(draft_comment) and draft_title == title:
@@ -1758,8 +1763,11 @@ class IssueTrackerIssue(IssueTracker):
                 d = description + '...'
             except:
                 d = description[:length]
-       
-        return self.HighlightQ(Utils.html_entity_fixer(Utils.safe_html_quote(d)))
+        
+        if isinstance(d, str):
+            return self.HighlightQ(Utils.html_entity_fixer(Utils.safe_html_quote(d)))
+        else:
+            return self.HighlightQ(Utils.safe_html_quote(d))
 
         
     def showAdditionalInformation(self, usebrackets=0, timedifference=None):
@@ -1884,7 +1892,17 @@ class IssueTrackerIssue(IssueTracker):
                 msg = "'filenames' KeywordIndex missing. "\
                       "Press Update Everything button"
                 LOG(self.__class__.__name__, INFO, msg)
+                
         catalog.catalog_object(self, path, idxs=idxs)
+ 
+    def getTitle_idx(self):
+        return self.getTitle()
+    
+    def getFromname_idx(self):
+        return self.getFromname()
+    
+    def getDescription_idx(self):
+        return self.getDescription()
 
     def unindex_object(self):
         """A common method to allow Findables to unindex themselves."""
@@ -2455,7 +2473,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                  Tempfolder_fileattachments=None):
         """ init an Issue object """
         self.id = str(id)
-        self.title = title
+        self.title = unicodify(title)
         #if Utils.same_type(issuedate, 's'):
         #    issuedate = DateTime(issuedate)
         #self.issuedate = issuedate
@@ -2464,12 +2482,12 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         self.type = issuetype
         self.urgency = urgency
         self.sections = sections
-        self.fromname = fromname
+        self.fromname = unicodify(fromname)
         self.email = email
         self.url2issue = url2issue
         self.confidential = confidential
         self.hide_me = hide_me
-        self.description = description
+        self.description = unicodify(description)
         self.display_format = display_format
         self.acl_adder = acl_adder
         self.is_autosave = not not is_autosave
@@ -2573,10 +2591,10 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         default ModifyIssue() which creates thread objects. """
 
         if title is not None:
-            self.title = title
+            self.title = unicodify(title)
             
         if description is not None:
-            self.description = description
+            self.description = unicodify(description)
 
         if status is not None:
             self.status = status
@@ -2596,7 +2614,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
             self.sections = sections
             
         if fromname is not None:
-            self.fromname = fromname
+            self.fromname = unicodify(fromname)
 
         if email is not None:
             self.email = email

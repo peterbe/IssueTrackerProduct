@@ -1,13 +1,13 @@
 <metal:block define-macro="standard"><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
- tal:define="dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=iso-8859-1');dummy here/StopCache">
+ tal:define="dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING);dummy here/StopCache">
 
 <head tal:define="root_relative_url here/getRootRelativeURL">
 
 <title tal:content="structure here/titleTag"></title>
 <meta name="generator" content="IssueTrackerProduct - http://www.issuetrackerproduct.com" />
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Type" tal:attributes="content string:text/html;; charset=${here/UNICODE_ENCODING}" />
 <link rel="alternate" type="application/rss+xml" title="RSS" tal:attributes="href string:${root_relative_url}/rss.xml" />
 <link rel="alternate" type="application/rss+xml" title="RSS (with followups)" tal:attributes="href string:${root_relative_url}/rss.xml?show=all" />
 <link rel="start" tal:attributes="href string:${root_relative_url}/" title="Home" />

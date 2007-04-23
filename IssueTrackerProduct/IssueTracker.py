@@ -94,6 +94,7 @@ from Acquisition import aq_inner, aq_parent
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
 from App.ImageFile import ImageFile
+from ZPublisher.HTTPRequest import record
 
 # Is CMF installed?
 try:
@@ -128,6 +129,7 @@ from upgrade import VersionController
 from TemplateAdder import addTemplates2Class, CTP
 import Notifyables
 import Utils
+from Utils import unicodify
 from Webservices import IssueTrackerWebservices
 from Permissions import *
 from Constants import *
@@ -2745,8 +2747,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 title = "About Structured Text"
             #elif self.doDebug():
             #    print "what about page", page
-                
-        return Utils.html_entity_fixer(title)
+        
+        if isinstance(title, str):
+            # legacy
+            return Utils.html_entity_fixer(title)
+        else:
+            # new way
+            return title
     
     
     def hasWYSIWYGEditor(self):
@@ -3367,13 +3374,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # add all the properties
         _rfg = request.form.get
         _rg = request.get
-        title           = _rg('title')
-        fromname        = _rg('fromname')
+        title           = unicodify(_rg('title'))
+        fromname        = unicodify(_rg('fromname'))
         email           = _rg('email')
         url2issue       = _rg('url2issue')
         type            = _rg('type')
         urgency         = _rg('urgency')
-        description     = _rg('description')
+        description     = unicodify(_rg('description'))
         display_format  = _rg('display_format')
         confidential    = int(_rg('confidential',0))
         hide_me         = int(_rg('hide_me',0))
@@ -3484,7 +3491,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for issue in self.getIssueObjects():
             
             # most basic test, the title
-            if issue.title == title:
+            if unicodify(issue.title) == title:
                 
                 # potentially match email 'Message-Id'
                 if email_message_id and issue.getEmailMessageId():
@@ -3492,7 +3499,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         return issue
                 
                 # match description, sections, type and urgencies
-                if issue.description == description and \
+                if unicodify(issue.description) == description and \
                    issue.sections == sections and \
                    issue.type == type and \
                    issue.urgency == urgency:
@@ -4186,11 +4193,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 issuetitle = Utils.html_quote(issue.getTitle())
                 threadtitle = Utils.html_quote(lasthread.getTitle())
                 if self.ShowIdWithTitle():
-                    title = "%s #%s (%s)"%(issue.getTitle(), issue.getId(), lasthread.getTitle())
+                    title = u"%s #%s (%s)"%(unicodify(issue.getTitle()), issue.getId(), lasthread.getTitle())
                 else:
-                    title = "%s (%s)"%(issue.getTitle(), lasthread.getTitle())
-                description = lasthread.showComment()
-                fromname = lasthread.getFromname()
+                    title = u"%s (%s)"%(unicodify(issue.getTitle()), lasthread.getTitle())
+                description = unicodify(lasthread.showComment())
+                fromname = unicodify(lasthread.getFromname())
                 fromemail = lasthread.getEmail()
                 date = lasthread.getThreadDate()
                 url += '#i%s'%len(_all_threads)
@@ -4198,9 +4205,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 #issuetitle = Utils.html_quote(issue.title)
                 #issuestatus = Utils.html_quote(issue.status.capitalize())
                 if self.ShowIdWithTitle():
-                    title = "%s #%s (%s)"%(issue.title, issue.getId(), issue.status.capitalize())
+                    title = u"%s #%s (%s)"%(unicodify(issue.title), issue.getId(), issue.status.capitalize())
                 else:
-                    title = "%s (%s)"%(issue.title, issue.status.capitalize())
+                    title = u"%s (%s)"%(unicodify(issue.title), issue.status.capitalize())
                 description = issue.showDescription() #issue.description.strip()
                 fromname = issue.getFromname()
                 fromemail = issue.getEmail()
@@ -4346,11 +4353,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         limit = BRIEF_TITLE_MAX_LENGTH
         if self.ShowIdWithTitle():
             limit -= self.randomid_length
-        return self.tag_quote(
-                 Utils.html_entity_fixer(
-                     self.lengthLimit(title, limit, '...')
-                   )
+        if isinstance(title, str):
+            # the old way
+            return self.tag_quote(
+                     Utils.html_entity_fixer(
+                         self.lengthLimit(title, limit, '...')
+                       )
                  )
+        else:
+            return self.tag_quote(self.lengthLimit(title, limit, '...'))
                  
     def getOutlookDaylabels(self, issues):
         """ return a dictionary where the keys are the issue ids and the value is the
@@ -4490,7 +4501,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ set RESPONSE cookie """
         later = DateTime() + days
         later = later.rfc822()
-        self.REQUEST.RESPONSE.setCookie(name, str(value), expires=later, path='/')
+        try:
+            value = str(value)
+        except UnicodeEncodeError:
+            value = value.encode(UNICODE_ENCODING)
+            
+        self.REQUEST.RESPONSE.setCookie(name, value, expires=later, path='/')
         
         
     def has_cookie(self, name):
@@ -4535,7 +4551,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if request.get(s):
             return request[s]
         elif self.get_cookie(cookie):
-            return self.get_cookie(cookie)
+            if s =='fromname':
+                return unicodify(self.get_cookie(cookie))
+            else:
+                return self.get_cookie(cookie)
         elif acl_username:
             r = self._getACLCookie(acl_username, s)
             if r is None:
@@ -4984,6 +5003,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         indexes = zcatalog._catalog.indexes
         
         if not hasattr(zcatalog, 'Lexicon'):
+            # This default lexicon sucks because it doesn't support unicode.
+            # Consider creating a http://www.zope.org/Members/shh/UnicodeLexicon
+            # instead.
             script = zcatalog.manage_addProduct['ZCTextIndex'].manage_addLexicon
             
             wordsplitter = Empty()
@@ -5006,7 +5028,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 #            script = zcatalog.manage_addProduct['ZCatalog'].manage_addVocabulary
 #            script(id='Vocabulary', title='', globbing=1)
 #            t['Vocabulary'] = "It is recommended that you now run Update Catalog"
-        
+    
         for fieldindex in ('id','meta_type'):
             if not indexes.has_key(fieldindex):
                 zcatalog.addIndex(fieldindex, 'FieldIndex')
@@ -5016,15 +5038,36 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 zcatalog.addIndex(keywordindex, 'KeywordIndex')
             
         
-        textindexes = ('fromname', 'email','url2issue')
+        textindexes = ('email','url2issue')
         for idx in textindexes:
             if not indexes.has_key(idx):
                 zcatalog.addIndex(idx, 'TextIndex')
-        
-        zctextindexes = ('title','description','comment')
-        for idx in zctextindexes:
+                
+        #wrapped_textindexes = [('fromname','getTitle_idx')]
+        #for idx, indexed_attrs in wrapped_textindexes:
+        #    if indexes.has_key(idx) and not indexes[idx].call_methods:
+        #        # the old way!
+        #        indexes.pop(idx)
+        #    if not indexes.has_key(idx):
+        #        extra = record()
+        #        extra.indexed_attrs = indexed_attrs
+        #        extra.vocabulary = 'Vocabulary'
+        #        zcatalog.addIndex(idx, 'TextIndex', extra)
+            
+        #raise "STOP", 'lukasz'
+    
+        zctextindexes = (
+          ('title', 'getTitle_idx'),
+          ('description', 'getDescription_idx'),
+          ('comment', 'getComment_idx'),
+          ('fromname', 'getFromname_idx'),
+        )
+        for idx, indexed_attrs in zctextindexes:
+            
+            
+            
             extras = Empty()
-            extras.doc_attr = idx
+            extras.doc_attr = indexed_attrs
             # 'Okapi BM25 Rank' is good if you match small search terms
             # against big texts. 
             # 'Cosine Rule' is useful to match similarity between two texts
@@ -5034,10 +5077,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if indexes.has_key(idx) and indexes.get(idx).meta_type \
               not in ('ZCTextIndex', 'TextIndexNG2'):
                 zcatalog.delIndex(idx)
+                
+            if indexes.has_key(idx):# and indexes.get(idx)
+                if indexed_attrs not in indexes.get(idx).getIndexSourceNames():
+                    # The old way
+                    zcatalog.delIndex(idx)
             
             if not indexes.has_key(idx):
                 zcatalog.addIndex(idx, 'ZCTextIndex', extras)
-                
+                t['ZCTextIndex'] = idx
                 
         # now we need to say that certain indexes must use
         # the vocabulary.
@@ -5514,8 +5562,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 email = fromname.getEmail()
                 fromname = fromname.getFullname()
 
-        fromname = Utils.html_entity_fixer(self.safe_html_quote(fromname))
-        email    = Utils.html_quote(email)
+        if isinstance(fromname, str):
+            # old way
+            fromname = Utils.html_entity_fixer(self.safe_html_quote(fromname))
+            fromname = self.safe_html_quote(fromname)
+        else:
+            # new way
+            fromname = fromname.encode('ascii', 'xmlcharrefreplace')
+            
+        email = Utils.html_quote(email)
         show_email = email
         
         if highlight:
@@ -7458,7 +7513,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         key = RECENTHISTORY_SEARCHKEY
         
         searches = self.get_session(key, [])
-        as_dict = {'q':q, 'yield':result}
+        as_dict = {'q':unicodify(q), 'yield':result}
         
         request.set('NotYetRecent', as_dict)
         if as_dict not in searches:
@@ -7481,7 +7536,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def getRecentSearchTerms(self, length=None):
         """ Return if any exists """
         key = RECENTHISTORY_SEARCHKEY
-
         searches = self.get_session(key, {})
         if length:
             searches = searches[:length]
@@ -7499,8 +7553,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         items = []
         for term in searches:
             q = term['q']
-            href = actionurl + '?q=%s'%Utils.url_quote_plus(q)
-            q_nice = Utils.html_entity_fixer(q)
+            if isinstance(q, str):
+                q_quoted = Utils.url_quote_plus(q)
+            else:
+                try:
+                    q_quoted = Utils.url_quote_plus(q.encode(UNICODE_ENCODING))
+                except UnicodeEncodeError:
+                    q_quoted = Utils.url_quote_plus(q.encode('ascii','xmlcharrefreplace'))
+            href = actionurl + '?q=%s' % q_quoted
+            if isinstance(q, str):
+                # old way
+                q_nice = Utils.html_entity_fixer(q)
+            else:
+                q_nice = q
             htmlchunk = '<a href="%s">%s</a> '%(href, q_nice)
             htmlchunk += '(%s found)'%term['yield']
             items.append(htmlchunk)
@@ -10031,7 +10096,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # Go on, make the changes
 
         # 1. Change the details of the user object
-        fullname = fullname.strip()
+        fullname = unicodify(fullname.strip())
         email = email.strip()
         if issueuser:
             userfolder._changeUserDetails(issueuser.name, fullname, email)
@@ -10628,7 +10693,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if enough_request_data:    
             # check that a draft like this doesn't exist already
             _finder = self._findMatchingIssueDraft
-            draft = _finder(request.get('title',''), request.get('description',''))
+            draft = _finder(unicodify(request.get('title','')), 
+                            unicodify(request.get('description','')))
             if draft:
                 return False
         
@@ -10639,7 +10705,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         container = self.getDraftsContainer()
         draftobjects = container.objectValues(ISSUE_DRAFT_METATYPE)
         for draft in draftobjects:
-            if draft.title == title and draft.description == description:
+            if unicodify(draft.title) == title and unicodify(draft.description) == description:
                 return draft
         return None
         
@@ -10674,9 +10740,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         modifier = draftissue.ModifyIssue
         rget = REQUEST.get
         
-        modifier(title=rget('title'),
-                 description=rget('description'),
-                 fromname=rget('fromname'),
+        modifier(title=unicodify(rget('title')),
+                 description=unicodify(rget('description')),
+                 fromname=unicodify(rget('fromname')),
                  email=rget('email'),
                  acl_adder=acl_adder,
                  display_format=rget('display_format', self.getSavedTextFormat()),
@@ -11982,6 +12048,9 @@ security.declareProtected(AddIssuesPermission, 'QuickAddIssue')
 security.apply(IssueTracker)
 
 InitializeClass(IssueTracker)
+
+
+setattr(IssueTracker, 'UNICODE_ENCODING', UNICODE_ENCODING)
 
 #----------------------------------------------------------------------------
 

@@ -32,7 +32,8 @@
 	         tal:condition="errors/comment|nothing" 
       	         tal:content="structure python:here.ShowSubmitError(options, 'comment', linebreak=1)"></span>
 		<textarea tabindex="1" name="comment" id="textarea" rows="10" cols="70"
-		tal:attributes="rows python:test(minimalformfollowup, 5, 10);
+		tal:attributes="name string:comment:${here/UNICODE_ENCODING}:utext;
+                                rows python:test(minimalformfollowup, 5, 10);
                                 cols python:test(minimalformfollowup, 70, 70);
                                 onfocus python:test(here.SaveDrafts() and here.UseAutoSave(), 'startautosave()');
                                 onblur python:test(here.SaveDrafts() and here.UseAutoSave(), 'stopautosave()')
@@ -58,9 +59,10 @@
 	<tr>
 		<td tal:define="fromname request/fromname | python:here.getSavedUser('fromname');email request/email | python:here.getSavedUser('email')">
 		
-			<input type="hidden" name="fromname"
+			<input type="hidden" name="fromname::"
 			tal:condition="not:python:minimalformfollowup and fromname=='' or not minimalformfollowup"
-			tal:attributes="value fromname" />
+			tal:attributes="value fromname;
+                                        name string:fromname:${here/UNICODE_ENCODING}:ustring" />
 			
 			<input type="hidden" name="email"
 			tal:condition="not:python:minimalformfollowup and email=='' or not minimalformfollowup"
@@ -78,8 +80,10 @@
                 </tr>
 		<tr tal:condition="python:not loggedin and (minimalformfollowup and fromname=='' or not minimalformfollowup)">
 		    <td><b>Name:</b></td>
-                    <td><input tabindex="4" name="fromname" tal:attributes="value fromname"
-			 size="25" /></td>
+                    <td><input tabindex="4" name="fromname" size="25"
+                         tal:attributes="value fromname;
+                                         name string:fromname:${here/UNICODE_ENCODING}:ustring"
+			  /></td>
 		</tr>
 		<tr tal:condition="python:not loggedin and (minimalformfollowup and email=='' or not minimalformfollowup)">
 		    <td><b>Email:</b></td>

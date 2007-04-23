@@ -49,11 +49,14 @@ tal:attributes="id python:test(request.get('change'),'rightcorner_change','right
   <tr>
     <td><b>Name</b></td>
     <td><input name="fullname" tal:condition="issueuser"
-         tal:attributes="value request/fullname|issueuser/getFullname" />
+         tal:attributes="value request/fullname|issueuser/getFullname;
+                         name string:fullname:${here/UNICODE_ENCODING}:ustring" />
         <input name="fullname" tal:condition="cmfuser"
-         tal:attributes="value python:request.get('fullname', cmfuser.getProperty('fullname'))" />
+         tal:attributes="value python:request.get('fullname', cmfuser.getProperty('fullname'));
+                         name string:fullname:${here/UNICODE_ENCODING}:ustring" />
         <input name="fullname" tal:condition="not:python:issueuser or cmfuser"
-         tal:attributes="value python:request.get('fullname', here.getSavedUser('fullname'))" />
+         tal:attributes="value python:request.get('fullname', here.getSavedUser('fullname'));
+                         name string:fullname:${here/UNICODE_ENCODING}:ustring" />
         <span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fullname')"></span>
     </td>
   </tr>

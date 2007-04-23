@@ -5,8 +5,7 @@
 
 # python 
 import string
-import sys
-import re
+import sys, re, os
 import codecs
 from random import shuffle
 from math import floor
@@ -23,14 +22,15 @@ for k,v in entitydefs.items():
 
 
 # zope
-try:
-    from Products.PythonScripts.standard import html_quote, newline_to_br, \
-         structured_text, url_quote, url_quote_plus
-except ImportError:
-    sys.path.insert(0, '/home/peterbe/zope/zope273/lib/python')
-    from Products.PythonScripts.standard import html_quote, newline_to_br, \
-         structured_text, url_quote, url_quote_plus
+from Products.PythonScripts.standard import html_quote, newline_to_br, \
+         url_quote, url_quote_plus
 
+from StructuredText.StructuredText import HTML
+
+def structured_text(txt):
+    return HTML(txt,
+                level=int(os.environ.get('STX_DEFAULT_LEVEL',3)),
+                header=0)
 
 from addhrefs import addhrefs, __version__ as addhrefs_version
 _major, _minor = addhrefs_version.split('.')[:2]
@@ -56,6 +56,21 @@ except ImportError:
                 return True
         return False
 
+from Constants import UNICODE_ENCODING
+
+def unicodify(s, encodings=(UNICODE_ENCODING, 'latin1', 'utf8')):
+    if isinstance(s, str):
+        if not isinstance(encodings, (tuple, list)):
+            encodings = [encodings]
+        for encoding in encodings:
+            try:
+                return unicode(s, encoding)
+            except UnicodeDecodeError:
+                pass
+        raise UnicodeDecodeError, \
+            "Unable to unicodify %r with these encodings %s" % (s, encodings)
+    return s
+        
 
 def SimpleTextPurifier(text):
     text = text.replace('<p>&nbsp;</p>','')
@@ -908,9 +923,9 @@ def ShowDescription(text, display_format='',
                     '[':'|[|'}.items():
             st = st.replace(k,v)
 
-        st = html_entity_fixer(st, skipchars=('"',))
-        
-
+        if isinstance(st, str):
+            st = html_entity_fixer(st, skipchars=('"',))
+            
         st = structured_text(st)
         
         for k,v in {'&amp;lt;':'&lt;', '&amp;gt;':'&gt;',
