@@ -1,3 +1,7 @@
+
+    New feature: fromname, title and description of issues and
+    followups are now stored as unicode! The default encoding is utf8.
+    
     New feature: If you run Python 2.4 on your Zope you can configure
     the POP3 to use SSL. Thanks Shane Graber
 
