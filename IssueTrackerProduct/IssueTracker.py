@@ -8356,12 +8356,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     # added. Not overly happy about this test check.
                     return self._processInboundEmailReply(email, reply_issue_id_found)
                         
-        body = email['body'].strip()
+        body = unicodify(email['body'].strip())
         
         # Before we can create this issue, we need to make a duplication
         # check to prevent duplicate issues with the exact same 
         # input.
-        title = email['title']
+        title = unicodify(email['title'])
         if self._check4Duplicate(title, body,
                           sections=email['sections'], type=email['type'],
                           urgency=email['urgency'],
@@ -8370,9 +8370,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                           
             
         create = self.createIssueObject
-        issue = create(None, email['title'], self.getStatuses()[0],
-                       email['type'], email['urgency'], email['sections'],
-                       email['fromname'], email.get('email',''), '', 0, 0, 
+        issue = create(None, unicodify(email['title']), 
+                       self.getStatuses()[0],
+                       email['type'], 
+                       email['urgency'], 
+                       email['sections'],
+                       unicodify(email['fromname']),
+                       email.get('email',''), '', 0, 0, 
                        body,
                        display_format,
                        email['date'], index=True,
