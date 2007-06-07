@@ -17,7 +17,11 @@ function shownewsection() {
 function autosave() {
    $.post('AutoSaveDraftIssue', $(document.ai).fastSerialize(),
           function(resp) {
-             document.form_followup.draft_issue_id.value=resp;
+             if (resp) {
+               console.log(resp);
+               $('input[@name=draft_issue_id]').val(resp);
+               console.log($('input[@name=draft_issue_id]'));
+             }
           });
    
 }

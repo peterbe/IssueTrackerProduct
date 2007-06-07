@@ -10674,7 +10674,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     security.declareProtected('View', 'AutoSaveDraftIssue')
     def AutoSaveDraftIssue(self, REQUEST, draft_issue_id=None):
         """ called potentially by the Ajax script """
-        
 
         _saver = self._saveDraftIssue
         if self.SaveDrafts() and REQUEST.form and \
@@ -10702,7 +10701,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if enough_request_data:    
             # check that a draft like this doesn't exist already
             _finder = self._findMatchingIssueDraft
-            draft = _finder(unicodify(request.get('title','')), 
+            draft = _finder(unicodify(request.get('title','')),
                             unicodify(request.get('description','')))
             if draft:
                 return False

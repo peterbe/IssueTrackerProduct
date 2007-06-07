@@ -1,3 +1,4 @@
+    Bug fixed: multiple drafts were created sometimes.
 
     New feature: fromname, title and description of issues and
     followups are now stored as unicode! The default encoding is utf8.
