@@ -1,3 +1,7 @@
+    New feature: The autorefresh interval starts on 3 seconds interval
+    and increases the interval length by 30% each time it incurs.
+    http://www.issuetrackerproduct.com/News/autorefresh-intervals/
+
     Bug fixed: multiple drafts were created sometimes.
 
     New feature: fromname, title and description of issues and

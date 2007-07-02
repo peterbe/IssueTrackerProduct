@@ -245,7 +245,6 @@ SHOW_FILTEROPTIONS_KEY = '__issuetracker_show_filteroptions'
 FILTEROPTIONS_KEY = '__issuetracker_filteroptions'
 
 
-
 # Misc
 AUTOSAVE_INTERVAL_SECONDS = 6
 FILTERVALUER_EXPIRATION_DAYS = 30 # saved filters > this gets cleaned away
