@@ -373,6 +373,10 @@ class IssueTrackerIssue(IssueTracker):
 
     
     
+    def _unicode_description(self):
+        """ make the description of this issue a unicode string """
+        self.description = unicodify(self.description)
+        self._prerendered_description = unicodify(self._prerendered_description)
         
     def _prerender_description(self):
         """ Run the methods that pre-renders the description on the issue. """

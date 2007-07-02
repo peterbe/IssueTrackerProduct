@@ -176,7 +176,11 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             comment = comment.replace('<p>&nbsp;</p>','')
             
         return comment
-    
+
+    def _unicode_comment(self):
+        """ make the comment of this thread a unicode string """
+        self.comment = unicodify(self.comment)
+        self._prerendered_comment = unicodify(self._prerendered_comment)
     
     def _prerender_comment(self):
         """ Run the methods that pre-renders the comment of the issue. """

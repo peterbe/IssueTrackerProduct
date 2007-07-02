@@ -1652,8 +1652,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         msgs.append(self.CleanOldSavedFilters(user_excess_clean=True,
                                               implode_if_possible=True,
                                               clean_keyed_only_filtervaluers=True))
-                                              
-
+                                    
+        #msg.append(self.FixNonUnicodeIssues())
+        
         msg = '\n'.join([x for x in msgs if x])
         
         if DestinationURL:
@@ -1744,15 +1745,20 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         count_issues = 0
         count_threads = 0
         root = self.getRoot()
+        
         for issue in root.getIssueObjects():
+            if isinstance(issue.getDescription(), str):
+                issue._unicode_description()
+                
             d_before = issue._getFormattedDescription()
             issue._prerender_description()
             d_after = issue._getFormattedDescription()
             if d_before != d_after:
                 count_issues += 1
-                
             
             for thread in issue.getThreadObjects():
+                if isinstance(thread.getComment(), str):
+                    thread._unicode_comment()
                 c_before = thread._getFormattedComment()
                 thread._prerender_comment()
                 c_after = thread._getFormattedComment()
