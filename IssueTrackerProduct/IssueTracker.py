@@ -9752,7 +9752,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # check if any of it matches
             if issue.getACLAdder() == acl_user:
                 issues.append(issue)
-            elif fromname == user_fullname and \
+            elif unicodify(fromname) == user_fullname and \
                  email == user_email:
                 issues.append(issue)
                 
@@ -9779,7 +9779,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if thread.getACLAdder() == acl_user:
                     threads.append(thread)
                     threadcounts[thread.absolute_url()] = count
-                elif fromname == user_fullname and \
+                elif unicodify(fromname) == user_fullname and \
                      email == user_email:
                     threads.append(thread)
                     threadcounts[thread.absolute_url()] = count
@@ -11061,7 +11061,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
             if issue.getACLAdder() == acl_user:
                 opened = True
-            elif issue_fromname == fromname and \
+            elif unicodify(issue_fromname) == fromname and \
                  issue_email == email:
                 opened = True
                 
@@ -11387,7 +11387,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         params['description'] = text
         
-        return Utils.AddParam2URL(url, params)
+        return Utils.AddParam2URL(url, params, unicode_encoding=UNICODE_ENCODING)
     
     def guessPages(self, url=None, howmany=10):
         """ return [[URL,Title], ...] alternatives if any. This is used on the

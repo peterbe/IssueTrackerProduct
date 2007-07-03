@@ -684,7 +684,8 @@ def preParseEmailString(es, names2emails={}, aslist=0):
 
         
 
-def AddParam2URL(url, params={}, plus_quote=False, **kwargs):
+def AddParam2URL(url, params={}, unicode_encoding='utf8', 
+                 plus_quote=False, **kwargs):
     """ return url and append params but be aware of existing params """
     if plus_quote:
         url_quoter = url_quote_plus
@@ -699,8 +700,12 @@ def AddParam2URL(url, params={}, plus_quote=False, **kwargs):
     for key, value in params.items():
         if same_type(value, []) or same_type(value, ()):
             for e in value:
+                if isinstance(e, unicode):
+                    e = e.encode(unicode_encoding)
                 url += '%s=%s&'%(key, url_quoter(e))
         else:
+            if isinstance(value, unicode):
+                value = value.encode(unicode_encoding)
             url += '%s=%s&'%(key, url_quoter(value))
     return url[:-1]
 
