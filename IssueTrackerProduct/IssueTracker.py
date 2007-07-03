@@ -50,6 +50,10 @@ except ImportError:
     # must be old python 
     Set = None
     
+from email.MIMEText import MIMEText
+from email.MIMEMultipart import MIMEMultipart
+from email.Header import Header
+from email.Utils import parseaddr, formataddr    
     
 try:
     import email.Parser as email_Parser
@@ -6397,6 +6401,101 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 debug(body)
             return True
         except:
+            debug("Failed to send email")
+            debug(msg, steps=4)
+            typ, val, tb = sys.exc_info()
+            if swallowerrors:
+                try:
+                    err_log = self.error_log
+                    err_log.raising(sys.exc_info())
+                except:
+                    pass                
+                _classname = self.__class__.__name__
+                _methodname = inspect.stack()[1][3]
+                LOG("%s.%s"%(_classname, _methodname), ERROR,
+                    'Could not send email to %s'%to,
+                    error=sys.exc_info())
+                return False
+            else:
+                raise typ, val
+            
+
+    def sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
+        """ this is the new sendEmail that works much better but with Unicode instead
+        """
+        if 1:#try:
+            header_charset = 'ISO-8859-1'
+            #header_charset = UNICODE_ENCODING
+            # We must choose the body charset manually
+                
+            for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'LATIN-1':
+                try:
+                    msg.encode(body_charset)
+                except UnicodeError:
+                    pass
+                else:
+                    break
+            #body_charset = UNICODE_ENCODING
+                
+            # Split real name (which is optional) and email address parts
+            fr_name, fr_addr = parseaddr(fr)
+            to_name, to_addr = parseaddr(to)
+            
+            # Make sure email addresses do not contain non-ASCII characters
+            fr_addr = fr_addr.encode('ascii')
+            to_addr = to_addr.encode('ascii')            
+            
+            # We must always pass Unicode strings to Header, otherwise it will
+            # use RFC 2047 encoding even on plain ASCII strings.
+            fr_name = str(Header(unicode(fr_name), header_charset))
+            to_name = str(Header(unicode(to_name), header_charset))
+            
+            headers_clean={}
+            for key, value in headers.items():
+                if isinstance(key, str) and key.strip():
+                    key = key.strip()
+                    if key.endswith(':'):
+                        key = key[:-1]
+                    value = str(value).strip()
+                headers_clean[key] = value
+            
+            # Create the message ('plain' stands for Content-Type: text/plain)
+            #print repr(msg)
+            try:
+                msg_encoded = msg.encode(body_charset)
+                #print "\t1", repr(msg_encoded)
+            except UnicodeDecodeError:
+                if isinstance(msg, str):
+                    try:
+                        msg_encoded = unicode(msg, body_charset).encode(body_charset)
+                        #print "\t\t2", repr(msg_encoded)
+                    except UnicodeDecodeError:
+                        logger.warn("Unable to encode msg (type=%r, body_charset=%s)" %\
+                            (type(msg), body_charset),
+                            exc_info=True)
+                        msg_encoded = Utils.internationalizeID(msg)
+                        
+                else:
+                    logger.warn("Unable to encode msg (type=%r, body_charset=%s)" %\
+                            (type(msg), body_charset),
+                            exc_info=True)
+                    msg_encoded = Utils.internationalizeID(msg)
+                    
+            message = MIMEText(msg_encoded, 'plain', body_charset)
+            message['From'] = formataddr((fr_name, fr_addr))
+            message['To'] = formataddr((to_name, to_addr))
+            message['Subject'] = Header(unicode(subject), header_charset)
+            for k, v in headers_clean.items():
+                message[k] = Header(unicode(v), header_charset)
+            
+            mailhost = self._findMailHost()
+            # We like to do our own (more unicode sensitive) munging of headers and 
+            # stuff but like to use the mailhost to do the actual network sending.
+            mailhost._send(fr, to, message.as_string())
+            
+            return True
+        
+        else:#except:
             debug("Failed to send email")
             debug(msg, steps=4)
             typ, val, tb = sys.exc_info()
