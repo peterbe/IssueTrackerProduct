@@ -2755,8 +2755,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 title = "WYSIWYG = What You See Is What You Get"
             elif page == 'What-is-StructuredText':
                 title = "About Structured Text"
-            #elif self.doDebug():
-            #    print "what about page", page
         
         if isinstance(title, str):
             # legacy
