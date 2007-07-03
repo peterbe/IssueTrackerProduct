@@ -1,3 +1,6 @@
+    Bug fixed: Emails in unicode (non-ascii) characters could lead to
+    email notifications being sent out incorrectly.
+
     New feature: The autorefresh interval starts on 3 seconds interval
     and increases the interval length by 30% each time it incurs.
     http://www.issuetrackerproduct.com/News/autorefresh-intervals/
