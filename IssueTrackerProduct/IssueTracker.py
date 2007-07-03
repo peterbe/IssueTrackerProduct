@@ -10613,8 +10613,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if not draft.getTitle() or not draft.getDescription(): # odd draft!
                 continue
             
-            draft_desc = draft.getDescription()
-            draft_title = draft.getTitle()
+            draft_desc = unicodify(draft.getDescription())
+            draft_title = unicodify(draft.getTitle())
             if draft_title == title and draft_desc == description:
                 self._dropDraftIssue(draft.getId())
             elif title.startswith(draft_title) and draft_desc == description:
