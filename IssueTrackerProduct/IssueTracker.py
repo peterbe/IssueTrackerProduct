@@ -1751,8 +1751,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         root = self.getRoot()
         
         for issue in root.getIssueObjects():
+            # fix a few possible legacy issues with the issue
             if isinstance(issue.getDescription(), str):
                 issue._unicode_description()
+            if isinstance(issue.fromname, str):
+                issue.fromname = unicodify(issue.fromname)
+            
                 
             d_before = issue._getFormattedDescription()
             issue._prerender_description()
@@ -1761,8 +1765,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 count_issues += 1
             
             for thread in issue.getThreadObjects():
+                # fix a few possible legacy issues with the issue
                 if isinstance(thread.getComment(), str):
                     thread._unicode_comment()
+                if isinstance(thread.fromname, str):
+                    thread.fromname = unicodify(thread.fromname)
+                    
+                    
                 c_before = thread._getFormattedComment()
                 thread._prerender_comment()
                 c_after = thread._getFormattedComment()
