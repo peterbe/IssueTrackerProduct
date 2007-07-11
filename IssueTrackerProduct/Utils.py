@@ -171,6 +171,7 @@ def textify(html_snippet, maxwords=None):
     else:
         return string.join(words)
     
+    
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436833
 def printu(ustr):
     print ustr.encode('raw_unicode_escape')
