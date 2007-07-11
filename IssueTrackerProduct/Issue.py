@@ -265,7 +265,6 @@ class IssueTrackerIssue(IssueTracker):
         description = self.getDescription()
         if self.getDisplayFormat() =='html':
             # textify() coverts "<tag>Something</tag>" to "Something". Simple.
-            LOG(self.__class__.__name__, INFO, "DESCRIPTION=%r" % (description))
             description = Utils.textify(description)
             
             # a very common thing is that the description contains

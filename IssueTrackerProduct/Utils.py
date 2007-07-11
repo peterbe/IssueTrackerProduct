@@ -138,38 +138,42 @@ def filenameSplitter(filename):
     return uniqify(keys)
     
     
-def textify(html_snippet, maxwords=None):
-    """ Thank you Fredrik Lundh
-    http://online.effbot.org/2003_08_01_archive.htm#20030811
-    """
+def textify(html_snippet):
+    return re.sub('<.*?>', '', html_snippet)
 
-    class Parser(htmllib.HTMLParser):
-        def anchor_end(self):
-            self.anchor = None
-
-    class Formatter(formatter.AbstractFormatter):
-        pass
-
-    class Writer(formatter.DumbWriter):
-        def send_label_data(self, data):
-            self.send_flowing_data(data)
-            self.send_flowing_data(" ")
-
-    o = StringIO.StringIO()
-    p = Parser(Formatter(Writer(o)))
-    p.feed(html_snippet)
-    p.close()
-
-    words = o.getvalue().split()
-
-
-    if maxwords:
-        if len(words) <= 2*maxwords:
-            return string.join(words)
-        
-        return string.join(words[:maxwords]) + " ..."
-    else:
-        return string.join(words)
+##def textify(html_snippet, maxwords=None):
+##    """ Thank you Fredrik Lundh
+##    http://online.effbot.org/2003_08_01_archive.htm#20030811
+##    """
+##    
+##
+##    class Parser(htmllib.HTMLParser):
+##        def anchor_end(self):
+##            self.anchor = None
+##
+##    class Formatter(formatter.AbstractFormatter):
+##        pass
+##
+##    class Writer(formatter.DumbWriter):
+##        def send_label_data(self, data):
+##            self.send_flowing_data(data)
+##            self.send_flowing_data(" ")
+##
+##    o = StringIO.StringIO()
+##    p = Parser(Formatter(Writer(o)))
+##    p.feed(html_snippet)
+##    p.close()
+##
+##    words = o.getvalue().split()
+##
+##
+##    if maxwords:
+##        if len(words) <= 2*maxwords:
+##            return string.join(words)
+##        
+##        return string.join(words[:maxwords]) + " ..."
+##    else:
+##        return string.join(words)
     
     
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436833
