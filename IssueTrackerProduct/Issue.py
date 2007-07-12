@@ -153,8 +153,6 @@ class IssueTrackerIssue(IssueTracker):
     def showTitle(self):
         """ return title html quoted """
         t = self.getTitle()
-        print "HERE IN showTitle(): %r" % t
-        print 
         if isinstance(t, str):
             return self.HighlightQ(
                     Utils.html_entity_fixer(
