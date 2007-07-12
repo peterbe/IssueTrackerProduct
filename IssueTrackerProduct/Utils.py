@@ -421,20 +421,23 @@ def html_entity_fixer(text, skipchars=[], extra_careful=1):
     if isinstance(skipchars, basestring):
         skipchars = [skipchars]
 
-    
     keyholder= {}
     for x in _badchars_regex.findall(text):
         if x not in skipchars:
             keyholder[x] = 1
+            
     text = text.replace('&','&amp;')
-    text = text.replace('\x80', '&#8364;')
+    text = text.replace(u'\x80', '&#8364;')
     for each in keyholder.keys():
         if each == '&':
             continue
 
-        better = entitydefs_inverted[each]
-        if not better.startswith('&#'):
-            better = '&%s;'%entitydefs_inverted[each]
+        try:
+            better = entitydefs_inverted[each]
+            if not better.startswith('&#'):
+                better = '&%s;'%entitydefs_inverted[each]
+        except KeyError:
+            continue
         
         text = text.replace(each, better)
     return text
