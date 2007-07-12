@@ -153,6 +153,8 @@ class IssueTrackerIssue(IssueTracker):
     def showTitle(self):
         """ return title html quoted """
         t = self.getTitle()
+        print "HERE IN showTitle(): %r" % t
+        print 
         if isinstance(t, str):
             return self.HighlightQ(
                     Utils.html_entity_fixer(
@@ -372,6 +374,9 @@ class IssueTrackerIssue(IssueTracker):
         return regex.sub(process_find, formatted)
 
     
+    def _unicode_title(self):
+        """ make the title of this issue a unicode string """
+        self.title = unicodify(self.title)
     
     def _unicode_description(self):
         """ make the description of this issue a unicode string """

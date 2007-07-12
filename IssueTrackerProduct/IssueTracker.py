@@ -1752,6 +1752,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         for issue in root.getIssueObjects():
             # fix a few possible legacy issues with the issue
+            if isinstance(issue.getTitle(), str):
+                issue._unicode_title()
             if isinstance(issue.getDescription(), str):
                 issue._unicode_description()
             if isinstance(issue.fromname, str):
@@ -11444,6 +11446,27 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def bugreportingURL(self, error_type=None, error_value=None,
                         error_traceback=None):
         """ return a quoted url for reporting bugs """
+        url, params = self._getBugReportingParameters(error_type=error_type,
+                                                      error_value=error_value,
+                                                      error_traceback=error_traceback)
+        
+        return Utils.AddParam2URL(url, params, unicode_encoding=UNICODE_ENCODING)
+    
+    def bugreportingForm(self, error_type=None, error_value=None,
+                        error_traceback=None, submit_value='Issue Tracker'):
+        url, params = self._getBugReportingParameters(error_type=error_type,
+                                                      error_value=error_value,
+                                                      error_traceback=error_traceback)
+        html = ['<form action="%s" method="post">' % url]
+        for k, v in params.items():
+            html.append(u'<input type="hidden" name="%s" value="%s" />' % (k, Utils.html_quote(v)))
+            
+        html.append(u'<input type="submit" value="%s" />' % submit_value)
+        html.append('</form>')
+        return '\n'.join(html)
+        
+    def _getBugReportingParameters(self, error_type=None, error_value=None,
+                                   error_traceback=None):
         url = "http://real.issuetrackerproduct.com/AddIssue"
         params = {'type':'bug report'}
         this_name = self.getSavedUser('fromname')
@@ -11493,7 +11516,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         params['description'] = text
         
-        return Utils.AddParam2URL(url, params, unicode_encoding=UNICODE_ENCODING)
+        return url, params
+        
     
     def guessPages(self, url=None, howmany=10):
         """ return [[URL,Title], ...] alternatives if any. This is used on the

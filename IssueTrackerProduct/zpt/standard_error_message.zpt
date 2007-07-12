@@ -112,9 +112,15 @@ has not been defined in that block of code.
   <p>If this error is highly unexpected you might want to contribute to the 
   IssueTrackerProduct project how you encountered the error and its presence. To do this, you need to 
   report it back to the 
-  <a tal:define="homeurl here/project_homepage" tal:attributes="href homeurl">IssueTrackerProduct website</a> on the 
+  <a tal:define="homeurl here/project_homepage" tal:attributes="href homeurl">IssueTrackerProduct website</a> on the
+  <form tal:replace="structure python:here.bugreportingForm(err_type, err_value, err_traceback, submit_value='Real Issue Tracker')">
+  </form>
+  
+  <tal:comment replace="nothing">
   <a href="http://real.issuetrackerproduct.com/AddIssue"
    tal:attributes="href python:here.bugreportingURL(err_type, err_value, err_traceback)">Real Issue Tracker</a>.
+  </tal:comment>
+  
   </p>
   <p tal:define="errorfileobject python:here.createErrorFileObject(options)" tal:condition="errorfileobject">
     Download this file and attach it together with the bug report when you submit it:<br />
