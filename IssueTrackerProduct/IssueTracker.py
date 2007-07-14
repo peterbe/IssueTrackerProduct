@@ -3228,6 +3228,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             name = zopeuser.getUserName()
             acl_adder = ','.join([path, name])
 
+        _invalid_name_chars = re.compile('|'.join([re.escape(x) for x in list('<>;\\')]))
 
         if issueuser and issueuser.getEmail():
             request['email'] = issueuser.getEmail()
@@ -3246,6 +3247,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             request['fromname'] = get_cookie(name_cookiekey)
         elif not request.get('fromname','') and self.getSavedUser('fromname'):
             request['fromname'] = self.getSavedUser('fromname')
+        
+            
+        # this prevents dodgy XSS attempts
+        if _invalid_name_chars.findall(request['fromname']):
+            SubmitError['fromname'] = u'Contains not allowed characters'
+        if _invalid_name_chars.findall(request['email']):
+            SubmitError['email'] = u'Contains not allowed characters'
+        
             
         if not request.get('display_format','').strip():
             request['display_format'] = self.getSavedTextFormat()
@@ -5592,7 +5601,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             fromname = self.safe_html_quote(fromname)
         else:
             # new way
-            fromname = fromname.encode('ascii', 'xmlcharrefreplace')
+            fromname = self.safe_html_quote(fromname.encode('ascii', 'xmlcharrefreplace'))
             
         email = Utils.html_quote(email)
         show_email = email

@@ -502,7 +502,7 @@ def encodeEmailString(email, title=None, nolink=0):
     The way we show the email address must match the Javascript
     that converts it on the fly. """
 
-    methods = ['_dot_',' dot ', '_._']
+    methods = ['_dot_','%20dot%20', '_._']
     shuffle(methods)
 
     # replace . after @
@@ -524,11 +524,11 @@ def encodeEmailString(email, title=None, nolink=0):
         title = email
 
     spantag = '<span class="aeh">%s</span>'
-    spantag_link = '<span class="aeh"><a href="mailto:%s">%s</a></span>'
+    spantag_link = '<a class="aeh" href="mailto:%s">%s</a>'
     if nolink:
-        return spantag%email
+        return spantag % email
     else:
-        return spantag_link%(email, title)
+        return spantag_link % (email, title)
         
 
     

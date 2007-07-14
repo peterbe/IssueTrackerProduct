@@ -83,11 +83,19 @@
                     <td><input tabindex="4" name="fromname" size="25"
                          tal:attributes="value fromname;
                                          name string:fromname:${here/UNICODE_ENCODING}:ustring"
-			  /></td>
+			  />
+                        <span class="submiterror"
+                              tal:condition="errors/fromname|nothing" 
+      	                      tal:content="structure python:here.ShowSubmitError(options, 'fromname')"></span>
+                    </td>
 		</tr>
 		<tr tal:condition="python:not loggedin and (minimalformfollowup and email=='' or not minimalformfollowup)">
 		    <td><b>Email:</b></td>
-		    <td><input tabindex="5" name="email" tal:attributes="value email" size="25" /></td>
+		    <td><input tabindex="5" name="email" tal:attributes="value email" size="25" />
+                        <span class="submiterror"
+                              tal:condition="errors/fromname|nothing" 
+      	                      tal:content="structure python:here.ShowSubmitError(options, 'fromname')"></span>                    
+                    </td>
                 </tr>
 		<tr tal:condition="here/useSpambotPrevention">
 		    <td><b>Spambot prevention:</b></td>

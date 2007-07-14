@@ -881,6 +881,12 @@ class IssueTrackerIssue(IssueTracker):
             elif self.containsSpamKeywords(comment, verbose=True):
                 SubmitError['comment'] = _("Contains spam keywords")
                 
+            _invalid_name_chars = re.compile('|'.join([re.escape(x) for x in list('<>;\\')]))
+            if _invalid_name_chars.findall(request.get('fromname','')):
+                SubmitError['fromname'] = u'Contains not allowed characters'
+            if _invalid_name_chars.findall(request.get('email','')):
+                SubmitError['email'] = u'Contains not allowed characters'
+
             # check for spambots
             if self.useSpambotPrevention():
                 captcha_numbers = request.get('captcha_numbers','').strip()
@@ -971,7 +977,7 @@ class IssueTrackerIssue(IssueTracker):
                 email = self.get_cookie(ckey)
             elif request.get('email'):
                 self.set_cookie(ckey, email)
-
+                
             if request.get('display_format'):
                 display_format = request.get('display_format')
                 if issueuser:

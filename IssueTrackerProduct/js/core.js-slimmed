@@ -5,7 +5,8 @@ function removeEvent(obj,type,fn){if(obj.detachEvent){obj.detachEvent("on"+type,
 obj.removeEventListener(type,fn,false);}
 $.id=function(id){return document.getElementById(id)};function stripSpaces(x){return $.trim(x);}
 function econvert(s){return s.replace(/%7E/g,'~').replace(/%28/g,'(').replace(/%29/g,')').replace(/%20/g,' ').replace(/_dot_| dot |_\._|\(\.\)/gi, '.').replace(/_at_|~at~/gi, '@');}
-$(function(){$("span.aeh a").each(function(){this.href=econvert(this.href);this.innerHTML=econvert(this.innerHTML);});});function G(p){location.href=p;}
+$(function(){$("a.aeh").each(function() {this.href=econvert(this.href);this.innerHTML=econvert(this.innerHTML);});
+$("span.aeh").each(function(){this.innerHTML=econvert(this.innerHTML);});});function G(p){location.href=p;}
 function checkCaptchaValue(elm,msg,maxlength){var v = $.trim(elm.value);if(v){if(v.search(/\D/)>-1)
 alert(msg);v=v.replace(/\D/g,'');if(v.length >= maxlength) 
 v=v.substring(0,maxlength);}

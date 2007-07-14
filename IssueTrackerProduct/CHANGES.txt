@@ -1,3 +1,6 @@
+    Bug fixed: Fixed possible XSS hole. Name and email checking now
+    done when adding issues and followups.
+    
     Bug fixed: Emails in unicode (non-ascii) characters could lead to
     email notifications being sent out incorrectly.
 
