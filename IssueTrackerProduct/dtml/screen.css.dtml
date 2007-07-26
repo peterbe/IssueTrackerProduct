@@ -283,6 +283,17 @@ tr.l_commenthead {
 p .q_highlight {font-weight:bold;}
 
 
+/* Special options ---------------------------------------- */
+
+#special-options {
+  border-top:1px solid #ccc;
+  margin-top:30px;
+  margin-bottom:20px;
+  padding:14px;
+}  
+
+
+
 /* Recent history ---------------------------------------- */
 
 #recent {

@@ -2159,8 +2159,13 @@ class IssueTrackerIssue(IssueTracker):
         
     security.declareProtected('View', 'TellAFriend')
     def TellAFriend(self, email_string, friends=[], ignoreword='', added=False, send=True,
-                    message_sender=''):
+                    message_sender='', cancel=False):
         """ Allows people to send notifications to other people """
+        
+        if cancel:
+            self.REQUEST.RESPONSE.redirect(self.absolute_url())
+            return
+        
         email_string = email_string.strip()
         if (not email_string or email_string == ignoreword) and send:
             if not friends:

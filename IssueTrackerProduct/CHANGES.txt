@@ -1,3 +1,6 @@
+    New feature: The Tell-a-friend and Subscribe-to-changes has been
+    moved down below the issue threads.
+    
     Bug fixed: Fixed possible XSS hole. Name and email checking now
     done when adding issues and followups.
     

@@ -50,6 +50,7 @@ function bolderCkbox(id,on) {
      tal:content="request/tellafriend|default">
             Multimessage not sent because of no valid destinations.</b>
 </div>
+   <a name="details"></a>
     <b class="bigger">Tell a Friend with more options</b><br />
 
   <table tal:define="friends python:here.getFriends(maxlength=request.get('MaxLengthFriends',13))">
@@ -102,6 +103,8 @@ function bolderCkbox(id,on) {
 
     <input type="hidden" name="ignoreword" tal:attributes="value ignoreword" />
     <input type="hidden" name="NewIssue" value="Submitted" tal:condition="python:request.get('NewIssue')=='Submitted'" />
-    <input type="submit" value="Email them!" />  
+    <input type="submit" value="Email them!" />
+    <input type="submit" name="cancel" value="Cancel" style="font-size:80%" 
+           tal:attributes="onclick string:location.href='${here/ActionURL}'" />
 </form>
 </div>

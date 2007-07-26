@@ -130,8 +130,8 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 
 
 
-
 <div align="center">
+
 
   <!-- id=issue -->
   <a name="i"></a>
@@ -140,18 +140,6 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
   </div>
   <!--/ id=issue-->
 
-  <!-- Special options -->
-  <table border="0" class="specialoptions"
-   tal:define="use_tellafriend python:here.UseTellAFriend() and (not here.isAnonymous() or here.UseTellAFriendForAnonymous());
-               allow_subscription here/AllowIssueSubscription"
-   tal:condition="python:use_tellafriend or allow_subscription">
-  <tr>
-    <td valign="top" tal:condition="use_tellafriend" tal:content="structure here/tell_a_friend"></td>
-    <td style="padding-left:10px" valign="top" tal:condition="python:allow_subscription and not request.get('MoreEmailOptions')"
-     tal:content="structure here/subscription"></td>
-  </tr>
-  </table>
-  <!-- /Special options -->
 
   <!-- Show Issue Threads -->
   <div tal:define="in_completelist python:here.thisInURL('CompleteList')"
@@ -165,6 +153,22 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 
 <span tal:condition="not:python:request.has_key('previewissue') or request.has_key('action')"
 tal:replace="structure here/quick_form_followup"></span>
+
+
+<!-- Special options -->
+<div id="special-options"
+     tal:define="use_tellafriend python:here.UseTellAFriend() and (not here.isAnonymous() or here.UseTellAFriendForAnonymous());
+               allow_subscription here/AllowIssueSubscription"
+   tal:condition="python:use_tellafriend or allow_subscription">
+  <table border="0" class="specialoptions" align="center">
+  <tr>
+    <td valign="top" tal:condition="use_tellafriend" tal:content="structure here/tell_a_friend"></td>
+    <td style="padding-left:10px" valign="top" tal:condition="python:allow_subscription and not request.get('MoreEmailOptions')"
+     tal:content="structure here/subscription"></td>
+  </tr>
+  </table>
+</div>  
+<!-- /Special options -->
 
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="request/action|nothing">
