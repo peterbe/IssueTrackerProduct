@@ -4089,9 +4089,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if self.isFromBrother(issue):
                 title += "(%s)" % self.getBrotherFromIssue(issue).getTitle()
             row = ['#%s' % issue.getIssueId(), 
-                   title,
+                   title.encode(UNICODE_ENCODING),
                    issue.getStatus(), 
-                   issue.getFromname(),
+                   issue.getFromname().encode(UNICODE_ENCODING),
                    issue.getEmail()]
             if default_sortorder == 'issuedate':
                 row.append(issue.getIssueDate())
