@@ -7436,6 +7436,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 issues += these
 
         return issues
+    
         
     
 ##    def _getFilter(self, request):

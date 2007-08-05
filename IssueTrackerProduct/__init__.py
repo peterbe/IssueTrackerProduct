@@ -3,6 +3,8 @@
 # Peter Bengtsson <mail@peterbe.com>
 #
 import os
+import stat
+from time import time
 
 from AccessControl.Permission import registerPermissions
 from zLOG import LOG, ERROR, INFO
@@ -165,6 +167,106 @@ def initialize(context):
 
 import OFS, App
 
+from App.Common import rfc1123_date
+from ZPublisher.Iterators import filestream_iterator
+from Globals import package_home, DevelopmentMode
+from OFS.content_types import guess_content_type
+
+FILESTREAM_ITERATOR_THRESHOLD = 2 << 16 # 128 Kb (from LocalFS StreamingFile.py)
+
+
+class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
+    
+    def __init__(self, path, _prefix=None, 
+                 max_age_development=60,
+                 max_age_production=3600*24,
+                 content_type=None, set_expiry_header=True):
+        if _prefix is None:
+            _prefix = getConfiguration().softwarehome
+        elif type(_prefix) is not type(''):
+            _prefix = package_home(_prefix)
+        path = os.path.join(_prefix, path)
+        self.path = path
+        self.set_expiry_header = set_expiry_header
+        
+        if DevelopmentMode:
+            # In development mode, a shorter time is handy
+            max_age = max_age_development
+        else:
+            # A longer time reduces latency in production mode
+            max_age = max_age_production
+        self.max_age = max_age
+        self.cch = 'public,max-age=%d' % max_age
+
+        data = open(path, 'rb').read()
+        if content_type is None:
+            content_type, __ = my_guess_content_type(path, data)
+        if content_type:
+            self.content_type=content_type
+        else:
+            raise ValueError, "content_type not set or couldn't be guessed"
+            #self.content_type='text/plain'
+            
+        self.__name__=path[path.rfind('/')+1:]
+        self.lmt=float(os.stat(path)[8]) or time.time()
+        self.lmh=rfc1123_date(self.lmt)
+        self.content_size = os.stat(path)[stat.ST_SIZE]
+        
+        
+    def index_html(self, REQUEST, RESPONSE):
+        """Default document"""
+        # HTTP If-Modified-Since header handling. This is duplicated
+        # from OFS.Image.Image - it really should be consolidated
+        # somewhere...
+        RESPONSE.setHeader('Content-Type', self.content_type)
+        RESPONSE.setHeader('Last-Modified', self.lmh)
+        RESPONSE.setHeader('Cache-Control', self.cch)
+        RESPONSE.setHeader('Cache-Length', self.content_size)
+        if self.set_expiry_header:
+            RESPONSE.setHeader('Expires', self._expires())
+            
+
+        header=REQUEST.get_header('If-Modified-Since', None)
+        if header is not None:
+            header=header.split(';')[0]
+            # Some proxies seem to send invalid date strings for this
+            # header. If the date string is not valid, we ignore it
+            # rather than raise an error to be generally consistent
+            # with common servers such as Apache (which can usually
+            # understand the screwy date string as a lucky side effect
+            # of the way they parse it).
+            try:    mod_since=long(DateTime(header).timeTime())
+            except: mod_since=None
+            if mod_since is not None:
+                if getattr(self, 'lmt', None):
+                    last_mod = long(self.lmt)
+                else:
+                    last_mod = long(0)
+                if last_mod > 0 and last_mod <= mod_since:
+                    RESPONSE.setStatus(304)
+                    return ''
+
+        if self.content_size > FILESTREAM_ITERATOR_THRESHOLD:
+            return filestream_iterator(self.path, 'rb')
+        else:
+            return open(self.path,'rb').read()
+        
+
+    def _expires(self):
+        return rfc1123_date(time()+self.max_age)
+        
+def my_guess_content_type(path, data):
+    content_type, enc = guess_content_type(path, data)
+    if content_type in ('text/plain', 'text/html'):
+        if os.path.basename(path).endswith('.js-slimmed'):
+            content_type = 'application/x-javascript'
+        elif os.path.basename(path).find('.css-slimmed') > -1:
+            # the find() covers both 'foo.css-slimmed' and
+            # 'foo.css-slimmed-data64expanded'
+            content_type = 'text/css'
+    return content_type, enc
+
+
 def registerIcon(filename, idreplacer={}, epath=None, startpath='www'):
     # A helper function that takes an image filename (assumed
     # to live in a 'www' subdirectory of this package). It 
@@ -182,7 +284,8 @@ def registerIcon(filename, idreplacer={}, epath=None, startpath='www'):
         objectid = objectid.replace(k,v)
     setattr(OFS.misc_.misc_.IssueTrackerProduct, 
             objectid, 
-            App.ImageFile.ImageFile(os.path.join(path, filename), globals())
+            #App.ImageFile.ImageFile(os.path.join(path, filename), globals())
+            BetterImageFile(os.path.join(path, filename), globals())
             )
             
 def registerJS(filename, path='js', slim_if_possible=True):
@@ -190,7 +293,8 @@ def registerJS(filename, path='js', slim_if_possible=True):
     objectid = filename
     setattr(product,
             objectid, 
-            App.ImageFile.ImageFile(os.path.join(path, filename), globals())
+            #App.ImageFile.ImageFile(os.path.join(path, filename), globals())
+            BetterImageFile(os.path.join(path, filename), globals())
             )
     obj = getattr(product, objectid)
     if js_slimmer is not None and OPTIMIZE:
@@ -206,7 +310,7 @@ def registerCSS(filename, path='css', slim_if_possible=True):
     objectid = filename
     setattr(product,
             objectid, 
-            App.ImageFile.ImageFile(os.path.join(path, filename), globals())
+            BetterImageFile(os.path.join(path, filename), globals())
             )
     obj = getattr(product, objectid)
     if css_slimmer is not None and OPTIMIZE:

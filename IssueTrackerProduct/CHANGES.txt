@@ -1,3 +1,6 @@
+    New feature: Expires header set to all static content and set much
+    further into the future for better HTTP caching.
+    
     New feature: The Tell-a-friend and Subscribe-to-changes has been
     moved down below the issue threads.
     
