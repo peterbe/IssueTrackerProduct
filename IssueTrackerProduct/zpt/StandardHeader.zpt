@@ -31,6 +31,10 @@ function debug(s){}
 <meta tal:replace="here/testAutoLogin" />
 
 
+<script type="text/javascript" tal:condition="here/useAccessKeys"
+ tal:attributes="src string:${here/getRootRelativeURL}/keyboardshortcuts.js"></script>
+<script metal:define-slot="extrajs" tal:omit-tag=""></script>
+
 </head>
 
 <body>
@@ -83,10 +87,6 @@ function debug(s){}
     <br />&nbsp;
   </div><!--/foot-->
   
-<script type="text/javascript" tal:condition="here/useAccessKeys"
- tal:attributes="src string:${here/getRootRelativeURL}/keyboardshortcuts.js"></script>
- 
-<script metal:define-slot="extrajs" tal:omit-tag=""></script>
 
 
 <span tal:condition="here/doDebug" tal:omit-tag="">
