@@ -47,33 +47,24 @@ $(function() {
    });
    $("span.aeh").each(function() {
       this.innerHTML = econvert(this.innerHTML);
-   });   
+   });
+   
+   // First, for all the textareas that have lots of lines of text 
+   // in them, we want to double their number of rows
+   $('textarea.autoexpanding').each(function() {
+      console.log($.trim(this.value).split('\n').length);
+      while ($.trim(this.value).split('\n').length > parseInt(this.rows))
+        this.rows = '' + Math.round((parseInt(this.rows) * 1.5));
+   });
+            
+   // When a user enters new lines, if they have entered more
+   // lines than the textarea has rows, then double the textareas rows
+   $('textarea.autoexpanding').bind('keyup', function() {
+      if ($.trim(this.value).split('\n').length > parseInt(this.rows))
+        this.rows = '' + Math.round((parseInt(this.rows) * 1.5));
+   });
+   
 });
-
-
-
-//function form2querystring(f) {
-//  var d = '';
-//  for (i=0;i < f.elements.length;i++) {
-//    ob = f.elements[i];
-//    if ((ob.type=='text' || ob.type=='textarea' || ob.type=='hidden') ||
-//        (ob.type=='radio' && ob.checked)) {
-//      if (ob.name!='')
-//        d += ob.name +'='+ escape(ob.value) +'&';
-//    } else if (ob.type=='select-one') {
-//      d += ob.name +'='+ escape(ob.options[ob.selectedIndex].value) +'&';
-//    } else if (ob.type=='select-multiple') {
-//      for (y=0;y < ob.options.length;y++) 
-//        if (ob.options[y].selected)
-//	  d += ob.name +'='+ escape(ob.options[y].value) +'&';
-//    } else if (ob.type=='checkbox') {
-//      if (ob.checked) d += ob.name +'=1&';
-//      else d += ob.name +'=False&';
-//    }
-//  }
-//  return d;
-//}
-//
 
 
 function G(p) {

@@ -31,7 +31,7 @@
                 <span class="submiterror" 
 	         tal:condition="errors/comment|nothing" 
       	         tal:content="structure python:here.ShowSubmitError(options, 'comment', linebreak=1)"></span>
-		<textarea tabindex="1" name="comment" id="textarea" rows="10" cols="70"
+		<textarea tabindex="1" name="comment" id="textarea" rows="10" cols="70" class="autoexpanding"
 		tal:attributes="name string:comment:${here/UNICODE_ENCODING}:utext;
                                 rows python:test(minimalformfollowup, 5, 10);
                                 cols python:test(minimalformfollowup, 70, 70);

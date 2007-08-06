@@ -91,14 +91,13 @@
   
   
   		<td valign="top"><br /><br /><br /><br /><b>Description:</b><br />
-		<span id="tsizer"></span>
   		<td>
-		<textarea tabindex="4" name="description:text" rows="10" cols="60" id="description_text"
-		tal:content="python:request.get('description','')"
+		<textarea tabindex="4" name="description:text" rows="10" cols="60" id="description_text" class="autoexpanding"
+		tal:content="python:request.get('description','')" 
                 tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                                 onblur python:test(use_autosave, 'stopautosave()');
                                 name string:description:${here/UNICODE_ENCODING}:utext"
-		onkeypress="if (!enabled_tsizer && this.value.length>600){enableTsizer();}"></textarea>
+		></textarea>
 		<span class="submiterror" tal:condition="errors/description|nothing"
 		  tal:content="python:here.ShowSubmitError(options, 'description')"></span>
 
@@ -277,7 +276,6 @@
 <script type="text/javascript" tal:condition="useaccesskeys">$.id('title').focus();disableKS();</script>
 </tal:block>
 
-<script type="text/javascript" tal:condition="request/previewissue|request/draft_issue_id|nothing">if ($.id('description_text').value.length >600) enableTsizer();</script>
 
 
 

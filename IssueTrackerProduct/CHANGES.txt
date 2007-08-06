@@ -1,3 +1,7 @@
+    New feature: When you reach the last line in any textarea input
+    (eg. on adding a new issue) the textarea box automatically expands
+    to add a few extra blank lines.
+    
     New feature: Expires header set to all static content and set much
     further into the future for better HTTP caching.
     

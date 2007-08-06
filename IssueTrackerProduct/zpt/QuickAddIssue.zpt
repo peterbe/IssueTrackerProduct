@@ -83,7 +83,7 @@ here's a special script that converts 'section' into ['section'] if present and 
 	<tr>
 		<td colspan="2">
 			<b>Description:</b><span id="tsizer"></span><br />
-			<textarea name="description:text" tabindex="4" rows="8" cols="50" id="description_text"
+			<textarea name="description:text" tabindex="4" rows="8" cols="50" id="description_text" class="autoexpanding"
                          tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                                          onblur python:test(use_autosave, 'stopautosave()');
                                          name string:description:${here/UNICODE_ENCODING}:utext"
