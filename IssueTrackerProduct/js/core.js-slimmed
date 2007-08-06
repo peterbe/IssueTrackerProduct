@@ -7,7 +7,7 @@ $.id=function(id){return document.getElementById(id)};function stripSpaces(x){re
 function econvert(s){return s.replace(/%7E/g,'~').replace(/%28/g,'(').replace(/%29/g,')').replace(/%20/g,' ').replace(/_dot_| dot |_\._|\(\.\)/gi, '.').replace(/_at_|~at~/gi, '@');}
 $(function(){$("a.aeh").each(function() {this.href=econvert(this.href);this.innerHTML=econvert(this.innerHTML);});
 $("span.aeh").each(function(){this.innerHTML=econvert(this.innerHTML);});
-$('textarea.autoexpanding').each(function(){console.log($.trim(this.value).split('\n').length);while($.trim(this.value).split('\n').length > parseInt(this.rows))
+$('textarea.autoexpanding').each(function(){while($.trim(this.value).split('\n').length > parseInt(this.rows))
 this.rows = '' + Math.round((parseInt(this.rows) * 1.5));});
 $('textarea.autoexpanding').bind('keyup', function(){if($.trim(this.value).split('\n').length > parseInt(this.rows))
 this.rows = '' + Math.round((parseInt(this.rows) * 1.5));});});function G(p){location.href=p;}

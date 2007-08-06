@@ -52,7 +52,6 @@ $(function() {
    // First, for all the textareas that have lots of lines of text 
    // in them, we want to double their number of rows
    $('textarea.autoexpanding').each(function() {
-      console.log($.trim(this.value).split('\n').length);
       while ($.trim(this.value).split('\n').length > parseInt(this.rows))
         this.rows = '' + Math.round((parseInt(this.rows) * 1.5));
    });
