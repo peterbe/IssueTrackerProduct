@@ -35,7 +35,7 @@
 		tal:attributes="name string:comment:${here/UNICODE_ENCODING}:utext;
                                 rows python:test(minimalformfollowup, 5, 10);
                                 cols python:test(minimalformfollowup, 70, 70);
-                                onfocus python:test(here.SaveDrafts() and here.UseAutoSave(), 'startautosave()');
+                                onfocus python:test(here.SaveDrafts() and here.UseAutoSave(), 'startautosave();;clearAutoRefreshTitle()','clearAutoRefreshTitle()');
                                 onblur python:test(here.SaveDrafts() and here.UseAutoSave(), 'stopautosave()')
                                 "
 		tal:content="python:request.get('comment','')"></textarea>

@@ -30,7 +30,9 @@
 	 
 	<div class="trest">
 	  
-        <div class="tbody" tal:define="comment thread/getComment">
+        <div class="tbody" 
+             tal:define="comment thread/getComment"
+             tal:attributes="onclick python:test(path('repeat/thread/end'), 'clearAutoRefreshTitle()')">
 	    <div tal:condition="comment"				            
 			tal:replace="structure thread/showComment">
 			    COMMENT here

@@ -16,6 +16,7 @@
 <link tal:condition="not:forced_css" rel="stylesheet" type="text/css" tal:attributes="href string:${root_relative_url}/print.css" media="print" />
 <link tal:condition="forced_css" rel="stylesheet" type="text/css" tal:attributes="href forced_css" />
 </tal:block>
+<style metal:define-slot="extracss" tal:omit-tag=""></style>
 <link rel="Shortcut Icon" href="/favicon.ico" type="image/x-icon" tal:attributes="href string:${root_relative_url}/favicon.ico" />
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-latest.pack.js"></script>
 
@@ -29,11 +30,6 @@ function debug(s){}
 
 <meta tal:replace="here/testAutoLogin" />
 
-<script type="text/javascript" tal:condition="here/useAccessKeys"
- tal:attributes="src string:$root_relative_url/keyboardshortcuts.js"></script>
- 
-<style metal:define-slot="extracss" tal:omit-tag=""></style>
-<script metal:define-slot="extrajs" tal:omit-tag=""></script>
 
 </head>
 
@@ -86,6 +82,12 @@ function debug(s){}
     <a tal:attributes="href string:${here/getRootRelativeURL}/About.html" class="foot" >About</a>
     <br />&nbsp;
   </div><!--/foot-->
+  
+<script type="text/javascript" tal:condition="here/useAccessKeys"
+ tal:attributes="src string:${here/getRootRelativeURL}/keyboardshortcuts.js"></script>
+ 
+<script metal:define-slot="extrajs" tal:omit-tag=""></script>
+
 
 <span tal:condition="here/doDebug" tal:omit-tag="">
 <div id="dbgout" style="font-family:monospace,courier,sans-serif;font-size:0.7em;"></div>
@@ -101,6 +103,8 @@ function debug(s){}
 </span>
 <a href="javascript:void(z=document.body.appendChild(document.createElement('script')));void(z.language='javascript');void(z.type='text/javascript');void(z.src='http://slayeroffice.com/tools/modi/modi.js');void(z.id='modi');">DOM inspector</a> ("v" to edit, ESC to exit)
 </span>
+
+</body>
 </html>
 
         

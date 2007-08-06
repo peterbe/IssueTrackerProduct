@@ -25,9 +25,12 @@ function checkRefresh() {
          refreshinterval = orig_refreshinterval;
       }
    });
-
-  
 }
+
+function clearAutoRefreshTitle() {
+  document.title = document.title.replace(/\(automatically refreshed\) /,'');
+}
+
 
 <dtml-if "SaveDrafts() and UseAutoSave()">
 function autosave() {
