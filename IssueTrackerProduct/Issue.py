@@ -1068,7 +1068,6 @@ class IssueTrackerIssue(IssueTracker):
                                    use_stored_counter=0)
 
         title = self.title
-        change = gentitle
         issueID = self.id
         anchorname = len(self.objectIds(ISSUETHREAD_METATYPE))
         emails = email_addresses

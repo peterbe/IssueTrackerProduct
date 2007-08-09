@@ -8690,8 +8690,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if not email.has_key('display_format'):
             email['display_format'] = self.getDefaultDisplayFormat()
         
-        #raise "STOP", text
-        
         thread = create(genid, gentitle, text, DateTime(), 
                         email['fromname'], email['email'],
                         email['display_format'],
