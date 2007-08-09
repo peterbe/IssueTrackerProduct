@@ -8884,8 +8884,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             extractor = self.preParseEmailString
             
             email['email'] = extractor(email['from'], allnotifyables=0)
+
+            if email['email'] is None:
+                # no valid email address was extracted
+                continue
             
-            assert isinstance(email['email'], (str, unicode)), \
+            assert isinstance(email['email'], basestring), \
               "email['email'] not string (email['email']=%r, (%s))" % (email['email'], type(email['email']))
               
             f = email['from'].replace(email['email'],'').strip()
