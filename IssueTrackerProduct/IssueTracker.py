@@ -8714,10 +8714,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             name = Utils.badIdFilter(name)
             thread.manage_addFile(name, file)
             
-            
-        ##
-        ## XXX Perhaps here we want to send an email back saying the followup
-        ## was added.
+
+        email_addresses = issueobject.Others2Notify(do='email', emailtoskip=email['email'])
+        if email_addresses:
+            self._sendFollowupNotifications(email_addresses)
         
         # nothing else to complain about
         return True

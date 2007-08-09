@@ -1041,46 +1041,7 @@ class IssueTrackerIssue(IssueTracker):
                                                      emailtoskip=email)
 
                 if len(email_addresses) > 0:
-
-                    # create id for notification
-                    mtype = NOTIFICATION_META_TYPE
-                    notifyid = self.generateID(4, prefix+"notification",
-                                               meta_type=mtype,
-                                               use_stored_counter=0)
-
-                    title = self.title
-                    change = gentitle
-                    issueID = self.id
-                    anchorname = len(self.objectIds(ISSUETHREAD_METATYPE))
-                    emails = email_addresses
-                    date = DateTime()
-                    
-                    assert self.hasIssue(issueID), "This notification has no issue"
-
-                    notification_comment = followupobject.getCommentPure()
-                    notification = IssueTrackerNotification(
-                                        notifyid, title, change, issueID,
-                                        notification_comment, emails, anchorname, fromname,
-                                        date)
-                    self._setObject(notifyid, notification)
-                    notifyobject = getattr(self, notifyid)
-                      
-                    # use the dispatcher to try to send
-                    # this notification right now.
-                    # there is no big deal if the dispatcher crashes here
-                    # because the notification is saved and the dispatcher
-                    # can be invoked some other time manually
-                    if self.doDispatchOnSubmit():
-                        try:
-                            self.dispatcher()
-                        except:
-                            try:
-                                err_log = self.error_log
-                                err_log.raising(sys.exc_info())
-                            except:
-                                pass
-                            LOG(self.__class__.__name__, PROBLEM,
-                               'Email could not be sent', error=sys.exc_info())
+                    self._sendFollowupNotifications(email_addresses)
             
 
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
@@ -1092,7 +1053,54 @@ class IssueTrackerIssue(IssueTracker):
         
         # ready ! redirect!
         request.RESPONSE.redirect(redirect_url)
+
         
+        
+    def _sendFollowupNotifications(self, email_addresses):
+
+        prefix = self.issueprefix
+        
+        # create id for notification
+        mtype = NOTIFICATION_META_TYPE
+        notifyid = self.generateID(4, prefix+"notification",
+                                   meta_type=mtype,
+                                   use_stored_counter=0)
+
+        title = self.title
+        change = gentitle
+        issueID = self.id
+        anchorname = len(self.objectIds(ISSUETHREAD_METATYPE))
+        emails = email_addresses
+        date = DateTime()
+        
+        assert self.hasIssue(issueID), "This notification has no issue"
+
+        notification_comment = followupobject.getCommentPure()
+        notification = IssueTrackerNotification(
+                            notifyid, title, change, issueID,
+                            notification_comment, emails, anchorname, fromname,
+                            date)
+        self._setObject(notifyid, notification)
+        notifyobject = getattr(self, notifyid)
+          
+        # use the dispatcher to try to send
+        # this notification right now.
+        # there is no big deal if the dispatcher crashes here
+        # because the notification is saved and the dispatcher
+        # can be invoked some other time manually
+        if self.doDispatchOnSubmit():
+            try:
+                self.dispatcher()
+            except:
+                try:
+                    err_log = self.error_log
+                    err_log.raising(sys.exc_info())
+                except:
+                    pass
+                LOG(self.__class__.__name__, PROBLEM,
+                   'Email could not be sent', error=sys.exc_info())
+
+
         
     def _check4Duplicate(self, title, comment, fromname=None, email=None,
                          email_message_id=None

@@ -1,3 +1,7 @@
+    Bug fixed: When you reply via email to an issue, no notification
+    was sent to those involved in the issue. Thanks Robert Leftwich.
+    (Real#0413)
+    
     New feature: When you reach the last line in any textarea input
     (eg. on adding a new issue) the textarea box automatically expands
     to add a few extra blank lines.
