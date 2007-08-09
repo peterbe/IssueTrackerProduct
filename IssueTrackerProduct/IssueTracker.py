@@ -8364,8 +8364,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         if email.has_key('display_format'):
             display_format = email['display_format']
+            LOG('itp', INFO, "email['display_format']=%r"%display_format)
         else:
             display_format = self.getDefaultDisplayFormat()
+            LOG('itp', INFO, 'self.getDefaultDisplayFormat()=%r'%display_format)
             
         _root_title = self.getRoot().getTitle()
         _root_id = self.getRoot().getId()
