@@ -8364,10 +8364,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         if email.has_key('display_format'):
             display_format = email['display_format']
-            LOG('itp', INFO, "email['display_format']=%r"%display_format)
         else:
             display_format = self.getDefaultDisplayFormat()
-            LOG('itp', INFO, 'self.getDefaultDisplayFormat()=%r'%display_format)
             
         _root_title = self.getRoot().getTitle()
         _root_id = self.getRoot().getId()
@@ -8814,15 +8812,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             subject, parsable, delimiter = self._getParsableSubject(s)
             parsable = [x.strip() for x in parsable.split(',')]
             
-            # look for issueid, i.e. a followup
-            #issueids = []
-            #for eachpart in parsable:
-                #issueids.extend(reg_issueids.findall(eachpart))
-            #if issueids:
-                ## if any, accept only the first
-                #email['issueid'] = correct_caser(issueids[0], allissueids)
-                #parsable.remove(issueids[0])
-
             # Sections
             sections = []
             for eachpart in parsable[:]:
@@ -9062,7 +9051,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if self._isHTMLBody(content_html):
                     if html2safehtml is not None:
                         content_html = self._stripHTMLBody(content_html)
-                        e['display_format'] = 'plain'
+                        e['display_format'] = 'plaintext'
                     else:
                         m = "stripogram module not installed to strip HTML emails"
                         LOG(self.__class__.__name__, WARNING, m)
