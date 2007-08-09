@@ -1041,7 +1041,7 @@ class IssueTrackerIssue(IssueTracker):
                                                      emailtoskip=email)
 
                 if len(email_addresses) > 0:
-                    self._sendFollowupNotifications(email_addresses)
+                    self.sendFollowupNotifications(email_addresses)
             
 
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
@@ -1056,7 +1056,8 @@ class IssueTrackerIssue(IssueTracker):
 
         
         
-    def _sendFollowupNotifications(self, email_addresses):
+    security.declarePrivate('sendFollowupNotifications')
+    def sendFollowupNotifications(self, email_addresses):
 
         prefix = self.issueprefix
         
