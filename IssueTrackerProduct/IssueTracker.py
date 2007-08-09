@@ -8885,7 +8885,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
             email['email'] = extractor(email['from'], allnotifyables=0)
             
-            assert isinstance(email['email'], basestring), \
+            assert isinstance(email['email'], (str, unicode)), \
               "email['email'] not string (email['from']=%r (%s))" % (email['from'], type(email['from']))
               
             f = email['from'].replace(email['email'],'').strip()
