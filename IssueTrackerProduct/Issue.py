@@ -1079,7 +1079,8 @@ class IssueTrackerIssue(IssueTracker):
         notification_comment = followupobject.getCommentPure()
         notification = IssueTrackerNotification(
                             notifyid, title, change, issueID,
-                            notification_comment, emails, anchorname, fromname,
+                            notification_comment, emails, anchorname, 
+                            followupobject.fromname,
                             date)
         self._setObject(notifyid, notification)
         notifyobject = getattr(self, notifyid)
