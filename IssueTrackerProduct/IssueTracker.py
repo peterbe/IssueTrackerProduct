@@ -8715,7 +8715,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         email_addresses = issueobject.Others2Notify(do='email', emailtoskip=email['email'])
         if email_addresses:
-            issueobject.sendFollowupNotifications(email_addresses, gentitle)
+            issueobject.sendFollowupNotifications(thread, email_addresses, gentitle)
         
         # nothing else to complain about
         return True
