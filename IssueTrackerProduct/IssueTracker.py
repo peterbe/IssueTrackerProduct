@@ -8508,8 +8508,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                        email_message_id=email.get('message_id', None))
 
         for name, file in email.get('fileattachments', {}).items():
-            name = Utils.badIdFilter(name)
-            issue.manage_addFile(name, file)
+            name_id = Utils.badIdFilter(name)
+            if name:
+                issue.manage_addFile(name_id, file)
+            else:
+                m = "File attachment didn't have a name %r" % (name)
+                LOG(self.__class__.__name__, ERROR, m)
             
         try:
             issue._setEmailOriginal(email['originalfile'].read())
