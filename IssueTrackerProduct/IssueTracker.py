@@ -12021,7 +12021,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for issue in self.getIssueObjects():
             text = ' '.join([issue.getTitle(), 
                              issue.getDescription(),
-                             issue.getFromname()])
+                             issue.getFromname(),
+                             issue.getEmail()])
             if self.containsSpamKeywords(text):
                 issues.append(issue)
                 
@@ -12035,7 +12036,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for issue in self.getIssueObjects():
             count = 1
             for thread in issue.getThreadObjects():
-                text = ' '.join([thread.getComment(), thread.getFromname()])
+                text = ' '.join([thread.getComment(), 
+                                 thread.getFromname(),
+                                 thread.getEmail()])
                 if self.containsSpamKeywords(text):
                     thread_counts[thread.absolute_url_path()] = count
                     threads.append(thread)
