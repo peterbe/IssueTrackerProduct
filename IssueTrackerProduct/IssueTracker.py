@@ -8390,7 +8390,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             reply_issue_id_found = reply_issue_id_found.replace('%s#' % _root_id, '')
             reply_issue_id_found = reply_issue_id_found.strip()
             if reply_issue_id_found:
-                return self._processInboundEmailReply(email, reply_issue_id_found)
+                try:
+                    self.getIssueObject(reply_issue_id_found)
+                except AttributeError:
+                    LOG(self.__class__.__name__, ERROR, 
+                        "Reply to issue %s doesn't exit" % reply_issue_id_found)
+                    reply_issue_id_found = None
+                if reply_issue_id_found:
+                    return self._processInboundEmailReply(email, reply_issue_id_found)
             
             
         # is the root of the issuetracker to be found in the email body
