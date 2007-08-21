@@ -8627,13 +8627,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 except AttributeError, msg:
                     raise AttributeError, "%s (_character_set=%r)" %(msg, _character_set)
 
-            except UnicodeDecodeError:
+            except UnicodeDecodeError, err:
                 try:
-                    text = formatflowed_decode(text, 'latin-1')
+                    text = formatflowed_decode(text, character_set='latin-1')
                     text, old = Utils.parseFlowFormattedResult(text)
                 except UnicodeDecodeError, err:
                     try:
-                        text = formatflowed_decode(text, 'utf-8')
+                        text = formatflowed_decode(text, character_set='utf-8')
                         text, old = Utils.parseFlowFormattedResult(text)
                     except UnicodeDecodeError:
                         pass
