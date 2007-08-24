@@ -1,3 +1,5 @@
+    New feature: Uses jQuery 1.1.4 (much faster)
+    
     Bug fixed: UnicodeDecodeError wasn't raised properly in processing
     inbound email reply and formatflowed_decode() was called with wrong 
     parameter. Thanks Robert Leftwich (Real#0642)
