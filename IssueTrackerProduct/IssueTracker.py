@@ -1074,7 +1074,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return _("Creation date")
         else:
             return variable.capitalize()
-    
+
         
 
     security.declareProtected(VMS, 'manage_findPotentialBrothers')

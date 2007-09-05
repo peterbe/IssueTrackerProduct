@@ -5,6 +5,7 @@
 
 # python 
 import string
+from string import translate, maketrans
 import sys, re, os
 import codecs
 from random import shuffle
@@ -631,14 +632,14 @@ def preParseEmailString(es, names2emails={}, aslist=0):
     # first remove any junk
     es = es.replace(';',sep)
     es = es.replace('>',' ').replace('<',' ')
-    transtab = string.maketrans('/ ','  ')
-    es = string.translate(es,transtab,'?&!()<=>*#[]{}')
+    transtab = maketrans('/ ','  ')
+    es = translate(es, transtab, '?&!()<=>*#[]{}')
+    print "translate(%r, %r, '?&!()<=>*#[]{}')" % (es, transtab)
 
     # fix so that, the keys are lower case and 'group:' gone
     n2e = {}
     for k, v in names2emails.items():
         n2e[k.lower().replace('group:', '').strip()] = v
-        
 
     grand_list = []
     for chunk in es.split(sep):
