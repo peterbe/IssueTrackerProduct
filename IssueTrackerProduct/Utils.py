@@ -634,7 +634,6 @@ def preParseEmailString(es, names2emails={}, aslist=0):
     es = es.replace('>',' ').replace('<',' ')
     transtab = maketrans('/ ','  ')
     es = translate(es, transtab, '?&!()<=>*#[]{}')
-    print "translate(%r, %r, '?&!()<=>*#[]{}')" % (es, transtab)
 
     # fix so that, the keys are lower case and 'group:' gone
     n2e = {}
