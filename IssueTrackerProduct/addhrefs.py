@@ -5,10 +5,12 @@
 ## License: ZPL (http://www.zope.org/Resources/ZPL)
 ##
 __doc__='''A little function that puts HTML links into text.'''
-__version__='0.9.2'
+__version__='0.9.3'
 
 
 __changes__ = '''
+0.9.3         Fixed a bug when text contains "m." but wasnt followed but a a-z.
+
 0.9.2         Added supports for URLs starting with m., mobile. and www2.
               Added 1 new unit test
 
@@ -119,8 +121,7 @@ def _make_regexp(regexp):
 
 ok_middle_name_starts = ('ftp','http','www.','mobile.','m.','www2.')
 ok = {'start': ('^','\(','{','>','<','@','\s',''),
-      #'middle':('ftp\S+', 'http\S+', 'www\.\S+', 'mobile\.\S+', 'm\.\S+',),
-      'middle':[r'%s\S+' % re.escape(x) for x in ok_middle_name_starts],
+      'middle':('ftp\S+', 'http\S+', 'www\.\w\S+', 'mobile\.\w\S+', 'm\.\w\S+',),
       'end':('\)','}','>','\s','$'),
       }
       

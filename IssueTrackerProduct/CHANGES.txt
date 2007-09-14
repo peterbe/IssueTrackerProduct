@@ -1,3 +1,5 @@
+    New feature: Upgraded to addhrefs 0.9.3
+
     Bug fixed: preParseEmailString would sometimes barf on unicode
     strings for translation.
     
