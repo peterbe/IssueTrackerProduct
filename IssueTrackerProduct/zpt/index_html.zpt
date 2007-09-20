@@ -2,8 +2,9 @@
 
 <script type="text/javascript" metal:fill-slot="extrajs"><!--
 function _deldraft(draftid, method) {
+  $('li.draft-'+draftid).remove();
   $.post(method, {id:draftid, return_show_drafts:1}, function(resp) {
-    $('#issuedraftsouter').html(resp);
+      $('#issuedraftsouter').html(resp);
   });
   return false;  
 }

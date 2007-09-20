@@ -4,7 +4,8 @@
 <div tal:condition="python:here.SaveDrafts() and drafts">
        <h4>Draft issues</h4>
        <ul>
-         <li tal:repeat="issuedraft drafts">
+         <li tal:repeat="issuedraft drafts"
+	     tal:attributes="class string:draft-${issuedraft/getId}">
           <span tal:condition="issuedraft/isAutosave">(autosave) </span><a tal:attributes="href string:AddIssue?draft_issue_id=${issuedraft/getId}"
    tal:content="structure python:issuedraft.shortDescription(maxlength=50)"></a>
           <small> (<a tal:attributes="href string:DeleteDraftIssue?id=${issuedraft/getId}&back=Home;
@@ -17,7 +18,8 @@
 <div tal:condition="python:here.SaveDrafts() and followupdrafts">
        <h4>Draft followups</h4>
        <ul>
-         <li tal:repeat="draft followupdrafts">
+         <li tal:repeat="draft followupdrafts"
+	     tal:attributes="class string:draft-${draft/getId}">
           <span tal:condition="draft/isAutosave">(autosave) </span>
           <a tal:attributes="href string:${draft/getIssuePath}?draft_followup_id=${draft/getId}"
    tal:content="structure python:draft.shortDescription(maxlength=50)"></a>

@@ -1,36 +1,3 @@
-// from http://ejohn.org/projects/flexible-javascript-events/
-function addEvent(obj, type, fn) { 
-  if (obj.attachEvent) {
-    obj["e"+type+fn] = fn;
-    obj[type+fn] = function() { obj["e"+type+fn]( window.event ); }
-    obj.attachEvent("on"+type, obj[type+fn]);
-  } else
-    obj.addEventListener(type, fn, false);
-    
-}
-
-// from http://ejohn.org/projects/flexible-javascript-events/
-function removeEvent(obj, type, fn) {
-  if (obj.detachEvent) {
-    obj.detachEvent("on"+type, obj[type+fn]);
-    obj[type+fn] = null;
-  } else
-    obj.removeEventListener(type, fn, false);
-}
-
-//function $() {
-//  var elements = new Array();
-//  for (var i=0; i < arguments.length; i++) {
-//    var element = arguments[i];
-//    if (typeof element == 'string')
-//      element=document.getElementById(element);
-//    if (arguments.length == 1) 
-//      return element;
-//    elements.push(element);
-//  }
-//  return elements;
-//}
-
 $.id=function(id){return document.getElementById(id)};
 
 function stripSpaces(x) {
@@ -39,6 +6,15 @@ function stripSpaces(x) {
 
 function econvert(s) {
 return s.replace(/%7E/g,'~').replace(/%28/g,'(').replace(/%29/g,')').replace(/%20/g,' ').replace(/_dot_| dot |_\._|\(\.\)/gi, '.').replace(/_at_|~at~/gi, '@');}
+
+function _getNoLines(element) {
+   var hardlines = element.value.split('\n');
+   var total = hardlines.length;
+   for (var i=0, len=hardlines.length; i<len; i++) {
+      total += Math.max(Math.round(hardlines[i].length / element.cols), 1) - 1;
+   }
+   return total;
+}
 
 $(function() {
    $("a.aeh").each(function() {
@@ -52,14 +28,14 @@ $(function() {
    // First, for all the textareas that have lots of lines of text 
    // in them, we want to double their number of rows
    $('textarea.autoexpanding').each(function() {
-      while ($.trim(this.value).split('\n').length > parseInt(this.rows))
+      while (_getNoLines(this) > parseInt(this.rows))
         this.rows = '' + Math.round((parseInt(this.rows) * 1.5));
    });
             
    // When a user enters new lines, if they have entered more
    // lines than the textarea has rows, then double the textareas rows
    $('textarea.autoexpanding').bind('keyup', function() {
-      if ($.trim(this.value).split('\n').length > parseInt(this.rows))
+      if (_getNoLines(this) > parseInt(this.rows))
         this.rows = '' + Math.round((parseInt(this.rows) * 1.5));
    });
    

@@ -1471,6 +1471,60 @@ class IssueTrackerIssue(IssueTracker):
             return draft_followup_id
         else:
             return ""
+
+    def getRecentOtherDraftThreadAuthor(self, only_fromname=False, max_age_seconds=20,
+                                        REQUEST=None):
+        """ return the name of the author of the most recent draft followup
+        that is not written by the current user. 
+        """
+        you_fromname = self.getSavedUser('fromname')
+        you_email = self.getSavedUser('email')
+        now = int(DateTime())
+        
+        if REQUEST is not None:
+            ct = 'text/html; charset=%s' % UNICODE_ENCODING
+            REQUEST.RESPONSE.setHeader('Content-Type', ct)
+        
+        container = self.getDraftsContainer()
+        draftobjects = list(container.objectValues(ISSUETHREAD_DRAFT_METATYPE))
+        draftobjects.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
+        
+        fmt_followup = u"%s has started working on a followup"
+        for draft in draftobjects:
+            if now - int(draft.getModifyDate()) > max_age_seconds:
+                return None
+            if draft.getFromname() != you_fromname and draft.getEmail() != you_email:
+                if only_fromname and draft.getFromname():
+                    return fmt_followup % draft.getFromname()
+                elif only_fromname and draft.getEmail():
+                    return fmt_followup % draft.getEmail()
+                else:
+                    return fmt_followup % self.ShowNameEmail(draft.getFromname(), draft.getEmail())
+        return None        
+    
+    def getLatestDraftThreadAuthor(self, only_if_not_you=False):
+        """ return the fullname of the latest draft thread author.
+        
+        If @only_if_not_you is true, then don't bother if the current
+        user *is* the latest draft thread author.
+        """
+        latest_draft = self._getLatestThreadDraft()
+        
+        if only_if_not_you:
+            you_fromname = self.getSavedUser('fromname')
+            you_email = self.getSavedUser('email')
+        
+        if latest_draft is not None:
+            fromname = latest_draft.getFromname()
+            email = latest_draft.getEmail()
+            if only_if_not_you:
+                if you_fromname == fromname and you_email == email:
+                    return ''
+                else:
+                    return self.ShowNameEmail(fromname, email)
+            else:
+                return self.ShowNameEmail(fromname, email)
+        return ''
     
 
     def _reason2saveDraft(self, request):
@@ -1500,6 +1554,16 @@ class IssueTrackerIssue(IssueTracker):
             if draft.comment == comment:
                 return draft
         return None
+    
+    def _getLatestThreadDraft(self):
+        """ return the thread draft object that is the latest """
+        container = self.getDraftsContainer()
+        draftobjects = list(container.objectValues(ISSUETHREAD_DRAFT_METATYPE))
+        draftobjects.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
+        try:
+            return draftobjects[0]
+        except IndexError:
+            return None
                 
 
     def _saveDraftThread(self, issueid, action, REQUEST, draft_followup_id=None,

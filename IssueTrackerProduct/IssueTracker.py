@@ -10703,6 +10703,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             container = self.getDraftsContainer()
             container.manage_delObjects([id])
             
+        if REQUEST is not None:
+            self.StopCache()
+            
         if Utils.niceboolean(return_show_drafts_simple):
             # Exceptional case where we render and return the show_drafts_simple 
             # template again.
@@ -10711,7 +10714,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # Another exceptional case where we render and return the
             # show_drafts template. This featurette is exploited by
             # the AJAX calling DeleteDraftIssue from index_html
-            return self.show_drafts(self, self.REQUEST)
+            r = self.show_drafts(self, self.REQUEST)
+            return r
 
         if REQUEST is not None:
             if REQUEST.get('back','').lower() == 'home':

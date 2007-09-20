@@ -2,7 +2,8 @@
                  dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)"
      tal:condition="python:not request.get('previewissue') and issuedrafts" id="issuedrafts">
 <p><b>Drafts</b></p>
-<p tal:repeat="issuedraft issuedrafts">
+<p tal:repeat="issuedraft issuedrafts"
+   tal:attributes="class string:draft-${issuedraft/getId}">
 <span tal:condition="issuedraft/isAutosave">(autosave) </span><a tal:attributes="href string:?draft_issue_id=${issuedraft/getId}" 
    tal:content="structure python:issuedraft.shortDescription(maxlength=37)"></a>
 <small> (<a tal:attributes="href string:DeleteDraftIssue?id=${issuedraft/getId};

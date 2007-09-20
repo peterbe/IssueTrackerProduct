@@ -18,7 +18,7 @@ function autosave() {
    $.post('AutoSaveDraftIssue', $(document.ai).fastSerialize(),
           function(resp) {
              if (resp) {
-               $('input[@name=draft_issue_id]').val(resp);
+               $('input[name="draft_issue_id"]').val(resp);
              }
           });
    
@@ -53,9 +53,10 @@ function enableTsizer(){
 }
 
 function deldraft(draftid) {
+   $('p.draft-'+draftid).remove();
    $.post('DeleteDraftIssue', {id:draftid, return_show_drafts_simple:1}, function(resp) {
       $('#issuedraftsouter').html(resp);
+      
    });
-   
-  return false;  
+   return false;  
 }

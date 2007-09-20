@@ -3,6 +3,8 @@
  tal:replace="structure here/show_submissionerror_message">
 </span>
 
+<div id="recent-draftthread-author" style="display:none">&nbsp;
+</div>
 
 <form method="post" name="form_followup" enctype="multipart/form-data"
       tal:attributes="action here/relative_url"

@@ -1,3 +1,8 @@
+    New feature: Uses jQuery 1.2.1
+    
+    Bug fixed: Cancelling a go-to-issue keyboard command caused a
+    Javascript error.
+    
     New feature: Upgraded to addhrefs 0.9.3
 
     Bug fixed: preParseEmailString would sometimes barf on unicode

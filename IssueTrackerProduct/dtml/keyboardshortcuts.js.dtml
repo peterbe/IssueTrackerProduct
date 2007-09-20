@@ -50,22 +50,24 @@ function body_onkeypress(evt){
         
     } else if (s == '#') { // 51 = #
        var issue = prompt("Enter issue number or title:","");
-       issueid = issue.replace(/^\s+|\s+$/g,''); // strip whitespace
-       <dtml-if "issueprefix">
-       ok_id = new RegExp(/^\d+$|/^<dtml-var issueprefix>\d+$/);
-       <dtml-else>
-       ok_id = new RegExp(/^\d+$|^#\d+$/);
-       </dtml-if>
-       if (issueid) {
-         if (ok_id.exec(issueid)) {
-	   if (issueid.length!=<dtml-var "randomid_length">)
-             while(issueid.length<<dtml-var "randomid_length">)
-               issueid = "0"+issueid;
-	   if (issueid[0]=='#') issueid = issueid.substring(1, issueid.length);
-           location.href=burl+'/'+issueid;
-           return false;
-         } else {
-           location.href='<dtml-var "getRootURL()">/<dtml-var "whichList()">/?search_only_on=title&q='+escape(issue);
+       if (issue !== null) {
+         issueid = issue.replace(/^\s+|\s+$/g,''); // strip whitespace
+         <dtml-if "issueprefix">
+         ok_id = new RegExp(/^\d+$|/^<dtml-var issueprefix>\d+$/);
+         <dtml-else>
+         ok_id = new RegExp(/^\d+$|^#\d+$/);
+         </dtml-if>
+         if (issueid) {
+           if (ok_id.exec(issueid)) {
+  	   if (issueid.length!=<dtml-var "randomid_length">)
+               while(issueid.length<<dtml-var "randomid_length">)
+                 issueid = "0"+issueid;
+  	   if (issueid[0]=='#') issueid = issueid.substring(1, issueid.length);
+             location.href=burl+'/'+issueid;
+             return false;
+           } else {
+             location.href='<dtml-var "getRootURL()">/<dtml-var "whichList()">/?search_only_on=title&q='+escape(issue);
+           }
          }
        }
 
@@ -103,16 +105,9 @@ function body_onkeypress(evt){
 }
 
 $(document).bind("keypress", body_onkeypress);
-//addEvent(document, 'keypress', body_onkeypress);
 
 function toggleInputsKS() {
    $("input,textarea,select").bind("blur", enableKS).bind("focus", disableKS);
-  //els = [document.getElementsByTagName("INPUT"), document.getElementsByTagName("TEXTAREA"), document.getElementsByTagName("SELECT")];
-  //for (i=0; i< els.length; i++)
-  //  for (j=0; j<els[i].length; j++){
-  //    addEvent(els[i][j], 'blur', enableKS);
-  //    addEvent(els[i][j], 'focus', disableKS);
-  //  }
 }
 
 function findILinks() {
@@ -120,11 +115,6 @@ function findILinks() {
    $('a.ilink').each(function() {
       all_ilinks.push(this);
    });
-   //links = document.getElementsByTagName('a');
-   //for (i=0;i<links.length;i++)
-   //  if (links[i].className=='ilink') { c++;
-   //    all_ilinks.push(links[i]);
-   //  }
 }
 
 function highlightILink(el){
@@ -142,7 +132,5 @@ $(function() {
    findILinks();
 });
 
-//addEvent(window, 'load', toggleInputsKS);
-//addEvent(window, 'load', findILinks);
 
 

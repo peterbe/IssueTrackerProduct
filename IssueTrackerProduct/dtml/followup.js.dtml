@@ -33,10 +33,29 @@ function clearAutoRefreshTitle() {
 
 
 <dtml-if "SaveDrafts() and UseAutoSave()">
+  
+function clairvoyant_followups() {
+   $.get(_base_url+'/getRecentOtherDraftThreadAuthor', {'only_fromname':1}, function(resp) {
+      if (resp) {
+         $('#recent-draftthread-author').text(resp).show();
+         setTimeout(function() {
+            $('#recent-draftthread-author').fadeOut(500);
+         }, 30*1000);
+      }
+   });
+}
+var cf_timer;
+start_clairvoyant_followups = function() {
+   clairvoyant_followups();
+   cf_timer=window.setTimeout("start_clairvoyant_followups()", 4*1000);
+}
+
+
 function autosave() {
-   $.post(_base_url+'/AutoSaveDraftThread', $(document.form_followup).fastSerialize(), 
+   $.post(_base_url+'/AutoSaveDraftThread', 
+          $(document.form_followup).fastSerialize(),
           function(resp) {
-             document.form_followup.draft_followup_id.value=resp;
+             $('#draft_followup_id').val(resp['draft_followup_id']);
           });
 }
 
@@ -64,6 +83,7 @@ function startautorefresh() {
 
 $(function() {
    startautorefresh();
+   start_clairvoyant_followups();
 });
 
 
