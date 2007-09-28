@@ -11,6 +11,7 @@ import codecs
 from random import shuffle
 from math import floor
 from htmlentitydefs import entitydefs
+import warnings
 
 # import line used by textify
 import formatter, htmllib, StringIO
@@ -580,6 +581,7 @@ def _hex_string(oldstring):
 
 def same_type(one, two):
     """ use this because 'type' as variable can be used elsewhere """
+    warnings.warn("use isinstance(object, type) instead", DeprecationWarning, 2)
     return type(one)==type(two)
 
 
@@ -661,7 +663,7 @@ def preParseEmailString(es, names2emails={}, aslist=0):
     for item in grand_list[:]:
         if n2e.has_key(ss(item)):
             value = n2e.get(ss(item))
-            if same_type(value, []):
+            if isinstance(value, list):
                 for each in value:
                     if each:
                         grand_list.append(each.strip())
@@ -708,7 +710,7 @@ def AddParam2URL(url, params={}, unicode_encoding='utf8',
         p = '&'
     url = url + p
     for key, value in params.items():
-        if same_type(value, []) or same_type(value, ()):
+        if isinstance(value, (list, tuple)):
             for e in value:
                 if isinstance(e, unicode):
                     e = e.encode(unicode_encoding)
@@ -722,9 +724,9 @@ def AddParam2URL(url, params={}, unicode_encoding='utf8',
 def fixDictofLists(dict):
     " throw it a dictionary and it returns the values lowercased "
     for key,value in dict.items():
-        if same_type(value, []):
+        if isinstance(value, list):
             dict[key] = _lowercaseList(value)
-        elif same_type(value, 's'):
+        elif isinstance(value, basestring):
             dict[key] = value.lower()
     return dict
 

@@ -1,3 +1,6 @@
+    Bug fixed: Sending assignment emails from a user with non-ASCII
+    name would cause an UnicodeDecodeError.
+
     New feature: Uses jQuery 1.2.1
     
     Bug fixed: Cancelling a go-to-issue keyboard command caused a

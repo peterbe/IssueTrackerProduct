@@ -71,7 +71,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         self.id = str(id)
         self.title = unicodify(title)
         self.comment = unicodify(comment)
-        if Utils.same_type(threaddate, 's'):
+        if isinstance(threaddate, basestring):
             threaddate = DateTime(threaddate)
         self.threaddate = threaddate
         self.fromname = unicodify(fromname)
@@ -386,7 +386,7 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
         self.action = action
         self.title = title
         self.comment = comment
-        if Utils.same_type(threaddate, 's'):
+        if isinstance(threaddate, basestring):
             threaddate = DateTime(threaddate)
         self.threaddate = threaddate
         self.fromname = fromname

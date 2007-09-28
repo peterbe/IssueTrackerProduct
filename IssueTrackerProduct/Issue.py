@@ -95,7 +95,7 @@ class IssueTrackerIssue(IssueTracker):
         """ init an Issue object """
         self.id = str(id)
         self.title = unicodify(title.strip())
-        if Utils.same_type(issuedate, 's'):
+        if isinstance(issuedate, basestring):
             issuedate = DateTime(issuedate)
         self.issuedate = issuedate
         self.modifydate = DateTime()
@@ -509,7 +509,7 @@ class IssueTrackerIssue(IssueTracker):
             if not self.__dict__.has_key(key):
                 self.__dict__[key] = default
                 count += 1
-            elif key=='sections' and Utils.same_type(self.sections, ()):
+            elif key=='sections' and isinstance(self.sections, tuple):
                 self.sections = list(self.sections)
                 count += 1
                 
@@ -1179,7 +1179,7 @@ class IssueTrackerIssue(IssueTracker):
         
         # Section must be a list and might only allow for recognized values
         if sections is not None:
-            if not Utils.same_type(sections, []):
+            if not isinstance(sections, list):
                 sections = [sections]
                 
             if not self.CanAddNewSections():
@@ -1641,28 +1641,6 @@ class IssueTrackerIssue(IssueTracker):
     
     ## Changing the issue in mid-air
 
-    
-#    def change_issueAttributes(self, sections, issuetype, urgency,
-#                               REQUEST=None):
-#        """ Custom edit of only these properties """
-#        if not Utils.same_type(sections, []):
-#            sections=[sections]
-#        n_sections = []
-#        for section in sections:
-#            if section in self.getSectionOptions():
-#                n_sections.append(section)
-#        self.sections=n_sections
-#        
-#        issuetype=str(issuetype)
-#        if issuetype in self.types:
-#            self.type = issuetype
-#
-#        urgency=str(urgency)
-#        if urgency in self.urgencies:
-#            self.urgency = urgency
-#            
-#        if REQUEST is not None:
-#            REQUEST.RESPONSE.redirect(self.absolute_url())
     
     def Others2Notify(self, format='email', emailtoskip=None, requireemail=False, 
                       do=None # legacy parameter
@@ -2378,7 +2356,7 @@ class IssueTrackerIssue(IssueTracker):
     def changeAssignment(self, assignee, send_email=False):
         """ add a new assignee to the issue object only if the current assignee is the
         user who calls this. """
-        if Utils.same_type(send_email,'s'):
+        if isinstance(send_email, basestring):
             send_email = Utils.niceboolean(send_email)
             
         assignments = self.getAssignments()
@@ -2442,9 +2420,9 @@ class IssueTrackerIssue(IssueTracker):
         if issueuser and issueuser.getFullname():
             fromname = issueuser.getFullname()
         elif not request.get('fromname') and self.has_cookie(name_cookiekey):
-            fromname = self.get_cookie(name_cookiekey)
+            fromname = unicodify(self.get_cookie(name_cookiekey))
         else:
-            fromname = request.get('fromname','')
+            fromname = unicodify(request.get('fromname',''))
 
         if send_email and Utils.ValidEmailAddress(user.getEmail()) \
                and not Utils.ss(user.getEmail())==Utils.ss(email):
@@ -2480,21 +2458,21 @@ class IssueTrackerIssue(IssueTracker):
             m = "Sitemaster email not valid. Email might not work"
             LOG(self.__class__.__name__, WARNING, m)
             
-        From = "%s <%s>"%(sitemaster_name, sitemaster_email)
+        From = u"%s <%s>"%(sitemaster_name, sitemaster_email)
         
         issuetitle = issuetitle_short = self.getTitle()
         if len(issuetitle_short) > 45:
             issuetitle_short = issuetitle_short[:45].strip()+'...'
         
         if self.ShowIdWithTitle():
-            Subject = "%s: (assignment) #%s %s"
+            Subject = u"%s: (assignment) #%s %s"
             Subject = Subject%(roottitle, self.getId(), issuetitle_short)
         else:
-            Subject = "%s: (assignment) %s"
+            Subject = u"%s: (assignment) %s"
             Subject = Subject%(roottitle, issuetitle_short)
 
         if to_name:
-            To = '%s <%s>'%(to_name, to_email)
+            To = u'%s <%s>'%(to_name, to_email)
         else:
             To = to_email
 
@@ -2502,12 +2480,13 @@ class IssueTrackerIssue(IssueTracker):
         if not by_who:
             by_who = from_email
 
-        msg = "" #%DateTime().strftime(self.display_date)
-        msg += "You have been assigned to an issue by %s"%by_who
-        msg += ' with title: "%s"\n'%self.getTitle()
-        msg += "The issue is currently %r.\n\n"%self.status.capitalize()
+        msg = u"" #%DateTime().strftime(self.display_date)
+        msg += u"You have been assigned to an issue by %s"%by_who
         
-        msg += "The issue can be found at\n%s\n\n"%self.absolute_url()
+        msg += u' with title: "%s"\n'%self.getTitle()
+        msg += u"The issue is currently %r.\n\n"%self.status.capitalize()
+        
+        msg += u"The issue can be found at\n%s\n\n"%self.absolute_url()
 
         signature = self.showSignature()
         if signature:
@@ -2566,9 +2545,6 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         """ init an Issue object """
         self.id = str(id)
         self.title = unicodify(title)
-        #if Utils.same_type(issuedate, 's'):
-        #    issuedate = DateTime(issuedate)
-        #self.issuedate = issuedate
         self.modifydate = DateTime()
         self.status = status
         self.type = issuetype
@@ -2698,8 +2674,8 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
             self.urgency = urgency
 
         if sections is not None:
-            if not Utils.same_type(sections, []):
-                if Utils.same_type(sections, ()):
+            if not isinstance(sections, list):
+                if isinstance(sections, tuple):
                     sections = list(sections)
                 else:
                     sections = [sections]
@@ -2867,7 +2843,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                     return 'plaintext'
         elif key == 'sections':
             sections = value
-            if not Utils.same_type(sections, []):
+            if not isinstance(sections, list):
                 sections = sections.replace(',','\n')
                 sections = sections.split('\n')
                 sections = Utils.uniqify(sections)

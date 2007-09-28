@@ -123,7 +123,7 @@ class Notifyables:
             groups = REQUEST.get('new_groups',[])
             if email != '':
                 no_attempted += 1
-            if not Utils.same_type(groups, []):
+            if not isinstance(groups, list):
                 groups = [groups]
             if Utils.ValidEmailAddress(email):
                 self.manage_addNotifyable(email, alias, groups)
@@ -391,7 +391,7 @@ class IssueTrackerNotifyable(SimpleItem.SimpleItem):
         """ case insensitivly check if 'group' is part of this
         'self.groups' """
         these = [Utils.ss(x) for x in self.getGroups()]
-        if Utils.same_type(group, ''):
+        if isinstance(group, basestring):
             return Utils.ss(group) in these
         else:
             return Utils.ss(group.getTitle()) in these

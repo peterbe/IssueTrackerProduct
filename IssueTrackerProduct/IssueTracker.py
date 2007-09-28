@@ -454,7 +454,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def XXXglobal_relative_url(self, object_or_url):
         """ return a simpler url of any object """
-        if Utils.same_type(object_or_url, 's'):
+        if isinstance(object_or_url, basestring):
             url = object_or_url
         else:
             url = object_or_url.absolute_url()
@@ -1194,18 +1194,18 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     ]
         dict = self.__dict__
         for each in strings:
-            if hk(each) and Utils.same_type(get(each), 's'):
+            if hk(each) and isinstance(get(each), basestring):
                 dict[each] = get(each).strip()
 
         for each in ints:
             if hk(each):
-                if Utils.same_type(get(each), 3):
+                if isinstance(get(each), int):
                     dict[each] = get(each)
                 else:
                     LOG(self.meta_type, WARNING,
                         '%s not integer'%get(each), '')
         for each in lists:
-            if hk(each) and Utils.same_type(get(each), []):
+            if hk(each) and isinstance(get(each), list):
                 dict[each] = Utils.uniqify(get(each))
 
         for each in booleans:
@@ -1216,7 +1216,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 
         # now for a special one
         if hk('statuses-and-verbs'):
-            if Utils.same_type(get('statuses-and-verbs'), []):
+            if isinstance(get('statuses-and-verbs'), list):
                 L1, L2 = self.splitStatusesAndVerbs(get('statuses-and-verbs'))
                 self.statuses = L1
                 self.statuses_verbs = L2
@@ -2597,7 +2597,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return all the acl users as identifiers """
         if userfolders is None:
             userfolders = self.getAllIssueUserFolders()
-        elif not Utils.same_type(userfolders, []):
+        elif not isinstance(userfolders, list):
             userfolders = [userfolders]
 
         users = []
@@ -3385,7 +3385,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         # filter out empty item from sections
         sections_newlist = request.get('sections', [])
-        if not Utils.same_type(sections_newlist, []):
+        if not isinstance(sections_newlist, list):
             sections_newlist = [sections_newlist]
             
         sections_newlist = [x.strip() for x in sections_newlist]
@@ -3562,7 +3562,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if urgency not in self.urgencies:
             raise "NoUrgency", "Unrecognized issue urgency"
         
-        if not Utils.same_type(sections, []):
+        if not isinstance(sections, list):
             raise "NotList", "Sections is not a list"
 
         if confidential not in [1,0]:
@@ -3872,7 +3872,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         assignee_email = None
         if assignee:
-            if Utils.same_type(assignee, 's'):
+            if isinstance(assignee, basestring):
                 acl_path, username = assignee.split(',')
                 try:
                     userfolder = self.unrestrictedTraverse(acl_path)
@@ -3933,7 +3933,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             else:
                 fr = self.getSitemasterFromField()
             
-        if Utils.same_type(issue, 's'):
+        if isinstance(issue, basestring):
             issue = getattr(self, issue)
 
         _issuetitle = issue.getTitle()
@@ -4476,7 +4476,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def saveEmailfriends(self, friends):
         """ Save to string as a cookie with '|' between each """
         raise "DeprecatedError"
-        if not Utils.same_type(friends, []):
+        if not isinstance(friends, list):
             friends = [friends]
         key = EMAILFRIENDS_COOKIEKEY
         key = self.defineInstanceCookieKey(key)
@@ -4632,7 +4632,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if request.has_key(filterkey_simple):
             value = request.get(filterkey_simple)
             if key in ('statuses', 'sections', 'urgencies', 'types') \
-                   and Utils.same_type(value, 's'):
+                   and isinstance(value, basestring):
                 value = [value]
                 
         elif not request_only and self.has_session(filterkey):
@@ -4945,7 +4945,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         splitter = '-'
         # Use old things
-        if not Utils.same_type(ignore, []):
+        if not isinstance(ignore, list):
             ignore = [ignore]
         keys_applied = []
         for key, value in params.items():
@@ -5399,7 +5399,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def preParseEmailString(self, email_string, aslist=0, allnotifyables=1):
         """ wrapper around utils """
-        if Utils.same_type(email_string, []):
+        if isinstance(email_string, list):
             email_string = ', '.join(email_string)
         parsemethod = Utils.preParseEmailString
         all_notifyables = self.getNotifyables()
@@ -5519,10 +5519,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """
         request = self.REQUEST
         actionurl = self.ActionURL()
-        if Utils.same_type(batchdict, 's') and batchdict=='all':
+        if isinstance(batchdict, basestring) and batchdict=='all':
             #request.set('start', None)
             url = self.aurl(actionurl, {'show':'all'}, ignore='start')
-        elif Utils.same_type(batchdict, 's') and batchdict.lower()=='none':
+        elif isinstance(batchdict, basestring) and batchdict.lower()=='none':
             url = self.aurl(actionurl, ignore=['start','show'])
         else:
             batchdict = self._Zero2None(batchdict)
@@ -5587,7 +5587,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ Show name and email depending on certain criterias """
         out = ''
 
-        if not Utils.same_type(fromname, 's') and hasattr(fromname, 'meta_type'):
+        if not isinstance(fromname, basestring) and hasattr(fromname, 'meta_type'):
             # This is a very special case. The fromname isn't a name but instead
             # an issue user object. Enabling for this strange parameter is why
             # the 'email' parameter has a default None.
@@ -7545,7 +7545,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def _dosort(self, seq, key):
         """ do the actual sort """
-        if not (Utils.same_type(key, ()) or Utils.same_type(key, [])):
+        if not isinstance(key, (tuple, list)):
             key = (key,)
         return sequence.sort(seq, (key,))
     
@@ -7712,7 +7712,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         key = RECENTHISTORY_ISSUEIDVISITKEY
         
-        if not Utils.same_type(issueid, 's'):
+        if not isinstance(issueid, basestring):
             # we only want objects id
             issueid = issueid.getId()
 
@@ -7774,7 +7774,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         key = RECENTHISTORY_ADDISSUEIDKEY
 
-        if not Utils.same_type(issueid, 's'):
+        if not isinstance(issueid, basestring):
             # we only want objects id
             issueid = issueid.getId()
         added = self.get_session(key, [])
@@ -8220,7 +8220,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     security.declareProtected(VMS, 'manage_delPOP3Accounts')
     def manage_delPOP3Accounts(self, ids=[], REQUEST=None):
         """ delete some POP3 Accounts """
-        if Utils.same_type(ids, 's'):
+        if isinstance(ids, basestring):
             ids = [ids]
             
         root = self.getPOP3Root()
@@ -8247,7 +8247,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def manage_delAcceptingEmails(self, id, ids=[], REQUEST=None):
         """ delete some accepting email objects """
         account = self.getPOP3Account(id)
-        if Utils.same_type(ids, 's'):
+        if isinstance(ids, basestring):
             ids = [ids]
         account.manage_delObjects(ids)
         
@@ -9113,10 +9113,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         intersection = []
         if list1 is None:
             return []
-        elif not Utils.same_type(list1, []):
+        elif not isinstance(list1, list):
             list1 = [list1]
             
-        if not Utils.same_type(list2, []):
+        if not isinstance(list2, list):
             list2 = [list2]
         list2lower = [x.lower().strip() for x in list2]
         for item in list1:
@@ -9328,7 +9328,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         request = self.REQUEST
 
         # check that since isn't a string
-        if Utils.same_type(since, 's'):
+        if isinstance(since, basestring):
             since = DateTime(since)
         elif request.has_key('count_status_since'):
             since = DateTime()-int(request['count_status_since'])
@@ -9406,7 +9406,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     issues=None, returncount=0):
         """ calculate for different day periods approximately how 
         many issues are coming in """
-        if from_date is not None and Utils.same_type(from_date, 's'):
+        if from_date is not None and isinstance(from_date, basestring):
             from_date = DateTime(from_date)
             
         if issues is not None:
@@ -11032,13 +11032,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         before = self._getListsToExpand()
         all_possible = POSSIBLE_USER_LISTS
 
-        if not Utils.same_type(hide, []):
+        if not isinstance(hide, list):
             hide = [hide]
         for each in hide:
             if each in before:
                 before.remove(each)
 
-        if not Utils.same_type(add, []):
+        if not isinstance(add, list):
             add = [add]
         for each in add:
             if each in all_possible:
