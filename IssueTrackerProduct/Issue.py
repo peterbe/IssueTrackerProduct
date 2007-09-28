@@ -2367,6 +2367,26 @@ class IssueTrackerIssue(IssueTracker):
 
         url = self.absolute_url()
         self.REQUEST.RESPONSE.redirect(url)
+
+        
+    security.declareProtected('View', 'setAssignment')
+    def setAssignment(self, assignee, send_email=False):
+        """ add a new assignee to the issue object only if the current assignee is the
+        user who calls this. """
+        if isinstance(send_email, basestring):
+            send_email = Utils.niceboolean(send_email)
+            
+        assignments = self.getAssignments()
+        if assignments:
+            state = 0
+        else:
+            state = 1
+        #lastone = assignments[-1]
+        if self.hasManagerRole():
+            self.createAssignment(assignee, state=state, send_email=send_email)
+
+        url = self.absolute_url()
+        self.REQUEST.RESPONSE.redirect(url)
         
     
     def _getAssignments(self):

@@ -9,7 +9,7 @@ AcceptingEmail	Email.py	/^class AcceptingEmail(SimpleItem.SimpleItem,$/;"	c
 ActionURL	IssueTracker.py	/^    def ActionURL(self, url=None):$/;"	m	class:IssueTracker
 AddIssue	IssueTracker.py	/^    def AddIssue(self, REQUEST, *args, **kw):$/;"	m	class:IssueTracker
 AddManyIssues	IssueTracker.py	/^    def AddManyIssues(self, REQUEST, **kw):$/;"	m	class:IssueTracker
-AddParam2URL	Utils.py	/^def AddParam2URL(url, params={}, plus_quote=False, **kwargs):$/;"	f
+AddParam2URL	Utils.py	/^def AddParam2URL(url, params={}, unicode_encoding='utf8', $/;"	f
 AllowIssueAttributeChange	IssueTracker.py	/^    def AllowIssueAttributeChange(self):$/;"	m	class:IssueTracker
 AllowIssueSubscription	IssueTracker.py	/^    def AllowIssueSubscription(self):$/;"	m	class:IssueTracker
 Always2Notify	IssueTracker.py	/^    def Always2Notify(self, format='email', emailtoskip=None, requireemail=False,$/;"	m	class:IssueTracker
@@ -19,6 +19,7 @@ AutoSaveDraftIssue	IssueTracker.py	/^    def AutoSaveDraftIssue(self, REQUEST, d
 AutoSaveDraftThread	Issue.py	/^    def AutoSaveDraftThread(self, REQUEST, draft_followup_id=None,$/;"	m	class:IssueTrackerIssue
 AwareLengthLimit	Utils.py	/^def AwareLengthLimit(string, maxsize=50, append='...'):$/;"	f
 BatchedQueryString	IssueTracker.py	/^    def BatchedQueryString(self, batchdict={}, encode=False):$/;"	m	class:IssueTracker
+BetterImageFile	__init__.py	/^class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve$/;"	c
 CDATAText	IssueTracker.py	/^    def CDATAText(self, text):$/;"	m	class:IssueTracker
 CSVExport	IssueTracker.py	/^    def CSVExport(self, batchsize=None, withheaders=True, $/;"	m	class:IssueTracker
 CSVExportURL	IssueTracker.py	/^    def CSVExportURL(self):$/;"	m	class:IssueTracker
@@ -38,7 +39,6 @@ Empty	IssueTracker.py	/^class Empty:$/;"	c
 EncodeEmailDisplay	IssueTracker.py	/^    def EncodeEmailDisplay(self):$/;"	m	class:IssueTracker
 ExtensionForm	Issue.py	/^    def ExtensionForm(self, options):$/;"	m	class:IssueTrackerIssue
 FilterValuer	IssueTracker.py	/^class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager):$/;"	c
-Formatter	Utils.py	/^    class Formatter(formatter.AbstractFormatter):$/;"	c
 GenerateNotifyableId	IssueTrackerNotifyables.py	/^    def GenerateNotifyableId(self, email, length=10, int_length=None):$/;"	m	class:Notifyables
 GenerateNotifyableId	Notifyables.py	/^    def GenerateNotifyableId(self, email, length=10, int_length=None):$/;"	m	class:Notifyables
 HeadingLinks	IssueTracker.py	/^    def HeadingLinks(self, display, sortname, default=0, inverted=0,$/;"	m	class:IssueTracker
@@ -86,7 +86,6 @@ Others2Notify	Issue.py	/^    def Others2Notify(self, format='email', emailtoskip
 POP3Account	Email.py	/^class POP3Account(IssueTracker.IssueTrackerFolderBase):$/;"	c
 PUT	Issue.py	/^    def PUT(self, REQUEST, RESPONSE):$/;"	m	class:IssueTrackerDraftIssue
 ParseError	IssueTracker.py	/^    class ParseError(Exception): # make it up ourselfs$/;"	c
-Parser	Utils.py	/^    class Parser(htmllib.HTMLParser):$/;"	c
 PrerenderDescriptionsAndComments	IssueTracker.py	/^    def PrerenderDescriptionsAndComments(self, REQUEST=None):$/;"	m	class:IssueTracker
 PrivateReports	IssueTracker.py	/^    def PrivateReports(self):$/;"	m	class:IssueTracker
 PrivateStatistics	IssueTracker.py	/^    def PrivateStatistics(self):$/;"	m	class:IssueTracker
@@ -157,7 +156,6 @@ UserChangeDetails	IssueTracker.py	/^    def UserChangeDetails(self, fullname, em
 ValidEmailAddress	IssueTracker.py	/^    def ValidEmailAddress(self, email):$/;"	m	class:IssueTrackerFolderBase
 ValidEmailAddress	Utils.py	/^def ValidEmailAddress(address, debug=None):$/;"	f
 VersionController	upgrade.py	/^class VersionController:$/;"	c
-Writer	Utils.py	/^    class Writer(formatter.DumbWriter):$/;"	c
 XXX_NO_LONGER_USED_encodeEmailString	Utils.py	/^def XXX_NO_LONGER_USED_encodeEmailString(email, title=None, nolink=0):$/;"	f
 XXXglobal_relative_url	IssueTracker.py	/^    def XXXglobal_relative_url(self, object_or_url):$/;"	m	class:IssueTracker
 _	I18N.py	/^def _(s, *a, **k):$/;"	f
@@ -187,6 +185,7 @@ __init__	Notifyables.py	/^    def __init__(self, id, title, groups=[]):$/;"	m	cl
 __init__	ReportScript.py	/^    def __init__(self, id):$/;"	m	class:ReportScript
 __init__	Thread.py	/^    def __init__(self, id, issueid, action, title=None,$/;"	m	class:IssueTrackerDraftIssueThread
 __init__	Thread.py	/^    def __init__(self, id, title, comment, threaddate, fromname, email,$/;"	m	class:IssueTrackerIssueThread
+__init__	__init__.py	/^    def __init__(self, path, _prefix=None, $/;"	m	class:BetterImageFile
 __init__	upgrade.py	/^    def __init__(self, home_path='.', verbose=False):$/;"	m	class:VersionController
 _acceptEmailsToSiteMaster	IssueTracker.py	/^    def _acceptEmailsToSiteMaster(self):$/;"	m	class:IssueTracker
 _add2bucket	IssueTracker.py	/^    def _add2bucket(self, bucket, key, opened=False, closed=False):$/;"	m	class:IssueTracker
@@ -233,6 +232,7 @@ _dropDraftThread	Issue.py	/^    def _dropDraftThread(self, id):$/;"	m	class:Issu
 _dropMatchingDraftIssues	IssueTracker.py	/^    def _dropMatchingDraftIssues(self, issue):$/;"	m	class:IssueTracker
 _dropMatchingDraftThreads	Issue.py	/^    def _dropMatchingDraftThreads(self, thread):$/;"	m	class:IssueTrackerIssue
 _emptyFunction	IssueTracker.py	/^    def _emptyFunction(self, REQUEST, RESPONSE):$/;"	m	class:IssueTracker
+_expires	__init__.py	/^    def _expires(self):$/;"	m	class:BetterImageFile
 _file_has_extensions	IssueTracker.py	/^    def _file_has_extensions(self, filestr, extensions):$/;"	m	class:IssueTracker
 _filterIssues	IssueTracker.py	/^    def _filterIssues(self, issues):$/;"	m	class:IssueTracker
 _filterNotifyGroups	IssueTrackerNotifyables.py	/^    def _filterNotifyGroups(self, groups):$/;"	m	class:Notifyables
@@ -254,6 +254,7 @@ _getAllScriptItems	IssueTracker.py	/^    def _getAllScriptItems(self):$/;"	m	cla
 _getAllScripts	IssueTracker.py	/^    def _getAllScripts(self):$/;"	m	class:ReportsContainer
 _getAssignments	Issue.py	/^    def _getAssignments(self):$/;"	m	class:IssueTrackerIssue
 _getBrothers	IssueTracker.py	/^    def _getBrothers(self):$/;"	m	class:IssueTracker
+_getBugReportingParameters	IssueTracker.py	/^    def _getBugReportingParameters(self, error_type=None, error_value=None,$/;"	m	class:IssueTracker
 _getConfirmFileattachments	IssueTracker.py	/^    def _getConfirmFileattachments(self):$/;"	m	class:IssueTracker
 _getCorrectCase	IssueTracker.py	/^    def _getCorrectCase(self, item, list):$/;"	m	class:IssueTracker
 _getCurrentVersion	upgrade.py	/^def _getCurrentVersion(home_path=None):$/;"	f
@@ -269,6 +270,7 @@ _getFormattedDescription	Issue.py	/^    def _getFormattedDescription(self, force
 _getIntersection	IssueTracker.py	/^    def _getIntersection(self, list1, list2):$/;"	m	class:IssueTracker
 _getIssueContainer	IssueTracker.py	/^    def _getIssueContainer(self):$/;"	m	class:IssueTracker
 _getIssueDraftObject	IssueTracker.py	/^    def _getIssueDraftObject(self, id):$/;"	m	class:IssueTracker
+_getLatestThreadDraft	Issue.py	/^    def _getLatestThreadDraft(self):$/;"	m	class:IssueTrackerIssue
 _getLatestVersion	upgrade.py	/^def _getLatestVersion():    $/;"	f
 _getLatestVersionURL	upgrade.py	/^def _getLatestVersionURL():    $/;"	f
 _getListsToExpand	IssueTracker.py	/^    def _getListsToExpand(self):$/;"	m	class:IssueTracker
@@ -349,6 +351,7 @@ _tidyFoundValue	Issue.py	/^    def _tidyFoundValue(self, key, value):$/;"	m	clas
 _tohex	Utils.py	/^    def _tohex(n):$/;"	f
 _unicode_comment	Thread.py	/^    def _unicode_comment(self):$/;"	m	class:IssueTrackerIssueThread
 _unicode_description	Issue.py	/^    def _unicode_description(self):$/;"	m	class:IssueTrackerIssue
+_unicode_title	Issue.py	/^    def _unicode_title(self):$/;"	m	class:IssueTrackerIssue
 _uniqify	IssueUserFolder.py	/^def _uniqify(somelist):$/;"	f
 _unmust_mustChangePassword	IssueUserFolder.py	/^    def _unmust_mustChangePassword(self):$/;"	m	class:IssueUser
 _updateModifyDate	Issue.py	/^    def _updateModifyDate(self):$/;"	m	class:IssueTrackerIssue
@@ -361,7 +364,6 @@ acceptOriginatorEmail	Email.py	/^    def acceptOriginatorEmail(self, email, defa
 addTemplates2Class	TemplateAdder.py	/^def addTemplates2Class(Class, templates, extension=None, optimize=None, $/;"	f
 addhrefs	addhrefs.py	/^def addhrefs(text, return_everything=0, $/;"	f
 ageOfOldestIssue	IssueTracker.py	/^    def ageOfOldestIssue(self):$/;"	m	class:IssueTracker
-anchor_end	Utils.py	/^        def anchor_end(self):$/;"	m	class:Parser
 anyTrue	Utils.py	/^    def anyTrue(pred, seq):$/;"	f
 assertAllProperties	Assignment.py	/^    def assertAllProperties(self):$/;"	m	class:IssueTrackerIssueAssignment
 assertAllProperties	Email.py	/^    def assertAllProperties(self):$/;"	m	class:AcceptingEmail
@@ -370,6 +372,7 @@ assertAllProperties	Thread.py	/^    def assertAllProperties(self):$/;"	m	class:I
 aurl	IssueTracker.py	/^    def aurl(self, url, params={}, ignore=[]):$/;"	m	class:IssueTracker
 badIdFilter	Utils.py	/^def badIdFilter(fileid, replacement=''):$/;"	f
 benchmark_ShowDescription	Utils.py	/^def benchmark_ShowDescription():$/;"	f
+bugreportingForm	IssueTracker.py	/^    def bugreportingForm(self, error_type=None, error_value=None,$/;"	m	class:IssueTracker
 bugreportingURL	IssueTracker.py	/^    def bugreportingURL(self, error_type=None, error_value=None,$/;"	m	class:IssueTracker
 calculateStatusScoreProgress	IssueTracker.py	/^    def calculateStatusScoreProgress(self, status_values):$/;"	m	class:IssueTracker
 canLogout	IssueTracker.py	/^    def canLogout(self):$/;"	m	class:IssueTracker
@@ -567,6 +570,7 @@ getIssueUserObject	IssueTracker.py	/^    def getIssueUserObject(self, identifier
 getIssueUserPath	IssueUserFolder.py	/^    def getIssueUserPath(self):$/;"	m	class:IssueUser
 getKey	IssueTracker.py	/^    def getKey(self):$/;"	m	class:FilterValuer
 getLastThread	Issue.py	/^    def getLastThread(self):$/;"	m	class:IssueTrackerIssue
+getLatestDraftThreadAuthor	Issue.py	/^    def getLatestDraftThreadAuthor(self, only_if_not_you=False):$/;"	m	class:IssueTrackerIssue
 getListIssuesList	IssueTracker.py	/^    def getListIssuesList(self, sublist):$/;"	m	class:IssueTracker
 getListPageTitle	IssueTracker.py	/^    def getListPageTitle(self, default='List Issues'):$/;"	m	class:IssueTracker
 getManagementForm	IssueTrackerNotifyables.py	/^    def getManagementForm(self):$/;"	m	class:Notifyables
@@ -626,6 +630,7 @@ getRandomString	Utils.py	/^def getRandomString(length=10, loweronly=1, numberson
 getRecentAddedIssues	IssueTracker.py	/^    def getRecentAddedIssues(self, ids=0, length=None):$/;"	m	class:IssueTracker
 getRecentIssueVisits	IssueTracker.py	/^    def getRecentIssueVisits(self, length=None):$/;"	m	class:IssueTracker
 getRecentIssues	IssueTracker.py	/^    def getRecentIssues(self, length=None, check_each=True):$/;"	m	class:IssueTracker
+getRecentOtherDraftThreadAuthor	Issue.py	/^    def getRecentOtherDraftThreadAuthor(self, only_fromname=False, max_age_seconds=20,$/;"	m	class:IssueTrackerIssue
 getRecentReportRuns	IssueTracker.py	/^    def getRecentReportRuns(self, length=None):$/;"	m	class:IssueTracker
 getRecentSearchTerms	IssueTracker.py	/^    def getRecentSearchTerms(self, length=None):$/;"	m	class:IssueTracker
 getReportsContainer	IssueTracker.py	/^    def getReportsContainer(self):$/;"	m	class:IssueTracker
@@ -745,6 +750,7 @@ imagesInMenu	IssueTracker.py	/^    def imagesInMenu(self):$/;"	m	class:IssueTrac
 incrementUsageCount	IssueTracker.py	/^    def incrementUsageCount(self):$/;"	m	class:FilterValuer
 index_html	Issue.py	/^    def index_html(self, REQUEST, *args, **kw):$/;"	m	class:IssueTrackerIssue
 index_html	Issue.py	/^    def index_html(self, REQUEST=None):$/;"	m	class:IssueTrackerDraftIssue
+index_html	__init__.py	/^    def index_html(self, REQUEST, RESPONSE):$/;"	m	class:BetterImageFile
 index_object	Issue.py	/^    def index_object(self, *args, **kws):$/;"	m	class:IssueTrackerDraftIssue
 index_object	Issue.py	/^    def index_object(self, idxs=['id','title','description',$/;"	m	class:IssueTrackerIssue
 index_object	Thread.py	/^    def index_object(self, *args, **kws):$/;"	m	class:IssueTrackerDraftIssueThread
@@ -846,6 +852,7 @@ matchUrlInBody	IssueTracker.py	/^        def matchUrlInBody(body, url):$/;"	m	cl
 merge_duplicates	IssueTracker.py	/^        def merge_duplicates(list_of_lists):$/;"	m	class:IssueTracker
 moveUpListelement	Utils.py	/^def moveUpListelement(element, xlist):$/;"	f
 mustChangePassword	IssueUserFolder.py	/^    def mustChangePassword(self):$/;"	m	class:IssueUser
+my_guess_content_type	__init__.py	/^def my_guess_content_type(path, data):$/;"	f
 newline_to_br	IssueTracker.py	/^    def newline_to_br(self, text):$/;"	m	class:IssueTrackerFolderBase
 niceboolean	Utils.py	/^def niceboolean(value):$/;"	f
 nullifyTempfolderREQUEST	IssueTracker.py	/^    def nullifyTempfolderREQUEST(self):$/;"	m	class:IssueTracker
@@ -881,9 +888,9 @@ script_log	IssueTracker.py	/^    def script_log(self, summary, text=''):$/;"	m	c
 searchWithOR	IssueTracker.py	/^    def searchWithOR(self, q=None):$/;"	m	class:IssueTracker
 sendAlwaysNotify	IssueTracker.py	/^    def sendAlwaysNotify(self, issue, email=None, assignee=None):$/;"	m	class:IssueTracker
 sendEmail	IssueTracker.py	/^    def sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):$/;"	m	class:IssueTracker
+sendFollowupNotifications	Issue.py	/^    def sendFollowupNotifications(self, followupobject, email_addresses, change):$/;"	m	class:IssueTrackerIssue
 sendPasswordReminder	IssueUserFolder.py	/^    def sendPasswordReminder(self):$/;"	m	class:IssueUser
 sendReturnErrorEmail	IssueTracker.py	/^    def sendReturnErrorEmail(self, email, msg):$/;"	m	class:IssueTracker
-send_label_data	Utils.py	/^        def send_label_data(self, data):$/;"	m	class:Writer
 set	IssueTracker.py	/^    def set(self, key, value):$/;"	m	class:FilterValuer
 setACLCookieDisplayformat	IssueTracker.py	/^    def setACLCookieDisplayformat(self, displayformat):$/;"	m	class:IssueTracker
 setACLCookieEmail	IssueTracker.py	/^    def setACLCookieEmail(self, email):$/;"	m	class:IssueTracker
@@ -955,7 +962,7 @@ test_niceboolean	Utils.py	/^def test_niceboolean():$/;"	f
 test_safe_html_quote	Utils.py	/^def test_safe_html_quote():$/;"	f
 test_timeSince	Utils.py	/^def test_timeSince():$/;"	f
 testmatch	IssueTracker.py	/^        def testmatch(keyword, text):$/;"	m	class:IssueTracker
-textify	Utils.py	/^def textify(html_snippet, maxwords=None):$/;"	f
+textify	Utils.py	/^def textify(html_snippet):$/;"	f
 thisInURL	IssueTracker.py	/^    def thisInURL(self, page, homepage=0):$/;"	m	class:IssueTracker
 timeSince	IssueTracker.py	/^    def timeSince(self, date1, date2, afterword=None, minute_granularity=False):$/;"	m	class:IssueTrackerFolderBase
 timeSince	Utils.py	/^def timeSince(firstdate, seconddate, afterword=None, $/;"	f

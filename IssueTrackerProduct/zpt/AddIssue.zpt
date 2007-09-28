@@ -193,14 +193,15 @@
         tal:condition="python:here.UseIssueAssignment() and all_users">
 		<td><b>Assign to:</b></td>
 		<td>
-			<select name="assignee" tal:define="selected python:request.get('assignee',''); youare python:here.getWhoYouAre(issueuser)" tabindex="30"
-             tal:attributes="onchange string:if(this.options[this.selectedIndex].value){askNoti(this.options[this.selectedIndex].value,'${youare}');;}">
-                <option value=""></option>
-				<option tal:repeat="user all_users" 
-                 tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected" 
-                 tal:content="python:user['user'].getFullname()">
-				Statuses</option>
-			</select>
+  		  <select name="assignee" tabindex="30"
+                          tal:define="selected python:request.get('assignee',''); 
+                                      youare python:here.getWhoYouAre(issueuser)" 
+                          tal:attributes="onchange string:if(this.options[this.selectedIndex].value){askNoti(this.options[this.selectedIndex].value,'${youare}');;}">
+                     <option value=""></option>
+		     <option tal:repeat="user all_users" 
+                             tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected" 
+                             tal:content="python:user['user'].getFullname()">Statuses</option>
+	           </select>
             <span class="submiterror" tal:condition="options/SubmitError|nothing" 
                   tal:content="python:here.ShowSubmitError(options, 'assignee')"></span>
             <span id="asi-noti" class="note">

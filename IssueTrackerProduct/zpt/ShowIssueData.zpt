@@ -180,8 +180,8 @@
      <span tal:condition="has_assigneeuser" 
       tal:replace="structure python:here.ShowNameEmail(assignment.getAssigneeFullname(), assignment.getAssigneeEmail(), highlight=0)"></span>
     </span>
-    <span tal:define="is_end repeat/assignment/end"
-     tal:condition="python:is_end and assignment.isYou()">
+    <tal:block define="is_end repeat/assignment/end"
+     tal:condition="python:is_end and here.hasManagerRole()">
      
      <form action="changeAssignment" tal:define="all_users python:here.getAllIssueUsers(exclude_assignee=assignment.getACLAssignee())" method="post" name="changeassignment" 
                                      tal:condition="python:all_users and not in_completelist">
@@ -198,11 +198,33 @@
         <input type="checkbox" name="send_email" checked="checked" value="1" />Send notification to new assignee
         <noscript><input type="submit" value="Change" /></noscript>
       </form>
-    </span>
+    </tal:block>
     </div>
+    
+    <tal:block condition="python:not assignments and not in_completelist">
+    
+     <form action="setAssignment" 
+           tal:define="all_users python:here.getAllIssueUsers()" method="post" name="setassignment"
+           tal:condition="python:all_users and not in_completelist">
+	<select name="assignee" style="color:#666"
+         tal:define="issueuser here/getIssueUser;
+                     selected python:request.get('assignee','');
+                     youare python:here.getWhoYouAre(issueuser)" tabindex="30"
+             tal:attributes="onchange string:if(this.options[this.selectedIndex].value){location.href='setAssignment?assignee='+this.options[this.selectedIndex].value+'&send_email='+document.setassignment.send_email.checked}">
+             <option value="" style="color:#666">Assign to...</option>
+				<option tal:repeat="user all_users" style="color:#000"
+                 tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected"
+                 tal:content="python:user['user'].getFullname()">
+				Statuses</option>
+	</select>
+        <input type="checkbox" name="send_email" checked="checked" value="1" />Send notification to new assignee
+        <noscript><input type="submit" value="Set" /></noscript>
+      </form>
+      
+    </tal:block>
+    
   </div>
   
-<!--  <div class="clearerL" tal:condition="python:not (assignments and here.UseIssueAssignment()) and use_extoptions">&nbsp;</div> -->
   
   </tal:block>
   
