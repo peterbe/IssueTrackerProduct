@@ -1,3 +1,6 @@
+    New feature: Ability to compare issues (experimental). Only works
+    when using keyboard shortcuts. Key: c
+    
     New feature: Now you can assign an issue to anybody even after
     it's been created and even if it didn't already have an assignment.
     Real#0299, Real#0188, Real#0081

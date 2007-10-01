@@ -18,11 +18,10 @@ p,td,th,div,span {
 }
 
 span.id {
-  color:#333;
+  color:rgb(70,70,70);
 }
 
 h3 span.id {
-  color:#333;
   font-size:11pt;
 }
 

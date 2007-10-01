@@ -11,7 +11,15 @@
  
 </metal:script>
 
-
+<style type="text/css" metal:fill-slot="extracss" 
+       tal:condition="request/compareTo|nothing">
+.issue {
+  width:96%;
+}
+.threadbox {
+  width:87%;
+}
+</style>
  
 <div metal:fill-slot="body" tal:omit-tag="" 
  tal:define="in_completelist python:here.thisInURL('CompleteList')">
@@ -125,12 +133,13 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 </span>
 
 
-<span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span>
-<span tal:condition="request/action|request/draft_followup_id|nothing" tal:replace="structure python:here.ExtensionForm(options)"></span>
 
 
 
-<div align="center">
+<div align="center" tal:condition="not:request/compareTo|nothing">
+
+  <span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span>
+  <span tal:condition="request/action|request/draft_followup_id|nothing" tal:replace="structure python:here.ExtensionForm(options)"></span>
 
 
   <!-- id=issue -->
@@ -146,12 +155,49 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
        tal:content="structure here/ShowIssueThreads">Show the threads
   </div>
   <!-- /Show Issue Threads -->
+  
+  <tal:block condition="not:python:request.has_key('previewissue') or request.has_key('action')"
+             replace="structure here/quick_form_followup"></tal:block>
+  
 
 </div>
 
 
-<span tal:condition="not:python:request.has_key('previewissue') or request.has_key('action')"
-tal:replace="structure here/quick_form_followup"></span>
+<div 
+     tal:condition="python:request.get('compareTo') and here.getRoot().hasIssue(request.get('compareTo'))">
+<tal:block define="other python:here.getIssueObject(request['compareTo'])">
+
+  <h4 style="text-align:center;">
+    <a href=".">Stop comparing issues</a>
+  </h4>
+
+  <div id="right-issue" style="float:right;width:49%">
+    <div tal:content="structure other/ShowIssueData">Show the actual issue data
+    </div>
+
+    <!-- Show Issue Threads -->
+    <div tal:content="structure other/ShowIssueThreads">Show the threads
+    </div>
+    <!-- /Show Issue Threads -->
+  </div>
+  <div id="left-issue" style="width:49%">
+    <div tal:content="structure here/ShowIssueData">Show the actual issue data
+    </div>
+
+    <!-- Show Issue Threads -->
+    <div tal:content="structure here/ShowIssueThreads">Show the threads
+    </div>
+    <!-- /Show Issue Threads -->  
+  </div>
+  
+  <div class="clearerR">&nbsp;</div>
+
+</tal:block>
+</div>
+
+
+
+
 
 
 <!-- Special options -->

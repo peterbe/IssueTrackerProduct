@@ -51,18 +51,8 @@ function body_onkeypress(evt){
     } else if (s == '#') { // 51 = #
        var issue = prompt("Enter issue number or title:","");
        if (issue !== null) {
-         issueid = issue.replace(/^\s+|\s+$/g,''); // strip whitespace
-         <dtml-if "issueprefix">
-         ok_id = new RegExp(/^\d+$|/^<dtml-var issueprefix>\d+$/);
-         <dtml-else>
-         ok_id = new RegExp(/^\d+$|^#\d+$/);
-         </dtml-if>
+         var issueid = __getIssueID(issue);
          if (issueid) {
-           if (ok_id.exec(issueid)) {
-  	   if (issueid.length!=<dtml-var "randomid_length">)
-               while(issueid.length<<dtml-var "randomid_length">)
-                 issueid = "0"+issueid;
-  	   if (issueid[0]=='#') issueid = issueid.substring(1, issueid.length);
              location.href=burl+'/'+issueid;
              return false;
            } else {
@@ -70,6 +60,26 @@ function body_onkeypress(evt){
            }
          }
        }
+
+    } else if (s == 'c') { // compare
+       if (!$('#issuedata').size()) {
+         alert("Go to the issue first to compare");
+         return false;
+       }
+       var issue = prompt("Compare issues - Enter issue number:","");
+       if (issue !== null) {
+         var issueid = __getIssueID(issue);
+         if (issueid) {
+           if ($('#issuehead').size()) {
+           } else {
+             location.href=location.href.split('?')[0]+'?compareTo='+issueid;
+           }
+           
+         }
+         else alert("Invalid Issue ID");
+           
+         return false;
+       } 
 
     } else if (s=='n') {
 	if (all_ilinks.length>1) {
@@ -102,6 +112,26 @@ function body_onkeypress(evt){
 
     prev_keycode=key;
     return true;
+}
+
+
+function __getIssueID(issue) {
+  var issueid = issue.replace(/^\s+|\s+$/g,''); // strip whitespace
+  <dtml-if "issueprefix">
+  var ok_id = new RegExp(/^\d+$|/^<dtml-var issueprefix>\d+$/);
+  <dtml-else>
+  var ok_id = new RegExp(/^\d+$|^#\d+$/);
+  </dtml-if>
+  if (issueid) {
+    if (ok_id.exec(issueid)) {
+      if (issueid.length!=<dtml-var "randomid_length">)
+        while(issueid.length<<dtml-var "randomid_length">)
+          issueid = "0"+issueid;
+      if (issueid[0]=='#') issueid = issueid.substring(1, issueid.length);
+    }
+    return issueid;
+  } 
+  return null;
 }
 
 $(document).bind("keypress", body_onkeypress);

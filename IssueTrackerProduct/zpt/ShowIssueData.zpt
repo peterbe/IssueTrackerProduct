@@ -1,11 +1,11 @@
 <div class="issue" align="left" 
-     tal:define="in_completelist python:here.thisInURL('CompleteList');
+     tal:define="show_many python:here.thisInURL('CompleteList') or request.get('compareTo');
                  dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)"
- tal:attributes="ondblclick python:test(in_completelist, 'G(\'%s\')'%here.absolute_url_path())">
+ tal:attributes="ondblclick python:test(show_many, 'G(\'%s\')'%here.absolute_url_path())">
   <div class="istatus" tal:define="status here/status"
 			        tal:content="python:status.capitalize()">Status</div>
   <div class="ihead">
-    <h3 tal:condition="not:in_completelist"><span 
+    <h3 tal:condition="not:show_many"><span 
       tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id"></span><br tal:replace="structure here/showTitle" />
     &nbsp;<a tal:condition="here/hasEmailOriginal" href="ShowOriginalEmail"><img tal:condition="python:here.getSubmissionType()=='email'"
      alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16" border="0"
@@ -14,7 +14,7 @@
      alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16"
      src="/misc_/IssueTrackerProduct/emailicon.gif" />
     </h3>
-    <h3 tal:condition="in_completelist"><span tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id">
+    <h3 tal:condition="show_many"><span tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id">
     </span><a tal:attributes="href here/absolute_url_path" tal:content="structure here/showTitle" class="ilink">The Title</a>
     &nbsp;<img tal:condition="python:here.getSubmissionType()=='email'"
      alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16"
@@ -54,11 +54,11 @@
   </div> 
 
   <form action="#i" method="post"
-  tal:define="change python:user.has_permission('Change Issue Tracker Issues', here) and not in_completelist and here.AllowIssueAttributeChange() and request.get('change')=='Details'"
+  tal:define="change python:user.has_permission('Change Issue Tracker Issues', here) and not show_many and here.AllowIssueAttributeChange() and request.get('change')=='Details'"
   tal:attributes="method python:test(change, 'post','get')"
   >
   <table class="idetails-table" summary="Details" border="0"
-   tal:attributes="ondblclick python:test(user.has_permission('Change Issue Tracker Issues', here) and not in_completelist and here.AllowIssueAttributeChange(), 'location.href=location.href+\'?change=Details#i\'')">
+   tal:attributes="ondblclick python:test(user.has_permission('Change Issue Tracker Issues', here) and not show_many and here.AllowIssueAttributeChange(), 'location.href=location.href+\'?change=Details#i\'')">
     <tr tal:condition="python:change and here.UseEstimatedTime()">
       <td class="ilabel">Estimated time</td>
       <td>
@@ -157,13 +157,13 @@
       <td tal:condition="not:change">
         <input type="hidden" name="change" value="Details" />
         <input type="submit"  value="change details" class="smallbutton"
-         tal:condition="python:user.has_permission('Change Issue Tracker Issues', here) and not in_completelist and here.AllowIssueAttributeChange()"/>
+         tal:condition="python:user.has_permission('Change Issue Tracker Issues', here) and not show_many and here.AllowIssueAttributeChange()"/>
       </td>      
     </tr>
   </table>
   </form>
   
- <div class="clearerR">&nbsp;</div>
+<!-- <div class="clearerR">&nbsp;</div>-->
 
   </div>
 
@@ -184,7 +184,7 @@
      tal:condition="python:is_end and here.hasManagerRole()">
      
      <form action="changeAssignment" tal:define="all_users python:here.getAllIssueUsers(exclude_assignee=assignment.getACLAssignee())" method="post" name="changeassignment" 
-                                     tal:condition="python:all_users and not in_completelist">
+                                     tal:condition="python:all_users and not show_many">
 	<select name="assignee" style="color:#666"
          tal:define="issueuser here/getIssueUser;selected python:request.get('assignee','');
                      youare python:here.getWhoYouAre(issueuser)" tabindex="30"
@@ -201,11 +201,11 @@
     </tal:block>
     </div>
     
-    <tal:block condition="python:not assignments and not in_completelist">
+    <tal:block condition="python:not assignments and not show_many">
     
      <form action="setAssignment" 
            tal:define="all_users python:here.getAllIssueUsers()" method="post" name="setassignment"
-           tal:condition="python:all_users and not in_completelist">
+           tal:condition="python:all_users and not show_many">
 	<select name="assignee" style="color:#666"
          tal:define="issueuser here/getIssueUser;
                      selected python:request.get('assignee','');
