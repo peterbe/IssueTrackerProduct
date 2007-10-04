@@ -2414,13 +2414,18 @@ class IssueTrackerIssue(IssueTracker):
                              use_stored_counter=False)
 
         # check that the assignee_identifier exits
-        userfolderpath, name = assignee_identifier.split(',')
+        try:
+            userfolderpath, name = assignee_identifier.split(',')
+        except ValueError:
+            m = "Invalid assignee identifier (%s)"
+            raise "AssigneeNotFound", m % assignee_identifier
+        
         userfolder = self.unrestrictedTraverse(userfolderpath)
         if name in userfolder.user_names():
             user = self.getIssueUserObject(assignee_identifier)
         else:
             m = "Invalid assignee identifier (%s)"
-            raise "AssigneeNotFound", m%assignee_identifier
+            raise "AssigneeNotFound", m % assignee_identifier
 
         acl_adder = ''
         issueuser = self.getIssueUser()
