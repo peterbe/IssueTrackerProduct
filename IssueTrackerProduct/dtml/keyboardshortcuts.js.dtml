@@ -59,7 +59,6 @@ function body_onkeypress(evt){
              location.href='<dtml-var "getRootURL()">/<dtml-var "whichList()">/?search_only_on=title&q='+escape(issue);
            }
          }
-       }
 
     } else if (s == 'c') { // compare
        if (!$('#issuedata').size()) {
@@ -69,17 +68,12 @@ function body_onkeypress(evt){
        var issue = prompt("Compare issues - Enter issue number:","");
        if (issue !== null) {
          var issueid = __getIssueID(issue);
-         if (issueid) {
-           if ($('#issuehead').size()) {
-           } else {
-             location.href=location.href.split('?')[0]+'?compareTo='+issueid;
-           }
-           
-         }
-         else alert("Invalid Issue ID");
-           
-         return false;
-       } 
+         if (issueid) 
+           location.href=location.href.split('?')[0]+'?compareTo='+issueid;
+         else
+	   alert("Invalid Issue ID");
+       }
+       return false;
 
     } else if (s=='n') {
 	if (all_ilinks.length>1) {
@@ -116,7 +110,7 @@ function body_onkeypress(evt){
 
 
 function __getIssueID(issue) {
-  var issueid = issue.replace(/^\s+|\s+$/g,''); // strip whitespace
+  var issueid = issue.replace(/^\s+|\s+$/g,'');
   <dtml-if "issueprefix">
   var ok_id = new RegExp(/^\d+$|/^<dtml-var issueprefix>\d+$/);
   <dtml-else>
@@ -125,7 +119,7 @@ function __getIssueID(issue) {
   if (issueid) {
     if (ok_id.exec(issueid)) {
       if (issueid.length!=<dtml-var "randomid_length">)
-        while(issueid.length<<dtml-var "randomid_length">)
+        while(issueid.length < <dtml-var "randomid_length">)
           issueid = "0"+issueid;
       if (issueid[0]=='#') issueid = issueid.substring(1, issueid.length);
     }
@@ -141,7 +135,7 @@ function toggleInputsKS() {
 }
 
 function findILinks() {
-   c=0;
+   var c=0;
    $('a.ilink').each(function() {
       all_ilinks.push(this);
    });
@@ -154,7 +148,6 @@ function highlightILink(el){
 function unhighlightILink(el){
    var s= el.innerHTML;
    el.innerHTML = el.innerHTML.substring(4);
-   
 }
 
 $(function() {
