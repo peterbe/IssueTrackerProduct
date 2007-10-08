@@ -1441,7 +1441,6 @@ class IssueTrackerIssue(IssueTracker):
                  or \
                  draft_followup_id is not None \
                ):
-            
             action = REQUEST.get('action','')
             issueid = self.getId()
             draft_followup_id = _saver(issueid, action, REQUEST, draft_followup_id)
@@ -1464,7 +1463,6 @@ class IssueTrackerIssue(IssueTracker):
                  or \
                  draft_followup_id \
                ):
-            
             action = REQUEST.get('action','')
             issueid = self.getId()
             draft_followup_id = _saver(issueid, action, REQUEST, draft_followup_id, is_autosave=True)
@@ -1498,8 +1496,15 @@ class IssueTrackerIssue(IssueTracker):
                     return fmt_followup % draft.getFromname()
                 elif only_fromname and draft.getEmail():
                     return fmt_followup % draft.getEmail()
-                else:
-                    return fmt_followup % self.ShowNameEmail(draft.getFromname(), draft.getEmail())
+                elif draft.getFromname() or draft.getEmail():
+                    if draft.getFromname() and draft.getEmail():
+                        name = self.ShowNameEmail(draft.getFromname(), draft.getEmail())
+                    elif draft.getFromname():
+                        name = draft.getFromname()
+                    else:
+                        name = draft.getEmail()
+                        
+                    return fmt_followup % name
         return None        
     
     def getLatestDraftThreadAuthor(self, only_if_not_you=False):

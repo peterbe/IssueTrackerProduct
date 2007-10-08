@@ -55,7 +55,8 @@ function autosave() {
    $.post(_base_url+'/AutoSaveDraftThread', 
           $(document.form_followup).fastSerialize(),
           function(resp) {
-             $('#draft_followup_id').val(resp['draft_followup_id']);
+	    if (resp)
+               $('input[name="draft_followup_id"]').val(resp);
           });
 }
 
