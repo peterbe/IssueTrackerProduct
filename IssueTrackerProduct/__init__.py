@@ -320,3 +320,5 @@ def registerCSS(filename, path='css', slim_if_possible=True):
             new_path = obj.path + '-slimmed'
             open(new_path, 'wb').write(slimmed)
             setattr(obj, 'path', new_path)
+
+            
