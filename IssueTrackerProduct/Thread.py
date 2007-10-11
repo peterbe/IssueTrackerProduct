@@ -40,7 +40,7 @@ def manage_addIssueTrackerIssueThread(*args, **kw):
 #----------------------------------------------------------------------------
 
 
-class IssueTrackerIssueThread(IssueTrackerIssue): 
+class IssueTrackerIssueThread(IssueTrackerIssue):
     """ Issuethreads class """
 
     meta_type = ISSUETHREAD_METATYPE
@@ -94,6 +94,10 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
     def getThreadDate(self):
         """ return threaddate """
         return self.threaddate
+    
+    def getModifyDate(self):
+        return self.bobobase_modification_time()
+    
 
     def getFromname(self, issueusercheck=True):
         """ return fromname """
@@ -398,6 +402,7 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
         if not acl_adder: # '', 0 or None
             acl_adder = ''
         self.acl_adder = acl_adder
+        
 
     # legacy support
     is_autosave = False
@@ -414,6 +419,8 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
         else:
             return rootpath + '/' + self.getIssueId()
         
+    def getModifyDate(self):
+        return self.bobobase_modification_time()
     
     def index_object(self, *args, **kws):
         """ do NOT index this object """
@@ -440,6 +447,7 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
                      REQUEST=None):
         """ since normal threads don't allow changes, we need to
         add this very custom method to the drafts """
+        
         if title is not None:
             self.title = title
             
@@ -457,7 +465,7 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
 
         if acl_adder is not None:
             self.acl_adder = acl_adder
-            
+
         self.is_autosave = bool(is_autosave)
             
     def isAutosave(self):

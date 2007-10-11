@@ -7068,7 +7068,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         # 3. Mandatory filter
         if not self.hasManagerRole():
-            issues = [issue for issue in issues if not issue.IsConfidential()]
+            issues = [issue for issue in issues 
+                      if not issue.isConfidential() or issue.isYourIssue()]
 
         # 4. Sort them
         if not skip_sort:
@@ -7165,7 +7166,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # Filter logic is to show only selected items but
             # nothing has been set so just return everything
             for issue in issues:
-                if not issue.IsConfidential() or has_managerrole:
+                if not issue.isConfidential() or has_managerrole or issue.isYourIssue():
                     checked.append(issue)
 
             return checked
@@ -7176,7 +7177,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             f_fromname_regex = _maker(f_fromname)
         
         for issue in issues:
-            if issue.IsConfidential() and not has_managerrole:
+            if issue.isConfidential() and not (has_managerrole or issue.isYourIssue()):
                 continue
                 
             if filterlogic == 'show':
@@ -9228,7 +9229,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 _inurl = inURL(e['inurl'], homepage=1)
             else:
                 _inurl = inURL(e['inurl'])
-            menu.append([e['label'], e['href'], _inurl])
+            menu.append([e['label'], e['href'], _inurl, id])
                 
         issueuser = self.getIssueUser()
         zopeuser = self.getZopeUser()
@@ -9721,7 +9722,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if not threads:
                     if acl_user and issue.getACLAdder() == acl_user:
                         _taken_match = True
-                    elif not acl_user and email and issue.getEmail() == email:
+                    elif not acl_user and oemail and issue.getEmail() == email:
                         _taken_match = True
             
                 elif threads:

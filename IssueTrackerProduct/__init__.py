@@ -178,8 +178,8 @@ FILESTREAM_ITERATOR_THRESHOLD = 2 << 16 # 128 Kb (from LocalFS StreamingFile.py)
 class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
     
     def __init__(self, path, _prefix=None, 
-                 max_age_development=60,
-                 max_age_production=3600*24,
+                 max_age_development=3600,
+                 max_age_production=3600*24*7,
                  content_type=None, set_expiry_header=True):
         if _prefix is None:
             _prefix = getConfiguration().softwarehome
@@ -254,7 +254,9 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
 
     def _expires(self):
         return rfc1123_date(time()+self.max_age)
-        
+    
+    
+    
 def my_guess_content_type(path, data):
     content_type, enc = guess_content_type(path, data)
     if content_type in ('text/plain', 'text/html'):
@@ -293,9 +295,8 @@ def registerJS(filename, path='js', slim_if_possible=True):
     objectid = filename
     setattr(product,
             objectid, 
-            #App.ImageFile.ImageFile(os.path.join(path, filename), globals())
             BetterImageFile(os.path.join(path, filename), globals())
-            )
+            )            
     obj = getattr(product, objectid)
     if js_slimmer is not None and OPTIMIZE:
         if slim_if_possible:

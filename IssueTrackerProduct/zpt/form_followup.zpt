@@ -59,13 +59,12 @@
 		</td>
 	</tr>
 	<tr>
-		<td tal:define="fromname request/fromname | python:here.getSavedUser('fromname');email request/email | python:here.getSavedUser('email')">
+		<td tal:define="fromname request/form/fromname | python:here.getSavedUser('fromname');email request/form/email | python:here.getSavedUser('email')">
 		
 			<input type="hidden" name="fromname::"
 			tal:condition="not:python:minimalformfollowup and fromname=='' or not minimalformfollowup"
 			tal:attributes="value fromname;
                                         name string:fromname:${here/UNICODE_ENCODING}:ustring" />
-			
 			<input type="hidden" name="email"
 			tal:condition="not:python:minimalformfollowup and email=='' or not minimalformfollowup"
 			tal:attributes="value email" />

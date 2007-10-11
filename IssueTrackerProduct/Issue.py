@@ -250,6 +250,31 @@ class IssueTrackerIssue(IssueTracker):
     def _setACLAdder(self, acl_adder):
         """ set acl_adder """
         self.acl_adder = acl_adder
+        
+        
+    def isYourIssue(self):
+        """ return true if the currently logged in user is the same 
+        user who added this issue. """
+        issueuser = self.getIssueUser()
+        if issueuser:
+            identifier = issueuser.getIssueUserIdentifier()
+            identifier = ','.join(identifier)
+            if identifier == self.getACLAdder():
+                return True
+            
+        zopeuser = self.getZopeUser()
+        if zopeuser:
+            path = '/'.join(zopeuser.getPhysicalPath())
+            name = zopeuser.getUserName()
+            acl_user = path+','+name
+            if acl_user == self.getACLAdder():
+                return True
+            
+        if self.getEmail() == self.getSavedUser('email'):
+            return True
+        
+        return False
+        
 
     def getDisplayFormat(self):
         """ return display_format """
@@ -536,7 +561,7 @@ class IssueTrackerIssue(IssueTracker):
     security.declareProtected('View', 'index_html')
     def index_html(self, REQUEST, *args, **kw):
         """ show the issue """
-        if not self.isConfidential() or self.hasManagerRole():
+        if not self.isConfidential() or self.hasManagerRole() or self.isYourIssue():
             #self.RememberIssueVisit(self.getId())
             self.RememberRecentIssue(self.getId(), 'viewed')
             fake_fileattachments = self._getFakeFileattachments()
@@ -642,8 +667,6 @@ class IssueTrackerIssue(IssueTracker):
         raise "InvalidHours", "Hours not recognized, enter only a numeral (or decimal)"
                     
             
-        
-    
         
     def getPreviewTitle(self, oldstatus, action):
         """ Get what the title of thread will be (via the web only) """
@@ -1482,16 +1505,18 @@ class IssueTrackerIssue(IssueTracker):
         if REQUEST is not None:
             ct = 'text/html; charset=%s' % UNICODE_ENCODING
             REQUEST.RESPONSE.setHeader('Content-Type', ct)
+            self.StopCache()
         
         container = self.getDraftsContainer()
         draftobjects = list(container.objectValues(ISSUETHREAD_DRAFT_METATYPE))
         draftobjects.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
         
-        fmt_followup = u"%s has started working on a followup"
+        fmt_followup = u"%s is working on a followup"
         for draft in draftobjects:
             if now - int(draft.getModifyDate()) > max_age_seconds:
                 return None
             if draft.getFromname() != you_fromname and draft.getEmail() != you_email:
+                
                 if only_fromname and draft.getFromname():
                     return fmt_followup % draft.getFromname()
                 elif only_fromname and draft.getEmail():
@@ -1503,7 +1528,6 @@ class IssueTrackerIssue(IssueTracker):
                         name = draft.getFromname()
                     else:
                         name = draft.getEmail()
-                        
                     return fmt_followup % name
         return None        
     
@@ -1610,7 +1634,7 @@ class IssueTrackerIssue(IssueTracker):
                  display_format=rget('display_format', self.getSavedTextFormat()),
                  is_autosave=is_autosave,
                  )
-
+                 
         # remember this
         issueuser = self.getIssueUser()
         if not issueuser:
