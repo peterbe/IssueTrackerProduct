@@ -322,3 +322,5 @@ def registerCSS(filename, path='css', slim_if_possible=True):
             setattr(obj, 'path', new_path)
 
             
+            
+            
