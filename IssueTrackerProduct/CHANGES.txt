@@ -1,3 +1,5 @@
+- 0.8.0
+
     New feature: Ability to compare issues (experimental). Only works
     when using keyboard shortcuts. Key: c
     

@@ -6356,7 +6356,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             params = {'cf':came_from}
             came_from = Utils.AddParam2URL(url, params)
             
-            
         self.REQUEST.RESPONSE.redirect(came_from)        
 
         
