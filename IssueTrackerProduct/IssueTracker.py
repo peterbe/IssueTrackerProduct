@@ -94,7 +94,7 @@ from OFS import SimpleItem, Folder, PropertyManager
 from DocumentTemplate import sequence
 from AccessControl import ClassSecurityInfo, getSecurityManager
 from Products.ZCatalog.CatalogAwareness import CatalogAware
-from Acquisition import aq_inner, aq_parent
+from Acquisition import aq_inner, aq_parent, aq_base
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
 from App.ImageFile import ImageFile
@@ -145,6 +145,20 @@ from Constants import *
 __version__=open(os.path.join(package_home(globals()), 'version.txt')).read().strip()
 
 
+## https://bugs.launchpad.net/zope2/+bug/142399
+def safe_hasattr(obj, name, _marker=object()):
+    """Make sure we don't mask exceptions like hasattr().
+    
+    We don't want exceptions other than AttributeError to be masked,
+    since that too often masks other programming errors.
+    Three-argument getattr() doesn't mask those, so we use that to
+    implement our own hasattr() replacement.
+    """
+    return getattr(obj, name, _marker) is not _marker
+
+def base_hasattr(obj, name):
+    """Like safe_hasattr, but also disables acquisition."""
+    return safe_hasattr(aq_base(obj), name)
 
 #----------------------------------------------------------------------------
 
@@ -3715,6 +3729,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                        meta_type=ISSUE_METATYPE, increment=None,
                        ):
         """ generate IDs for different objects """
+            
         if increment is None:
             idnr = len(incontainer.objectIds(meta_type))+1
             increment = idnr + 1
@@ -3722,13 +3737,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             idnr = increment
             increment = increment +1
         id='%s%s'%(prefix, string.zfill(str(idnr), length))
-        base= getattr(incontainer,'aq_base',incontainer)
-        if hasattr(base, id):
+        if base_hasattr(incontainer, id):
             # ah! Id already exists, try again
-            return self._do_generateID(incontainer, length, prefix, meta_type, 
+            return self._do_generateID(incontainer, length, 
+                                       prefix=prefix,
+                                       meta_type=meta_type,
                                        increment=increment)
         else:
             return id
+        
 
 
     def _moveUpSections(self, sections):
@@ -4530,25 +4547,86 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         value = self.REQUEST.cookies.get(name,default)
         return value
     
-    def set_cookie(self, name, value, days=365):
-        """ set RESPONSE cookie """
-        later = DateTime() + days
-        later = later.rfc822()
+    def set_cookie(self, key, value, expires=365, path='/',
+                   across_domain_cookie_=False,
+                   **kw):
+        """ set a cookie in REQUEST 
+        
+        'across_domain_cookie_' sets the cookie across all subdomains
+        eg. www.mobilexpenses.com and mobile.mobilexpenses.com etc.
+        This rule will only apply if the current domain name plus sub domain
+        contains at least two dots.
+        """
+        if expires is None:
+            then = DateTime()+365
+            then = then.rfc822()
+        elif isinstance(expires, int):
+            then = DateTime()+expires
+            then = then.rfc822()
+        elif type(expires)==DateTimeType:
+            # convert it to RFC822()
+            then = expires.rfc822()
+        else:
+            then = expires
+            
+        if across_domain_cookie_ and not kw.get('domain'):
+            
+            # set kw['domain'] = '.domainname.com' if possible
+            cookie_domain = self._getCookieDomain()
+            if cookie_domain:
+                kw['domain'] = cookie_domain
+                
         try:
             value = str(value)
         except UnicodeEncodeError:
             value = value.encode(UNICODE_ENCODING)
-            
-        self.REQUEST.RESPONSE.setCookie(name, value, expires=later, path='/')
-        
+                
+      
+        self.REQUEST.RESPONSE.setCookie(key, value, 
+                             expires=then, path=path, **kw)
+                             
+                             
         
     def has_cookie(self, name):
         """ return cookie presence """
         return self.REQUEST.cookies.has_key(name)
     
-    def expire_cookie(self, name):
-        """ expire a cookie """
-        self.REQUEST.RESPONSE.expireCookie(name, path='/')
+    def expire_cookie(self, key, path='/', across_domain_cookie_=False):
+        """ expire a cookie 
+        
+        'across_domain_cookie_' sets the cookie across all subdomains
+        eg. www.mobilexpenses.com and mobile.mobilexpenses.com etc.
+        This rule will only apply if the current domain name plus sub domain
+        contains at least two dots.
+        """
+        if across_domain_cookie_:
+            cookie_domain = self._getCookieDomain()
+            if cookie_domain:
+                self.REQUEST.RESPONSE.expireCookie(key, path=path, domain=cookie_domain)
+                return
+            
+        self.REQUEST.RESPONSE.expireCookie(key, path=path)
+        
+    def _getCookieDomain(self):
+        """ from the REQUEST.URL work out what is the cookie domain.
+        E.g. if REQUEST.URL is http://www.foo.com/path/page.html
+        the correct result is '.foo.com'
+        """
+        netloc = urlparse(self.REQUEST.URL)[1]
+
+        threes = 'com', 'net', 'org', 'biz', 'gov'
+        fours = 'name', 'info', 'firm', 'gov'
+        if not re.findall('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', netloc):
+            top = netloc.split('.')[-1]
+            if top in threes or top in fours:
+                if len(netloc.split('.')) > 2:
+                    return '.%s' % '.'.join(netloc.split('.')[1:])
+            else:
+                if len(netloc.split('.')) > 3:
+                    return '.%s' % '.'.join(netloc.split('.')[1:])
+
+        return None
+    
 
     def getSavedUser(self, name_email='email', d=0):
         """

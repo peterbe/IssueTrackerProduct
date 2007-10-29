@@ -1508,7 +1508,8 @@ class IssueTrackerIssue(IssueTracker):
             self.StopCache()
         
         container = self.getDraftsContainer()
-        draftobjects = list(container.objectValues(ISSUETHREAD_DRAFT_METATYPE))
+        draftobjects = [x for x in container.objectValues(ISSUETHREAD_DRAFT_METATYPE)
+                                if x.getIssueId()==self.getIssueId()]
         draftobjects.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
         
         fmt_followup = u"%s is working on a followup"

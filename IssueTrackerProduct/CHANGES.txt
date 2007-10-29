@@ -1,3 +1,8 @@
+- 
+
+    Bug fixed: The clarvoyent AJAX feature would show if someone is
+    working a different issue to the one you're looking at.
+    
 - 0.8.0
 
     New feature: Ability to compare issues (experimental). Only works

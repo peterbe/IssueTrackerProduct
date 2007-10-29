@@ -5,9 +5,9 @@ return total;}
 $(function(){$("a.aeh").each(function() {this.href=econvert(this.href);this.innerHTML=econvert(this.innerHTML);});
 $("span.aeh").each(function(){this.innerHTML=econvert(this.innerHTML);});
 $('textarea.autoexpanding').each(function(){while(_getNoLines(this) > parseInt(this.rows))
-this.rows = '' + Math.round((parseInt(this.rows) * 1.5));});
+this.rows = '' + Math.round((parseInt(this.rows) * 1.6));});
 $('textarea.autoexpanding').bind('keyup', function(){if(_getNoLines(this) > parseInt(this.rows))
-this.rows = '' + Math.round((parseInt(this.rows) * 1.5));});});function G(p){location.href=p;}
+this.rows = '' + Math.round((parseInt(this.rows) * 1.6));});});function G(p){location.href=p;}
 function checkCaptchaValue(elm,msg,maxlength){var v = $.trim(elm.value);if(v){if(v.search(/\D/)>-1)
 alert(msg);v=v.replace(/\D/g,'');if(v.length >= maxlength) 
 v=v.substring(0,maxlength);}
