@@ -140,6 +140,10 @@ from Constants import *
 
 
 
+#----------------------------------------------------------------------------
+
+import logging 
+logger = logging.getLogger('IssueTrackerProduct')
 
     
 __version__=open(os.path.join(package_home(globals()), 'version.txt')).read().strip()
@@ -3694,25 +3698,28 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 
 
     def generateID(self, length, prefix='', meta_type=ISSUE_METATYPE,
-                   incontainer=None, use_stored_counter=1):
+                   incontainer=None, use_stored_counter=True):
         """ see if there is an internal counter already,
         otherwise call up the old generateID() function
         that is now called _do_generateID(). """
         if incontainer is None:
-            incontainer = self
+            incontainer = self._getIssueContainer()
 
         counter_key = '_nextid_%s' % ss(incontainer.meta_type).replace(' ','')
         if use_stored_counter and incontainer.__dict__.has_key(counter_key):
-            
+            logger.info("HAS (use_stored_counter=%s) %s in %s" % (use_stored_counter, counter_key, incontainer))
             nextid_nr = incontainer.__dict__.get(counter_key)
             incontainer.__dict__[counter_key] = nextid_nr + 1
             
             increment = nextid_nr
-            return self._do_generateID(incontainer, length, prefix,
-                                       meta_type, increment=increment)
+            logger.info("START generate a new ID starting on increment %s" % increment)
+            return self._do_generateID(incontainer, length, prefix=prefix,
+                                       meta_type=meta_type, increment=increment)
         else:
+            logger.info("NO (use_stored_counter=%s) counter attribute"% use_stored_counter)
             nextid_str = self._do_generateID(incontainer, length,
-                                             prefix, meta_type)
+                                             prefix=prefix, 
+                                             meta_type=meta_type)
                                              
             # in python2.1 you can't replace with an empty string.
             # thanks Thomas Kruger
