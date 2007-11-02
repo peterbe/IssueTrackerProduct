@@ -6799,7 +6799,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         else:
             # We won't need the ZCatalog, we can use objectValues() which
-            # is many times faster
+            # is many times faster if the amount of issues is small
             seq = self.getIssueObjects()
                                      
 
