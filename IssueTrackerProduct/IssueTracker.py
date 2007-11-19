@@ -3707,16 +3707,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         counter_key = '_nextid_%s' % ss(incontainer.meta_type).replace(' ','')
         if use_stored_counter and incontainer.__dict__.has_key(counter_key):
-            logger.info("HAS (use_stored_counter=%s) %s in %s" % (use_stored_counter, counter_key, incontainer))
+            #logger.info("HAS (use_stored_counter=%s) %s in %s" % (use_stored_counter, counter_key, incontainer))
             nextid_nr = incontainer.__dict__.get(counter_key)
             incontainer.__dict__[counter_key] = nextid_nr + 1
             
             increment = nextid_nr
-            logger.info("START generate a new ID starting on increment %s" % increment)
+            #logger.info("START generate a new ID starting on increment %s" % increment)
             return self._do_generateID(incontainer, length, prefix=prefix,
                                        meta_type=meta_type, increment=increment)
         else:
-            logger.info("NO (use_stored_counter=%s) counter attribute"% use_stored_counter)
+            #logger.info("NO (use_stored_counter=%s) counter attribute"% use_stored_counter)
             nextid_str = self._do_generateID(incontainer, length,
                                              prefix=prefix, 
                                              meta_type=meta_type)
