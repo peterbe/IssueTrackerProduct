@@ -957,9 +957,11 @@ class IssueTrackerIssue(IssueTracker):
             if randomid_length > 3:
                 randomid_length = 3
 
-            genid = issueobject.generateID(randomid_length, prefix+'thread',
+            genid = issueobject.generateID(randomid_length, 
+                                           prefix=prefix+'thread',
                                            meta_type=ISSUETHREAD_METATYPE,
-                                           use_stored_counter=0)
+                                           use_stored_counter=False,
+                                           incontainer=issueobject)
 
             if action == 'addfollowup':
                 gentitle = "Added Issue followup"
