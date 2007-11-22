@@ -1091,7 +1091,8 @@ class IssueTrackerIssue(IssueTracker):
         mtype = NOTIFICATION_META_TYPE
         notifyid = self.generateID(4, prefix+"notification",
                                    meta_type=mtype,
-                                   use_stored_counter=0)
+                                   use_stored_counter=0,
+                                   incontainer=self)
 
         title = self.title
         issueID = self.id
