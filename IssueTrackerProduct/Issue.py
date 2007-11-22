@@ -960,8 +960,7 @@ class IssueTrackerIssue(IssueTracker):
             genid = issueobject.generateID(randomid_length, 
                                            prefix=prefix+'thread',
                                            meta_type=ISSUETHREAD_METATYPE,
-                                           use_stored_counter=False,
-                                           incontainer=issueobject)
+                                           use_stored_counter=False)
 
             if action == 'addfollowup':
                 gentitle = "Added Issue followup"
@@ -1091,8 +1090,7 @@ class IssueTrackerIssue(IssueTracker):
         mtype = NOTIFICATION_META_TYPE
         notifyid = self.generateID(4, prefix+"notification",
                                    meta_type=mtype,
-                                   use_stored_counter=0,
-                                   incontainer=self)
+                                   use_stored_counter=0)
 
         title = self.title
         issueID = self.id

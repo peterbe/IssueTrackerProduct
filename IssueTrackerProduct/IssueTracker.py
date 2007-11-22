@@ -3566,7 +3566,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # create id
             prefix = self.issueprefix
             randlength = self.randomid_length
-            id = self.generateID(randlength, prefix, incontainer=self._getIssueContainer())
+            id = self.generateID(randlength, prefix=prefix,
+                                 incontainer=self._getIssueContainer())
             
         if title.strip() == '':
             raise "NoSubject", "Issue has no subject line"
@@ -3703,7 +3704,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         otherwise call up the old generateID() function
         that is now called _do_generateID(). """
         if incontainer is None:
-            incontainer = self._getIssueContainer()
+            incontainer = self
 
         counter_key = '_nextid_%s' % ss(incontainer.meta_type).replace(' ','')
         if use_stored_counter and incontainer.__dict__.has_key(counter_key):
