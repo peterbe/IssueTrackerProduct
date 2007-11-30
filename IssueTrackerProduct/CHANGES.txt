@@ -1,3 +1,4 @@
+- 0.8.2
 
     Bug fixed: Error on duplicate in on second followups in issues.
     Real#0665 and Real#0666
