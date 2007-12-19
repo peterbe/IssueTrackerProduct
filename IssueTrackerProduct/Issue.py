@@ -1649,6 +1649,12 @@ class IssueTrackerIssue(IssueTracker):
                 all_draft_ids = '|'.join(all_draft_ids)
                 self.set_cookie(c_key, all_draft_ids, days=14)
             
+            # also save, the name if we didn't already have it
+            if rget('fromname') and not self.getSavedUser('fromname', use_request=False):
+                self.set_cookie(self.getCookiekey('name'), rget('fromname'))
+            if rget('email') and not self.getSavedUser('email', use_request=False):
+                self.set_cookie(self.getCookiekey('email'), rget('email'))
+                
         return draft_followup_id
 
     
@@ -2565,6 +2571,7 @@ zpts = ({'f':'zpt/ShowIssue', 'optimize':OPTIMIZE and 'xhtml'},
         'zpt/followup_preview',
         )
 
+        
 addTemplates2Class(IssueTracker, zpts, extension='zpt')
 
 InitializeClass(IssueTrackerIssue)

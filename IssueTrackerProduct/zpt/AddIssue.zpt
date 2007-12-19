@@ -138,30 +138,46 @@
                 <td valign="top">
 		        <div class="hidden" id="newsection" tal:condition="here/CanAddNewSections"
 			 tal:attributes="class python:test(request.get('newsection','New section...')=='New section...', 'hidden','')"
-			 ><input name="newsection" value="New section..." onfocus="if(this.value=='New section...'){this.value='';}" size="15"
-			   tal:attributes="value python:request.get('newsection','New section...')" /></div>
-			<select id="sections" name="sections:list" tabindex="9" multiple="multiple" tal:define="emptylist python:[];sections request/sections | emptylist"
-			tal:attributes="size python:min(6, len(here.sections_options))">
-				<option tal:repeat="option here/sections_options" 
-                tal:attributes="value option; selected python:option in sections" 
-                tal:content="option">
+			 ><input name="newsection" value="New section..." 
+                                 onfocus="if(this.value=='New section...'){this.value='';}" size="15"
+			         tal:attributes="value python:request.get('newsection','New section...');
+                                                 name string:newsection:${here/UNICODE_ENCODING}:ustring" /></div>
+			<select id="sections" name="sections:list" tabindex="9" multiple="multiple"
+                                tal:define="emptylist python:[];
+                                            sections request/sections | emptylist;
+                                            sections python:here.cleanSectionsList(sections)"
+ 			        tal:attributes="size python:min(6, len(here.sections_options));
+                                                name string:sections:${here/UNICODE_ENCODING}:list">
+				<option tal:repeat="option here/sections_options"
+                                        tal:attributes="value option; 
+                                                        selected python:option in sections"
+                                        tal:content="option">
 				Section</option>
 			</select>
                   
                 </td>
                 <td valign="top">
 
-			<select name="type" tabindex="10" tal:define="types here/types; size python:min(6, len(types)); type request/type | here/default_type | emptystring"
-                    tal:attributes="size size">
-				<option tal:repeat="option types" value="" tal:attributes="value option;selected python:option == type" tal:content="option">
+			<select name="type" tabindex="10" 
+                                tal:define="types here/types; size python:min(6, len(types));
+                                            type request/type | here/default_type | emptystring"
+                                tal:attributes="size size;
+                                                name string:type:${here/UNICODE_ENCODING}:ustring">
+				<option tal:repeat="option types" value="" 
+                                        tal:attributes="value option;
+                                                        selected python:option == type" tal:content="option">
 				Types</option>
 			</select>
                 
                 </td>
                 <td valign="top">
 
-			<select tal:define="urgencies here/urgencies; size python:min(6, len(urgencies)); urgency request/urgency | here/default_urgency | emptystring"
-             name="urgency" tabindex="11" tal:attributes="size size">
+			<select name="urgency" tabindex="11" 
+                                tal:define="urgencies here/urgencies; 
+                                            size python:min(6, len(urgencies)); 
+                                            urgency request/urgency | here/default_urgency | emptystring"
+                                tal:attributes="size size;
+                                                name string:urgency:${here/UNICODE_ENCODING}:ustring">
 				<option  tal:repeat="option urgencies" value="" tal:attributes="value option; selected python:urgency == option" tal:content="option">
 				Urgencies</option>
 			</select>

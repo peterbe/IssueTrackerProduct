@@ -95,7 +95,7 @@
 <span tal:condition="here/getZopeUser">
 <b>ZOPEUSER</b> <div tal:content="structure python:here.getZopeUser().getRoles()"></div>
 </span>
-<a href="javascript:void(z=document.body.appendChild(document.createElement('script')));void(z.language='javascript');void(z.type='text/javascript');void(z.src='http://slayeroffice.com/tools/modi/modi.js');void(z.id='modi');">DOM inspector</a> ("v" to edit, ESC to exit)
+
 </span>
 
 </body>

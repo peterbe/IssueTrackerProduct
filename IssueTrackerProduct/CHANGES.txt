@@ -1,3 +1,14 @@
+-
+
+    Bug fixed: Clairvoyant javascript alert on followups would repeat
+    the same message over and over (almost blinking).
+
+    New feature: Name and email is saved in a cookie when working on a
+    draft if the name/email isn't already set.
+
+    Change: If in DEBUG mode (environment variable
+    DEBUG_ISSUETRACKERPRODUCT) emails are printed to stdout
+    
 - 0.8.2
 
     Bug fixed: Error on duplicate in on second followups in issues.

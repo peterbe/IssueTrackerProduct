@@ -79,7 +79,7 @@
   </td>
   <td align="left" valign="top">
 
-      <input type="text" name="title:string" size="35"
+      <input type="text" name="title:<dtml-var UNICODE_ENCODING>:ustring" size="35"
    value="<dtml-var title html_quote>">
       </td>
   <td align="left" valign="top">
@@ -96,7 +96,7 @@
   </td>
   <td align="left" valign="top">
 
-      <textarea name="sections_options:lines" rows="6" cols="37"><dtml-var "_.string.join(sections_options,'\n')" html_quote></textarea>
+      <textarea name="sections_options:<dtml-var UNICODE_ENCODING>:ulines" rows="6" cols="37"><dtml-var "_.string.join(sections_options,'\n')" html_quote></textarea>
 
       </td>
 
@@ -116,9 +116,9 @@
   </td>
   <td align="left" valign="top">
     <div class="form-element">
-          <select name="defaultsections:list" multiple size="<dtml-var "_.min(7, _.len(sections_options))">">
+          <select name="defaultsections:<dtml-var UNICODE_ENCODING>:ulist" multiple size="<dtml-var "_.min(7, _.len(sections_options))">">
 	      <dtml-in sections_options>
-               <option <dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>
+               <option <dtml-if "_['sequence-item'] in defaultsections">selected="selected"</dtml-if>
                ><dtml-var sequence-item html_quote></option>
 	      </dtml-in>
           </select>
@@ -139,7 +139,7 @@
   </td>
   <td align="left" valign="top">
 
-      <textarea name="types:lines" rows="6" cols="37"><dtml-var "_.string.join(types, '\n')" html_quote></textarea>
+      <textarea name="types:<dtml-var UNICODE_ENCODING>:ulines" rows="6" cols="37"><dtml-var "_.string.join(types, '\n')" html_quote></textarea>
 
       </td>
   <td align="left" valign="top">
@@ -155,9 +155,9 @@
   <td align="left" valign="top">
 
         <div class="form-element">
-    <select name="default_type:string">
+    <select name="default_type:<dtml-var UNICODE_ENCODING>:ustring">
 	<dtml-in types>
-	    <option <dtml-if "_['sequence-item']==default_type">SELECTED</dtml-if>
+	    <option <dtml-if "_['sequence-item']==default_type">selected="selected"</dtml-if>
 	    ><dtml-var sequence-item html_quote></option>
 	</dtml-in>
           </select>
@@ -179,7 +179,7 @@
   </td>
   <td align="left" valign="top">
 
-      <textarea name="urgencies:lines" rows="6" cols="37"><dtml-var "_.string.join(urgencies, '\n')" html_quote></textarea>
+      <textarea name="urgencies:<dtml-var UNICODE_ENCODING>:ulines" rows="6" cols="37"><dtml-var "_.string.join(urgencies, '\n')" html_quote></textarea>
 
       </td>
   <td align="left" valign="top">
@@ -195,7 +195,7 @@
   <td align="left" valign="top">
 
    <div class="form-element">
-    <select name="default_urgency:string">
+    <select name="default_urgency:<dtml-var UNICODE_ENCODING>:ustring">
 	<dtml-in urgencies>
 	    <option <dtml-if "_['sequence-item']==default_urgency">selected="selected"</dtml-if>
 	    ><dtml-var sequence-item html_quote></option>
@@ -324,7 +324,7 @@
 <select name="default_sortorder:string">
 <dtml-in getDefaultSortorderOptions>
 <option value="<dtml-var sequence-item>"
-<dtml-if "getDefaultSortorder()==_['sequence-item']">selected</dtml-if>
+<dtml-if "getDefaultSortorder()==_['sequence-item']">selected="selected"</dtml-if>
 ><dtml-var "translateSortorderOption(_['sequence-item'])"></option>
 </dtml-in>
 </select>
@@ -348,7 +348,7 @@ issue towards the top of List Issues.
 <select name="display_date:string">
 <dtml-in getDisplayDateFormatOptions>
 <option value="<dtml-var sequence-item>"
-<dtml-if "display_date==_['sequence-item']">SELECTED</dtml-if>
+<dtml-if "display_date==_['sequence-item']">selected="selected"</dtml-if>
 ><dtml-var "ZopeTime('%s-12-13 22:15'%ZopeTime().strftime('%Y')).strftime(_['sequence-item'])"></option>
 </dtml-in>
 </select>
@@ -367,7 +367,7 @@ issue towards the top of List Issues.
   </td>
   <td align="left" valign="top">
 
-      <input type="text" name="sitemaster_name:string" size="35"
+      <input type="text" name="sitemaster_name:<dtml-var UNICODE_ENCODING>:ustring" size="35"
    value="<dtml-var sitemaster_name html_quote>">
       </td>
   <td align="left" valign="top">
@@ -529,7 +529,7 @@ issue towards the top of List Issues.
   </td>
   <td align="left" valign="top">
     <div class="form-element">
-      <textarea name="signature_text:text" rows="6" cols="37"><dtml-var getSignature html_quote></textarea>
+      <textarea name="signature_text:<dtml-var UNICODE_ENCODING>:utext" rows="6" cols="37"><dtml-var getSignature html_quote></textarea>
     </div>
   </td>
   <td align="left" valign="top">
@@ -547,7 +547,7 @@ issue towards the top of List Issues.
 
 <div class="submitarea" align="center">
         <input type="submit" value="Save Changes" name="manage_editIssueTrackerProperties:method">
-</div>	
+</div>
 
 
 </div><!-- /basic -->
@@ -1378,3 +1378,4 @@ issue.
 
 
 <dtml-var manage_page_footer>
+<dtml-call "RESPONSE.setHeader('Content-Type','text/html; charset=%s'%UNICODE_ENCODING)">

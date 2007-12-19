@@ -1173,12 +1173,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """
         hk = self.REQUEST.has_key
         get = self.REQUEST.get
-        strings = ['title','display_date','sitemaster_name',
+        strings = ['display_date',
                    'sitemaster_email',
-                   'default_type','default_urgency','issueprefix',
+                   'issueprefix',
                    'default_display_format',
                    'default_sortorder',
-                   'signature_text']
+                   ]
+        unicodes = ['title','sitemaster_name',
+                    'default_type','default_urgency',
+                    'signature_text']
         lists = ['types','urgencies','sections_options','defaultsections',
                  'statuses','statuses_verbs','display_formats',
                  'manager_roles',]
@@ -1215,6 +1218,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if hk(each) and isinstance(get(each), basestring):
                 dict[each] = get(each).strip()
 
+        for each in unicodes:
+            if hk(each) and isinstance(get(each), basestring):
+                dict[each] = unicodify(get(each).strip())
+                
         for each in ints:
             if hk(each):
                 if isinstance(get(each), int):
@@ -1222,6 +1229,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 else:
                     LOG(self.meta_type, WARNING,
                         '%s not integer'%get(each), '')
+                        
         for each in lists:
             if hk(each) and isinstance(get(each), list):
                 dict[each] = Utils.uniqify(get(each))
@@ -2785,8 +2793,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             elif page == 'What-is-StructuredText':
                 title = "About Structured Text"
         
-        if isinstance(title, str):
+        if isinstance(title, basestring):
             # legacy
+            
             return Utils.html_entity_fixer(title)
         else:
             # new way
@@ -3402,13 +3411,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         
         # filter out empty item from sections
-        sections_newlist = request.get('sections', [])
+        sections_newlist = self.cleanSectionsList(request.get('sections', []))
         if not isinstance(sections_newlist, list):
             sections_newlist = [sections_newlist]
             
-        sections_newlist = [x.strip() for x in sections_newlist]
-        while '' in sections_newlist:
-            sections_newlist.remove('')
+        sections_newlist = [x.strip() for x in sections_newlist if x.strip()]
             
         if newsection and self.CanAddNewSections():
             sections_newlist.insert(0, newsection)
@@ -3759,13 +3766,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def _moveUpSections(self, sections):
         """ when an issue has been created, prioritize it's sections globally.
         """
-        if type(self.sections_options)==type(()): 
+        if isinstance(self.sections_options, tuple):
             # fix for badly defined sections options.
             # this can go away in the future.
             self.sections_options = list(self.sections_options)
         
         sections_options = self.sections_options
-            
         Utils.moveUpListelement(sections, sections_options)
         self.sections_options = sections_options
         
@@ -4636,7 +4642,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return None
     
 
-    def getSavedUser(self, name_email='email', d=0):
+    def getSavedUser(self, name_email='email', d=0, use_request=True):
         """
         Return the name or email from request,
         if not found, return from cookie,
@@ -4667,7 +4673,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if acl_username.lower().replace(' ','') == 'anonymoususer':
             acl_username = None
             
-        if request.get(s):
+        if use_request and request.get(s):
             return request[s]
         elif self.get_cookie(cookie):
             if s =='fromname':
@@ -6526,7 +6532,21 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
         """ this is the new sendEmail that works much better but with Unicode instead
         """
-        if 1:#try:
+        if DEBUG:
+            # print the email instead of sending it
+            out = sys.stdout
+            print >>out, "To: %s\n" % to
+            print >>out, "From: %s\n" % fr
+            print >>out, "Subject: %s\n" % subject
+            print >>out, "\n"
+            if isinstance(msg, unicode):
+                print >>out, msg.encode('ascii','replace')
+            else:
+                print >>out, msg
+        
+            return True
+        
+        elif 1:
             header_charset = 'ISO-8859-1'
             #header_charset = UNICODE_ENCODING
             # We must choose the body charset manually
@@ -6563,7 +6583,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 headers_clean[key] = value
             
             # Create the message ('plain' stands for Content-Type: text/plain)
-            #print repr(msg)
             try:
                 msg_encoded = msg.encode(body_charset)
                 #print "\t1", repr(msg_encoded)
@@ -10994,6 +11013,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 all_draft_ids.append(draft_issue_id)
                 all_draft_ids = '|'.join(all_draft_ids)
                 self.set_cookie(c_key, all_draft_ids, days=14)
+                
+            # also save, the name if we didn't already have it
+            if rget('fromname') and not self.getSavedUser('fromname', use_request=False):
+                self.set_cookie(self.getCookiekey('name'), rget('fromname'))
+            if rget('email') and not self.getSavedUser('email', use_request=False):
+                self.set_cookie(self.getCookiekey('email'), rget('email'))
+        
             
         return draft_issue_id
 
@@ -11057,7 +11083,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         sections = Utils.uniqify(sections)
         
         return ', '.join(sections)
-
+    
+    def cleanSectionsList(self, sections):
+        """ return the list of sections as unicode strings if they're not """
+        for i, item in enumerate(sections):
+            if isinstance(item, str):
+                sections[i] = unicodify(item)
+        return sections
+    
     def QuickAddIssue(self, REQUEST, **kw):
         """ override this template if we need to do anything special
         before we show the template """
@@ -12164,7 +12197,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             else:
                 url += '?manage_tabs_message=Nothing+deleted'
             REQUEST.RESPONSE.redirect(url)
-        
+            
+            
                 
 
 #----------------------------------------------------------------------------
