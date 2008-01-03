@@ -8,9 +8,9 @@
        class="threadbox"
        align="left">
 
-    <a tal:condition="python:here.thisInURL('CompleteList')"
+    <a tal:condition="in_completelist"
        tal:attributes="name string:i-${thread/aq_parent/getId}-${repeat/thread/number}"></a>
-    <a tal:condition="not:python:here.thisInURL('CompleteList')"
+    <a tal:condition="not:in_completelist"
        tal:attributes="name string:i${repeat/thread/number}"></a>
     <div class="thead">
 	<b tal:content="structure python:here.colorizeThreadChange(thread.getTitle())">
@@ -30,10 +30,10 @@
 				Name and Email</span>
 				
     <a class="plink"
-       tal:condition="python:here.thisInURL('CompleteList')"
+       tal:condition="python:in_completelist"
        tal:attributes="href string:#i-${thread/aq_parent/getId}-${repeat/thread/number}">#</a>
     <a class="plink"
-       tal:condition="not:python:here.thisInURL('CompleteList')"
+       tal:condition="not:in_completelist"
        tal:attributes="href string:#i${repeat/thread/number}">#</a>
                                 
 	
