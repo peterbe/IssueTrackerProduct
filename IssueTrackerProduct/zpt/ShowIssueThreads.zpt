@@ -1,11 +1,17 @@
 <div align="center" 
      tal:define="threads python:here.ListThreads();
+                 in_completelist python:here.thisInURL('CompleteList');
                  dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)" 
      tal:condition="threads">
 
-  <div tal:repeat="thread threads" class="threadbox" align="left">
+  <div tal:repeat="thread threads" 
+       class="threadbox"
+       align="left">
 
-    <a tal:attributes="name string:i${repeat/thread/number}"></a>
+    <a tal:condition="python:here.thisInURL('CompleteList')"
+       tal:attributes="name string:i-${thread/aq_parent/getId}-${repeat/thread/number}"></a>
+    <a tal:condition="not:python:here.thisInURL('CompleteList')"
+       tal:attributes="name string:i${repeat/thread/number}"></a>
     <div class="thead">
 	<b tal:content="structure python:here.colorizeThreadChange(thread.getTitle())">
 		Title</b>
@@ -23,7 +29,12 @@
 	     tal:replace="structure python:here.ShowNameEmail(fromname,email)">
 				Name and Email</span>
 				
-    <a tal:attributes="href string:#i${repeat/thread/number}" class="plink">#</a>
+    <a class="plink"
+       tal:condition="python:here.thisInURL('CompleteList')"
+       tal:attributes="href string:#i-${thread/aq_parent/getId}-${repeat/thread/number}">#</a>
+    <a class="plink"
+       tal:condition="not:python:here.thisInURL('CompleteList')"
+       tal:attributes="href string:#i${repeat/thread/number}">#</a>
                                 
 	
     </div>

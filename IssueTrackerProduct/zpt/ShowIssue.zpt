@@ -148,7 +148,7 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
        tal:content="structure here/ShowIssueData">Show the actual issue data
   </div>
   <!--/ id=issue-->
-
+  
   <!-- Show Issue Threads -->
   <div tal:define="in_completelist python:here.thisInURL('CompleteList')"
        tal:attributes="id python:test(not in_completelist, 'threads')"
