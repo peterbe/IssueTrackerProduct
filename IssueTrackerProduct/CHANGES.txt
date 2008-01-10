@@ -1,4 +1,4 @@
--
+- 0.8.3
 
     Bug fixed: Clairvoyant javascript alert on followups would repeat
     the same message over and over (almost blinking).
