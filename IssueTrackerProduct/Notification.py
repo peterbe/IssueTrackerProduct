@@ -32,14 +32,14 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
 
     security=ClassSecurityInfo()
     
-    _properties=({'id':'title',       'type': 'string',  'mode':'w'},
-                 {'id':'change',      'type': 'string',  'mode':'w'},
+    _properties=({'id':'title',       'type': 'ustring',  'mode':'w'},
+                 {'id':'change',      'type': 'ustring',  'mode':'w'},
                  {'id':'issueID',     'type': 'string',  'mode':'w'},
-                 {'id':'comment',     'type': 'text',    'mode':'w'},
+                 {'id':'comment',     'type': 'utext',    'mode':'w'},
                  {'id':'emails',      'type': 'lines',   'mode':'w'},
                  {'id':'success_emails','type':'lines',  'mode':'w'},
                  {'id':'anchorname',  'type': 'string',  'mode':'w'},
-                 {'id':'fromname',    'type': 'string',  'mode':'w'},
+                 {'id':'fromname',    'type': 'ustring',  'mode':'w'},
                  {'id':'date',        'type': 'date',    'mode':'w'},
                  {'id':'dispatched',  'type': 'boolean', 'mode':'w'},
                  )
@@ -48,8 +48,13 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
         {'label':'Properties', 'action':'manage_propertiesForm'},
         )
 
-    def __init__(self, id, title, change, issueID, comment, emails,
-                 anchorname, fromname, date=None, dispatched=False, REQUEST=None):
+    def __init__(self, id, title, issueID, emails,
+                 fromname=u'',
+                 comment=u'',
+                 date=None, dispatched=False,
+                 anchorname='', change=u'',
+                 REQUEST=None,
+                 **extra_headers):
         """ create notification """
         self.id = str(id)
         self.title = title
@@ -64,6 +69,7 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
         if date is None:
             date = DateTime()
         self.date = date
+        self.extra_headers = extra_headers
         
     def getTitle(self):
         """ return title of the notification """

@@ -164,6 +164,7 @@ DEFAULT_NOTIFYABLECONTAINER_TITLE = "Global IssueTracker notifyables"
 TEMPFOLDER_ID = 'temp-uploadfolder'
 DRAFTSFOLDER_ID = 'drafts'
 FILTERVALUEFOLDER_ID = 'saved-filters'
+ISSUENOTIFICATIONS_ID = 'notifications'
 
 # Keys
 TEMPFOLDER_REQUEST_KEY = 'Tempfolder_fileattachments'

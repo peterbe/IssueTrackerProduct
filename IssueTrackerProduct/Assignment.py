@@ -38,9 +38,15 @@ class IssueTrackerIssueAssignment(IssueTrackerIssue):
         {'label':'Properties',  'action':'manage_propertiesForm'},
         {'label':'Contents',    'action':'manage_main'},                     
         )
+        
+    # legacy
+    # All old assignments that have already been sent we can assume
+    # that they have been sent.
+    email_sent = True
 
     def __init__(self, id, acl_assignee, state,
-                 fromname, email, acl_adder=''):
+                 fromname, email, acl_adder='',
+                 email_sent=False):
         """ create assignment """
         self.id = str(id)
         self.acl_assignee = acl_assignee
@@ -52,6 +58,7 @@ class IssueTrackerIssueAssignment(IssueTrackerIssue):
         self.acl_adder = acl_adder
         assert state in [-1, 0, 1], "Invalid state of assignment"
         self.state = state # 1=Assigned 0=Reassigned -1=Rejected
+        self.email_sent = bool(email_sent)
 
 
     def getTitle(self):
@@ -187,6 +194,12 @@ class IssueTrackerIssueAssignment(IssueTrackerIssue):
                 return "Assigned to"
             else:
                 return "Assigned"
+            
+    def _setEmailSent(self):
+        self.email_sent = True
+        
+    def isEmailSent(self):
+        return self.email_sent
 
     security.declareProtected(VMS, 'assertAllProperties')
     def assertAllProperties(self):

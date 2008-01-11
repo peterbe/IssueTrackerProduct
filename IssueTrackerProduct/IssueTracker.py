@@ -3509,27 +3509,31 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             issue.createAssignment(assignee,
                                    send_email=_send_email)
 
-        # tell the people who wants to know
-        try:
-            self.sendAlwaysNotify(issue, email=email, assignee=assignee)
-        except:
-            try:
-                err_log = self.error_log
-                err_log.raising(sys.exc_info())
-            except:
-                pass                
-            typ, val, tb = sys.exc_info()
-            _classname = self.__class__.__name__
-            _methodname = inspect.stack()[1][3]
-            LOG("IssueTrackerProduct.SubmitIssue()", ERROR,
-                'Could not send always-notify emails',
-                error=sys.exc_info())            
             
 
         # tune some exisiting data
         if not newsection:
             # when adding a new section, don't do this
             self._moveUpSections(sections)
+  
+        
+            
+        # tell the people who wants to know
+        if 1: #try:
+            self.sendAlwaysNotify(issue, email=email, assignee=assignee)
+        else: #except:
+            try:
+                err_log = self.error_log
+                err_log.raising(sys.exc_info())
+            except:
+                pass
+            #typ, val, tb = sys.exc_info()
+            #_classname = self.__class__.__name__
+            #_methodname = inspect.stack()[1][3]
+            LOG("IssueTrackerProduct.SubmitIssue()", ERROR,
+                'Could not send always-notify emails',
+                error=sys.exc_info())            
+            
 
         # Where to next?
         redirect_url = '%s?NewIssue=Submitted'%(issue.absolute_url())
@@ -3916,21 +3920,66 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         always_emailstring = ', '.join(self.getAlwaysNotify())
         tosend = self._alwaysNotifyMessage(issue, always_emailstring)
-        msg, to, fr, subject = tosend
-        
+        __, to, __, __ = tosend
+
         issueid_header = issue.getGlobalIssueId()
 
         if to is not None:
+            send_emails = []
             email = ss(str(email))
             for to_each in self.preParseEmailString(to, aslist=1):
                 if ss(to_each) == email:
                     continue
                 elif assignee_email and ss(to_each) == assignee_email:
                     continue
-                self.sendEmail(msg, to_each, fr, subject, swallowerrors=True,
-                               headers={EMAIL_ISSUEID_HEADER: issueid_header})
 
+                #self.sendEmail(msg, to_each, fr, subject, swallowerrors=True,
+                #               headers={EMAIL_ISSUEID_HEADER: issueid_header})
+                send_emails.append(to_each)
+                
+            if send_emails:
+                self.sendIssueNotifications(issue, send_emails)
+                 
 
+    security.declarePrivate('sendIssueNotifications')
+    def sendIssueNotifications(self, issue, emails):
+        """ create a notification about about this issue notification and then
+        send the notification. """
+
+        # save all notifications in root folder called "Notifications"
+        notifyid = self.generateID(5, self.issueprefix+"notification",
+                                   meta_type=NOTIFICATION_META_TYPE,
+                                   use_stored_counter=False,
+                                   incontainer=issue)
+                                   
+        title = issue.getTitle()
+        issueID = issue.getId()
+        date = DateTime()
+
+        notification = IssueTrackerNotification(notifyid,
+                             title, issue.getId(), emails,
+                             )
+        issue._setObject(notifyid, notification)
+        notifyobject = getattr(issue, notifyid)
+                             
+        # use the dispatcher to try to send
+        # this notification right now.
+        # there is no big deal if the dispatcher crashes here
+        # because the notification is saved and the dispatcher
+        # can be invoked some other time manually
+        if self.doDispatchOnSubmit():
+            if 1: #try:
+                self.dispatcher([notifyobject])
+            else: #except:
+                try:
+                    err_log = self.error_log
+                    err_log.raising(sys.exc_info())
+                except:
+                    pass
+                LOG(self.__class__.__name__, PROBLEM,
+                   'Email could not be sent', error=sys.exc_info())
+        
+        
     def _acceptEmailsToSiteMaster(self):
         """ return true if there is a POP3 account where one of the 
         accepting emails is the same as that of sitemaster_email 
@@ -5286,51 +5335,64 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         for notification in sendworthy:
             
+            # The notification is either about a followup or a new issue.
+            # The way to distinguish that is by the attribute notification.change
+
             issueID = notification.issueID
             #issue_url = self.issueURLbyID(issueID)
             issue = self.getIssueObject(issueID)
             issueid_header = issue.getGlobalIssueId()
             issue_url = issue.absolute_url()
-
-            if self.ShowIdWithTitle():
-                Subject = "%s: #%s %s"%(roottitle, issueID, 
-                                        notification.title)
-            else:
-                Subject = "%s: %s"%(roottitle, notification.title)
-            fromname = notification.fromname
-            if not fromname:
-                fromname = '(No name)'
-
-            br = '\r\n' 
-
-            msg = notification.date.strftime(self.display_date) +  br
-            msg += '%s has responded to "%s"'%(fromname, notification.title) + br
-            msg += issue_url + br*2
             
-            msg += 'Change:' + br + ' '*4 + notification.change + br * 2
-
-            msg += 'Comment:' + br
-            if notification.comment.strip():
-                msg += Utils.LineIndent(notification.comment, ' ' * 3, 67)
-            else:
-                msg += "(no comment)"
-
-            msg += br*2
-            msg += issue_url +\
-                   '#i%s'%notification.anchorname
-
-            msg += br*2
-
-            signature = self.showSignature()
-            if signature:
-                msg += '--' + br + signature
-
-            emails = [x.strip() for x in notification.emails]
-            while '' in emails:
-                emails.remove('')
+            emails = [x.strip() for x in notification.emails if x.strip()]
             emails = [x for x in emails if Utils.ValidEmailAddress(x)]
             emails = Utils.uniqify(emails)
             
+            if notification.change:
+    
+                if self.ShowIdWithTitle():
+                    Subject = "%s: #%s %s"%(roottitle, issueID, 
+                                            notification.title)
+                else:
+                    Subject = "%s: %s"%(roottitle, notification.title)
+                fromname = notification.fromname
+                if not fromname:
+                    fromname = '(No name)'
+    
+                br = '\r\n' 
+    
+                msg = notification.date.strftime(self.display_date) +  br
+                msg += '%s has responded to "%s"'%(fromname, notification.title) + br
+                msg += issue_url + br*2
+                
+                msg += 'Change:' + br + ' '*4 + notification.change + br * 2
+    
+                msg += 'Comment:' + br
+                if notification.comment.strip():
+                    msg += Utils.LineIndent(notification.comment, ' ' * 3, 67)
+                else:
+                    msg += "(no comment)"
+    
+                msg += br*2
+                msg += issue_url +\
+                       '#i%s'%notification.anchorname
+    
+                msg += br*2
+    
+                signature = self.showSignature()
+                if signature:
+                    msg += '--' + br + signature
+    
+                
+            else:
+                # the notification is about an issue and _alwaysNotifyMessage()
+                # will generate the appropriate message and from address
+
+                tosend = self._alwaysNotifyMessage(issue, ','.join(emails))
+                msg, __, From, Subject = tosend
+                
+            print msg
+
             for email in emails:
                 if senttos.has_key(issueID):
                     senttos[issueID].append(email)
@@ -5340,7 +5402,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 To = email
 
                 # send it!
-                success = self.sendEmail(msg, To, From, Subject, swallowerrors=True,
+                success = self.sendEmail(msg, To, From, Subject, 
+                                         swallowerrors=not(DEBUG and True or False),
                                          headers={EMAIL_ISSUEID_HEADER: issueid_header})
                 if success:
                     notification.setSuccessEmail(To)
@@ -5415,6 +5478,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     checked.append((True, [u.getFullname(), u.getEmail()]))
             except:
                 pass
+            
         elif include_assignee and self.objectValues(ISSUEASSIGNMENT_METATYPE):
             first_assignment = self.objectValues(ISSUEASSIGNMENT_METATYPE)[0]
             assignee_name = first_assignment.getAssigneeFullname()
@@ -6412,7 +6476,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if request.has_key('issueID') and self.hasManagerRole():
             container = self._getIssueContainer()
             issue = getattr(container, request['issueID'])
-            issue.unindex_object()
             
             container.manage_delObjects(request['issueID'])
 

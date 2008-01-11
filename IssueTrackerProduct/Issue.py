@@ -1102,10 +1102,11 @@ class IssueTrackerIssue(IssueTracker):
 
         notification_comment = followupobject.getCommentPure()
         notification = IssueTrackerNotification(
-                            notifyid, title, change, issueID,
-                            notification_comment, emails, anchorname, 
+                            notifyid, title, issueID,
+                            emails, 
                             followupobject.fromname,
-                            date)
+                            comment=notification_comment, 
+                            anchorname=anchorname, change=change)
         self._setObject(notifyid, notification)
         notifyobject = getattr(self, notifyid)
           
@@ -2008,7 +2009,8 @@ class IssueTrackerIssue(IssueTracker):
 
     def unindex_object(self):
         """A common method to allow Findables to unindex themselves."""
-        self.getCatalog().uncatalog_object('/'.join(self.getPhysicalPath()))
+        path = '/'.join(self.getPhysicalPath())
+        self.getCatalog().uncatalog_object(path)
         
     def isImplicitlySubscribing(self, email):
         """ return if they're already involved in this issue such that there is
@@ -2437,7 +2439,14 @@ class IssueTrackerIssue(IssueTracker):
         if sort:
             objects = self.sortSequence(objects, (('assignmentdate',),))
         return objects
-
+    
+    def getFirstAssignment(self):
+        """ return the first assignment or None """
+        try:
+            return self.getAssignments()[0]
+        except IndexError:
+            return None
+    
     
     def createAssignment(self, assignee_identifier, state=1,
                          send_email=False):
@@ -2485,16 +2494,19 @@ class IssueTrackerIssue(IssueTracker):
             fromname = unicodify(self.get_cookie(name_cookiekey))
         else:
             fromname = unicodify(request.get('fromname',''))
-
+            
+        # Add it
+        adder = self._createAssignmentObject
+        assignment = adder(id, assignee_identifier, state,
+                           fromname, email, acl_adder)
+              
         if send_email and Utils.ValidEmailAddress(user.getEmail()) \
                and not Utils.ss(user.getEmail())==Utils.ss(email):
             self._sendAssignementEmail(user.getFullname(), user.getEmail(),
                                        fromname, email)
+                                       
+            assignment._setEmailSent()
 
-        # Add it
-        adder = self._createAssignmentObject
-        adder(id, assignee_identifier, state,
-              fromname, email, acl_adder)
 
     def _createAssignmentObject(self, id, identifier, state,
                                 fromname, email, acl_adder=None):
@@ -2554,8 +2566,65 @@ class IssueTrackerIssue(IssueTracker):
         if signature:
             msg += '--\n'+signature
 
-        self.sendEmail(msg, To, From, Subject, swallowerrors=True,
+        self.sendEmail(msg, To, From, Subject, 
+                       swallowerrors=not(DEBUG and True or False),
                        headers={EMAIL_ISSUEID_HEADER: self.getGlobalIssueId()})
+
+                       
+    ##
+    ## The issue's notifications
+    ##
+                       
+    def getCreatedNotifications(self):
+        return list(self.objectValues(NOTIFICATION_META_TYPE))
+    
+    
+    ##
+    ## Misc.
+    ##
+    
+    def getNotifiedUsersByNotificationsAndAssignment(self):
+        """ return a list of of strings of people who will be notified
+        when this issue was submitted. """
+        
+        strings = []
+        _all_emails = []
+        notifications = self.getCreatedNotifications()
+        first_assignment = self.getFirstAssignment()
+        
+        if first_assignment is not None:
+            assignee_name = first_assignment.getAssigneeFullname()
+            assignee_email = first_assignment.getAssigneeEmail()
+            add = self.ShowNameEmail(assignee_name, assignee_email, highlight=False)
+            strings.append(add)
+            _all_emails.append(assignee_email.lower())
+            
+        always = self.getAlwaysNotify()
+        checked = [self._checkAlwaysNotify(x, format='list') for x in always]
+        print checked
+        # checked is a list of tuples that look like this:
+        # [(True, ['', 'peterbe@gmail.com']), ...]
+        # And this can be used to help us figure out the names of the emails 
+        # stored in the notification objects.
+        emails2names = {}
+        for valid, name_email in checked:
+            n, e = name_email
+            if not valid:
+                continue
+            
+            if n:
+                emails2names[e.lower()] = n.strip()
+            
+        for notification in notifications:
+            for email in notification.getEmails():
+                name = emails2names.get(email.lower(), '')
+                add = self.ShowNameEmail(name, email, highlight=False)
+                if email.lower() not in _all_emails:
+                    strings.append(add)
+                    _all_emails.append(email.lower())
+            
+        return strings
+
 
 
 zpts = ({'f':'zpt/ShowIssue', 'optimize':OPTIMIZE and 'xhtml'},

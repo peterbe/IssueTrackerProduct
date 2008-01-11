@@ -40,10 +40,11 @@
 
 <div align="center" tal:condition="python:request.has_key('NewIssue')">
 <table class="announcement" cellpadding="6" border="0">
-  <tr tal:define="always_notified python:here.Always2Notify(emailtoskip=here.email, format='merged', requireemail=1, include_assignee=1)">
+  <!--<tr tal:define="always_notified python:here.Always2Notify(emailtoskip=here.email, format='merged', requireemail=1, include_assignee=1)">-->
+  <tr tal:define="notified_users here/getNotifiedUsersByNotificationsAndAssignment">
     <td valign="top" align="left">
             <a tal:attributes="href request/URL1" style="float:right"
-               tal:condition="not:python:here.doShowAlwaysNotifyStatus() and always_notified"
+               tal:condition="not:python:here.doShowAlwaysNotifyStatus() and notified_users"
              ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
 
 	    <h3>Issue added!</h3>
@@ -57,15 +58,13 @@
 
     </td>
 
-    <td valign="top" tal:condition="python:here.doShowAlwaysNotifyStatus() and always_notified">
-            <tal:block tal:condition="python:here.doShowAlwaysNotifyStatus() and always_notified">
+    <td valign="top" tal:condition="python:here.doShowAlwaysNotifyStatus() and notified_users">
             <a tal:attributes="href request/URL1" style="float:right"
              ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
              <br clear="right" />
-            </tal:block>
              
 		<p><b>Notification was sent to:</b></p>
-		<div tal:repeat="anotify always_notified">
+		<div tal:repeat="anotify notified_users">
 		<img src="/misc_/IssueTrackerProduct/notification.gif"
 		width="16" height="16" alt="Notification icon" />
 		<span tal:replace="structure anotify" />
