@@ -63,7 +63,10 @@
              ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
              <br clear="right" />
              
-		<p><b>Notification was sent to:</b></p>
+		<p>
+		  <b tal:condition="here/doDispatchOnSubmit">Notification was sent to:</b>
+		  <b tal:condition="not:here/doDispatchOnSubmit">Notification will be sent to:</b>
+		</p>
 		<div tal:repeat="anotify notified_users">
 		<img src="/misc_/IssueTrackerProduct/notification.gif"
 		width="16" height="16" alt="Notification icon" />

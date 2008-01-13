@@ -3509,7 +3509,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             issue.createAssignment(assignee,
                                    send_email=_send_email)
 
-            
 
         # tune some exisiting data
         if not newsection:
@@ -3946,7 +3945,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ create a notification about about this issue notification and then
         send the notification. """
 
-        # save all notifications in root folder called "Notifications"
         notifyid = self.generateID(5, self.issueprefix+"notification",
                                    meta_type=NOTIFICATION_META_TYPE,
                                    use_stored_counter=False,
@@ -4039,8 +4037,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             else:
                 _from = fromname
             _r_dict['from_name'] = _from
-            msg = _('%(from_name)s has entered an issue in %(root_title)s and '\
-                    'wanted you to know about it, with the following title:') % _r_dict + br
+            msg = _('%(from_name)s has entered an issue in %(root_title)s '\
+                    'with the following title:') % _r_dict + br
 
         msg += _issuetitle + br * 2
         msg += _("The issue can be found at") + br
@@ -5307,7 +5305,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     ## Notification related
 
-    def dispatcher(self, notificationobjects=None):
+    def dispatcher(self, notificationobjects=None, REQUEST=None):
         """ Sends out all the emails or at least returns the string to use """
         if notificationobjects is None:
             notificationobjects = self.getAllNotifications()
@@ -5322,13 +5320,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         sitemaster_email = self.getSitemasterEmail()
         
         if not sitemaster_name:
-            LOG(self.__class__.__name__, INFO, "Sitemaster name not set")
+            m = "(%s) Sitemaster name not set"
+            logger.info(m % self.getRoot().getTitle())
         if not Utils.ValidEmailAddress(sitemaster_email):
             m = "(%s) Sitemaster email not valid. Email might not work"
-            m = m%self.getRoot().getTitle()
-            LOG(self.__class__.__name__, WARNING, m)
+            logger.warn(m % self.getRoot().getTitle())
             
-        From ="%s <%s>"%(sitemaster_name, sitemaster_email)
+        From = u"%s <%s>" % (sitemaster_name, sitemaster_email)
 
         senttos = {}
 
@@ -5347,8 +5345,70 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             emails = [x.strip() for x in notification.emails if x.strip()]
             emails = [x for x in emails if Utils.ValidEmailAddress(x)]
             emails = Utils.uniqify(emails)
+
+            if notification.assignment:
+                # the notification is about an assingment
             
-            if notification.change:
+                assignment = notification.getAssignmentObject()
+                if assignment is None:
+                    raise AttributeError, "Assignment object %r not found" % notification.assignment
+                
+                assignee_identifier = assignment.getACLAssignee()
+                roottitle = self.getRoot().getTitle()
+                
+                issuetitle = issuetitle_short = self.getTitle()
+                if len(issuetitle_short) > 45:
+                    issuetitle_short = issuetitle_short[:45].strip()+'...'
+                
+                if self.ShowIdWithTitle():
+                    Subject = u"%s: (assignment) #%s %s"
+                    Subject = Subject % (roottitle, self.getId(), issuetitle_short)
+                else:
+                    Subject = u"%s: (assignment) %s"
+                    Subject = Subject % (roottitle, issuetitle_short)
+                    
+                try:
+                    userfolderpath, name = assignee_identifier.split(',')
+                except ValueError:
+                    m = "Invalid assignee identifier (%s)"
+                    raise "AssigneeNotFound", m % assignee_identifier
+                
+                userfolder = self.unrestrictedTraverse(userfolderpath)
+                if name in userfolder.user_names():
+                    user = self.getIssueUserObject(assignee_identifier)
+                else:
+                    m = "Invalid assignee identifier (%s)"
+                    raise "AssigneeNotFound", m % assignee_identifier
+            
+                to_name = user.getFullname()
+                to_email = user.getEmail()
+        
+                if to_name:
+                    To = u'%s <%s>'%(to_name, to_email)
+                else:
+                    To = to_email
+        
+                # who made the assignment can be found from the assignment object
+                # itself.
+                
+                by_who = assignment.getFromname()
+                if not by_who:
+                    by_who = assignment.getEmail()
+        
+                msg = u"" #%DateTime().strftime(self.display_date)
+                msg += u"You have been assigned to an issue by %s" % by_who
+                
+                msg += u' with title: "%s"\n' % self.getTitle()
+                msg += u"The issue is currently %s.\n\n" % issue.status.capitalize()
+                
+                msg += u"The issue can be found at\n%s\n\n" % self.absolute_url()
+        
+                signature = self.showSignature()
+                if signature:
+                    msg += '--\n'+signature
+        
+                
+            elif notification.change:
     
                 if self.ShowIdWithTitle():
                     Subject = "%s: #%s %s"%(roottitle, issueID, 
@@ -5391,7 +5451,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 tosend = self._alwaysNotifyMessage(issue, ','.join(emails))
                 msg, __, From, Subject = tosend
                 
-            print msg
 
             for email in emails:
                 if senttos.has_key(issueID):
@@ -5420,6 +5479,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 out += '\n'
         else:
             out = "No notifications sent"
+            
+        if REQUEST is not None:
+            self.StopCache()
+            REQUEST.RESPONSE.setHeader('Content-Type','text/plain')
 
         return out
             
@@ -6648,12 +6711,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # Create the message ('plain' stands for Content-Type: text/plain)
             try:
                 msg_encoded = msg.encode(body_charset)
-                #print "\t1", repr(msg_encoded)
             except UnicodeDecodeError:
                 if isinstance(msg, str):
                     try:
                         msg_encoded = unicode(msg, body_charset).encode(body_charset)
-                        #print "\t\t2", repr(msg_encoded)
                     except UnicodeDecodeError:
                         logger.warn("Unable to encode msg (type=%r, body_charset=%s)" %\
                             (type(msg), body_charset),

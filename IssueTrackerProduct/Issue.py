@@ -2502,10 +2502,12 @@ class IssueTrackerIssue(IssueTracker):
               
         if send_email and Utils.ValidEmailAddress(user.getEmail()) \
                and not Utils.ss(user.getEmail())==Utils.ss(email):
-            self._sendAssignementEmail(user.getFullname(), user.getEmail(),
-                                       fromname, email)
+            self._sendAssignmentNotification(assignment, user.getEmail())
+            
+            #self._sendAssignementEmail(user.getFullname(), user.getEmail(),
+            #                           fromname, email)
                                        
-            assignment._setEmailSent()
+            #assignment._setEmailSent()
 
 
     def _createAssignmentObject(self, id, identifier, state,
@@ -2522,53 +2524,48 @@ class IssueTrackerIssue(IssueTracker):
     def _sendAssignementEmail(self, to_name, to_email, from_name, from_email):
         """ Send a simple email to he who was assigned this issue """
 
-        roottitle = self.getRoot().getTitle()
-        sitemaster_name = self.getSitemasterName()
-        sitemaster_email = self.getSitemasterEmail()
+        raise "Deprecated", "We're using _sendAssignmentNotification() instead"
+        #self.sendEmail(msg, To, From, Subject, 
+        #               swallowerrors=not(DEBUG and True or False),
+        #               headers={EMAIL_ISSUEID_HEADER: self.getGlobalIssueId()})
         
-        if not sitemaster_name:
-            LOG(self.__class__.__name__, INFO, "Sitemaster name not set")
-        if not Utils.ValidEmailAddress(sitemaster_email):
-            m = "Sitemaster email not valid. Email might not work"
-            LOG(self.__class__.__name__, WARNING, m)
-            
-        From = u"%s <%s>"%(sitemaster_name, sitemaster_email)
+    
+    def _sendAssignmentNotification(self, assignment, to_email):
+        """ create a notification object about this new assignment object """
+        # the person who "created" the assignment
+        fromname = assignment.getFromname()
+        email = assignment.getEmail()
+        issue = aq_parent(aq_inner(assignment))
         
-        issuetitle = issuetitle_short = self.getTitle()
-        if len(issuetitle_short) > 45:
-            issuetitle_short = issuetitle_short[:45].strip()+'...'
+        notifyid = self.generateID(5, self.issueprefix+"notification",
+                                   meta_type=NOTIFICATION_META_TYPE,
+                                   use_stored_counter=False,
+                                   incontainer=issue)
+                                   
+        title = issue.getTitle()
+        issueID = issue.getId()
+        date = DateTime()
         
-        if self.ShowIdWithTitle():
-            Subject = u"%s: (assignment) #%s %s"
-            Subject = Subject%(roottitle, self.getId(), issuetitle_short)
-        else:
-            Subject = u"%s: (assignment) %s"
-            Subject = Subject%(roottitle, issuetitle_short)
-
-        if to_name:
-            To = u'%s <%s>'%(to_name, to_email)
-        else:
-            To = to_email
-
-        by_who = from_name
-        if not by_who:
-            by_who = from_email
-
-        msg = u"" #%DateTime().strftime(self.display_date)
-        msg += u"You have been assigned to an issue by %s"%by_who
+        notification = IssueTrackerNotification(notifyid,
+                             title, issue.getId(), [to_email],
+                             assignment=assignment.getId()
+                             )
+        issue._setObject(notifyid, notification)
+        notifyobject = getattr(issue, notifyid)
         
-        msg += u' with title: "%s"\n'%self.getTitle()
-        msg += u"The issue is currently %r.\n\n"%self.status.capitalize()
+        if self.doDispatchOnSubmit():
+            if 1: #try:
+                self.dispatcher([notifyobject])
+            else: #except:
+                try:
+                    err_log = self.error_log
+                    err_log.raising(sys.exc_info())
+                except:
+                    pass
+                LOG(self.__class__.__name__, PROBLEM,
+                   'Email could not be sent', error=sys.exc_info())
         
-        msg += u"The issue can be found at\n%s\n\n"%self.absolute_url()
 
-        signature = self.showSignature()
-        if signature:
-            msg += '--\n'+signature
-
-        self.sendEmail(msg, To, From, Subject, 
-                       swallowerrors=not(DEBUG and True or False),
-                       headers={EMAIL_ISSUEID_HEADER: self.getGlobalIssueId()})
 
                        
     ##
@@ -2601,7 +2598,6 @@ class IssueTrackerIssue(IssueTracker):
             
         always = self.getAlwaysNotify()
         checked = [self._checkAlwaysNotify(x, format='list') for x in always]
-        print checked
         # checked is a list of tuples that look like this:
         # [(True, ['', 'peterbe@gmail.com']), ...]
         # And this can be used to help us figure out the names of the emails 

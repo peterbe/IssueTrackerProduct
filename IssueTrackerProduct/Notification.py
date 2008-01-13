@@ -13,10 +13,11 @@ from OFS import SimpleItem
 from AccessControl import ClassSecurityInfo
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
+from Acquisition import aq_inner, aq_parent
 
 
 # Product
-from IssueTracker import IssueTracker
+from IssueTracker import IssueTracker, base_hasattr
 from Constants import *
 import Utils
 
@@ -39,6 +40,7 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
                  {'id':'emails',      'type': 'lines',   'mode':'w'},
                  {'id':'success_emails','type':'lines',  'mode':'w'},
                  {'id':'anchorname',  'type': 'string',  'mode':'w'},
+                 {'id':'assignment',  'type': 'string',  'mode':'w'},
                  {'id':'fromname',    'type': 'ustring',  'mode':'w'},
                  {'id':'date',        'type': 'date',    'mode':'w'},
                  {'id':'dispatched',  'type': 'boolean', 'mode':'w'},
@@ -47,12 +49,16 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
     manage_options = (
         {'label':'Properties', 'action':'manage_propertiesForm'},
         )
+        
+    # legacy: attributes that have been added later
+    assignment = ''
 
     def __init__(self, id, title, issueID, emails,
                  fromname=u'',
                  comment=u'',
                  date=None, dispatched=False,
                  anchorname='', change=u'',
+                 assignment='',
                  REQUEST=None,
                  **extra_headers):
         """ create notification """
@@ -64,6 +70,7 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
         self.emails = emails
         self.success_emails = []
         self.anchorname = anchorname
+        self.assignment = assignment
         self.fromname = fromname
         self.dispatched = dispatched
         if date is None:
@@ -79,7 +86,21 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
         """ return issueID of the notification """
         return self.issueID
     
-
+    def getAssignmentObject(self):
+        """ return the assignment object this notification was about
+        or return None """
+        if self.assignment:
+            object_id = self.assignment
+            # expect the assignment object to be located in the same
+            # container as this notification
+            parent = aq_parent(aq_inner(self))
+            if base_hasattr(parent, object_id):
+                obj = getattr(parent, object_id)
+                if obj.meta_type == ISSUEASSIGNMENT_METATYPE:
+                    return obj
+                
+        return None
+    
     def isDispatched(self):
         """ return dispatched """
         return not not self.dispatched
