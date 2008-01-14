@@ -28,15 +28,15 @@ $(function() {
    // First, for all the textareas that have lots of lines of text 
    // in them, we want to double their number of rows
    $('textarea.autoexpanding').each(function() {
-      while (_getNoLines(this) > parseInt(this.rows))
-        this.rows = '' + Math.round((parseInt(this.rows) * 1.6));
+      if (_getNoLines(this) > parseInt(this.rows))
+        this.rows = '' + Math.min(_getNoLines(this) + 1, 50);
    });
             
    // When a user enters new lines, if they have entered more
    // lines than the textarea has rows, then double the textareas rows
    $('textarea.autoexpanding').bind('keyup', function() {
       if (_getNoLines(this) > parseInt(this.rows))
-        this.rows = '' + Math.round((parseInt(this.rows) * 1.6));
+        this.rows = '' + Math.min(_getNoLines(this) +1, 50);
    });
    
 });
