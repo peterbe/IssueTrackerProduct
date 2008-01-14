@@ -1,5 +1,8 @@
 - 
 
+    Bug fixed: Clairvoyant AJAX checks' interval increases now slowly as
+    the page gets older.
+    
     Bug fixed: Issues were uncataloged twice when deleting causing a
     harmless extra message in the event log.
     
