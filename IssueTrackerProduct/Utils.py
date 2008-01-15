@@ -769,7 +769,8 @@ AND = 'and'
     
 
 def timeSince(firstdate, seconddate, afterword=None, 
-              minute_granularity=False):
+              minute_granularity=False,
+              max_no_sections=3):
     """
     Use two date objects to return in plain english the difference between them.
     E.g. "3 years and 2 days"
@@ -854,6 +855,8 @@ def timeSince(firstdate, seconddate, afterword=None,
                 s.append('%s %s'%(days % 7,DAYS))
         elif days > 1:
             s.append('%s %s'%(days,DAYS))
+            
+        s = s[:max_no_sections]
         
         if len(s)>1:
             return wrap_afterword("%s" % (string.join(s,' %s '%AND)))

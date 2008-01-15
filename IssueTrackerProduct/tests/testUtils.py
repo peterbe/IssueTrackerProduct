@@ -1,8 +1,11 @@
 import unittest
 
 import sys, os
-sys.path.insert(0, os.path.abspath('../'))
-import Utils
+if __name__ == '__main__':
+    execfile(os.path.join(sys.path[0], 'framework.py'))
+        
+
+from Products.IssueTrackerProduct import Utils
 from DateTime import DateTime
 
 class IssueLinkFinderTestCase(unittest.TestCase):
@@ -205,7 +208,21 @@ class TimeSinceTestCase(unittest.TestCase):
         difference = Utils.timeSince(t1, t2)
         self.assertEqual(difference, '1 month and 4 weeks')
         
+    def testLongDistanceDates(self):
+        # If the result contains a year part, month part, week part
+        # and day part the number of parts is controlled by
+        # @max_no_sections (default 3)
+        t1 = DateTime('2004/11/12 00:08:30.937 GMT')
+        t2 = DateTime('2006/05/01 09:47:07.123 GMT')
+        difference_default = Utils.timeSince(t1, t2)
+        self.assertEqual(difference_default, '1 year and 5 months and 2 weeks')
+        
+        difference_2_parts = Utils.timeSince(t1, t2, max_no_sections=2)
+        self.assertEqual(difference_2_parts, '1 year and 5 months')
 
+        difference_99_parts = Utils.timeSince(t1, t2, max_no_sections=99)
+        self.assertEqual(difference_99_parts, '1 year and 5 months and 2 weeks and 6 days')
+        
         
 class SplitTermsTestCase(unittest.TestCase):
     
@@ -323,6 +340,18 @@ class ValidEmailAddressTestCase(unittest.TestCase):
         
     
         
+def test_suite():
+    from unittest import TestSuite, makeSuite
+    suite = TestSuite()
+    suite.addTest(makeSuite(IssueLinkFinderTestCase))
+    suite.addTest(makeSuite(TimeSinceTestCase))
+    suite.addTest(makeSuite(SplitTermsTestCase))
+    suite.addTest(makeSuite(AddParam2URLTestCase))
+    suite.addTest(makeSuite(StandaloneWordRegex))
+    suite.addTest(makeSuite(ValidEmailAddressTestCase))
+    return suite
+    
 if __name__ == '__main__':
-    unittest.main()        
+    framework()
+        
 
