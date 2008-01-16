@@ -30,7 +30,7 @@ except ImportError:
 
 
 # Product
-from IssueTracker import IssueTracker, debug
+from IssueTracker import IssueTracker, debug, safe_hasattr
 from TemplateAdder import addTemplates2Class
 import Utils
 from Utils import unicodify
@@ -700,12 +700,18 @@ class IssueTrackerIssue(IssueTracker):
         # extract what we need from this caller templates options
         SubmitError = options.get('SubmitError')
         draft_followup_id = options.get('draft_followup_id', request.get('draft_followup_id'))
+        
+            
+        
         draft_saved = options.get('draft_saved')
         
         if draft_followup_id:
+            if not isinstance(draft_followup_id, basestring):
+                raise ValueError, "draft_followup_id not a string (%r)" % draft_followup_id
+            
             # take the action from the draft
             container = self.getDraftsContainer()
-            if hasattr(container, draft_followup_id):
+            if safe_hasattr(container, draft_followup_id):
                 draft_object = getattr(container, draft_followup_id)
                 if not request.get('action'):
                     request.set('action', draft_object.action)
@@ -1495,8 +1501,9 @@ class IssueTrackerIssue(IssueTracker):
         else:
             return ""
 
+    
     def getRecentOtherDraftThreadAuthor(self, only_fromname=False, max_age_seconds=20,
-                                        REQUEST=None):
+                                        min_timestamp=None, REQUEST=None):
         """ return the name of the author of the most recent draft followup
         that is not written by the current user. 
         """
@@ -1512,6 +1519,15 @@ class IssueTrackerIssue(IssueTracker):
         container = self.getDraftsContainer()
         draftobjects = [x for x in container.objectValues(ISSUETHREAD_DRAFT_METATYPE)
                                 if x.getIssueId()==self.getIssueId()]
+                                
+        if min_timestamp:
+            # the @min_timestamp is possibly an integer timestamp of how old
+            # the drafts have to be to be considered "recent".
+            # Usually min_timestamp is set by the page template code which the
+            # javascript picks up and sticks to. Then this timestamp is effectively
+            # when the page was generate and thus the time the user came to it.
+            draftobjects = [x for x in draftobjects if int(x.getModifyDate()) > int(min_timestamp)]
+            
         draftobjects.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
         
         fmt_followup = u"%s is working on a followup"
@@ -1629,6 +1645,16 @@ class IssueTrackerIssue(IssueTracker):
         # we can find
         modifier = draftthread.ModifyThread
         rget = REQUEST.get
+
+        # only modify the thread draft if comment, fromname or email has changed
+        if draftthread.comment==rget('comment') and draftthread.fromname == rget('fromname') \
+          and draftthread.email == rget('email'):
+            # the thread hasn't changed enough, no need to call ModifyThread()
+            # again which would be a waste of ZODB transactions and would also
+            # mean that the getModifyDate() of the draft thread would be 
+            # set again.
+            return draft_followup_id
+        
         modifier(title=rget('title'),
                  comment=rget('comment'),
                  fromname=rget('fromname'),
@@ -2252,6 +2278,9 @@ class IssueTrackerIssue(IssueTracker):
     def TellAFriend(self, email_string, friends=[], ignoreword='', added=False, send=True,
                     message_sender='', cancel=False):
         """ Allows people to send notifications to other people """
+        
+        if not self.UseTellAFriend():
+            return "Tell a friend feature disabled"
         
         if cancel:
             self.REQUEST.RESPONSE.redirect(self.absolute_url())

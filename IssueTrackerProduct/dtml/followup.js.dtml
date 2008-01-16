@@ -35,9 +35,14 @@ function clearAutoRefreshTitle() {
 <dtml-if "SaveDrafts() and UseAutoSave()">
   
 var previous_clairvoyant_note='';
+var page_generated_timestamp;
 function clairvoyant_followups() {
-   $.get(_base_url+'/getRecentOtherDraftThreadAuthor?nochache='+(Math.random()+"").substr(2, 5),
-         {'only_fromname':1}, function(resp) {
+   var url = _base_url+'/getRecentOtherDraftThreadAuthor?nochache='+(Math.random()+"").substr(2, 5);
+   if ($('input[name=page_generated_timestamp]').size())
+     page_generated_timestamp = $('input[name=page_generated_timestamp]').val();
+   if (page_generated_timestamp)
+     url += '&min_timestamp='+page_generated_timestamp;
+   $.get(url, {'only_fromname':1}, function(resp) {
       try {
       if (resp && resp != previous_clairvoyant_note) {
          $('#recent-draftthread-author').text(resp).show();

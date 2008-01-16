@@ -499,4 +499,3 @@ a.plink:hover { text-decoration:none; color:#999; }
 /* Hides from IE5-mac \*/
 * html .trest {height: 1%;}
 /* End hide from IE5-mac */
-
