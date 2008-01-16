@@ -4,8 +4,8 @@
   <span class="floatL">
     <div tal:condition="not:python:options.has_key('nosum')" tal:omit-tag="string:&nbsp;">
      # Issues: <span tal:replace="filteredissues_len">number</span>
-     <span style="color:#999" tal:condition="python:request.TotalNoIssues > filteredissues_len">
-    (<br tal:replace="python:request.TotalNoIssues-filteredissues_len" /> issues filtered out or hidden)
+     <span style="color:#999" tal:condition="python:request.get('TotalNoIssues') > filteredissues_len">
+    (<br tal:replace="python:request.get('TotalNoIssues')-filteredissues_len" /> issues filtered out or hidden)
     </span>
     </div>
     <span tal:condition="python:options.get('showSubListOptions') and options['batch']"
