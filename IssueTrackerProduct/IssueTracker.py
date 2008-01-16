@@ -4195,7 +4195,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     
     def _write_csv_headers(self, writer):
         """ append the header for a csv file """
-        row = ['ID','Subject', 'Status', 'Fromname','Email',
+        row = ['Issue ID','Subject', 'Status', 'Fromname','Email',
                self.translateSortorderOption(self.getDefaultSortorder()),
                'Sections', 'Urgency', 'Type']
         writer.writerow(row)

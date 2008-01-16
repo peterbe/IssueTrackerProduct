@@ -1,5 +1,8 @@
 - 
 
+    Bug fixed: Header in CSV file for "ID" replaced by "Issue ID"
+    (Real#0687)
+
     Bug fixed: Clairvoyant AJAX checks' interval increases now slowly as
     the page gets older.
     

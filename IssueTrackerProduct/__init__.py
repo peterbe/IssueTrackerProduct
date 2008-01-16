@@ -122,6 +122,7 @@ def initialize(context):
         registerIcon('gradtablehead.png')
         registerJS('core.js')
         registerJS('jquery-latest.min.js', slim_if_possible=False)
+        registerJS('jquery-latest.pack.js', slim_if_possible=False) # legacy
         
         
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())
