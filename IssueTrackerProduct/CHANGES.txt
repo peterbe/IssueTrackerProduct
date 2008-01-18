@@ -1,4 +1,6 @@
 - 
+    Bug fixed: Changed default encoding from "utf8" to "utf-8" to make
+    sure older IEs gets it right.
 
     Bug fixed: Header in CSV file for "ID" replaced by "Issue ID"
     (Real#0687)
