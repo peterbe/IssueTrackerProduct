@@ -49,7 +49,7 @@ from I18N import _
 OPTIMIZE = getEnvBool('OPTIMIZE_ISSUETRACKERPRODUCT', True)
 
 # Debug
-# shows some verbose dev data
+# shows some verbose dev data and doesn't actually send emails
 DEBUG = getEnvBool('DEBUG_ISSUETRACKERPRODUCT', False)
 
 UNICODE_ENCODING = getEnvStr('UNICODE_ENCODING_ISSUETRACKERPRODUCT', 'utf-8')

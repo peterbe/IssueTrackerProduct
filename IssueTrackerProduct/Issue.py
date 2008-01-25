@@ -1060,6 +1060,12 @@ class IssueTrackerIssue(IssueTracker):
                 # make sure there aren't any drafts that match
                 # this recently added followupobject
                 self._dropMatchingDraftThreads(followupobject)
+                
+            if not self.doDispatchOnSubmit() and followupobject.getEmail():
+                # Notifications aren't sent out immediately, that means that
+                # there's a chance of a notification already exists inside
+                # this issue that is designated to the submitter of this followup.
+                self._removeUnsentNotifications(followupobject.getEmail())
             
 
             if request.has_key('notify'):
@@ -1070,6 +1076,7 @@ class IssueTrackerIssue(IssueTracker):
                 email_addresses = self.Others2Notify(do='email',
                                                      emailtoskip=email)
 
+                                                     
                 if len(email_addresses) > 0:
                     self.sendFollowupNotifications(followupobject, 
                               email_addresses, gentitle)
@@ -1084,7 +1091,41 @@ class IssueTrackerIssue(IssueTracker):
         
         # ready ! redirect!
         request.RESPONSE.redirect(redirect_url)
+        
+        
+    def _removeUnsentNotifications(self, to_email):
+        """ for all the unsent notification inside this issue, those that
+        are designated to @to_email can be discarded.
+        
+        When doing this, if by removing this email from the notificaiton's
+        list of emails, the list becomes empty then remove the notification
+        object.
+        
+        The reason for doing this is that it's assumed that this @to_email
+        has already participated in the issue and therefore don't need 
+        to be notified.
+        """
+        
+        def filter_function(notification, email):
+            if not notification.isDispatched():
+                if email.lower() in [x.lower() for x in notification.getEmails()]:
+                    return True
+            return False
+        
+        notifications = [x for x in self.getCreatedNotifications()
+                           if filter_function(x, to_email.lower())]
 
+        del_notification_ids = []
+        for notification in notifications:
+            new_emails_list = [x for x in notification.getEmails() 
+                                 if x.lower() != to_email.lower()]
+            if new_emails_list:
+                notification._setEmails(new_emails_list)
+            else:
+                del_notification_ids.append(notification.getId())
+        
+        if del_notification_ids:
+            self.manage_delObjects(del_notification_ids)
         
         
     security.declarePrivate('sendFollowupNotifications')
@@ -2600,10 +2641,16 @@ class IssueTrackerIssue(IssueTracker):
     ##
     ## The issue's notifications
     ##
-                       
-    def getCreatedNotifications(self):
-        return list(self.objectValues(NOTIFICATION_META_TYPE))
     
+                       
+    def getCreatedNotifications(self, sort=False):
+        objects = list(self._getCreatedNotifications())
+        if sort:
+            objects.sort(lambda x, y: cmp(x.date, y.date))
+        return objects
+    
+    def _getCreatedNotifications(self):
+        return self.objectValues(NOTIFICATION_META_TYPE)
     
     ##
     ## Misc.

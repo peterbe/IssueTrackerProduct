@@ -126,6 +126,9 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
         """ return the list of emails to send to """
         return self.emails
     
+    def _setEmails(self, emails):
+        self.emails = emails
+    
     def getSuccessEmails(self):
         """ return list of emails that have successfully been sent to """
         

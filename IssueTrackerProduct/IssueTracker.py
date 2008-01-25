@@ -3431,7 +3431,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         fromname        = unicodify(_rg('fromname'))
         email           = _rg('email')
         url2issue       = _rg('url2issue')
-        type            = _rg('type')
+        type_            = _rg('type')
         urgency         = _rg('urgency')
         description     = unicodify(_rg('description'))
         display_format  = _rg('display_format')
@@ -3454,7 +3454,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # accidently press the Save Issue button twice.
         #
         _existing_issue = self._check4Duplicate(title, description,
-                                      sections, type, urgency)
+                                      sections, type_, urgency)
         
         if _existing_issue:
             url = _existing_issue.absolute_url()
@@ -3473,7 +3473,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # Do the actual object adding
         cIO = self.createIssueObject
         
-        issue = cIO(genid, request.title, status, type, urgency,
+        issue = cIO(genid, request.title, status, type_, urgency,
                     sections, fromname, email, url2issue,
                     confidential, hide_me, description,
                     display_format, acl_adder=acl_adder)
@@ -3565,7 +3565,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
     
                              
-    def createIssueObject(self, id, title, status, type, urgency, sections,
+    def createIssueObject(self, id, title, status, type_, urgency, sections,
                           fromname, email, url2issue, confidential, hide_me,
                           description, display_format, issuedate=None, index=0,
                           acl_adder=None,
@@ -3585,23 +3585,23 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if status.lower() not in [x.lower() for x in self.getStatuses()]:
             raise "NoStatus", "Unrecognized issue status %r" % status
         
-        if type not in self.types:
-            raise "NoType", "Unrecognized issue type"
+        if type_ not in self.types:
+            raise ValueError, "Unrecognized issue type"
         
         if urgency not in self.urgencies:
-            raise "NoUrgency", "Unrecognized issue urgency"
+            raise ValueError, "Unrecognized issue urgency"
         
         if not isinstance(sections, list):
-            raise "NotList", "Sections is not a list"
+            raise ValueError, "Sections is not a list"
 
         if confidential not in [1,0]:
-            raise "NotBoolean", "Confidential value is not boolean (1 or 0)"
+            raise ValueError, "Confidential value is not boolean (1 or 0)"
         
         if hide_me not in [1,0]:
-            raise "NotBoolean", "Hide_me value is not boolean (1 or 0)"
+            raise ValueError, "Hide_me value is not boolean (1 or 0)"
         
         if display_format not in self.display_formats:
-            raise "InvalidDisplayFormat", "Invalid display format %r" % display_format
+            raise ValueError, "Invalid display format %r" % display_format
         
         if issuedate is None or issuedate =='':
             issuedate = DateTime()
@@ -3622,7 +3622,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         # Fine, submit it
         create_method = self._createIssueObject
-        return create_method(id, title, status, type, urgency,
+        return create_method(id, title, status, type_, urgency,
                              sections, fromname, email, url2issue,
                              confidential, hide_me, description,
                              display_format, issuedate, index=index,
@@ -6597,62 +6597,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             response.setHeader('Cache-Control', 'public,max-age=%d' % int(3600*hours))
 
             
-    def sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
-        """ Attempt to send emails un protectedly. Return true if 
-        managed to send it, false otherwise. (except when 'swallowerrors'
-        is true where errors can be raised) """
-        mailhost = self._findMailHost()
-        
-        headers_clean={}
-        for key, value in headers.items():
-            if isinstance(key, str) and key.strip():
-                key = key.strip()
-                if key.endswith(':'):
-                    key = key[:-1]
-                value = str(value).strip()
-                headers_clean[key] = value
-            
-        try:
-            if hasattr(mailhost, 'secureSend'):
-                # Using improved SecureMailHost
-                mailhost.secureSend(msg, to, fr, subject, **headers_clean)
-            else:
-                # since we're changing the code here, the creation of a body
-                # is done here in the sendEmail() function instead. If the msg
-                # is already made into a body, then don't proceed.
-                if msg.find('To: %s' % to) + msg.find('From: %s' % fr) > -2:
-                    body = msg
-                else:
-                    merge = ["From: %s"%fr,
-                             "To: %s"%to,
-                             "Subject: %s"%subject]
-                    for key, value in headers_clean.items():
-                        merge.append('%s: %s' % (key, value))
-                             
-                    merge.extend(["", msg])
-                    body = '\r\n'.join(merge)
-                
-                mailhost.send(body, to, fr, subject)
-                debug(body)
-            return True
-        except:
-            debug("Failed to send email")
-            debug(msg, steps=4)
-            typ, val, tb = sys.exc_info()
-            if swallowerrors:
-                try:
-                    err_log = self.error_log
-                    err_log.raising(sys.exc_info())
-                except:
-                    pass                
-                _classname = self.__class__.__name__
-                _methodname = inspect.stack()[1][3]
-                LOG("%s.%s"%(_classname, _methodname), ERROR,
-                    'Could not send email to %s'%to,
-                    error=sys.exc_info())
-                return False
-            else:
-                raise typ, val
             
 
     def sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
@@ -6672,7 +6616,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
             return True
         
-        elif 1:
+        try:
             header_charset = 'ISO-8859-1'
             #header_charset = UNICODE_ENCODING
             # We must choose the body charset manually
@@ -6741,7 +6685,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
             return True
         
-        else:#except:
+        except:
             debug("Failed to send email")
             debug(msg, steps=4)
             typ, val, tb = sys.exc_info()

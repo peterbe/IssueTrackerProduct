@@ -93,7 +93,7 @@ refreshinterval=orig_refreshinterval=3;
 function startautorefresh() {
   checkRefresh();
   r_timer=window.setTimeout(startautorefresh, refreshinterval*1000);
-  refreshinterval+= refreshinterval*0.09;
+  refreshinterval+= refreshinterval*0.08;
 }
 
 $(function() {
