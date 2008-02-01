@@ -4262,6 +4262,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if batchsize is None:
             batchsize = self.default_batch_size
         else:
+            print "BATCHSIZE", repr(batchsize)
             batchsize = int(batchsize)
 
         # manually set sortorder

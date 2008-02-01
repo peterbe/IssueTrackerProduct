@@ -1,3 +1,6 @@
+You might want to set this so you don't try to send out emails:
+export DEBUG_ISSUETRACKERPRODUCT=1
+
 To run all IssueTracker tests
 ./bin/zopectl test --dir Products/IssueTrackerProduct/tests/
 

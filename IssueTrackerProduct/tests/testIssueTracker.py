@@ -11,6 +11,7 @@ if __name__ == '__main__':
 
 from Globals import SOFTWARE_HOME    
 from Testing import ZopeTestCase
+from AccessControl import getSecurityManager
 
 
 import Acquisition
@@ -20,6 +21,8 @@ ZopeTestCase.installProduct('ZCatalog')
 ZopeTestCase.installProduct('ZCTextIndex')
 ZopeTestCase.installProduct('SiteErrorLog')
 ZopeTestCase.installProduct('IssueTrackerProduct')
+
+from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
 
 #------------------------------------------------------------------------------
 #
@@ -240,7 +243,66 @@ class IssueTrackerTestCase(TestBase):
         # let's look at the latest notification
         notification = issue.getCreatedNotifications(sort=True)[1]
         self.assertEqual(notification.getEmails(), [A, C])
+        
+        
+    def test_Real0695_bug(self):
+        """ test that RSS and RDF feeds have the same security protection
+        like viewing the issuetracker, the list of issues or an issue. """
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
 
+        # Adding an issue
+        add_issue_html = tracker.AddIssue(request)
+        self.assertTrue(add_issue_html.find('Description:') > -1)
+        
+        # add an issue so there's something in the ListIssues, and the XML feeds
+        A = u'email@address.com'
+        Af = u'From name'
+        request.set('title', u'TITLE')
+        request.set('fromname', Af)
+        request.set('email', A)
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        tracker.SubmitIssue(request)
+        
+
+        # first of all, viewing these with the current user should be fine.
+        #template_list_html = tracker.ListIssues(request)
+        template_list_html = tracker.restrictedTraverse('ListIssues')(request)
+        # expect it to say "# Issues: 0" since there are no issues added
+        self.assertTrue(template_list_html.find('# Issues: 1') > -1)
+
+        # rss.xml
+        rss_xml = getattr(tracker, 'rss.xml')()
+        self.assertTrue(rss_xml.find('<title><![CDATA[TITLE (Open)]]></title>') > -1)
+        
+        # rdf.xml
+        rdf_xml = getattr(tracker, 'rdf.xml')()
+        self.assertTrue(rdf_xml.find('<title>TITLE (Open)</title>') > -1)
+        
+        # Now, let's disallow anonymous access
+        msg = tracker.manage_ViewPermissionToggle()
+        self.assertEqual(msg, 'View permission disabled for Anonymous')
+        
+        # before we log out, let's create a user with the IssueTracker 
+        # IssueTrackerManagerRole
+        self.folder.acl_users.userFolderAddUser("manager", "secret", [IssueTrackerManagerRole], [])
+        self.folder.acl_users.userFolderAddUser("user", "secret", [IssueTrackerUserRole], [])
+
+        # Now, if I log out, none of the viewings above should work
+        self.logout()
+        assert getSecurityManager().getUser().getUserName() == 'Anonymous User'
+        
+        from zExceptions import Unauthorized
+
+        self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'ListIssues')
+        self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'rss.xml')
+        self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'rdf.xml')
+        
+        
+        
+        
     
         
 def test_suite():
