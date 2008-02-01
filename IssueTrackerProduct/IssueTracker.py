@@ -4199,13 +4199,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                self.translateSortorderOption(self.getDefaultSortorder()),
                'Sections', 'Urgency', 'Type']
         writer.writerow(row)
-        
-    
-    security.declarePublic('RSS091')
-    security.declarePublic('RSS10')
-    security.declarePublic('rss.xml')
 
-    
     security.declarePublic('CDATAText')
     def CDATAText(self, text):
         """ return text wrapped in CDATA tags """
@@ -4242,6 +4236,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return template(self, self.REQUEST, about_url=about_url, issues=issues)
         
     
+    security.declareProtected('View', 'RSS10')
     def RSS10(self, batchsize=None, withheaders=True, show='normal'):
         """ return RSS XML 1.0 """
         request = self.REQUEST
@@ -4352,6 +4347,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return rss
 
 
+    security.declareProtected('View', 'RSS091')
     def RSS091(self, batchsize=None, withheaders=1, show='normal'):
         """ return RSS XML """
         request = self.REQUEST
@@ -12386,6 +12382,10 @@ security.declareProtected('View', 'CompleteList')
 security.declareProtected('View', 'ListIssues')
 security.declareProtected('View', 'export.csv')
 security.declareProtected('View', 'ListIssues.csv')
+
+security.declareProtected('View', 'rss.xml')
+security.declareProtected('View', 'rdf.xml')
+
 security.declareProtected(VMS, 'manage_POP3ManagementForm')
 security.declareProtected(VMS, 'manage_configureMenuForm')
 security.declareProtected(VMS, 'manage_ManagementNotifyables')

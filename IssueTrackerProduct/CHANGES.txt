@@ -1,4 +1,7 @@
 - 
+    Bug fixed: rss.xml and rdf.xml weren't protected by the View
+    permission. (Real#0695, thanks Jesse Perry)
+    
     Bug fixed: Changed default encoding from "utf8" to "utf-8" to make
     sure older IEs gets it right.
 
