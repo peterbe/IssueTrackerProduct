@@ -5300,7 +5300,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     ## Notification related
 
-    def dispatcher(self, notificationobjects=None, REQUEST=None):
+    def dispatcher(self, notificationobjects=None, min_age_minutes=0, REQUEST=None):
         """ Sends out all the emails or at least returns the string to use """
         if notificationobjects is None:
             notificationobjects = self.getAllNotifications()
@@ -5309,6 +5309,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             notificationobjects = [notificationobjects]
             
         sendworthy = [x for x in notificationobjects if not x.isDispatched()]
+        
+        # if the @min_age_minutes is set to something other than 0,
+        # a check is made that the notifications aren't too young.
+        # With the new feature (Real#0686) of delayed sending, if some switches
+        # of "Dispatch on submit" and allows a cron job call dispatcher() every
+        # 15 minutes, there's a risk that it hits seconds after a notification
+        # is created and then the notification goes out since the notifyee might
+        # not have had time to respond even if he responds quickly.
+        min_age_minutes = int(min_age_minutes)
+        if min_age_minutes:
+            now = DateTime()
+            min_age_days = float(min_age_minutes)/(24*60)
+            sendworthy = [x for x in sendworthy if (now-x.date) >= min_age_days]
 
         roottitle = self.getRoot().getTitle()
         sitemaster_name = self.getSitemasterName()
