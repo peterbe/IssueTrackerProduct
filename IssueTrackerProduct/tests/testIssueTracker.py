@@ -12,7 +12,7 @@ if __name__ == '__main__':
 from Globals import SOFTWARE_HOME    
 from Testing import ZopeTestCase
 from AccessControl import getSecurityManager
-
+from AccessControl.SecurityManagement import newSecurityManager
 
 import Acquisition
 
@@ -23,6 +23,7 @@ ZopeTestCase.installProduct('SiteErrorLog')
 ZopeTestCase.installProduct('IssueTrackerProduct')
 
 from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
+from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE
 
 #------------------------------------------------------------------------------
 #
@@ -245,7 +246,167 @@ class IssueTrackerTestCase(TestBase):
         self.assertEqual(notification.getEmails(), [A, C])
         
         
-    def test_Real0695_bug(self):
+    def test_debatingIssue_withSmartAvoidanceOfNotifications_part2(self):
+        """ same test_debatingIssue_withSmartAvoidanceOfNotifications() but this time
+        test what happens if an issue is created with always notify on or
+        an issue is assigned to someone. """
+        
+        
+        tracker = self.folder.tracker
+        
+        # Important
+        tracker.dispatch_on_submit = False
+        
+        # add an issue user folder
+        # Since manage_addIssueUserFolder() needs to add the two extra roles
+        # we have to do that first because manage_addIssueUserFolder() isn't
+        # allowed to it because it's not a POST request.
+        tracker._addRole(IssueTrackerUserRole)
+        tracker._addRole(IssueTrackerManagerRole)
+        tracker.manage_addProduct['IssueTrackerProduct']\
+          .manage_addIssueUserFolder(keep_usernames=True)
+        tracker.acl_users.userFolderAddUser("user", "secret", [IssueTrackerUserRole], [],
+                                            email="user@test.com",
+                                            fullname="User Name")
+
+        # make the always notify of issuetracker be 'user' and A
+        A = 'a@a.com'
+        Af = 'Aaa'
+        
+        checked = []
+        for each in (A, 'user'):
+            valid, better_spelling = tracker._checkAlwaysNotify(each)
+            if valid:
+                checked.append(better_spelling)
+        tracker.always_notify = checked
+
+        # If someone else now adds an issue, a notification should
+        # be made going out to user@test.com adn a@a.com
+        
+        B = u'email@address.com'
+        Bf = u'From name'
+        
+        request = self.app.REQUEST
+        request.set('title', u'TITLE')
+        request.set('fromname', Bf)
+        request.set('email', B)
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        tracker.SubmitIssue(request)
+        
+        issue = tracker.getIssueObjects()[0]
+        
+        # have a look at that notification object
+        self.assertEqual(len(issue.getCreatedNotifications()), 1)
+        notification = issue.getCreatedNotifications()[0]
+        self.assertFalse(notification.isDispatched())
+        self.assertEqual(notification.getEmails(), ['a@a.com','user@test.com'])
+        
+        # now, if a@a.com follows up on B's new issue, there'll be
+        # you can cross off a@a.com from the notification
+        # object.
+        request.set('comment', u'COMMENT')
+        request.set('fromname', Af)
+        request.set('email', A)
+        request.set('notify', 1)
+        issue.ModifyIssue(request)
+        
+        # there should now be a new notification object where
+        # the latest one goes out to the submitter of the issue
+        self.assertEqual(len(issue.getCreatedNotifications()), 2)
+        latest_notification = issue.getCreatedNotifications(sort=True)[-1]
+        self.assertEqual(latest_notification.getEmails(), [B])
+        
+        
+        
+    def test_debatingIssue_withSmartAvoidanceOfNotifications_part3(self):
+        """ same as test_debatingIssue_withSmartAvoidanceOfNotifications() 
+        but create an assignment and then later as that assignee, 
+        participate in the issue and that should cancel the notification
+        going out to the assignee. 
+        """
+        
+        
+        tracker = self.folder.tracker
+        
+        # Important
+        tracker.dispatch_on_submit = False
+        
+        # add an issue user folder
+        # Since manage_addIssueUserFolder() needs to add the two extra roles
+        # we have to do that first because manage_addIssueUserFolder() isn't
+        # allowed to it because it's not a POST request.
+        tracker._addRole(IssueTrackerUserRole)
+        tracker._addRole(IssueTrackerManagerRole)
+        tracker.manage_addProduct['IssueTrackerProduct']\
+          .manage_addIssueUserFolder(keep_usernames=True)
+        tracker.acl_users.userFolderAddUser("user", "secret", [IssueTrackerUserRole], [],
+                                            email="user@test.com",
+                                            fullname="User Name")
+
+        # switch on issue assignment
+        tracker.manage_UseIssueAssignmentToggle()
+        self.assertEqual(len(tracker.getAllIssueUsers()), 1)
+        assignee_option = tracker.getAllIssueUsers()[0]
+        self.assertEqual(assignee_option['user'].getUserName(), 'user')
+        
+        # If someone else now adds an issue, a notification should
+        # be made going out to user@test.com adn a@a.com
+        
+        B = u'email@address.com'
+        Bf = u'From name'
+        
+        request = self.app.REQUEST
+        request.set('title', u'TITLE')
+        request.set('fromname', Bf)
+        request.set('email', B)
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('assignee', tracker.getAllIssueUsers()[0]['identifier'])
+        request.form['notify-assignee'] = '1'
+        tracker.SubmitIssue(request)
+        
+        issue = tracker.getIssueObjects()[0]
+        
+        # have a look at that notification object
+        self.assertEqual(len(issue.getCreatedNotifications()), 1)
+        notification = issue.getCreatedNotifications()[0]
+        self.assertFalse(notification.isDispatched())
+        self.assertEqual(notification.getEmails(), ['user@test.com'])
+        self.assertTrue(notification.getAssignmentObject() is not None)
+        assignment = notification.getAssignmentObject()
+        self.assertEqual(assignment.getEmail(), B) # who added it
+        self.assertEqual(assignment.getAssigneeEmail(), "user@test.com") # assigned to
+
+        # log in as this assignee
+        uf = tracker.acl_users
+        assert uf.meta_type == ISSUEUSERFOLDER_METATYPE
+        user = uf.getUserById('user')
+        user = user.__of__(uf)
+        newSecurityManager(None, user)
+
+        assert getSecurityManager().getUser().getUserName() == 'user'
+
+        # now reply a comment as this logged in user which should
+        # evetually nullify the notification going to this assignee
+        
+        request.set('comment', u'COMMENT')
+        #request.set('fromname', Af)
+        #request.set('email', A)
+        request.set('notify', 1)
+        issue.ModifyIssue(request)
+        
+        # there should now be a new notification object where
+        # the latest one goes out to the submitter of the issue
+        self.assertEqual(len(issue.getCreatedNotifications()), 1)
+        latest_notification = issue.getCreatedNotifications()[0]
+        self.assertEqual(latest_notification.getEmails(), [B])
+        
+        
+        
+    def test_Real0695_bug(self): # in lack of a better name 
         """ test that RSS and RDF feeds have the same security protection
         like viewing the issuetracker, the list of issues or an issue. """
         tracker = self.folder.tracker

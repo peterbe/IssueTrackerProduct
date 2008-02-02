@@ -1257,9 +1257,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
             # clean upp the variable a bit
             always_notify = Utils.uniqify(always_notify)
-            always_notify = [x.strip() for x in always_notify]
-            while '' in always_notify:
-                always_notify.remove('')
+            always_notify = [x.strip() for x in always_notify if x.strip()]
 
             checked = []
             for each in always_notify:

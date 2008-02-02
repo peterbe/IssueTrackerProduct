@@ -40,8 +40,10 @@ def manage_addIssueUserFolder(self, title='', webmaster_email='',
     userfolder = self._getOb(id)
 
     for role in [IssueTrackerManagerRole, IssueTrackerUserRole]:
-        self.REQUEST.set('role', role)
-        self.manage_defined_roles(submit='Add Role', REQUEST=self.REQUEST)
+        # only add these roles if they don't already exist
+        if role not in self.valid_roles():
+            self.REQUEST.set('role', role)
+            self.manage_defined_roles(submit='Add Role', REQUEST=self.REQUEST)
 
     if old_users and REQUEST is not None:
         old_users_dict = {}
@@ -70,8 +72,9 @@ def manage_addIssueUserFolder(self, title='', webmaster_email='',
             userfolder._doAddUser(username, password, roles, domains,
                                   email=email,
                                   fullname=fullname)
-            
-    return self.manage_main(self,REQUEST)
+                                  
+    if REQUEST:
+        return self.manage_main(self, REQUEST)
 
 
 def _uniqify(somelist):

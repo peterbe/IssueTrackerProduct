@@ -1,4 +1,10 @@
 - 
+
+    New feature: Skipped notifications when not dispatching on submit.
+    Means that if you let a cronjob send the notifications instead of
+    immediately sending them, some notifications are cancelled if the
+    people who are email have already followed up. (Real#0686)
+    
     Bug fixed: rss.xml and rdf.xml weren't protected by the View
     permission. (Real#0695, thanks Jesse Perry)
     

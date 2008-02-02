@@ -52,7 +52,7 @@ IssueTrackerDraftIssueThread	Thread.py	/^class IssueTrackerDraftIssueThread(Issu
 IssueTrackerFolderBase	IssueTracker.py	/^class IssueTrackerFolderBase(Folder.Folder, Persistent):$/;"	c
 IssueTrackerIssue	Issue.py	/^class IssueTrackerIssue(IssueTracker):$/;"	c
 IssueTrackerIssueAssignment	Assignment.py	/^class IssueTrackerIssueAssignment(IssueTrackerIssue):$/;"	c
-IssueTrackerIssueThread	Thread.py	/^class IssueTrackerIssueThread(IssueTrackerIssue): $/;"	c
+IssueTrackerIssueThread	Thread.py	/^class IssueTrackerIssueThread(IssueTrackerIssue):$/;"	c
 IssueTrackerNotification	Notification.py	/^class IssueTrackerNotification(SimpleItem.SimpleItem,$/;"	c
 IssueTrackerNotifyable	IssueTrackerNotifyables.py	/^class IssueTrackerNotifyable(SimpleItem.SimpleItem):$/;"	c
 IssueTrackerNotifyable	Notifyables.py	/^class IssueTrackerNotifyable(SimpleItem.SimpleItem):$/;"	c
@@ -178,7 +178,7 @@ __init__	IssueTrackerNotifyables.py	/^    def __init__(self, id, title):$/;"	m	c
 __init__	IssueTrackerNotifyables.py	/^    def __init__(self, id, title, groups=[]):$/;"	m	class:IssueTrackerNotifyableContainer
 __init__	IssueUserFolder.py	/^    def __init__(self, name, password, roles, domains,$/;"	m	class:IssueUser
 __init__	IssueUserFolder.py	/^    def __init__(self, webmaster_email=''):$/;"	m	class:IssueUserFolder
-__init__	Notification.py	/^    def __init__(self, id, title, change, issueID, comment, emails,$/;"	m	class:IssueTrackerNotification
+__init__	Notification.py	/^    def __init__(self, id, title, issueID, emails,$/;"	m	class:IssueTrackerNotification
 __init__	Notifyables.py	/^    def __init__(self, id, alias, email, groups=[]):$/;"	m	class:IssueTrackerNotifyable
 __init__	Notifyables.py	/^    def __init__(self, id, title):$/;"	m	class:IssueTrackerNotifyableGroup
 __init__	Notifyables.py	/^    def __init__(self, id, title, groups=[]):$/;"	m	class:IssueTrackerNotifyableContainer
@@ -256,7 +256,9 @@ _getAssignments	Issue.py	/^    def _getAssignments(self):$/;"	m	class:IssueTrack
 _getBrothers	IssueTracker.py	/^    def _getBrothers(self):$/;"	m	class:IssueTracker
 _getBugReportingParameters	IssueTracker.py	/^    def _getBugReportingParameters(self, error_type=None, error_value=None,$/;"	m	class:IssueTracker
 _getConfirmFileattachments	IssueTracker.py	/^    def _getConfirmFileattachments(self):$/;"	m	class:IssueTracker
+_getCookieDomain	IssueTracker.py	/^    def _getCookieDomain(self):$/;"	m	class:IssueTracker
 _getCorrectCase	IssueTracker.py	/^    def _getCorrectCase(self, item, list):$/;"	m	class:IssueTracker
+_getCreatedNotifications	Issue.py	/^    def _getCreatedNotifications(self):$/;"	m	class:IssueTrackerIssue
 _getCurrentVersion	upgrade.py	/^def _getCurrentVersion(home_path=None):$/;"	f
 _getDefaultFilterValueBlock	IssueTracker.py	/^    def _getDefaultFilterValueBlock(self, key):$/;"	m	class:IssueTracker
 _getDefaultFilterValueShow	IssueTracker.py	/^    def _getDefaultFilterValueShow(self, key):$/;"	m	class:IssueTracker
@@ -316,6 +318,7 @@ _rejectFile	upgrade.py	/^    def _rejectFile(f):$/;"	f
 _rejectURL	addhrefs.py	/^def _rejectURL(url, start):$/;"	f
 _rememberProvenNotSpambot	IssueTracker.py	/^    def _rememberProvenNotSpambot(self):$/;"	m	class:IssueTracker
 _removeUnConfirmedFiles	IssueTracker.py	/^    def _removeUnConfirmedFiles(self):$/;"	m	class:IssueTracker
+_removeUnsentNotifications	Issue.py	/^    def _removeUnsentNotifications(self, to_email):$/;"	m	class:IssueTrackerIssue
 _renameOldPaths	IssueTracker.py	/^    def _renameOldPaths(self, old_path, new_path):$/;"	m	class:IssueTracker
 _replace_special_chars	Utils.py	/^def _replace_special_chars(text, simplify=1, html_encoding=0):$/;"	f
 _rmDoctype	IssueTracker.py	/^    def _rmDoctype(self, s):$/;"	m	class:IssueTracker
@@ -326,6 +329,7 @@ _savePluginPaths	IssueTracker.py	/^    def _savePluginPaths(self, paths):$/;"	m	
 _searchByFilename	IssueTracker.py	/^    def _searchByFilename(self, q):$/;"	m	class:IssueTracker
 _searchCatalog	IssueTracker.py	/^    def _searchCatalog(self, q, search_only_on=None):$/;"	m	class:IssueTracker
 _sendAssignementEmail	Issue.py	/^    def _sendAssignementEmail(self, to_name, to_email, from_name, from_email):$/;"	m	class:IssueTrackerIssue
+_sendAssignmentNotification	Issue.py	/^    def _sendAssignmentNotification(self, assignment, to_email):$/;"	m	class:IssueTrackerIssue
 _setACLAdder	Assignment.py	/^    def _setACLAdder(self, acl_adder):$/;"	m	class:IssueTrackerIssueAssignment
 _setACLAdder	Issue.py	/^    def _setACLAdder(self, acl_adder):$/;"	m	class:IssueTrackerIssue
 _setACLAdder	Thread.py	/^    def _setACLAdder(self, acl_adder):$/;"	m	class:IssueTrackerIssueThread
@@ -334,6 +338,8 @@ _setEmailMessageId	Issue.py	/^    def _setEmailMessageId(self, message_id):$/;"	
 _setEmailMessageId	Thread.py	/^    def _setEmailMessageId(self, message_id):$/;"	m	class:IssueTrackerIssueThread
 _setEmailOriginal	Issue.py	/^    def _setEmailOriginal(self, original_email):$/;"	m	class:IssueTrackerIssue
 _setEmailOriginal	Thread.py	/^    def _setEmailOriginal(self, original_email):$/;"	m	class:IssueTrackerIssueThread
+_setEmailSent	Assignment.py	/^    def _setEmailSent(self):$/;"	m	class:IssueTrackerIssueAssignment
+_setEmails	Notification.py	/^    def _setEmails(self, emails):$/;"	m	class:IssueTrackerNotification
 _setListsToExpand	IssueTracker.py	/^    def _setListsToExpand(self, newlist):$/;"	m	class:IssueTracker
 _setMenuItems	IssueTracker.py	/^    def _setMenuItems(self, menu_items):$/;"	m	class:IssueTracker
 _setSearchFilterWarning	IssueTracker.py	/^    def _setSearchFilterWarning(self, author=None, status=None, section=None,$/;"	m	class:IssueTracker
@@ -371,6 +377,7 @@ assertAllProperties	Issue.py	/^    def assertAllProperties(self):$/;"	m	class:Is
 assertAllProperties	Thread.py	/^    def assertAllProperties(self):$/;"	m	class:IssueTrackerIssueThread
 aurl	IssueTracker.py	/^    def aurl(self, url, params={}, ignore=[]):$/;"	m	class:IssueTracker
 badIdFilter	Utils.py	/^def badIdFilter(fileid, replacement=''):$/;"	f
+base_hasattr	IssueTracker.py	/^def base_hasattr(obj, name):$/;"	f
 benchmark_ShowDescription	Utils.py	/^def benchmark_ShowDescription():$/;"	f
 bugreportingForm	IssueTracker.py	/^    def bugreportingForm(self, error_type=None, error_value=None,$/;"	m	class:IssueTracker
 bugreportingURL	IssueTracker.py	/^    def bugreportingURL(self, error_type=None, error_value=None,$/;"	m	class:IssueTracker
@@ -381,6 +388,7 @@ changeAssignment	Issue.py	/^    def changeAssignment(self, assignee, send_email=
 changeUserOptions	IssueTracker.py	/^    def changeUserOptions(self, remember_savedfilter_persistently=False,$/;"	m	class:IssueTracker
 changeWhichSubListURL	IssueTracker.py	/^    def changeWhichSubListURL(self, newtype):$/;"	m	class:IssueTracker
 check4MailIssues	IssueTracker.py	/^    def check4MailIssues(self, verbose=False):$/;"	m	class:IssueTracker
+cleanSectionsList	IssueTracker.py	/^    def cleanSectionsList(self, sections):$/;"	m	class:IssueTracker
 cli	upgrade.py	/^def cli():$/;"	f
 colorizeThreadChange	IssueTracker.py	/^    def colorizeThreadChange(self, title):$/;"	m	class:IssueTracker
 containsSpamKeywords	IssueTracker.py	/^    def containsSpamKeywords(self, text, verbose=False):$/;"	m	class:IssueTracker
@@ -394,7 +402,7 @@ createAcceptingEmail	Email.py	/^    def createAcceptingEmail(self, id, email_add
 createAcceptingEmail	IssueTracker.py	/^    def createAcceptingEmail(self, id, email_address, defaultsections=None, $/;"	m	class:IssueTracker
 createAssignment	Issue.py	/^    def createAssignment(self, assignee_identifier, state=1,$/;"	m	class:IssueTrackerIssue
 createErrorFileObject	IssueTracker.py	/^    def createErrorFileObject(self, options):$/;"	m	class:IssueTracker
-createIssueObject	IssueTracker.py	/^    def createIssueObject(self, id, title, status, type, urgency, sections,$/;"	m	class:IssueTracker
+createIssueObject	IssueTracker.py	/^    def createIssueObject(self, id, title, status, type_, urgency, sections,$/;"	m	class:IssueTracker
 createNotifyGroupId	IssueTrackerNotifyables.py	/^    def createNotifyGroupId(self, group):$/;"	m	class:Notifyables
 createNotifyGroupId	Notifyables.py	/^    def createNotifyGroupId(self, group):$/;"	m	class:Notifyables
 createPOP3Account	IssueTracker.py	/^    def createPOP3Account(self, hostname, username,$/;"	m	class:IssueTracker
@@ -411,7 +419,7 @@ disableAutoLogin	IssueTracker.py	/^    def disableAutoLogin(self, REQUEST=None):
 disableRememberSavedfilterPersistently	IssueTracker.py	/^    def disableRememberSavedfilterPersistently(self, REQUEST=None):$/;"	m	class:IssueTracker
 disableShowNextactionIssues	IssueTracker.py	/^    def disableShowNextactionIssues(self, REQUEST=None):$/;"	m	class:IssueTracker
 dispatch	Notification.py	/^    def dispatch(self):$/;"	m	class:IssueTrackerNotification
-dispatcher	IssueTracker.py	/^    def dispatcher(self, notificationobjects=None):$/;"	m	class:IssueTracker
+dispatcher	IssueTracker.py	/^    def dispatcher(self, notificationobjects=None, REQUEST=None):$/;"	m	class:IssueTracker
 displayBriefTitle	IssueTracker.py	/^    def displayBriefTitle(self, title):$/;"	m	class:IssueTracker
 displayMenuItem	IssueTracker.py	/^    def displayMenuItem(self, menuinfo, underline_first_letter=None):$/;"	m	class:IssueTracker
 doAutoLogin	IssueTracker.py	/^    def doAutoLogin(self):$/;"	m	class:IssueTracker
@@ -438,10 +446,11 @@ encodeEmailString	IssueTracker.py	/^    def encodeEmailString(self, email, title
 encodeEmailString	Utils.py	/^def encodeEmailString(email, title=None, nolink=0):$/;"	f
 equal	IssueTracker.py	/^        def equal(date1, date2, fmt):$/;"	m	class:IssueTracker
 exit	IssueTracker.py	/^        def exit(*words):$/;"	m	class:IssueTracker
-expire_cookie	IssueTracker.py	/^    def expire_cookie(self, name):$/;"	m	class:IssueTracker
+expire_cookie	IssueTracker.py	/^    def expire_cookie(self, key, path='\/', across_domain_cookie_=False):$/;"	m	class:IssueTracker
 filenameSplitter	Utils.py	/^def filenameSplitter(filename):$/;"	f
 filenames	Issue.py	/^    def filenames(self):$/;"	m	class:IssueTrackerIssue
 filterTooRecent	IssueTracker.py	/^    def filterTooRecent(self, recenthistory):$/;"	m	class:IssueTracker
+filter_function	Issue.py	/^        def filter_function(notification, email):$/;"	m	class:IssueTrackerIssue
 fixDictofLists	Utils.py	/^def fixDictofLists(dict):$/;"	f
 fixSectionsSubmission	IssueTracker.py	/^    def fixSectionsSubmission(self):$/;"	m	class:IssueTracker
 forceFilterValuerUpdate	IssueTracker.py	/^    def forceFilterValuerUpdate(self):$/;"	m	class:IssueTracker
@@ -467,6 +476,7 @@ getAlwaysNotify	IssueTracker.py	/^    def getAlwaysNotify(self, except_email=Non
 getAssigneeEmail	Assignment.py	/^    def getAssigneeEmail(self):$/;"	m	class:IssueTrackerIssueAssignment
 getAssigneeFullname	Assignment.py	/^    def getAssigneeFullname(self):$/;"	m	class:IssueTrackerIssueAssignment
 getAssignmentDate	Assignment.py	/^    def getAssignmentDate(self):$/;"	m	class:IssueTrackerIssueAssignment
+getAssignmentObject	Notification.py	/^    def getAssignmentObject(self):$/;"	m	class:IssueTrackerNotification
 getAssignments	Issue.py	/^    def getAssignments(self):$/;"	m	class:IssueTrackerDraftIssue
 getAssignments	Issue.py	/^    def getAssignments(self, sort=True):$/;"	m	class:IssueTrackerIssue
 getAutosaveInterval	IssueTracker.py	/^    def getAutosaveInterval(self):$/;"	m	class:IssueTrackerFolderBase
@@ -485,6 +495,7 @@ getComment	Thread.py	/^    def getComment(self):$/;"	m	class:IssueTrackerIssueTh
 getCommentPure	Thread.py	/^    def getCommentPure(self):$/;"	m	class:IssueTrackerIssueThread
 getComment_idx	Thread.py	/^    def getComment_idx(self):$/;"	m	class:IssueTrackerIssueThread
 getCookiekey	IssueTracker.py	/^    def getCookiekey(self, which):$/;"	m	class:IssueTracker
+getCreatedNotifications	Issue.py	/^    def getCreatedNotifications(self, sort=False):$/;"	m	class:IssueTrackerIssue
 getCurrentlyUsedSavedFilter	IssueTracker.py	/^    def getCurrentlyUsedSavedFilter(self, request_only=True):$/;"	m	class:IssueTracker
 getDefaultDisplayFormat	IssueTracker.py	/^    def getDefaultDisplayFormat(self):$/;"	m	class:IssueTracker
 getDefaultSections	IssueTracker.py	/^    def getDefaultSections(self):$/;"	m	class:IssueTracker
@@ -523,6 +534,7 @@ getFileattachmentInput	IssueTracker.py	/^    def getFileattachmentInput(self, in
 getFilterValue	IssueTracker.py	/^    def getFilterValue(self, key, filterlogic=None,$/;"	m	class:IssueTracker
 getFilterlogic	IssueTracker.py	/^    def getFilterlogic(self):$/;"	m	class:IssueTracker
 getFindIssueLinksRegex	Utils.py	/^def getFindIssueLinksRegex(zfill, trackerids=None, prefix=None):$/;"	f
+getFirstAssignment	Issue.py	/^    def getFirstAssignment(self):$/;"	m	class:IssueTrackerIssue
 getForcedStylesheet	IssueTracker.py	/^    def getForcedStylesheet(self):$/;"	m	class:IssueTracker
 getFriends	Issue.py	/^    def getFriends(self, maxlength=13):$/;"	m	class:IssueTrackerIssue
 getFromname	Assignment.py	/^    def getFromname(self, issueusercheck=1):$/;"	m	class:IssueTrackerIssueAssignment
@@ -581,6 +593,8 @@ getMenuItemsList	IssueTracker.py	/^    def getMenuItemsList(self):$/;"	m	class:I
 getMiscProperty	IssueUserFolder.py	/^    def getMiscProperty(self, key, default=None):$/;"	m	class:IssueUser
 getModificationDate	IssueTracker.py	/^    def getModificationDate(self):$/;"	m	class:FilterValuer
 getModifyDate	Issue.py	/^    def getModifyDate(self):$/;"	m	class:IssueTrackerIssue
+getModifyDate	Thread.py	/^    def getModifyDate(self):$/;"	m	class:IssueTrackerDraftIssueThread
+getModifyDate	Thread.py	/^    def getModifyDate(self):$/;"	m	class:IssueTrackerIssueThread
 getModifyTimestamp	Issue.py	/^    def getModifyTimestamp(self):$/;"	m	class:IssueTrackerIssue
 getMyFollowupDrafts	IssueTracker.py	/^    def getMyFollowupDrafts(self, skip_draft_id=None, autosaved_only=False):$/;"	m	class:IssueTracker
 getMyIssueDrafts	IssueTracker.py	/^    def getMyIssueDrafts(self, skip_draft_issue_id=None, autosaved_only=False):$/;"	m	class:IssueTracker
@@ -598,6 +612,7 @@ getNiceRecentReportRuns	IssueTracker.py	/^    def getNiceRecentReportRuns(self, 
 getNiceRecentSearchTerms	IssueTracker.py	/^    def getNiceRecentSearchTerms(self, searches):$/;"	m	class:IssueTracker
 getNoFileattachments	IssueTracker.py	/^    def getNoFileattachments(self):$/;"	m	class:IssueTracker
 getNoFollowupFileattachments	IssueTracker.py	/^    def getNoFollowupFileattachments(self):$/;"	m	class:IssueTracker
+getNotifiedUsersByNotificationsAndAssignment	Issue.py	/^    def getNotifiedUsersByNotificationsAndAssignment(self):$/;"	m	class:IssueTrackerIssue
 getNotifyableGroupIds	IssueTrackerNotifyables.py	/^    def getNotifyableGroupIds(self):$/;"	m	class:Notifyables
 getNotifyableGroupIds	Notifyables.py	/^    def getNotifyableGroupIds(self):$/;"	m	class:Notifyables
 getNotifyableGroups	IssueTrackerNotifyables.py	/^    def getNotifyableGroups(self, only=None):$/;"	m	class:Notifyables
@@ -641,7 +656,7 @@ getSavedEmailfriends	IssueTracker.py	/^    def getSavedEmailfriends(self):$/;"	m
 getSavedEmailstring	IssueTracker.py	/^    def getSavedEmailstring(self):$/;"	m	class:IssueTracker
 getSavedFilterObject	IssueTracker.py	/^    def getSavedFilterObject(self, objectid):$/;"	m	class:IssueTracker
 getSavedTextFormat	IssueTracker.py	/^    def getSavedTextFormat(self, no_default=False):$/;"	m	class:IssueTracker
-getSavedUser	IssueTracker.py	/^    def getSavedUser(self, name_email='email', d=0):$/;"	m	class:IssueTracker
+getSavedUser	IssueTracker.py	/^    def getSavedUser(self, name_email='email', d=0, use_request=True):$/;"	m	class:IssueTracker
 getSavedUserEmail	IssueTracker.py	/^    def getSavedUserEmail(self):$/;"	m	class:IssueTracker
 getSavedUserName	IssueTracker.py	/^    def getSavedUserName(self):$/;"	m	class:IssueTracker
 getScripts	IssueTracker.py	/^    def getScripts(self, sort=False, reverse=False):$/;"	m	class:ReportsContainer
@@ -762,6 +777,7 @@ isAutosave	Thread.py	/^    def isAutosave(self):$/;"	m	class:IssueTrackerDraftIs
 isConfidential	Issue.py	/^    def isConfidential(self):$/;"	m	class:IssueTrackerIssue
 isCreator	Issue.py	/^    def isCreator(self):$/;"	m	class:IssueTrackerIssue
 isDispatched	Notification.py	/^    def isDispatched(self):$/;"	m	class:IssueTrackerNotification
+isEmailSent	Assignment.py	/^    def isEmailSent(self):$/;"	m	class:IssueTrackerIssueAssignment
 isFromBrother	IssueTracker.py	/^    def isFromBrother(self, issue):$/;"	m	class:IssueTracker
 isGlobalHere	IssueTrackerNotifyables.py	/^    def isGlobalHere(self):$/;"	m	class:Notifyables
 isGlobalHere	Notifyables.py	/^    def isGlobalHere(self):$/;"	m	class:Notifyables
@@ -772,6 +788,7 @@ isSubscribing	Issue.py	/^    def isSubscribing(self, email):$/;"	m	class:IssueTr
 isUsingCVS	upgrade.py	/^    def isUsingCVS(self):$/;"	m	class:VersionController
 isViewPermissionOn	IssueTracker.py	/^    def isViewPermissionOn(self):$/;"	m	class:IssueTracker
 isYou	Assignment.py	/^    def isYou(self):$/;"	m	class:IssueTrackerIssueAssignment
+isYourIssue	Issue.py	/^    def isYourIssue(self):$/;"	m	class:IssueTrackerIssue
 issueInflux	IssueTracker.py	/^    def issueInflux(self, from_date=None, till_date=None,$/;"	m	class:IssueTracker
 issueInfluxbyPeriod	IssueTracker.py	/^    def issueInfluxbyPeriod(self, period=14):$/;"	m	class:IssueTracker
 issueURLbyID	IssueTracker.py	/^    def issueURLbyID(self, issueID):$/;"	m	class:IssueTracker
@@ -875,6 +892,7 @@ rememberSavedfilterPersistently	IssueTracker.py	/^    def rememberSavedfilterPer
 rememberSavedfilterPersistently	IssueUserFolder.py	/^    def rememberSavedfilterPersistently(self, default=False):$/;"	m	class:IssueUser
 revealIssueURL	Email.py	/^    def revealIssueURL(self):$/;"	m	class:AcceptingEmail
 safeId	Utils.py	/^def safeId(id, nospaces=0):$/;"	f
+safe_hasattr	IssueTracker.py	/^def safe_hasattr(obj, name, _marker=object()):$/;"	f
 safe_html_quote	IssueTracker.py	/^    def safe_html_quote(self, text):$/;"	m	class:IssueTrackerFolderBase
 safe_html_quote	Utils.py	/^def safe_html_quote(text):$/;"	f
 safebool	Utils.py	/^def safebool(value):$/;"	f
@@ -889,6 +907,7 @@ searchWithOR	IssueTracker.py	/^    def searchWithOR(self, q=None):$/;"	m	class:I
 sendAlwaysNotify	IssueTracker.py	/^    def sendAlwaysNotify(self, issue, email=None, assignee=None):$/;"	m	class:IssueTracker
 sendEmail	IssueTracker.py	/^    def sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):$/;"	m	class:IssueTracker
 sendFollowupNotifications	Issue.py	/^    def sendFollowupNotifications(self, followupobject, email_addresses, change):$/;"	m	class:IssueTrackerIssue
+sendIssueNotifications	IssueTracker.py	/^    def sendIssueNotifications(self, issue, emails):$/;"	m	class:IssueTracker
 sendPasswordReminder	IssueUserFolder.py	/^    def sendPasswordReminder(self):$/;"	m	class:IssueUser
 sendReturnErrorEmail	IssueTracker.py	/^    def sendReturnErrorEmail(self, email, msg):$/;"	m	class:IssueTracker
 set	IssueTracker.py	/^    def set(self, key, value):$/;"	m	class:FilterValuer
@@ -896,6 +915,7 @@ setACLCookieDisplayformat	IssueTracker.py	/^    def setACLCookieDisplayformat(se
 setACLCookieEmail	IssueTracker.py	/^    def setACLCookieEmail(self, email):$/;"	m	class:IssueTracker
 setACLCookieName	IssueTracker.py	/^    def setACLCookieName(self, fromname):$/;"	m	class:IssueTracker
 setAccessKeys	IssueUserFolder.py	/^    def setAccessKeys(self, toggle):$/;"	m	class:IssueUser
+setAssignment	Issue.py	/^    def setAssignment(self, assignee, send_email=False):$/;"	m	class:IssueTrackerIssue
 setDisplayFormat	IssueUserFolder.py	/^    def setDisplayFormat(self, displayformat):$/;"	m	class:IssueUser
 setMiscProperty	IssueUserFolder.py	/^    def setMiscProperty(self, key, value):$/;"	m	class:IssueUser
 setRememberSavedfilterPersistently	IssueUserFolder.py	/^    def setRememberSavedfilterPersistently(self, toggle):$/;"	m	class:IssueUser
@@ -905,7 +925,7 @@ setUserLists	IssueUserFolder.py	/^    def setUserLists(self, lists):$/;"	m	class
 setWhichList	IssueTracker.py	/^    def setWhichList(self, what):$/;"	m	class:IssueTracker
 setWhichSubList	IssueTracker.py	/^    def setWhichSubList(self, what):$/;"	m	class:IssueTracker
 setYieldCount	ReportScript.py	/^    def setYieldCount(self, count):$/;"	m	class:ReportScript
-set_cookie	IssueTracker.py	/^    def set_cookie(self, name, value, days=365):$/;"	m	class:IssueTracker
+set_cookie	IssueTracker.py	/^    def set_cookie(self, key, value, expires=365, path='\/',$/;"	m	class:IssueTracker
 set_session	IssueTracker.py	/^    def set_session(self, name, value, globally=0):$/;"	m	class:IssueTracker
 shortDescription	Issue.py	/^    def shortDescription(self, maxlength=55, html=True):$/;"	m	class:IssueTrackerDraftIssue
 shortDescription	Thread.py	/^    def shortDescription(self, maxlength=55, html=True):$/;"	m	class:IssueTrackerDraftIssueThread
