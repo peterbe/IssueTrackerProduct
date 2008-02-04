@@ -23,7 +23,7 @@ b.key { font-size:115%; }
    >To go to <a href="Statistics">the statistics page</a>, press <b class="key">g</b> followed by <b class="key">s</b></li>
   <li tal:condition="python:here.getReportsContainer().getScripts()"
    >To list <a href="Reports">all reports</a>, press <b class="key">g</b> followed by <b class="key">r</b></li>
-  <li>To compare two issues, go to one issue first then press <b class="key">c</b></li>
+  <li>To compare two issues, go to one issue first then press <b class="key">g</b> followed by <b class="key">d</b></li>
 </ul>
 <br />
 

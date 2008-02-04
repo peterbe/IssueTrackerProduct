@@ -45,7 +45,23 @@ function body_onkeypress(evt){
         } else if (s == 's') { 
             location.href=burl+'/Statistics'; return false;
         </dtml-if>
-        
+	     
+	} else if (s == 'd') {
+	   // Compare!
+	   if (!$('#issuedata').size()) {
+	      alert("Go to the issue first to compare");
+	      return false;
+	   }
+	   var issue = prompt("Compare issues - Enter issue number:","");
+	   if (issue !== null) {
+	      var issueid = __getIssueID(issue);
+	      if (issueid) 
+		location.href=location.href.split('?')[0]+'?compareTo='+issueid;
+	      else
+		alert("Invalid Issue ID");
+	   }
+	   return false;	     
+	   
         }       
         
     } else if (s == '#') { // 51 = #
@@ -60,20 +76,6 @@ function body_onkeypress(evt){
            }
          }
 
-    } else if (s == 'c') { // compare
-       if (!$('#issuedata').size()) {
-         alert("Go to the issue first to compare");
-         return false;
-       }
-       var issue = prompt("Compare issues - Enter issue number:","");
-       if (issue !== null) {
-         var issueid = __getIssueID(issue);
-         if (issueid) 
-           location.href=location.href.split('?')[0]+'?compareTo='+issueid;
-         else
-	   alert("Invalid Issue ID");
-       }
-       return false;
 
     } else if (s=='n') {
 	if (all_ilinks.length>1) {

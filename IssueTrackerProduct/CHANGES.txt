@@ -1,4 +1,8 @@
-- 
+-
+
+    Bug fixed: Keyboard shortcut for comparing issues changed from 'c'
+    to 'g'+'d' since the 'c' cause interference with Ctrl-C for copying.
+    (Real#0697, thanks Jesse Perry)
 
     New feature: Skipped notifications when not dispatching on submit.
     Means that if you let a cronjob send the notifications instead of

@@ -2852,6 +2852,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         request = self.REQUEST
         stack = request['TraversalRequestNameStack']
         popped = []
+        
+        # XXX this works but I'm still not sure I want to do it
+        #print "BEFORE", stack
+        #if stack and self._isUsingBTreeFolder() and BTREEFOLDER2_ID not in stack:
+        #    stack.append(BTREEFOLDER2_ID)
+        #print "AFTER", stack
+        #print
 
         _special = 'REQUEST'
         # things to pop out
@@ -2913,7 +2920,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     popped.append(stack_item)
 
             request.set('popped',popped)
-
 
 
     ## General for file attachments to issues
@@ -11753,6 +11759,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 _issue_url = _issue.absolute_url()
                 if self.REQUEST.QUERY_STRING:
                     _issue_url += "?%s"%self.REQUEST.QUERY_STRING
+                print "STOP", _issue_url
                 self.REQUEST.RESPONSE.redirect(_issue_url, lock=1)
                 return [[_issue.absolute_url(), _issue.getTitle()]]
             
@@ -11767,6 +11774,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if self.REQUEST.QUERY_STRING:
                     _issue_url += "?%s"%self.REQUEST.QUERY_STRING
                 self.REQUEST.RESPONSE.redirect(_issue_url, lock=1)
+                
                 return [[_issue.absolute_url(), _issue.getTitle()]]
             
         case_corrections = ('check4MailIssues','About.html')
