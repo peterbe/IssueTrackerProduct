@@ -79,24 +79,23 @@
     <a tal:attributes="href string:http://www.issuetrackerproduct.com?version=${here/getIssueTrackerVersion}">IssueTrackerProduct.com</a>  &#183;
     <a tal:attributes="href string:${here/getRootRelativeURL}/About.html" class="foot" >About</a>
     <br />&nbsp;
-  </div><!--/foot-->
+</div><!--/foot-->
   
 
 
-<span tal:condition="here/doDebug" tal:omit-tag="">
-<div id="dbgout" style="font-family:monospace,courier,sans-serif;font-size:0.7em;"></div>
-<!--<textarea id="dbgout" cols="117" rows="10" style="font-family:monospace,courier,sans-serif;font-size:0.7em;"></textarea>-->
-<a href="http://validator.w3.org/check/referer?ss=1">Validate</a>, <a href="http://feedvalidator.org/check.cgi?url=http%3A%2F%2Fhome.peterbe.com%3A8088%2Ftest%2FnewT%2Frss.xml">RSS feed</a><br />
-<b>SESSION</b> <div tal:content="structure request/SESSION"></div><br/>
-<b>COOKIES</b> <div tal:content="structure request/cookies"></div>
-<span tal:condition="here/getIssueUser">
-<b>USER</b> <div tal:content="structure python:here.getIssueUser().debugInfo()"></div>
-</span>
-<span tal:condition="here/getZopeUser">
-<b>ZOPEUSER</b> <div tal:content="structure python:here.getZopeUser().getRoles()"></div>
-</span>
+<tal:block tal:condition="python:0 and here.doDebug()">
+  <div id="dbgout" style="font-family:monospace,courier,sans-serif;font-size:0.7em;"></div>
+  <a href="http://validator.w3.org/check/referer?ss=1">Validate</a>, <a href="http://feedvalidator.org/check.cgi?url=http%3A%2F%2Fhome.peterbe.com%3A8088%2Ftest%2FnewT%2Frss.xml">RSS feed</a><br />
+  <b>SESSION</b> <div tal:content="structure request/SESSION"></div><br/>
+  <b>COOKIES</b> <div tal:content="structure request/cookies"></div>
+  <span tal:condition="here/getIssueUser">
+    <b>USER</b> <div tal:content="structure python:here.getIssueUser().debugInfo()"></div>
+  </span>
+  <span tal:condition="here/getZopeUser">
+    <b>ZOPEUSER</b> <div tal:content="structure python:here.getZopeUser().getRoles()"></div>
+  </span>
 
-</span>
+</tal:block>
 
 </body>
 </html>

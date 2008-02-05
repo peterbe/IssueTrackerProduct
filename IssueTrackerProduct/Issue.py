@@ -261,6 +261,17 @@ class IssueTrackerIssue(IssueTracker):
             identifier = ','.join(identifier)
             if identifier == self.getACLAdder():
                 return True
+            else:
+                # if you're logged in as an issue user then how could
+                # the issue have been yours if your identifier 
+                # is not the same.
+                # If this `return False` wasn't here a logged in user
+                # would be able to change his email address and then see
+                # other peoples issues.
+                # However, as you'll see in the comment a few lines below
+                # it's also not possible to return True here if the issue
+                # was added by an authenticated user.
+                return False
             
         zopeuser = self.getZopeUser()
         if zopeuser:
@@ -269,9 +280,15 @@ class IssueTrackerIssue(IssueTracker):
             acl_user = path+','+name
             if acl_user == self.getACLAdder():
                 return True
+            else:
+                return False
             
-        if self.getEmail() == self.getSavedUser('email'):
-            return True
+        # the last remaining chance is if the issue was added by someone
+        # who's not logged in but has the same email address.
+        if not self.getACLAdder():
+            
+            if self.getEmail() == self.getSavedUser('email'):
+                return True
         
         return False
         

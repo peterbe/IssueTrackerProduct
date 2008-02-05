@@ -1,5 +1,9 @@
 -
 
+    Bug fixed: Confidential issues could be seen by logged in people
+    by changing their email address to an email address of someone else.
+    (Real#0696, thanks NiBar)
+
     Bug fixed: Keyboard shortcut for comparing issues changed from 'c'
     to 'g'+'d' since the 'c' cause interference with Ctrl-C for copying.
     (Real#0697, thanks Jesse Perry)
