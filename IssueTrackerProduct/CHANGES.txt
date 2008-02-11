@@ -1,5 +1,9 @@
 -
 
+    New feature: Ability to hook up pre- and post scripts that are
+    called before and after issues are submitted.
+    http://www.issuetrackerproduct.com/Documentation/How-Tos/pre-post-SubmitIssue
+
     Bug fixed: Confidential issues could be seen by logged in people
     by changing their email address to an email address of someone else.
     (Real#0696, thanks NiBar)

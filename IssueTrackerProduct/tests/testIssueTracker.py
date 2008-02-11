@@ -20,6 +20,7 @@ ZopeTestCase.installProduct('MailHost')
 ZopeTestCase.installProduct('ZCatalog')
 ZopeTestCase.installProduct('ZCTextIndex')
 ZopeTestCase.installProduct('SiteErrorLog')
+ZopeTestCase.installProduct('PythonScripts')
 ZopeTestCase.installProduct('IssueTrackerProduct')
 
 from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
@@ -44,8 +45,43 @@ ZopeTestCase.utils.setupCoreSessions(app)
         
 # Close ZODB connection
 ZopeTestCase.close(app)
-        
+
+#------------------------------------------------------------------------------
+pre_submitissue_script_src = """
+## Script (Python) "pre_SubmitIssue"
+##parameters=
+##title=
+##
+request = context.REQUEST
+title = request.get('title',u'')
+if title.lower().startswith(u'a'):
+    return {'title':u'Subject line must NOT start with an A'}
+"""
+
+
+post_submitissue_script_src = """
+## Script (Python) "post_SubmitIssue"
+##parameters=issue
+##title=
+##
+
+if 'Security' in issue.getSections():
+   # increase the urgency by one notch
+
+   urgency = issue.getUrgency()
+
+   options = issue.getUrgencyOptions() # acquired 
+
+   try:
+       urgency = options[options.index(urgency)+1]
+   except IndexError:
+       # was already at the topmost
+       return
+   issue.editIssueDetails(urgency=urgency)
+   
+"""
     
+
 #------------------------------------------------------------------------------
 
 
@@ -461,10 +497,94 @@ class IssueTrackerTestCase(TestBase):
         self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'rss.xml')
         self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'rdf.xml')
         
+
+        
+    def test_preSubmitIssue_hook(self):
+        """ test adding an issue with a script hook called 'pre_SubmitIssue()' """
+        tracker = self.folder.tracker
+        tracker.dispatch_on_submit = False # no annoying emails on stdout
+        
+        adder = tracker.manage_addProduct['PythonScripts'].manage_addPythonScript
+        adder('pre_SubmitIssue')
+        script = getattr(tracker, 'pre_SubmitIssue')
+        script.write(pre_submitissue_script_src)
+        
+        # With this hook it won't be possible to add a issue where
+        # the subject line starts with the letter a. (silly, yes)
+        
+        request = self.app.REQUEST
+        request.set('title', u'A TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        tracker.SubmitIssue(request)
+        
+        self.assertEqual(len(tracker.getIssueObjects()), 0)
+
+        request.set('title', u'Some TITLE')
+
+        tracker.SubmitIssue(request)
+        
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+
         
         
+    def test_postSubmitIssue_hook(self):
+        """ test adding an issue with a script hook called 'post_SubmitIssue()' """
+        tracker = self.folder.tracker
+        tracker.dispatch_on_submit = False # no annoying emails on stdout
+        tracker.can_add_new_sections = True
         
-    
+        # add an issue user folder
+        # Since manage_addIssueUserFolder() needs to add the two extra roles
+        # we have to do that first because manage_addIssueUserFolder() isn't
+        # allowed to it because it's not a POST request.
+        tracker._addRole(IssueTrackerUserRole)
+        tracker._addRole(IssueTrackerManagerRole)
+        tracker.manage_addProduct['IssueTrackerProduct']\
+          .manage_addIssueUserFolder(keep_usernames=True)
+        tracker.acl_users.userFolderAddUser("user", "secret", [IssueTrackerManagerRole,'Manager'], [],
+                                            email="user@test.com",
+                                            fullname="User Name")
+        
+        
+        adder = tracker.manage_addProduct['PythonScripts'].manage_addPythonScript
+        adder('post_SubmitIssue')
+        script = getattr(tracker, 'post_SubmitIssue')
+        script.write(post_submitissue_script_src)
+        
+        # With this hook it won't be possible to add a issue where
+        # the subject line starts with the letter a. (silly, yes)
+        
+        request = self.app.REQUEST
+        request.set('title', u'A TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('newsection', 'Security')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+
+        uf = tracker.acl_users
+        assert uf.meta_type == ISSUEUSERFOLDER_METATYPE
+        user = uf.getUserById('user')
+        user = user.__of__(uf)
+        newSecurityManager(None, user)
+
+        assert getSecurityManager().getUser().getUserName() == 'user'
+        
+        print getSecurityManager().getUser().getRoles()
+        
+        tracker.SubmitIssue(request)
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+        
+        issue = tracker.getIssueObjects()[0]
+        print issue.getSections()
+
+        
         
 def test_suite():
     from unittest import TestSuite, makeSuite

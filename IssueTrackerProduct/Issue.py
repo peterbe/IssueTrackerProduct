@@ -1280,7 +1280,7 @@ class IssueTrackerIssue(IssueTracker):
             self.sections = sections
             
         # Type must be recognized
-        if type is not None: ## hate this variable name!
+        if type is not None: ## I hate this variable name!
             assert type in self.getTypeOptions(), "Unrecognized issue type"
             
             # set it 

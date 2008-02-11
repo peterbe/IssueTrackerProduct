@@ -15,7 +15,7 @@
 <div metal:fill-slot="body">
 
 <span tal:condition="python:options.get('SubmitError')"
-      tal:replace="structure here/show_submissionerror_message">
+      tal:replace="structure python:here.show_submissionerror_message(SubmitError=options.get('SubmitError'))">
 </span>
 
 

@@ -3380,8 +3380,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     SubmitError['captcha_numbers'] = m
                 else:
                     self._rememberProvenNotSpambot()
-            
-            
+
+                    
+        # Look for a script or something that plugs in to the IssueTrackerProduct
+        # if you in your customization want to validate your own things
+        if safe_hasattr(self, 'pre_SubmitIssue'):
+            script = getattr(self, 'pre_SubmitIssue')
+            result = script()
+            if isinstance(result, dict):
+                SubmitError.update(result)
 
         if SubmitError:
             if request.get('previewissue'):
@@ -3519,7 +3526,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # when adding a new section, don't do this
             self._moveUpSections(sections)
   
-        
+        # Look for a script to call after the creation of the issue
+        if safe_hasattr(self, 'post_SubmitIssue'):
+            print "roles:", getSecurityManager().getUser().getRoles()
+            script = getattr(self, 'post_SubmitIssue')
+            script(issue)
             
         # tell the people who wants to know
         if 1: #try:
@@ -4699,11 +4710,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         request = self.REQUEST
 
         if name_email =='email':
-            s='email'
-            cookie=self.getCookiekey('email')
+            s = 'email'
+            cookie = self.getCookiekey('email')
         else:
-            s='fromname'
-            cookie=self.getCookiekey('name')
+            s = 'fromname'
+            cookie = self.getCookiekey('name')
             
         issueuser = self.getIssueUser()
         if issueuser:
@@ -4722,7 +4733,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             acl_username = None
             
         if use_request and request.get(s):
-            return request[s]
+            return unicodify(request[s])
         elif self.get_cookie(cookie):
             if s =='fromname':
                 return unicodify(self.get_cookie(cookie))
@@ -10973,6 +10984,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         if prevent_preview:
             REQUEST.set('previewissue', False)
+            
 
         __saver = self._saveDraftIssue
         if self.SaveDrafts() and \

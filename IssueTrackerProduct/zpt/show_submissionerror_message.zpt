@@ -6,5 +6,24 @@
 <p>There was a slight error with your submission, please try to amend the 
 missing pieces.</p>
 
+<div tal:define="error options/SubmitError|nothing"
+     tal:condition="error">
+  
+  <div tal:define="standard_error_keys python:['title','fromname','email','description','fileattachment','captcha_numbers'];
+                   non_standard_error_keys python:[x for x in error.keys() if x not in standard_error_keys]"
+       tal:condition="non_standard_error_keys">
+  <p>The following items submission errors were found:</p>
+  <ul>
+    <li tal:repeat="key non_standard_error_keys">
+      <span tal:condition="python:error.get(key)"
+            tal:content="python:error.get(key)"></span>
+      <span tal:condition="not:python:error.get(key)"
+            tal:content="python:key.capitalize()"></span>            
+    </li>
+  </ul>
+  </div>
+
+</div>
+
 </div>
 
