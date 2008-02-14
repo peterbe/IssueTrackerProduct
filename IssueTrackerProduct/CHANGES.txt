@@ -1,4 +1,5 @@
 -
+    New feature: File attachment links have a rel="nofollow" now.
 
     New feature: Ability to hook up pre- and post scripts that are
     called before and after issues are submitted.

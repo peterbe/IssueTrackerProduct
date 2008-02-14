@@ -3115,7 +3115,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             url = self.relative_url(url)
             size = self.ShowFilesize(file.getSize())
             alt = "File size: %s"%size
-            href = '<a href="%s" title="%s">'%(url, alt)
+            href = '<a href="%s" rel="nofollow" title="%s">'%(url, alt)
             _html = '%s<img src="%s" alt="%s" title="%s" border="0" '
             _html += 'class="fileatt" />'
             thumbid = 'thumbnail--%s'%file.getId()
