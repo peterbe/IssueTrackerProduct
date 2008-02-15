@@ -1,4 +1,8 @@
 -
+
+    Bug fixed: Download of dodgy emails without a To: part now skipped
+    (Real#0700, thanks Jesse Perry)
+
     New feature: File attachment links have a rel="nofollow" now.
 
     New feature: Ability to hook up pre- and post scripts that are

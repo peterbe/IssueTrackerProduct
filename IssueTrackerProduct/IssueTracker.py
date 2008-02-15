@@ -9280,7 +9280,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 e['to'] = "%s, %s"%(e.get('to',''), e['cc'])
             # check whom it's to
             extractor = self.preParseEmailString
-            tolist = extractor(e['to'], aslist=1, allnotifyables=0)
+            try:
+                to = e['to']
+            except KeyError:
+                # emails that don't have a To: part are dodgy
+                logger.warn("One email is missing To: part (subject=%r, from=%s)" % \
+                            (e.get('subject','*no subject*'), e.get('from','*no from*')))
+                continue
+                
+            tolist = extractor(to, aslist=1, allnotifyables=0)
             
             tolist_simplified = [ss(x) for x in tolist]
             intersection = []
