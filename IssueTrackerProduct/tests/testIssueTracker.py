@@ -576,14 +576,37 @@ class IssueTrackerTestCase(TestBase):
 
         assert getSecurityManager().getUser().getUserName() == 'user'
         
-        print getSecurityManager().getUser().getRoles()
+        #print getSecurityManager().getUser().getRoles()
+        #tracker.SubmitIssue(request)
+        #self.assertEqual(len(tracker.getIssueObjects()), 1)
+        #issue = tracker.getIssueObjects()[0]
+
+
+    def test_getModifyTimestamp(self):
+        """ test issuetracker.getModifyTimestamp() """
+        tracker = self.folder.tracker
+        
+        # with no issues, the getModifyTimestamp() should be the 
+        # same as the issuetrackers' bobobase_modification_time()
+        self.assertEqual(int(tracker.bobobase_modification_time()), 
+                         tracker.getModifyTimestamp())
+                         
+        # if we add an issue, the issuetrackers' getModifyTimestamp()
+        # should be that of the last added issue.
+        request = self.app.REQUEST
+        request.set('title', u'TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
         
         tracker.SubmitIssue(request)
-        self.assertEqual(len(tracker.getIssueObjects()), 1)
         
         issue = tracker.getIssueObjects()[0]
-        print issue.getSections()
-
+        self.assertEqual(issue.getModifyTimestamp(), tracker.getModifyTimestamp())
+        
+        
         
         
 def test_suite():

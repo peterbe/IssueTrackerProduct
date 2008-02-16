@@ -1,5 +1,8 @@
 -
 
+    New feature: List of issues on home page periodically refreshed
+    with AJAX.
+
     Bug fixed: Download of dodgy emails without a To: part now skipped
     (Real#0700, thanks Jesse Perry)
 

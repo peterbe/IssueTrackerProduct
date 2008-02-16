@@ -458,6 +458,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return title """
         return self.title
 
+    
+    security.declareProtected('View', 'getModifyTimestamp')
+    def getModifyTimestamp(self):
+        """ return the modify date of the issuetracker as a whole as 
+        an integer timestamp. The latest modify date is the issue with 
+        the latest modify date. """
+        issues = self.getIssueObjects()
+        issues.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
+        if issues:
+            return issues[0].getModifyTimestamp()
+        return int(self.bobobase_modification_time())
+    
+
     def relative_url(self, url=None):
         """ shorter than absolute_url """
         if url:
@@ -12340,7 +12353,8 @@ zpts = ('zpt/StandardHeader',
         'zpt/Your-next-action-issues',
         ('zpt/rdf', 'rdf_template'),
         'zpt/show_user_achievements',
-        
+        'zpt/show_outlook',
+
         )
 
 #addTemplates2Class(IssueTracker, zpts, extension='zpt')
@@ -12371,6 +12385,8 @@ dtmls = ({'f':'dtml/screen.css', 'optimize':OPTIMIZE and 'css'},
           'optimize':OPTIMIZE and 'js', 
           },
          {'f':'dtml/followup.js', 'optimize':OPTIMIZE and 'js', 
+          },
+         {'f':'dtml/home.js', 'optimize':OPTIMIZE and 'js',
           },
 
          ('dtml/PropertiesStatusScores', 'manage_PropertiesStatusScores'),
