@@ -1,0 +1,67 @@
+<div id="outlook" tal:define="global at_least_one_found python:0">
+
+
+<dl  tal:define="days_filter python:30*2;
+                 batch_limit context/getOutlookBatchSize;
+                 dummy python:request.set('keep_sortorder',0);
+                 dummy python:request.set('sortorder', 'modifydate');
+                 dummy python:request.set('reverse',0);
+                 filteredissues python:here.ListIssuesFiltered(skip_filter=1)[:batch_limit];
+		 today context/ZopeTime;
+                 todaystrf nocall:today/strftime;
+                 daylabels python:here.getOutlookDaylabels(filteredissues);
+                 ">
+    <tal:repeat repeat="issue filteredissues">
+    <tal:cutoff define="age python:int(today-issue.getModifyDate())"
+                condition="python:age < days_filter">
+      <tal:item define="global at_least_one_found python:1" />
+
+      <dt tal:define="label python:daylabels.get(issue.getId())" tal:condition="label" 
+          tal:content="label" class="daylabel"></dt>
+      
+      <dd tal:define="threads issue/ListThreads"
+        ><span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
+         <b><a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
+               tal:attributes="href issue/relative_url_path;
+                               title python:test(diff, diff)"
+	         tal:content="structure python:context.displayBriefTitle(issue.getTitle())"
+		 class="ilink"
+		 ></a></b>&nbsp;<img src="/misc_/IssueTrackerProduct/paperclip.gif"
+                  tal:define="noattachments issue/countFileattachments"
+                  tal:condition="noattachments"
+                  tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                  <tal:test tal:condition="python:here.isFromBrother(issue)">
+                   (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+                       tal:attributes="href brother/absolute_url_path" class="brother"
+                       tal:content="brother/getTitle"></a>)
+                  </tal:test>                              
+                 - <b class="status" tal:content="python:issue.getStatus().capitalize()"></b><br />
+	    <tal:threads condition="threads">
+	        <a tal:define="anchor python:len(threads)"
+		   tal:attributes="href string:${issue/relative_url_path}#i${anchor}"
+		   tal:content="structure python:here.colorizeThreadChange(threads[-1].getTitle())"></a>
+		by: <a tal:replace="structure python:here.ShowNameEmail(threads[-1].getFromname(),threads[-1].getEmail())"></a><br />
+		
+	    </tal:threads>
+	    
+	    <tal:new condition="not:threads">
+ 	      Submitted by: <a tal:replace="structure python:here.ShowNameEmail(issue.getFromname(), issue.getEmail())"></a><br />
+		
+	    </tal:new>	    
+      </dd>
+    </tal:cutoff>
+    </tal:repeat>
+    
+<p tal:condition="not:at_least_one_found">    
+<em tal:condition="here/hasAnyIssues">
+No activity in the last <br tal:replace="python:days_filter/7" /> weeks</em>
+
+<em tal:condition="not:here/hasAnyIssues">
+No issues added yet</em>
+</p>
+
+
+</dl>
+
+
+</div>
