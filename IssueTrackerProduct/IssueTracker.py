@@ -5436,10 +5436,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 msg = u"" #%DateTime().strftime(self.display_date)
                 msg += u"You have been assigned to an issue by %s" % by_who
                 
-                msg += u' with title: "%s"\n' % self.getTitle()
+                msg += u' with title: "%s"\n' % issue.getTitle()
                 msg += u"The issue is currently %s.\n\n" % issue.status.capitalize()
                 
-                msg += u"The issue can be found at\n%s\n\n" % self.absolute_url()
+                msg += u"The issue can be found at\n%s\n\n" % issue.absolute_url()
         
                 signature = self.showSignature()
                 if signature:
