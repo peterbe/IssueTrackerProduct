@@ -1,5 +1,7 @@
 -
 
+    Bug fixed: Name hidden wasn't hidden on home page.
+
     New feature: List of issues on home page periodically refreshed
     with AJAX.
 

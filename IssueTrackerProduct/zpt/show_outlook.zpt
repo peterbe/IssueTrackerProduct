@@ -30,6 +30,9 @@
                   tal:define="noattachments issue/countFileattachments"
                   tal:condition="noattachments"
                   tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                  <tal:confidential condition="issue/isConfidential">
+                  (<acronym title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym>)
+                  </tal:confidential>
                   <tal:test tal:condition="python:here.isFromBrother(issue)">
                    (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
                        tal:attributes="href brother/absolute_url_path" class="brother"
@@ -45,7 +48,7 @@
 	    </tal:threads>
 	    
 	    <tal:new condition="not:threads">
- 	      Submitted by: <a tal:replace="structure python:here.ShowNameEmail(issue.getFromname(), issue.getEmail())"></a><br />
+ 	      Submitted by: <a tal:replace="structure python:here.ShowNameEmail(issue.getFromname(), issue.getEmail(), hideme=issue.isHidden())"></a><br />
 		
 	    </tal:new>	    
       </dd>
