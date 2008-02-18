@@ -37,7 +37,7 @@
         tal:attributes="href python:here.BatchedQueryString({'start':p.first})"
         ><b>&lt; <br tal:replace="python:test(p.first, 'Previous','First')"/> <span tal:replace="p/length">n</span></b></a>
     &nbsp;
-    <a tal:condition="not:python:request.has_key('show')" 
+    <a tal:condition="python:here.AllowShowAll() and not request.has_key('show')" 
     tal:attributes="href python:here.BatchedQueryString('all')">Show them all</a>
     &nbsp;
     <a tal:define="p batch/next" tal:condition="p"

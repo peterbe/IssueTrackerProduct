@@ -394,6 +394,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.default_urgency    = DEFAULT_URGENCY
         self.manager_roles      = DEFAULT_MANAGER_ROLES
         self.default_batch_size = DEFAULT_DEFAULT_BATCH_SIZE
+        self.allow_show_all     = DEFAULT_ALLOW_SHOW_ALL
         self.issueprefix        = DEFAULT_ISSUEPREFIX
         self.no_fileattachments = DEFAULT_NO_FILEATTACHMENTS
         self.no_followup_fileattachments = DEFAULT_NO_FOLLOWUP_FILEATTACHMENTS
@@ -668,6 +669,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return use_estimated_time """
         default = DEFAULT_USE_ESTIMATED_TIME
         return getattr(self, 'use_estimated_time', default)
+    
+    def AllowShowAll(self):
+        """ return allow_show_all """
+        default = DEFAULT_ALLOW_SHOW_ALL
+        return getattr(self, 'allow_show_all', default)
     
     def UseActualTime(self):
         """ return use_actual_time """
@@ -1201,6 +1207,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         ints = ['default_batch_size','randomid_length','no_fileattachments',
                 'no_followup_fileattachments', 'outlook_batch_size']
         booleans = ['dispatch_on_submit','allow_issueattrchange','stop_cache',
+                    'allow_show_all',
                     'allow_subscription',
                     'use_tellafriend',
                     'use_tellafriend_for_anonymous',
@@ -7770,7 +7777,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def getBatchSize(self, default=None, factor=None):
         """ return the batchsize value """
         request = self.REQUEST
-        if request.get('show','')=='all':
+        if request.get('show','')=='all' and self.AllowShowAll():
             if factor:
                 return int(1000*factor)
             else:

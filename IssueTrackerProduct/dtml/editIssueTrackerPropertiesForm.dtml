@@ -1092,6 +1092,24 @@ issue.
 <tr>
   <td align="left" valign="top">
   <div class="form-label">
+  <label for="cb-allow_show_all">Allow 'Show all'</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+      <input type="checkbox" name="allow_show_all:boolean" value="1"
+       <dtml-if "AllowShowAll()">checked="checked"</dtml-if> />
+  </td>
+  <td align="left" valign="top">
+  <p>If checked, on the List Issues and Complete List you can click to list all the first 1000.<br />
+  This can get really really slow on a high traffic issue tracker and its slow loading time can cause Zope to 
+  run high in CPU and memory.
+  </p>
+  </td> 
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
   <label for="cb-plugin_paths">Plugin paths</label>
   </div>
   </td>

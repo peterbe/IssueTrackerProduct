@@ -1,5 +1,9 @@
 -
 
+    New feature: Ability to disable "Show them all" as a batching
+    option. Very useful when there are many issues because showing this
+    page will slow your Zope down.
+
     Bug fixed: Name hidden wasn't hidden on home page.
 
     New feature: List of issues on home page periodically refreshed
