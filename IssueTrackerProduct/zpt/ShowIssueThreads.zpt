@@ -16,7 +16,7 @@
 	<b tal:content="structure python:here.colorizeThreadChange(thread.getTitle())">
 		Title</b>
 
-    <a tal:condition="thread/hasEmailOriginal" 
+    <a tal:condition="thread/hasEmailOriginal" rel="nofollow"
        tal:attributes="href string:${thread/getId}/ShowOriginalEmail"><img tal:condition="python:thread.getSubmissionType()=='email'"
      alt="Followup submitted via email" width="16" height="16" border="0"
      src="/misc_/IssueTrackerProduct/emailicon.gif" /></a>

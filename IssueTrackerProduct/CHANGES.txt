@@ -1,4 +1,6 @@
 -
+    Bug fixed: Filter switcher ("Do only show"/"Do not show") had a
+    Javascript error on a missing variable called 'label'.
 
     New feature: Ability to disable "Show them all" as a batching
     option. Very useful when there are many issues because showing this

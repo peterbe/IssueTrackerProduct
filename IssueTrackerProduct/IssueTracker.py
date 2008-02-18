@@ -4297,8 +4297,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if batchsize is None:
             batchsize = self.default_batch_size
         else:
-            print "BATCHSIZE", repr(batchsize)
             batchsize = int(batchsize)
+            if self.AllowShowAll():
+                assert batchsize <= 1000, "Too big batch size"
+            else:
+                assert batchsize <= self.default_batch_size, "Too big batch size"
 
         # manually set sortorder
         request.set('keep_sortorder',False)

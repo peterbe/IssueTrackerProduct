@@ -1,40 +1,24 @@
 <script type="text/javascript"><!--
 function swapFilterLogic() {
-  //var link = $('changefilterlogic');
-  //var label = $('currentfilterlogic');
   var hidden = document.filter.Filterlogic
   var was = hidden.value;
   if (was=='show') {
     hidden.value='block';
     $('#currentfilterlogic').html('Do not show');
-    //label.innerHTML='Do not show';
     $('#changefilterlogic').attr("href", function(){
       return this.href.replace('=show','=block');
     }).html('Do only show...');
-    //link.href=link.href.replace('=show','=block');
-    //link.innerHTML='Do only show...';
   } else {
     hidden.value='show';
-    label.innerHTML='Do only show';
     $('#currentfilterlogic').html('Do only show');
     $('#changefilterlogic').attr("href", function(){
       return this.href.replace('=block','=show');
     }).html('Do not show...');
-    //link.href=link.href.replace('=block','=show');
-    //link.innerHTML='Do not show...';
   }
 }
 
 function _doload(url, d, outid) {
-  $($.id(outid)).load(url + '?' +d)
-  // do the actual ajax stuff
-  //var a = new sack(url);
-  //a.AjaxFailedAlert = null;
-  //a.encodeURIString = false;
-  //a.runAJAX(d);
-  //a.onCompletion = function() { $(outid).innerHTML=a.response; };
-  //if (a.failed) return true;
-  
+  $($.id(outid)).load(url + '?' +d);
   return false;
 }
 

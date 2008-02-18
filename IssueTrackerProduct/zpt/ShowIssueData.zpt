@@ -7,7 +7,7 @@
   <div class="ihead">
     <h3 tal:condition="not:show_many"><span 
       tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id"></span><br tal:replace="structure here/showTitle" />
-    &nbsp;<a tal:condition="here/hasEmailOriginal" href="ShowOriginalEmail"><img tal:condition="python:here.getSubmissionType()=='email'"
+    &nbsp;<a tal:condition="here/hasEmailOriginal" href="ShowOriginalEmail" rel="nofollow"><img tal:condition="python:here.getSubmissionType()=='email'"
      alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16" border="0"
      src="/misc_/IssueTrackerProduct/emailicon.gif" /></a>
      <img tal:condition="python:here.getSubmissionType()=='email' and not here.hasEmailOriginal()"
