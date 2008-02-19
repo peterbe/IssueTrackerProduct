@@ -122,3 +122,14 @@ function softsubmit(action) {
     document.form_followup.submit();
   }
 }
+
+
+function showAssignmentForm() {
+   $('#assignment-form-rest').show(300);
+   $('#assignee').css('color','#000');
+}
+
+function hideAssignmentForm() {
+   $('#assignment-form-rest').hide(300);
+   $('#assignee').css('color','#666');
+}

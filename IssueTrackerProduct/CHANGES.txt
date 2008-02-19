@@ -1,4 +1,7 @@
 -
+
+    New feature: Change assignment form expands automatically on focus.
+
     Bug fixed: Filter switcher ("Do only show"/"Do not show") had a
     Javascript error on a missing variable called 'label'.
 

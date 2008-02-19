@@ -185,18 +185,21 @@
      
      <form action="changeAssignment" tal:define="all_users python:here.getAllIssueUsers(exclude_assignee=assignment.getACLAssignee())" method="post" name="changeassignment" 
                                      tal:condition="python:all_users and not show_many">
-	<select name="assignee" style="color:#666"
+	<select name="assignee" style="color:#666" id="assignee"
          tal:define="issueuser here/getIssueUser;selected python:request.get('assignee','');
-                     youare python:here.getWhoYouAre(issueuser)" tabindex="30"
-             tal:attributes="onchange string:if(this.options[this.selectedIndex].value){location.href='changeAssignment?assignee='+this.options[this.selectedIndex].value+'&send_email='+document.changeassignment.send_email.checked}">
+                     youare python:here.getWhoYouAre(issueuser)" tabindex="30" onfocus="showAssignmentForm()" onblur="if(!this.options[this.selectedIndex].value){hideAssignmentForm()}"
+             onchange="if(!this.options[this.selectedIndex].value){hideAssignmentForm()}else{showAssignmentForm()}">
              <option value="" style="color:#666">Change assignment...</option>
 				<option tal:repeat="user all_users" style="color:#000"
                  tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected"
                  tal:content="python:user['user'].getFullname()">
 				Statuses</option>
 	</select>
-        <input type="checkbox" name="send_email" checked="checked" value="1" />Send notification to new assignee
-        <noscript><input type="submit" value="Change" /></noscript>
+	<div id="assignment-form-rest" style="display:none">
+        <input type="checkbox" name="send_email" id="send_email" checked="checked" value="1" /><label for="send_email">Send notification to new assignee</label>
+	<input type="submit" value="Change" />
+	<input type="button" class="smallbutton" value="Cancel" onclick="hideAssignmentForm();$('#assignee')[0].selectedIndex=0" />
+	</div>
       </form>
     </tal:block>
     </div>
