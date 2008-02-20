@@ -1,5 +1,11 @@
 -
 
+    Bug fixed: Possible UnicodeDecodeError if using normal acl_users
+    user folder with a unicode fromname.
+
+    New feature: File attachments initially hidden and covered with a
+    Javascript opener.
+
     New feature: Change assignment form expands automatically on focus.
 
     Bug fixed: Filter switcher ("Do only show"/"Do not show") had a

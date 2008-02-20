@@ -3548,7 +3548,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
   
         # Look for a script to call after the creation of the issue
         if safe_hasattr(self, 'post_SubmitIssue'):
-            print "roles:", getSecurityManager().getUser().getRoles()
             script = getattr(self, 'post_SubmitIssue')
             script(issue)
             
@@ -4750,10 +4749,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if issueuser_name:
                     return issueuser_name
                 
+                
         # now we know what we're looking for
         acl_username = getSecurityManager().getUser().getUserName()
         if acl_username.lower().replace(' ','') == 'anonymoususer':
             acl_username = None
+            
             
         if use_request and request.get(s):
             return unicodify(request[s])
@@ -4764,11 +4765,22 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 return self.get_cookie(cookie)
         elif acl_username:
             r = self._getACLCookie(acl_username, s)
-            if r is None:
-                r = ""
-            return r
+            
+            if name_email == 'email':
+                if r is None:
+                    r = ""
+                else:
+                    return r
+            else:
+                if r is None:
+                    return u""
+                else:
+                    return unicodify(r)
         else:
-            return ""
+            if name_email == 'email':
+                return ""
+            else:
+                return u""
 
     def getSavedUserName(self):
         """ wrap getSavedUser() """
@@ -5853,7 +5865,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                       nolink=0, encode=0, angle_brackets=1):
         """ Show name and email depending on certain criterias """
         out = ''
-
         if not isinstance(fromname, basestring) and hasattr(fromname, 'meta_type'):
             # This is a very special case. The fromname isn't a name but instead
             # an issue user object. Enabling for this strange parameter is why
@@ -11802,7 +11813,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 _issue_url = _issue.absolute_url()
                 if self.REQUEST.QUERY_STRING:
                     _issue_url += "?%s"%self.REQUEST.QUERY_STRING
-                print "STOP", _issue_url
                 self.REQUEST.RESPONSE.redirect(_issue_url, lock=1)
                 return [[_issue.absolute_url(), _issue.getTitle()]]
             

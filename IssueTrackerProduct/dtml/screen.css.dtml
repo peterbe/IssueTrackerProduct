@@ -1,7 +1,8 @@
 <dtml-call "doCache(hours=30)"><dtml-call "RESPONSE.setHeader('Content-type','text/css')">
 
 html, body {
-  margin:0; padding:0;
+  margin:0; 
+  padding:0;
   background: white; color: black;
   font-family:Arial, sans-serif, verdana;
 }
@@ -435,7 +436,7 @@ ul#navlist {
   width: 100%;
 }
 
-ul#navlist li { display:inline; }
+ul#navlist li { display:inline;}
 
 ul#navlist li a {
   width: 8em;
@@ -499,3 +500,8 @@ a.plink:hover { text-decoration:none; color:#999; }
 /* Hides from IE5-mac \*/
 * html .trest {height: 1%;}
 /* End hide from IE5-mac */
+
+a.fileattachment-tip {
+  text-decoration:none;
+  color:#666;
+}

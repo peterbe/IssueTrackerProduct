@@ -42,7 +42,8 @@
                               cmfuser here/getCMFUser;
                               zopeuser here/getZopeUser;
                               use_autosave python:here.SaveDrafts() and here.UseAutoSave();
-                              loggedin python:issueuser or cmfuser or (zopeuser and here.getSavedUser('fromname') and here.getSavedUser('email'))"
+                              loggedin python:issueuser or cmfuser or (zopeuser and here.getSavedUser('fromname') and here.getSavedUser('email'));
+                              number_of_files here/getNoFileattachments"
   summary="">
       <tr>
 		<td><b>Subject:</b></td>
@@ -195,20 +196,11 @@
         <td><input name="url2issue" tabindex="12" size="40" value="" tal:define="url2issue request/url | request/url2issue | emptystring" 
               tal:attributes="value url2issue" /></td>
     </tr>
-    <tr tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
-      <td>&nbsp;</td>
-      <td><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
-    </tr>
-	<tr tal:repeat="each python:range(here.getNoFileattachments())">
-		<td><b>File attachment:</b></td>
-		<td tal:define="index repeat/each/index" tal:content="structure python:here.getFileattachmentInput(index)"></td>
-	</tr>
-
-
-	<tr tal:define="all_users here/getAllIssueUsers"
+    
+    <tr tal:define="all_users here/getAllIssueUsers"
         tal:condition="python:here.UseIssueAssignment() and all_users">
-		<td><b>Assign to:</b></td>
-		<td>
+	<td><b>Assign to:</b></td>
+	<td>
   		  <select name="assignee" tabindex="30"
                           tal:define="selected python:request.get('assignee',''); 
                                       youare python:here.getWhoYouAre(issueuser)" 
@@ -227,8 +219,43 @@
               <input type="hidden" name="asked-notify-assignee" value="1" />
             </span>
             </span>
-		</td>
-	</tr>
+	</td>
+    </tr>
+    
+    
+    <tr class="fileattachment-error"
+        tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
+      <td>&nbsp;</td>
+      <td><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
+    </tr>
+
+    <tr class="fileattachment-tip" style="display:none"
+        tal:condition="number_of_files">
+      <td>&nbsp;</td>
+      <td><a href="AddIssue" onclick="showFileAttachments();return false"
+             class="fileattachment-tip"
+            ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Click here to attach
+          <span tal:condition="python:number_of_files==1">a file</span>
+          <span tal:condition="not:python:number_of_files==1">one or more files</span>
+      </a>
+      </td>
+    </tr>
+
+    <tr tal:repeat="each python:range(number_of_files)" class="fileattachment">
+	<td><b>File attachment:</b></td>
+	<td tal:define="index repeat/each/index">
+          <input tal:replace="structure python:here.getFileattachmentInput(index)" />
+        </td>
+    </tr>
+    <tr tal:condition="number_of_files" class="fileattachment">
+        <td colspan="2" align="left">
+          <a href="#" class="fileattachment-tip" onclick="hideFileAttachments();return false">
+          <img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Hide again" />
+          hide file attachments</a>
+        </td>
+    </tr>    
+
+
 
 
     <tr>

@@ -71,7 +71,7 @@
 			tal:condition="not:python:minimalformfollowup and email=='' or not minimalformfollowup"
 			tal:attributes="value email" />
 			
-	        <table>
+	        <table tal:define="number_of_files here/getNoFileattachments" style="width:420px">
                 <tr tal:condition="python:loggedin and not minimalformfollowup">
                    <td><b>User:</b></td>
                    <td tal:condition="issueuser"
@@ -117,12 +117,32 @@
 		    </td>
                 </tr>		
                 <tr tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
-                    <td colspan=2><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
+                    <td colspan="2"><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
                 </tr>
-		<tr tal:repeat="each python:range(here.getNoFollowupFileattachments())">
+                
+    <tr class="fileattachment-tip" style="display:none"
+        tal:condition="number_of_files">
+      <td>&nbsp;</td>
+      <td align="left"><a href="AddIssue" onclick="showFileAttachments();return false"
+             class="fileattachment-tip"
+            ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Click here to attach
+          <tal:block condition="python:number_of_files==1">a file</tal:block>
+          <tal:block condition="not:python:number_of_files==1">one or more files</tal:block>
+      </a>
+      </td>
+    </tr>
+    
+		<tr tal:repeat="each python:range(number_of_files)" class="fileattachment">
 		    <td><b>File attachment:</b></td>
 		    <td tal:define="index repeat/each/index" tal:content="structure python:here.getFileattachmentInput(index, initsize=25)"></td>
 		</tr>
+                <tr tal:condition="number_of_files" class="fileattachment">
+                  <td colspan="2" align="left">
+                     <a href="#" class="fileattachment-tip" onclick="hideFileAttachments();return false">
+                     <img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Hide again" />
+                     hide file attachments</a>
+                  </td>
+                </tr>
 		</table>
 		</td>
 		<td align="left" valign="top" 

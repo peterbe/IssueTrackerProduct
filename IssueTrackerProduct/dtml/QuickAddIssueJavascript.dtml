@@ -3,13 +3,15 @@
 
 
 <dtml-if "SaveDrafts() and UseAutoSave()">
-  function autosave() {
+function autosave() {
    $.post('AutoSaveDraftIssue', $(document.ai).fastSerialize(),
           function(resp) {
-             document.form_followup.draft_issue_id.value=resp;
+             if (resp) {
+               $('input[name="draft_issue_id"]').val(resp);
+             }
           });
    
-  }
+}
 
 var as_timer;
 stopautosave=function() {  
@@ -21,22 +23,6 @@ startautosave = function() {
 };
 
 </dtml-if>
-
-function bigup(){
- var t=$.id('description_text');t.cols=80;t.rows=20;
- var s=$.id('tsizer');s.innerHTML='<a href="#" onclick="smalldown();return false">&ndash; smaller<'+'/a>';
-}
-function smalldown(){
-  var t=$.id('description_text');t.cols=60;t.rows=10;
-  var s=$.id('tsizer');
-  s.innerHTML='<a href="#" onclick="bigup();return false">+bigger<'+'/a>';
-}
-var enabled_tsizer=false;
-function enableTsizer(){
-  var s=$.id('tsizer');
-  s.innerHTML='<a href="#" onclick="bigup();return false">+bigger<'+'/a>';
-  enabled_tsizer=true;
-}
 
 function softsubmit() {
   if (document.ai) {

@@ -16,6 +16,16 @@ function _getNoLines(element) {
    return total;
 }
 
+
+function hideFileAttachments() {
+  $('tr.fileattachment').hide();
+  $('tr.fileattachment-tip').show();
+} 
+function showFileAttachments() {
+  $('tr.fileattachment-tip').hide();
+  $('tr.fileattachment').show();
+}  
+
 $(function() {
    $("a.aeh").each(function() {
       this.href = econvert(this.href);
@@ -38,6 +48,19 @@ $(function() {
       if (_getNoLines(this) > parseInt(this.rows))
         this.rows = '' + Math.min(_getNoLines(this) + 2, 50);
    });
+   
+  // Unless we can find a reason not to, hide all the fileattachment input TRs
+  if (!($('tr.fileattachment-error').size() || $('tr.fileattachment input[type="checkbox"]').size())) {
+     hideFileAttachments();
+  } else {
+     $('tr.fileattachment a.fileattachment-tip').hide();
+  }
+  $('input[type="file"]').change(function() {
+     if (this.value)
+       $('tr.fileattachment a.fileattachment-tip').hide();
+     else
+       $('tr.fileattachment a.fileattachment-tip:hidden').show();
+  });
    
 });
 
@@ -103,5 +126,6 @@ $.fn.fastSerialize = function() {
 
     return a;
 };
+
 
 

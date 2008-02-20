@@ -82,13 +82,13 @@ here's a special script that converts 'section' into ['section'] if present and 
 	</tr>
 	<tr>
 		<td colspan="2">
-			<b>Description:</b><span id="tsizer"></span><br />
-			<textarea name="description:text" tabindex="4" rows="8" cols="50" id="description_text" class="autoexpanding"
+			<b>Description:</b><br />
+			<textarea name="description:text" tabindex="4" rows="8" cols="60" id="description_text" class="autoexpanding"
                          tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                                          onblur python:test(use_autosave, 'stopautosave()');
                                          name string:description:${here/UNICODE_ENCODING}:utext"
                          tal:content="python:request.get('description','')"
-                         onkeypress="if (!enabled_tsizer && this.value.length>600){enableTsizer();}"></textarea>
+                         ></textarea>
 
 		<input tal:condition="not:python:test(display_format =='')" type="hidden" name="display_format:string" value=""
        tal:attributes="value here/getSavedTextFormat" />

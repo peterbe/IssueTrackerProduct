@@ -11,7 +11,15 @@
  
 </metal:script>
 
-<style type="text/css" metal:fill-slot="extracss" 
+<metal:style fill-slot="extracss">
+<style type="text/css">
+form {
+  margin-bottom:0;
+  margin-top:0;
+}
+</style>
+
+<style type="text/css"
        tal:condition="request/compareTo|nothing">
 .issue {
   width:96%;
@@ -20,6 +28,7 @@
   width:87%;
 }
 </style>
+</metal:style>
  
 <div metal:fill-slot="body" tal:omit-tag="" 
  tal:define="in_completelist python:here.thisInURL('CompleteList')">
