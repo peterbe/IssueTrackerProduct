@@ -122,8 +122,7 @@
                 
     <tr class="fileattachment-tip" style="display:none"
         tal:condition="number_of_files">
-      <td>&nbsp;</td>
-      <td align="left"><a href="AddIssue" onclick="showFileAttachments();return false"
+      <td align="left" colspan="2"><a href="AddIssue" onclick="showFileAttachments();return false"
              class="fileattachment-tip"
             ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Click here to attach
           <tal:block condition="python:number_of_files==1">a file</tal:block>

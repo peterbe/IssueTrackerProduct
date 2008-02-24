@@ -1,5 +1,7 @@
 -
 
+    Bug fixed: Encoded email address in a autorefresh are re-encoded.
+
     Bug fixed: Possible UnicodeDecodeError if using normal acl_users
     user folder with a unicode fromname.
 

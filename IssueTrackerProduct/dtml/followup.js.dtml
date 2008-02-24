@@ -11,6 +11,7 @@ $(function() {
    $.get(_base_url+'/getModifyTimestamp', {}, function(resp) {
       if (resp) modified_timestamp = resp;
    });
+   
 });
 
 function checkRefresh() {
@@ -33,6 +34,27 @@ function clearAutoRefreshTitle() {
 
 
 <dtml-if "SaveDrafts() and UseAutoSave()">
+function autosave() {
+   $.post(_base_url+'/AutoSaveDraftThread', 
+          $(document.form_followup).fastSerialize(),
+          function(resp) {
+	    if (resp)
+               $('input[name="draft_followup_id"]').val(resp);
+          });
+}
+
+var as_timer;
+var orig_autosaveinterval=<dtml-var getAutosaveInterval>;
+var autosaveinterval=<dtml-var getAutosaveInterval>;
+startautosave = function() {
+  autosave(); 
+  as_timer=window.setTimeout("startautosave()", autosaveinterval*1000);
+};
+stopautosave=function() {
+  if (as_timer) window.clearTimeout(as_timer);
+  
+};
+</dtml-if>
   
 var previous_clairvoyant_note='';
 var page_generated_timestamp;
@@ -64,43 +86,23 @@ start_clairvoyant_followups = function() {
    clairvoyantinterval+=0.1; 
 }
 
-
-function autosave() {
-   $.post(_base_url+'/AutoSaveDraftThread', 
-          $(document.form_followup).fastSerialize(),
-          function(resp) {
-	    if (resp)
-               $('input[name="draft_followup_id"]').val(resp);
-          });
-}
-
-var as_timer;
-var orig_autosaveinterval=<dtml-var getAutosaveInterval>;
-var autosaveinterval=<dtml-var getAutosaveInterval>;
-startautosave = function() {
-  autosave(); 
-  as_timer=window.setTimeout("startautosave()", autosaveinterval*1000);
-};
-stopautosave=function() {
-  if (as_timer) window.clearTimeout(as_timer);
   
-};
-</dtml-if>
+  
   
 var r_timer;
 var refreshinterval,orig_refreshinterval;
 refreshinterval=orig_refreshinterval=3;
 function startautorefresh() {
-  checkRefresh();
-  r_timer=window.setTimeout(startautorefresh, refreshinterval*1000);
-  refreshinterval+= refreshinterval*0.08;
+   checkRefresh();
+   r_timer=window.setTimeout(startautorefresh, refreshinterval*1000);
+   refreshinterval+= refreshinterval*0.08;
+   <dtml-if "EncodeEmailDisplay()">fixEncodedLinks();</dtml-if>
 }
 
 $(function() {
    startautorefresh();
    start_clairvoyant_followups();
 });
-
 
 
 function af(dest, e, ignoreword) {
