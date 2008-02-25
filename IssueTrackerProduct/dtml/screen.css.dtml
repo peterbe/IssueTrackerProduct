@@ -282,6 +282,9 @@ tr.l_commenthead {
 }
 p .q_highlight {font-weight:bold;}
 
+a.highlight-toggle {
+  margin-left:30px;
+}
 
 /* Special options ---------------------------------------- */
 

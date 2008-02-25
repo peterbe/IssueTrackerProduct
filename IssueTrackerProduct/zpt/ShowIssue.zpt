@@ -47,6 +47,7 @@ form {
 </div>
 
 
+
 <div align="center" tal:condition="python:request.has_key('NewIssue')">
 <table class="announcement" cellpadding="6" border="0">
   <!--<tr tal:define="always_notified python:here.Always2Notify(emailtoskip=here.email, format='merged', requireemail=1, include_assignee=1)">-->

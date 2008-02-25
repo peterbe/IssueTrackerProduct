@@ -367,6 +367,6 @@ div.assignment {
   float:left;
 }
 
-.plink {
+.plink, a.highlight-toggle, a.backlink {
   display:none;
 }

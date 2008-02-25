@@ -1,5 +1,8 @@
 -
 
+    New feature: Search result highlighting can be switched off with a
+    Javascript-created link similar to Gmail.
+
     Bug fixed: Encoded email address in a autorefresh are re-encoded.
 
     Bug fixed: Possible UnicodeDecodeError if using normal acl_users

@@ -99,9 +99,29 @@ function startautorefresh() {
    <dtml-if "EncodeEmailDisplay()">fixEncodedLinks();</dtml-if>
 }
 
+function toggleHighlight() {
+   if ($('span.q_highlight').size()) {
+      $('span.q_highlight').addClass('q_highlight-off').removeClass('q_highlight');
+      $('a.highlight-toggle').removeClass('q_highlight').text('Turn on highlighting');
+   } else {
+      $('span.q_highlight-off').addClass('q_highlight').removeClass('q_highlight-off');
+      $('a.highlight-toggle').addClass('q_highlight').text('Turn off highlighting');
+   }
+}
+
 $(function() {
    startautorefresh();
    start_clairvoyant_followups();
+   
+   if ($('span.q_highlight').size() && $('a.backlink')) {
+      // make a javascript link that removes the highlighting
+      //console.log();
+      $('a.backlink').parent('div').append(
+         $('<a>').attr('href','.').addClass('highlight-toggle').addClass('q_highlight')
+                                           .click(function() {toggleHighlight();return false})
+                                           .text('Turn off highlighting')
+      );
+   }
 });
 
 
