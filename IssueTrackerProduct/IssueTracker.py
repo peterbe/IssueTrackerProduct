@@ -5862,7 +5862,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
 
     def ShowNameEmail(self, fromname, email=None, hideme=None, highlight=1,
-                      nolink=0, encode=0, angle_brackets=1):
+                      nolink=0, encode=True, angle_brackets=1):
         """ Show name and email depending on certain criterias """
         out = ''
         if not isinstance(fromname, basestring) and hasattr(fromname, 'meta_type'):
@@ -5894,7 +5894,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             name_email = NONAME_NOEMAIL
         elif not fromname:
             # Show only the email address
-            if self.EncodeEmailDisplay():
+            if encode and self.EncodeEmailDisplay():
                 email = self.encodeEmailString(email)
             else:
                 email = '<a href="mailto:%s">%s</a>'%(email, email)
@@ -5907,7 +5907,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             name_email = fromname
         else:
             # both were specified
-            if self.EncodeEmailDisplay():
+            if encode and self.EncodeEmailDisplay():
                 name_email = self.encodeEmailString(email, fromname)
             else:
                 name_email = '<a href="mailto:%s">%s</a>'%(email, fromname)

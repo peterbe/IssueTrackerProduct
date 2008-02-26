@@ -1,0 +1,6 @@
+<html>
+	<head>
+		<title><dtml-var title_or_id> - IssueTracker Mass Container</title>
+		<link rel="stylesheet" type="text/css" href="<dtml-var getRootURL>/masscontainer_style.css">
+	</head>
+<body>

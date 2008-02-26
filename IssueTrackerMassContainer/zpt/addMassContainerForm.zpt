@@ -1,0 +1,24 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+
+<h2>Add IssueTracker Mass Container</h2>
+
+
+<form action="manage_addMassContainer">
+<table border=0> 
+<tr><th>Id</th> 
+    <td><input type="text" name="oid" value="issuetrackers"></td>
+</tr> 
+<tr><th>Title</th> 
+    <td><input type="text" name="title" value="Issue Tracker Mass Container"></td> 
+</tr> 
+<tr><td></td>
+    <td><input type="submit" value=" Add "> 
+    	<input type="submit" name="addandedit" value=" Add and Edit "> 
+</td>
+</tr> 
+</table>
+</form> 
+
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>
+

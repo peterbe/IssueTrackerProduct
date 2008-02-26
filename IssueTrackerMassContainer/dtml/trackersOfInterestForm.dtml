@@ -1,0 +1,24 @@
+<dtml-let alltrackers="objectValues('Issue Tracker')">
+<dtml-if alltrackers>
+<table>
+<tr><td>
+I'm actually only interested in these. 
+<form action="<dtml-var getRootURL>/saveTrackersOfInterest" method="post">
+<select name="issuetrackers_show:list" multiple size="4">
+<dtml-in "_.sequence.sort(alltrackers,(('title',),))">
+<option value="<dtml-var id>"
+<dtml-if "id not in toList(getIgnoreTrackers())">SELECTED</dtml-if>
+><dtml-var title_or_id><dtml-if "id.lower()!=title_or_id().lower()"> (<dtml-var id>)</dtml-if></option>
+</dtml-in>
+</select>
+
+</td>
+<td><br>
+<input type="submit" value="Save"></td>
+</tr>
+</table>
+</form>
+
+</dtml-if>
+</dtml-let>
+

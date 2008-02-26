@@ -1,0 +1,25 @@
+<ul 
+    tal:define="in_object options/in_object;
+                ignored_paths here/getSkippablePaths;
+                root_url python:here.getRoot().absolute_url()"
+    tal:attributes="id python:test(in_object==here.getRoot(),'tree');
+                    class python:test(in_object==here.getRoot(),'filetree')"
+    >
+  <tal:block repeat="o python:here.getTrackersAndMassContainers(in_object, sort=True)">
+  <tal:subbloc define="ignored python:o.absolute_url().replace(root_url,'') in ignored_paths">
+  <li class="folder"
+      tal:condition="python:o.meta_type=='Issue Tracker Mass Container'"
+      tal:attributes="class python:test(ignored, 'folder ignored', 'folder')">
+    <span class="folder"><a tal:attributes="href o/absolute_url_path; title o/title_or_id"
+       tal:content="o/title_or_id"></a></span>
+    <ul tal:replace="structure python:here.show_tree(here, request, in_object=o)"></ul>
+  </li>
+  <li class="file"
+      tal:condition="python:o.meta_type=='Issue Tracker'"
+      tal:attributes="class python:test(ignored, 'file ignored','file')">
+    <span class="file"><a tal:attributes="href o/absolute_url_path; title o/title_or_id"
+       tal:content="o/title_or_id"></a></span>
+  </li>
+  </tal:subblock>
+  </tal:block>
+</ul>

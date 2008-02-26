@@ -1,0 +1,37 @@
+<dtml-in getAllRecentIssues size=10>
+<dtml-let issue=sequence-item>
+<dtml-if sequence-start>
+  <table border=1 cellpadding=3>
+    <tr>
+      <td><b>Issue tracker</b></td>
+      <td><b>Issue subject</b></td>
+      <td><b>Author</b></td>
+      <td><b>Date</b></td>
+    </tr>
+</dtml-if>
+<tr>
+  <td><a href="<dtml-var "issue.aq_parent.absolute_url()">"><dtml-var "issue.aq_parent.title_or_id()"></a><dtml-if "issue.aq_parent.title_or_id()!=issue.aq_parent.id"> (<dtml-var "issue.aq_parent.id">)</dtml-if></td>
+  <td><a href="<dtml-var absolute_url>"><dtml-var title></a></td>
+  <td><dtml-var "ShowNameEmail(getFromname(), getEmail())"></td>
+  <td><dtml-var "issuedate.strftime('%d/%m/%Y')"></td>
+</tr>
+
+<dtml-let allthreads="issue.objectValues('Issue Tracker Issue Thread')">
+<dtml-if "issue.issuedate.strftime('%Y%m%d%H%M')!=issue.bobobase_modification_time().strftime('%Y%m%d%H%M') and _.len(allthreads)>0">
+<tr>
+  <td align="right"><small>&nbsp;</small></td>
+  <td colspan="3" align="right">
+    <dtml-let thread="allthreads[-1]">
+      <small><a href="<dtml-var absolute_url>#i<dtml-var "_.len(allthreads)">"><dtml-var "issue.colorizeThreadChange(thread.getTitle())"></a> by <dtml-var "issue.ShowNameEmail(thread.getFromname(), thread.getEmail())"></small>
+    </dtml-let>
+    <br>&nbsp;
+  </td>
+</tr>
+</dtml-if>
+</dtml-let>
+
+<dtml-if sequence-end>
+  </table>
+</dtml-if>
+</dtml-let>
+</dtml-in>

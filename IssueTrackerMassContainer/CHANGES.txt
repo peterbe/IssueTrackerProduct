@@ -1,0 +1,47 @@
+- 0.0.8
+
+    * major change to structure *
+    
+- 0.0.7
+
+    Bug fixed: Made it compatible with zope 2.8
+    
+- 0.0.6
+
+    Bug fixed: Use of issue.getEmail() instead of issue.email
+    (getEmail() is better)
+    
+- 0.0.5
+
+    Bug fixed: defaults for use_native_header and use_native_footer
+    
+- 0.0.4
+
+    New feature: findCorrectURL() can be called from
+    standard_error_message to find alternative URLs on 404s.
+
+    New feature: Changed the default automate script to be more
+    up-to-date
+
+- 0.0.3
+
+    New feature: Option for disabling native headers as well as footers.
+    
+    Bug fixed: Corrected CSS to colorize thread changes.
+    
+- 0.0.3
+
+    Bug fixed: The Masscontainer didn't properly listen to the 
+    Security settings from Zope. Now it does, so if you disable
+    acquiring the View permission, then authentication is invoked.
+
+    New feature: RSS links to all issuetrackers
+
+- 0.0.2a
+
+    New feature: DeployStandards() which creates automate script.
+
+- 0.0.1a
+
+    First release
+

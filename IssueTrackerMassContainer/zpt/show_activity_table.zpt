@@ -1,0 +1,51 @@
+<table border="0" cellpadding="5" cellspacing="0"
+       style="border:1px solid #ccc"
+       id="activity-table"
+       tal:define="root here/getRoot;
+                   root_url root/absolute_url;
+                   batch_size python:int(request.get('batch_size', 20));
+                   batch_start python:int(request.get('batch_start', 0));
+                   issues python:here.getRecentIssues(batch_size=batch_size, batch_start=batch_start)">
+                   
+<thead>
+  <tr>
+    <td>Container</td>
+    <td>Issue Tracker</td>
+    <td>Issue</td>
+    <td>User</td>
+    <td>Add date</td>
+  </tr>
+</thead>
+
+<tbody tal:repeat="issue issues">
+  <tr tal:define="its_tracker issue/getRoot; tracker_parent python:its_tracker.aq_parent">
+    <td>
+      <a
+         tal:attributes="href tracker_parent/absolute_url_path"
+         tal:content="python:tracker_parent.absolute_url_path().replace(here.getRoot().absolute_url_path(),'')"
+         ></a> 
+         <a tal:define="path python:tracker_parent.absolute_url().replace(root_url,'')"
+            tal:attributes="href string:ignoreMassContainer?path=${path}"><img src="/misc_/IssueTrackerProduct/close.gif" border="0" alt="Ignore" /></a>
+    </td>
+    <td>
+       <a class="issuetracker"
+          tal:attributes="href its_tracker/absolute_url_path"
+          tal:content="its_tracker/getTitle"></a>
+          <a tal:define="path python:its_tracker.absolute_url().replace(root_url,'')"
+             tal:attributes="href string:ignoreIssueTracker?path=${path}"><img src="/misc_/IssueTrackerProduct/close.gif" border="0" alt="Ignore" /></a>
+    </td>
+    <td>
+      <a tal:attributes="href issue/absolute_url_path"
+         ><span tal:replace="issue/title"></span> 
+          <span class="status" tal:content="python:issue.status.capitalize()"></span></a>
+    </td>
+    <td>
+      <a tal:replace="structure python:issue.ShowNameEmail(issue.getFromname(), issue.getEmail(), encode=False, highlight=False)"></a>
+    </td>
+    <td>
+      <br tal:replace="python:issue.getIssueDate().strftime('%d/%m/%Y')" />
+    </td>
+  </tr>
+</tbody>
+  
+</table>

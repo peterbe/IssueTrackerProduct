@@ -1,0 +1,46 @@
+<html metal:use-macro="here/getHeader">
+<style type="text/css" metal:fill-slot="extracss">
+table thead tr {
+  background:#C3C3C3 url(/misc_/IssueTrackerProduct/gradtablehead.png) repeat scroll 0%;
+}
+
+table thead tr td {
+  font-weight:bold;
+}
+
+table tbody tr {
+  background-color:#DFDFDF;
+}
+span.status {
+  color:red;
+}
+
+#tree-outer {
+  /*border:1px solid red;*/
+  float:left;
+  width:300px;
+}
+
+#activity-table-outer {
+  margin-left:310px;
+  /*border:1px solid green;*/
+}
+
+</style>
+<div metal:fill-slot="body">
+
+
+<div id="tree-outer">
+  <h3>All trackers and mass containers</h3>
+  <ul tal:replace="structure python:here.show_tree(here, request, in_object=here)"></ul>
+</div>
+
+
+<div id="activity-table-outer">
+<h3>Latest activity</h3>
+<table tal:replace="structure here/show_activity_table"></table> 
+</div>
+
+
+</div>
+</html>

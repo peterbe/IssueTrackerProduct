@@ -1,0 +1,15 @@
+<dtml-call "RESPONSE.setHeader('Content-type','text/css')">
+
+
+html, body {
+  background: white; color: black;
+  font-family:Arial, sans-serif, verdana;
+}
+
+p,td,th,div,span {
+  font-size:10pt;    
+}
+
+.cth { /* ColorThreadChange */
+  color:#c00;
+}

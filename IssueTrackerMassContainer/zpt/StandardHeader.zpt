@@ -1,0 +1,31 @@
+<metal:block define-macro="standard"><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+ tal:define="dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING);dummy here/StopCache">
+
+<head tal:define="root_relative_url here/getRootRelativeURL">
+
+<title tal:content="structure string:${here/title_or_id} - IssueTracker mass Container"></title>
+<meta http-equiv="Content-Type" tal:attributes="content string:text/html;; charset=${here/UNICODE_ENCODING}" />
+<link rel="start" tal:attributes="href string:${root_relative_url}/" title="Home" />
+<link rel="stylesheet" type="text/css" tal:attributes="href string:${root_relative_url}/masscontainer_style.css" />
+<link rel="stylesheet" type="text/css" href="/misc_/IssueTrackerMassContainer/jquery.treeview.css" />
+<style metal:define-slot="extracss" tal:omit-tag=""></style>
+
+</head>
+
+<body>
+<div id="main">
+<metal:body define-slot="body">
+
+</metal:body>
+</div>
+
+<script type="text/javascript" src="/misc_/IssueTrackerMassContainer/jquery-1.2.3.min.js"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerMassContainer/jquery.treeview.min.js"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerMassContainer/jquery.cookie.js"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerMassContainer/core.js"></script>
+<script metal:define-slot="extrajs" tal:omit-tag=""></script>
+</body>
+</html>
+</metal:block>

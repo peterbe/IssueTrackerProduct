@@ -1,0 +1,42 @@
+<dtml-var getHeader>
+
+<table align="center" border="0">
+<tr>
+<td rowspan="2" valign="top">
+ <br /><br /><br />
+<dtml-in "_.sequence.sort(objectValues('Issue Tracker'),(('title',),))">
+ <ul><li><big>
+ <a href="<dtml-var absolute_url>"><dtml-var title_or_id></a>
+  </big><br>
+ <dtml-if "id.lower()!=title_or_id().lower()">(<dtml-var id>)</dtml-if>
+
+ <a href="<dtml-var absolute_url>/rss.xml"><img src="/misc_/IssueTrackerMassContainer/rss-blue.png" border=0 width=25 height=10></a></li></ul>
+<dtml-else>
+<i><a href="manage_addProduct/IssueTrackerProduct/addIssueTrackerForm">No Issue Trackers set up yet</a></i>
+</dtml-in>
+
+</td>
+
+<td>
+<h2><dtml-var title_or_id></h2>
+</td>
+
+<td>
+<dtml-var trackersOfInterestForm>
+
+</td>
+
+</tr>
+<tr>
+
+<td colspan="2" valign="top">
+<dtml-var AllrecentIssues>
+</td>
+
+
+
+</tr>
+</table>
+
+
+<dtml-var getFooter>
