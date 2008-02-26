@@ -6,19 +6,38 @@
                     class python:test(in_object==here.getRoot(),'filetree')"
     >
   <tal:block repeat="o python:here.getTrackersAndMassContainers(in_object, sort=True)">
-  <tal:subbloc define="ignored python:o.absolute_url().replace(root_url,'') in ignored_paths">
+  <tal:subblock define="path python:o.absolute_url().replace(root_url,'');
+                       ignored python:path in ignored_paths">
   <li class="folder"
       tal:condition="python:o.meta_type=='Issue Tracker Mass Container'"
       tal:attributes="class python:test(ignored, 'folder ignored', 'folder')">
-    <span class="folder"><a tal:attributes="href o/absolute_url_path; title o/title_or_id"
-       tal:content="o/title_or_id"></a></span>
+    <span class="folder"
+          tal:define="tracker_count python:len(o.objectIds('Issue Tracker'))"
+          ><a tal:attributes="href o/absolute_url_path; title o/title_or_id"
+           >
+          <br tal:replace="o/title_or_id" />
+          <span class="tracker-path"
+                tal:condition="python:here.title_id_different(o.title_or_id(), o.getId())"
+                tal:content="string:(${path})"></span></a>
+       <a tal:condition="ignored"
+          tal:attributes="href string:undoIgnoreMassContainer?path=${path}"
+       ><img src="/misc_/IssueTrackerMassContainer/icon_ignore.gif" alt="Don't ignore any more" border="0" /></a>
+       <span class="tracker-count" tal:condition="tracker_count" tal:content="string:($tracker_count)"></span>
+       </span>
     <ul tal:replace="structure python:here.show_tree(here, request, in_object=o)"></ul>
   </li>
   <li class="file"
       tal:condition="python:o.meta_type=='Issue Tracker'"
       tal:attributes="class python:test(ignored, 'file ignored','file')">
-    <span class="file"><a tal:attributes="href o/absolute_url_path; title o/title_or_id"
-       tal:content="o/title_or_id"></a></span>
+    <span class="file"><a tal:attributes="href o/absolute_url_path; title o/title_or_id">
+          <br tal:replace="o/title_or_id" />
+          <span class="tracker-path"
+                tal:condition="python:here.title_id_different(o.title_or_id(), o.getId())"
+                tal:content="string:(${path})"></span></a>
+       <a tal:condition="ignored"
+          tal:attributes="href string:undoIgnoreIssueTracker?path=${path}"
+       ><img src="/misc_/IssueTrackerMassContainer/icon_ignore.gif" alt="Don't ignore any more" border="0" /></a>       
+       </span>
   </li>
   </tal:subblock>
   </tal:block>

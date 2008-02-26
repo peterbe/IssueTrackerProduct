@@ -18,12 +18,20 @@ span.status {
 #tree-outer {
   /*border:1px solid red;*/
   float:left;
-  width:300px;
+  width:400px;
 }
 
 #activity-table-outer {
-  margin-left:310px;
+  margin-left:410px;
   /*border:1px solid green;*/
+}
+
+span.tracker-count {
+  font-size:80%;
+}
+
+span.tracker-path {
+  font-size:80%;
 }
 
 </style>
@@ -38,7 +46,11 @@ span.status {
 
 <div id="activity-table-outer">
 <h3>Latest activity</h3>
-<table tal:replace="structure here/show_activity_table"></table> 
+<div id="table-outer">
+<table tal:replace="structure here/show_activity_table"></table>
+</div>
+<a href="." onclick="refreshActivityTable();return false"><img src="/misc_/IssueTrackerMassContainer/refresh_icon.png" border="0" alt="Refresh" /></a>
+<a href="." onclick="refreshActivityTable();return false">Refresh</a>
 </div>
 
 

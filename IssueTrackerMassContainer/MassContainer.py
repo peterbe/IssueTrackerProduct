@@ -25,6 +25,7 @@ from DocumentTemplate import sequence
 from AccessControl import ClassSecurityInfo
 from DateTime import DateTime
 from Products.PythonScripts.PythonScript import PythonScript
+from Products.PythonScripts.standard import url_quote
 
 # product
 from Constants import *
@@ -249,60 +250,6 @@ class MassContainer(Folder.Folder, Persistent):
                 
         return issues
         
-        
-    def _datesort(self, issues):
-        """ sort all issues by date """
-        return sequence.sort(issues, (('bobobase_modification_time',),))
-    
-    def _interest_objectValues(self, meta_type):
-        """ return all the ones interested in """
-        ts = []
-        ignore = self.toList(self.getIgnoreTrackers())
-        for o in self.objectValues(meta_type):
-            if str(o.id) not in ignore:
-                ts.append(o)
-        
-        return ts
-    
-    def getIgnoreTrackers(self):
-        """ return what's in the request """
-        request = self.REQUEST
-        key = IGNORE_COOKIEKEY
-        return request.get(key, [])
-    
-    def toList(self, stringlist):
-        """ 'stringlist' looks like this issuetracker1|tracker2|tracker3 """
-        if type(stringlist) == type([]):
-            return stringlist
-        else:
-            return stringlist.split('|')
-        
-        
-    def saveTrackersOfInterest(self, issuetrackers_show):
-        """ save cookie """
-        request = self.REQUEST
-        response = request.RESPONSE
-        
-        all_issuetrackers = []
-        for o in self.objectValues('Issue Tracker'):
-            all_issuetrackers.append(str(o.id))
-        
-        key = IGNORE_COOKIEKEY
-        to_save = []
-        
-        for id in all_issuetrackers:
-            if id not in issuetrackers_show:
-                to_save.append(id)
-        to_save = '|'.join(to_save)
-        then = DateTime()
-        then = then+360
-        then = then.rfc822()
-        
-        response.setCookie(key, to_save, path='/', expires=then)
-        
-        rand_str = str(int(DateTime()))
-        response.redirect(self.absolute_url()+'?random=%s'%rand_str, lock=1)
-
 
     # some templates
     #security.declareProtected('View', 'AllrecentIssues')
@@ -489,6 +436,9 @@ class MassContainer(Folder.Folder, Persistent):
     
     def ignoreIssueTracker(self, path, REQUEST=None):
         """ add this to the cookie """
+        # if path == '/Image Test' convert it to '/Image Test'
+        path = url_quote(path)
+        print repr(path)
         paths = self.getSkippablePaths()
         if path in paths:
             paths.remove(path)
@@ -503,12 +453,26 @@ class MassContainer(Folder.Folder, Persistent):
         """ add this to the cookie """
         return self.ignoreIssueTracker(path, REQUEST=REQUEST)
     
+    def undoIgnoreIssueTracker(self, path, REQUEST=None):
+        """ remove this from the cookie """
+        paths = self.getSkippablePaths()
+        if path in paths:
+            paths.remove(path)
+            
+        self._saveSkippablePaths(paths)
+        if REQUEST is not None:
+            REQUEST.RESPONSE.redirect(self.getRootURL())
+
+    def undoIgnoreMassContainer(self, path, REQUEST=None):
+        """ remove this from the cookie """
+        return self.undoIgnoreIssueTracker(path, REQUEST=REQUEST)
+    
     def _saveSkippablePaths(self, paths):
         """ save the list to a cookie """
         assert isinstance(paths, list)
         value = '|'.join(paths)
         key = '__masscontainer_skippable_paths'
-        then = DateTime()+100
+        then = DateTime()+300
         then = then.rfc822()
         self.REQUEST.RESPONSE.setCookie(key, value, path='/', 
                                         expires=then)
@@ -523,7 +487,18 @@ class MassContainer(Folder.Folder, Persistent):
             return r.split('|')
         else:
             return []
+
+    ##
+    ## Misc
+    ##
     
+    def title_id_different(self, title, oid):
+        """ return true if the title is very different from the oid.
+        If the title is 'Peter Bengtsson' and the id is 'peter-bengtsson'
+        it's not sufficiently different.
+        """
+        title = title.lower().replace(' ','-')
+        return title != oid.lower()
         
     
 setattr(MassContainer, 'masscontainer_style.css', MassContainer.masscontainer_style_css)

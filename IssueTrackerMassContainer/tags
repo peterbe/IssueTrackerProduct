@@ -15,7 +15,6 @@ _deployImages	MassContainer.py	/^    def _deployImages(self, destination, dir, e
 _file_has_extensions	MassContainer.py	/^    def _file_has_extensions(self, filestr, extensions):$/;"	m	class:MassContainer
 _getAllIssues	MassContainer.py	/^    def _getAllIssues(self, in_object, skippable_paths):$/;"	m	class:MassContainer
 _getIssueTrackerId	MassContainer.py	/^    def _getIssueTrackerId(self, parsed_badurl):$/;"	m	class:MassContainer
-_getSkippablePaths	MassContainer.py	/^    def _getSkippablePaths(self):$/;"	m	class:MassContainer
 _interest_objectValues	MassContainer.py	/^    def _interest_objectValues(self, meta_type):$/;"	m	class:MassContainer
 _prepare_feed	MassContainer.py	/^    def _prepare_feed(self, s):$/;"	m	class:MassContainer
 _saveSkippablePaths	MassContainer.py	/^    def _saveSkippablePaths(self, paths):$/;"	m	class:MassContainer
@@ -29,8 +28,10 @@ getRecentIssues	MassContainer.py	/^    def getRecentIssues(self, recursive=True,
 getRoot	MassContainer.py	/^    def getRoot(self):$/;"	m	class:MassContainer
 getRootRelativeURL	MassContainer.py	/^    def getRootRelativeURL(self):$/;"	m	class:MassContainer
 getRootURL	MassContainer.py	/^    def getRootURL(self):$/;"	m	class:MassContainer
+getSkippablePaths	MassContainer.py	/^    def getSkippablePaths(self):$/;"	m	class:MassContainer
 getTrackersAndMassContainers	MassContainer.py	/^    def getTrackersAndMassContainers(self, in_object=None, sort=False):$/;"	m	class:MassContainer
 ignoreIssueTracker	MassContainer.py	/^    def ignoreIssueTracker(self, path, REQUEST=None):$/;"	m	class:MassContainer
+ignoreMassContainer	MassContainer.py	/^    def ignoreMassContainer(self, path, REQUEST=None):$/;"	m	class:MassContainer
 initialize	__init__.py	/^def initialize(context):$/;"	f
 manage_DeployStandards	MassContainer.py	/^    def manage_DeployStandards(self):$/;"	m	class:MassContainer
 manage_addMassContainer	MassContainer.py	/^def manage_addMassContainer(dispatcher, oid, title='',$/;"	f

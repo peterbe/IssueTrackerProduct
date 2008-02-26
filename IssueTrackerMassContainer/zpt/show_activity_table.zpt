@@ -9,7 +9,6 @@
                    
 <thead>
   <tr>
-    <td>Container</td>
     <td>Issue Tracker</td>
     <td>Issue</td>
     <td>User</td>
@@ -19,20 +18,23 @@
 
 <tbody tal:repeat="issue issues">
   <tr tal:define="its_tracker issue/getRoot; tracker_parent python:its_tracker.aq_parent">
-    <td>
+    <td tal:define="path python:its_tracker.absolute_url().replace(root_url,'')">
+       <a class="issuetracker"
+          tal:attributes="href its_tracker/absolute_url_path">
+          <br tal:replace="its_tracker/getTitle" />
+          <span class="tracker-path"
+                tal:condition="python:here.title_id_different(its_tracker.getTitle(), its_tracker.getId())"
+                tal:content="string:(${path})"></span></a>
+          <a tal:attributes="href string:ignoreIssueTracker?path=${path}"><img src="/misc_/IssueTrackerProduct/close.gif" border="0" alt="Ignore" /></a>
+             
       <a
          tal:attributes="href tracker_parent/absolute_url_path"
          tal:content="python:tracker_parent.absolute_url_path().replace(here.getRoot().absolute_url_path(),'')"
          ></a> 
          <a tal:define="path python:tracker_parent.absolute_url().replace(root_url,'')"
+            tal:condition="path"
             tal:attributes="href string:ignoreMassContainer?path=${path}"><img src="/misc_/IssueTrackerProduct/close.gif" border="0" alt="Ignore" /></a>
-    </td>
-    <td>
-       <a class="issuetracker"
-          tal:attributes="href its_tracker/absolute_url_path"
-          tal:content="its_tracker/getTitle"></a>
-          <a tal:define="path python:its_tracker.absolute_url().replace(root_url,'')"
-             tal:attributes="href string:ignoreIssueTracker?path=${path}"><img src="/misc_/IssueTrackerProduct/close.gif" border="0" alt="Ignore" /></a>
+            
     </td>
     <td>
       <a tal:attributes="href issue/absolute_url_path"
