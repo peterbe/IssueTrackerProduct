@@ -474,7 +474,7 @@ class MassContainer(Folder.Folder, Persistent):
         key = '__masscontainer_skippable_paths'
         then = DateTime()+300
         then = then.rfc822()
-        print "Setting this cookie %r" % value
+        logger.info("Setting this cookie %r" % value)
         self.REQUEST.RESPONSE.setCookie(key, value, path='/', 
                                         expires=then)
         
