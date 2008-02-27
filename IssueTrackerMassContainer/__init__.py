@@ -8,6 +8,7 @@ try:
     from Products import IssueTrackerProduct
     DO_INITIALIZE = True
     from Products.IssueTrackerProduct import BetterImageFile
+    from Products.IssueTrackerProduct.Constants import OPTIMIZE
     from Constants import *
     
 except:
