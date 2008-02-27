@@ -215,16 +215,6 @@ class MassContainer(Folder.Folder, Persistent):
         return objs
     
         
-    def getAllRecentIssues(self):
-        """ find all issues in all issuetrackers """
-        allissues = []
-        for issuetracker in self._interest_objectValues('Issue Tracker'):
-            allissues = allissues + issuetracker.ListIssuesFiltered()
-        
-        datesorted = self._datesort(allissues)
-        datesorted.reverse()
-        
-        return datesorted
     
     def getRecentIssues(self, recursive=True, batch_size=20, batch_start=0):
         """ return a list of all the most recent issues """
@@ -238,12 +228,15 @@ class MassContainer(Folder.Folder, Persistent):
         issues = issues[int(batch_start):int(batch_size)]
         
         return issues
-        
+    
+
     def _getAllIssues(self, in_object, skippable_paths):
         issues = []
         root_url = self.getRoot().absolute_url()
         for o in in_object.objectValues([MASSCONTAINER_METATYPE,'Issue Tracker']):
             path = o.absolute_url().replace(root_url,'')
+            if o.absolute_url().find('wolvespct') > -1:
+                logger_info("path=%r, skippable_paths=%s in? %s"%(path, str(skippable_paths), path in skippable_paths))
             if path in skippable_paths:
                 continue
             
