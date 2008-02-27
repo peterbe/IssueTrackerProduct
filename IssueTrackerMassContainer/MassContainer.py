@@ -483,7 +483,7 @@ class MassContainer(Folder.Folder, Persistent):
         """
         r = self.REQUEST.cookies.get('__masscontainer_skippable_paths','')
         logger_info("r=%r" % r)
-        logger_info(str(self.REQUEST.cookies.items()))
+        logger_info(str(self.REQUEST.cookies.keys()))
         if r:
             return r.split('|')
         else:
