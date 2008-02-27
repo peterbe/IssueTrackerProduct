@@ -219,6 +219,7 @@ class MassContainer(Folder.Folder, Persistent):
     def getRecentIssues(self, recursive=True, batch_size=20, batch_start=0):
         """ return a list of all the most recent issues """
         skippable_paths = self.getSkippablePaths()
+        
         issues = self._getAllIssues(self.getRoot(), skippable_paths)
         
         # sort them all
@@ -481,6 +482,8 @@ class MassContainer(Folder.Folder, Persistent):
         that the user is not interested in. 
         """
         r = self.REQUEST.cookies.get('__masscontainer_skippable_paths','')
+        logger_info("r=%r" % r)
+        logger_info(str(self.REQUEST.cookies.items()))
         if r:
             return r.split('|')
         else:
