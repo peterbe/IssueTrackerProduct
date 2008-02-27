@@ -74,7 +74,7 @@ def initialize(context):
             del type, val, tb
             LOG(MASSCONTAINER_METATYPE, ERROR, "Unable to initialize IssueTrackerMassContainer",
                 detail=err,
-                error=error=sys.exc_info())
+                error=sys.exc_info())
     
 
 
