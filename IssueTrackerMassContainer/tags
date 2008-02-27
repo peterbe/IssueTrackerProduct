@@ -10,12 +10,10 @@ MassContainer	MassContainer.py	/^class MassContainer(Folder.Folder, Persistent):
 RSS091	MassContainer.py	/^    def RSS091(self, batchsize=None, withheaders=1):$/;"	m	class:MassContainer
 StopCache	MassContainer.py	/^    def StopCache(self):$/;"	m	class:MassContainer
 __init__	MassContainer.py	/^    def __init__(self, oid, title=''):$/;"	m	class:MassContainer
-_datesort	MassContainer.py	/^    def _datesort(self, issues):$/;"	m	class:MassContainer
 _deployImages	MassContainer.py	/^    def _deployImages(self, destination, dir, extensions=['.gif','.ico'], t={},$/;"	m	class:MassContainer
 _file_has_extensions	MassContainer.py	/^    def _file_has_extensions(self, filestr, extensions):$/;"	m	class:MassContainer
 _getAllIssues	MassContainer.py	/^    def _getAllIssues(self, in_object, skippable_paths):$/;"	m	class:MassContainer
 _getIssueTrackerId	MassContainer.py	/^    def _getIssueTrackerId(self, parsed_badurl):$/;"	m	class:MassContainer
-_interest_objectValues	MassContainer.py	/^    def _interest_objectValues(self, meta_type):$/;"	m	class:MassContainer
 _prepare_feed	MassContainer.py	/^    def _prepare_feed(self, s):$/;"	m	class:MassContainer
 _saveSkippablePaths	MassContainer.py	/^    def _saveSkippablePaths(self, paths):$/;"	m	class:MassContainer
 cookIdAndTitle	Utils.py	/^def cookIdAndTitle(s):$/;"	f
@@ -23,7 +21,6 @@ doCache	MassContainer.py	/^    def doCache(self, hours=10):$/;"	m	class:MassCont
 findCorrectURL	MassContainer.py	/^    def findCorrectURL(self):$/;"	m	class:MassContainer
 getAllRecentIssues	MassContainer.py	/^    def getAllRecentIssues(self):$/;"	m	class:MassContainer
 getHeader	MassContainer.py	/^    def getHeader(self):               $/;"	m	class:MassContainer
-getIgnoreTrackers	MassContainer.py	/^    def getIgnoreTrackers(self):$/;"	m	class:MassContainer
 getRecentIssues	MassContainer.py	/^    def getRecentIssues(self, recursive=True, batch_size=20, batch_start=0):$/;"	m	class:MassContainer
 getRoot	MassContainer.py	/^    def getRoot(self):$/;"	m	class:MassContainer
 getRootRelativeURL	MassContainer.py	/^    def getRootRelativeURL(self):$/;"	m	class:MassContainer
@@ -39,5 +36,6 @@ registerCSS	__init__.py	/^def registerCSS(filename, path='css', slim_if_possible
 registerIcon	__init__.py	/^def registerIcon(filename, idreplacer={}, epath=None, startpath='www'):$/;"	f
 registerJS	__init__.py	/^def registerJS(filename, path='js', slim_if_possible=True):$/;"	f
 relative_url	MassContainer.py	/^    def relative_url(self, url=None):$/;"	m	class:MassContainer
-saveTrackersOfInterest	MassContainer.py	/^    def saveTrackersOfInterest(self, issuetrackers_show):$/;"	m	class:MassContainer
-toList	MassContainer.py	/^    def toList(self, stringlist):$/;"	m	class:MassContainer
+title_id_different	MassContainer.py	/^    def title_id_different(self, title, oid):$/;"	m	class:MassContainer
+undoIgnoreIssueTracker	MassContainer.py	/^    def undoIgnoreIssueTracker(self, path, REQUEST=None):$/;"	m	class:MassContainer
+undoIgnoreMassContainer	MassContainer.py	/^    def undoIgnoreMassContainer(self, path, REQUEST=None):$/;"	m	class:MassContainer

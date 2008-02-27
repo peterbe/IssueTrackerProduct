@@ -49,6 +49,7 @@ def initialize(context):
             registerIcon('treeview-red.gif')
             registerIcon('icon_ignore.gif')
             registerIcon('refresh_icon.png')
+            registerIcon('loading-bar.gif')
 
             registerJS('core.js', slim_if_possible=False)
             registerJS('jquery-1.2.3.min.js', slim_if_possible=False)

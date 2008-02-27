@@ -8,9 +8,12 @@ table thead tr td {
   font-weight:bold;
 }
 
-table tbody tr {
+/*table tbody  {
   background-color:#DFDFDF;
 }
+/*table tbody {
+  background-color:red;
+}*/
 span.status {
   color:red;
 }
@@ -49,8 +52,11 @@ span.tracker-path {
 <div id="table-outer">
 <table tal:replace="structure here/show_activity_table"></table>
 </div>
-<a href="." onclick="refreshActivityTable();return false"><img src="/misc_/IssueTrackerMassContainer/refresh_icon.png" border="0" alt="Refresh" /></a>
-<a href="." onclick="refreshActivityTable();return false">Refresh</a>
+
+  <div id="table-refresher">
+  <a href="." onclick="refreshActivityTable();return false"><img src="/misc_/IssueTrackerMassContainer/refresh_icon.png" border="0" alt="Refresh" /></a>
+  <a href="." onclick="refreshActivityTable();return false">Refresh</a>
+  </div>
 </div>
 
 
