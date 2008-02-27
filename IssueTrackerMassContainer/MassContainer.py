@@ -238,8 +238,6 @@ class MassContainer(Folder.Folder, Persistent):
         root_url = self.getRoot().absolute_url()
         for o in in_object.objectValues([MASSCONTAINER_METATYPE,'Issue Tracker']):
             path = o.absolute_url().replace(root_url,'')
-            if o.absolute_url().find('wolvespct') > -1:
-                logger_info("path=%r, skippable_paths=%s in? %s"%(path, str(skippable_paths), path in skippable_paths))
             if path in skippable_paths:
                 continue
             
@@ -483,10 +481,6 @@ class MassContainer(Folder.Folder, Persistent):
         that the user is not interested in. 
         """
         r = self.REQUEST.cookies.get(COOKIEKEY_SKIPPABLE_PATHS,'')
-        #logger_info("r=%r" % r)
-        #keys = self.REQUEST.cookies.keys()
-        #keys.sort()
-        #logger_info(str(keys))
         if r:
             return r.split('|')
         else:
