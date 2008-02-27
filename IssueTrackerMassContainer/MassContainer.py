@@ -15,6 +15,7 @@ Credits:
 # python
 import os, sys
 from urlparse import urlparse, urlunparse
+import logging
 
 # zope
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
@@ -40,7 +41,7 @@ except:
     
 __version__=open(os.path.join(package_home(globals()), 'version.txt')).read().strip()    
 
-
+logger = logging.getLogger('IssueTrackerMassContainer')
 
 #----------------------------------------------------------------------------
 
@@ -438,7 +439,6 @@ class MassContainer(Folder.Folder, Persistent):
         """ add this to the cookie """
         # if path == '/Image Test' convert it to '/Image Test'
         path = url_quote(path)
-        print repr(path)
         paths = self.getSkippablePaths()
         if path in paths:
             paths.remove(path)
@@ -474,6 +474,7 @@ class MassContainer(Folder.Folder, Persistent):
         key = '__masscontainer_skippable_paths'
         then = DateTime()+300
         then = then.rfc822()
+        print "Setting this cookie %r" % value
         self.REQUEST.RESPONSE.setCookie(key, value, path='/', 
                                         expires=then)
         
