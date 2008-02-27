@@ -27,6 +27,7 @@ from AccessControl import ClassSecurityInfo
 from DateTime import DateTime
 from Products.PythonScripts.PythonScript import PythonScript
 from Products.PythonScripts.standard import url_quote
+from zLOG import LOG, INFO
 
 # product
 from Constants import *
@@ -41,8 +42,10 @@ except:
     
 __version__=open(os.path.join(package_home(globals()), 'version.txt')).read().strip()    
 
-logger = logging.getLogger('IssueTrackerMassContainer')
 
+def logger_info(s, detail=''):
+    LOG('IssueTrackerMassContainer', INFO, s, detail=detail)
+    
 #----------------------------------------------------------------------------
 
 manage_addMassContainerForm = PTF('zpt/addMassContainerForm', globals())
@@ -442,7 +445,6 @@ class MassContainer(Folder.Folder, Persistent):
         paths = self.getSkippablePaths()
         if path in paths:
             paths.remove(path)
-        logger.info("Hi!")
 
         paths.insert(0, path)
         self._saveSkippablePaths(paths)
@@ -476,7 +478,7 @@ class MassContainer(Folder.Folder, Persistent):
         key = '__masscontainer_skippable_paths'
         then = DateTime()+300
         then = then.rfc822()
-        logger.info("Setting this cookie %r" % value)
+        logger_info("Setting this cookie %r" % value)
         self.REQUEST.RESPONSE.setCookie(key, value, path='/', 
                                         expires=then)
         
