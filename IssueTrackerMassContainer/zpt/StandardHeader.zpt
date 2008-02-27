@@ -26,6 +26,8 @@
 <script type="text/javascript" src="/misc_/IssueTrackerMassContainer/jquery.cookie.js"></script>
 <script type="text/javascript" src="/misc_/IssueTrackerMassContainer/core.js"></script>
 <script metal:define-slot="extrajs" tal:omit-tag=""></script>
+
+<br tal:replace="structure request" />
 </body>
 </html>
 </metal:block>
