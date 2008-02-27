@@ -1,7 +1,7 @@
 <html metal:use-macro="here/getHeader">
 <style type="text/css" metal:fill-slot="extracss">
 table thead tr {
-  background:#C3C3C3 url(/misc_/IssueTrackerProduct/gradtablehead.png) repeat scroll 0%;
+  background:#C3C3C3 url(/misc_/IssueTrackerMassContainer/gradtablehead.png) repeat scroll 0%;
 }
 
 table thead tr td {

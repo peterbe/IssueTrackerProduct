@@ -17,7 +17,7 @@
 </thead>
 
 <tbody tal:repeat="issue issues"
-       style="background:#C3C3C3 url(/misc_/IssueTrackerProduct/gradissuehead.png) repeat scroll 0%;">
+       style="background:#C3C3C3 url(/misc_/IssueTrackerMassContainer/gradissuehead.png) repeat scroll 0%;">
   <tr tal:define="its_tracker issue/getRoot; tracker_parent python:its_tracker.aq_parent">
     <td tal:define="path python:its_tracker.absolute_url().replace(root_url,'')">
        <a class="issuetracker"
