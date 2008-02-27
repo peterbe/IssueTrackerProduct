@@ -1,4 +1,5 @@
 import os
+from zLOG import LOG, WARNING, ERROR
 
 import MassContainer
 """IssueTrackerMassContainer Product"""
@@ -10,7 +11,6 @@ try:
     from Constants import *
     
 except:
-    from zLOG import LOG, WARNING
     LOG(MASSCONTAINER_METATYPE, WARNING,
         'IssueTrackerProduct not install', '')
     DO_INITIALIZE = False
@@ -67,10 +67,14 @@ def initialize(context):
             
             This code provides traceback for anything that happened in 
             registerClass(), assuming you're running Zope in debug mode."""
-            import sys, traceback, string
+            import sys, traceback
             type, val, tb = sys.exc_info()
-            sys.stderr.write(string.join(traceback.format_exception(type, val, tb), ''))
+            err = ''.join(traceback.format_exception(type, val, tb)
+            sys.stderr.write(err)
             del type, val, tb
+            LOG(MASSCONTAINER_METATYPE, ERROR, "Unable to initialize IssueTrackerMassContainer",
+                detail=err,
+                error=error=sys.exc_info())
     
 
 
