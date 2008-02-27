@@ -482,7 +482,7 @@ class MassContainer(Folder.Folder, Persistent):
         that the user is not interested in. 
         """
         r = self.REQUEST.cookies.get('__masscontainer_skippable_paths','')
-        logger_info("r=%r" % r)
+        #logger_info("r=%r" % r)
         #keys = self.REQUEST.cookies.keys()
         #keys.sort()
         #logger_info(str(keys))
