@@ -69,7 +69,7 @@ def initialize(context):
             registerClass(), assuming you're running Zope in debug mode."""
             import sys, traceback
             type, val, tb = sys.exc_info()
-            err = ''.join(traceback.format_exception(type, val, tb)
+            err = ''.join(traceback.format_exception(type, val, tb))
             sys.stderr.write(err)
             del type, val, tb
             LOG(MASSCONTAINER_METATYPE, ERROR, "Unable to initialize IssueTrackerMassContainer",
