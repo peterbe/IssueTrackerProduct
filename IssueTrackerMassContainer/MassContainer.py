@@ -45,7 +45,9 @@ __version__=open(os.path.join(package_home(globals()), 'version.txt')).read().st
 
 def logger_info(s, detail=''):
     LOG('IssueTrackerMassContainer', INFO, s, detail=detail)
+
     
+COOKIEKEY_SKIPPABLE_PATHS = '__itmc_skippable_paths'    
 #----------------------------------------------------------------------------
 
 manage_addMassContainerForm = PTF('zpt/addMassContainerForm', globals())
@@ -469,7 +471,7 @@ class MassContainer(Folder.Folder, Persistent):
         """ save the list to a cookie """
         assert isinstance(paths, list)
         value = '|'.join(paths)
-        key = '__masscontainer_skippable_paths'
+        key = COOKIEKEY_SKIPPABLE_PATHS
         then = DateTime()+300
         then = then.rfc822()
         logger_info("Setting this cookie %s=%r" % (key, value))
@@ -481,7 +483,7 @@ class MassContainer(Folder.Folder, Persistent):
         """ return a list of paths to issuetrackers and other mass containers
         that the user is not interested in. 
         """
-        r = self.REQUEST.cookies.get('__masscontainer_skippable_paths','')
+        r = self.REQUEST.cookies.get(COOKIEKEY_SKIPPABLE_PATHS,'')
         #logger_info("r=%r" % r)
         #keys = self.REQUEST.cookies.keys()
         #keys.sort()
