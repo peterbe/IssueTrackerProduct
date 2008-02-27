@@ -460,6 +460,7 @@ class MassContainer(Folder.Folder, Persistent):
             paths.remove(path)
             
         self._saveSkippablePaths(paths)
+        
         if REQUEST is not None:
             REQUEST.RESPONSE.redirect(self.getRootURL())
 
