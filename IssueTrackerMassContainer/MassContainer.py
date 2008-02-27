@@ -442,7 +442,8 @@ class MassContainer(Folder.Folder, Persistent):
         paths = self.getSkippablePaths()
         if path in paths:
             paths.remove(path)
-            
+        logger.info("Hi!")
+
         paths.insert(0, path)
         self._saveSkippablePaths(paths)
         
