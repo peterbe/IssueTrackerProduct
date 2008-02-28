@@ -9136,7 +9136,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ Send a simple email when there is an error """
         # Check that the sitemaster_email has been set
         if self.sitemaster_email == DEFAULT_SITEMASTER_EMAIL:
-            m = "Sitemaster email not changed from default. Email not sent."
+            m = "Sitemaster email not changed from default. Email not sent. (%s)" 
+            m = m % self.absolute_url_path()
             LOG(self.meta_type, WARNING, m)
             return
 
