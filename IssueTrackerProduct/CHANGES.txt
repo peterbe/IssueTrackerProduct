@@ -1,5 +1,9 @@
 -
 
+    New feature: Added new method called getReportIssues() that takes
+    the id of the report as an only parameter and it returns all the 
+    issues that report would find.
+
     New feature: Search result highlighting can be switched off with a
     Javascript-created link similar to Gmail.
 

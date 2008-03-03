@@ -7015,11 +7015,25 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         return ok
     
+    
+    def getReportIssues(self, report_id):
+        """ wrapper around _generateReport(report object) that returns a 
+        list of issue objects.
+        
+        This method is useful if you for example want to figure something
+        out about the issues that a report returns.
+        """
+        container = self.getReportsContainer()
+        report = getattr(container, report_id, None)
+        assert report.meta_type == REPORTSCRIPT_METATYPE, \
+        "Not a Report script object"
+        
+        return self._generateReport(report)
+    
     def _generateReport(self, report):
         """ return a sequence of issues where each issues yields a true
         result when applied on the report script. """
         checked = []
-        # XXX might want to use an iterator here
         for issue in self.getIssueObjects():
             if report(issue):
                 checked.append(issue)
