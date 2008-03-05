@@ -24,7 +24,7 @@ ZopeTestCase.installProduct('PythonScripts')
 ZopeTestCase.installProduct('IssueTrackerProduct')
 
 from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
-from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE
+from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE, DEBUG
 
 #------------------------------------------------------------------------------
 #
@@ -102,7 +102,11 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         # install an error_log
         dispatcher = self.folder.manage_addProduct['SiteErrorLog']
         dispatcher.manage_addErrorLog()
-        
+
+        # install a MailHost
+        if not DEBUG:
+            dispatcher = self.folder.manage_addProduct['MailHost']
+            dispatcher.manage_addMailHost('MailHost')
         
         # if you set this override you won't be able to do a transaction.get().commit()
         # in the unit tests.

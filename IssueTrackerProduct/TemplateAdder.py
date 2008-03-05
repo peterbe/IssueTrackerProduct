@@ -120,11 +120,14 @@ except ImportError:
 # each template that gets used in a tab separated fashion
 LOG_USAGE = os.environ.get('TEMPLATEADDER_LOG_USAGE', None)
 
+from Constants import DISABLE_CHECKOUTABLE_TEMPLATES
+
 #------------------------------------------------------------------------------
     
 
 def addTemplates2Class(Class, templates, extension=None, optimize=None, 
-                       Globals=globals(), use_checkoutable_templates=True):
+                       Globals=globals(), 
+                       use_checkoutable_templates=not DISABLE_CHECKOUTABLE_TEMPLATES):
     
     if use_checkoutable_templates:
         dtml_adder = CTD

@@ -153,6 +153,7 @@ class POP3Account(IssueTracker.IssueTrackerFolderBase):
                                         reveal_issue_url=reveal_issue_url)
         self._setObject(id, acceptingemail)
         return getattr(self, id)
+    
         
 InitializeClass(POP3Account)
 

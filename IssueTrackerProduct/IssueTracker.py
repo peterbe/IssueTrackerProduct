@@ -8209,6 +8209,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             url = '%s?manage_tabs_message=%s'%(url, 'POP3 Account created')
             response = self.REQUEST.RESPONSE
             response.redirect(url)
+        else:
+            return pop3account
         
             
     security.declareProtected(VMS, 'editPOP3Account')
@@ -8398,7 +8400,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                   email_address
         
         genid = email_address.replace('@','-at-').lower()
-        account.createAcceptingEmail(genid, email_address, defaultsections,
+        a_email = account.createAcceptingEmail(genid, email_address, defaultsections,
                                      default_type, default_urgency,
                                      send_confirm, reveal_issue_url=reveal_issue_url)
         
@@ -8408,6 +8410,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             url = '%s&manage_tabs_message=%s'%(url, 'Accepting email created')
             response = self.REQUEST.RESPONSE
             response.redirect(url)
+        else:
+            return a_email
         
         
     def hasAcceptingEmails(self, id):

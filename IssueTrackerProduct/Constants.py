@@ -5,9 +5,7 @@
 # Constants for IssueTrackerProduct
 #
 
-
 import os
-
 def getEnvBool(key, default):
     """ return an boolean from the environment variables """    
     value = os.environ.get(key, default)
@@ -53,6 +51,12 @@ OPTIMIZE = getEnvBool('OPTIMIZE_ISSUETRACKERPRODUCT', True)
 DEBUG = getEnvBool('DEBUG_ISSUETRACKERPRODUCT', False)
 
 UNICODE_ENCODING = getEnvStr('UNICODE_ENCODING_ISSUETRACKERPRODUCT', 'utf-8')
+
+# Global variable if you want to disable CheckoutableTemplates
+# even if it's installed and working. This can be useful to disable 
+# if you're doing development or want to supress all checked out 
+# templates in ZODB.
+DISABLE_CHECKOUTABLE_TEMPLATES = getEnvBool('DISABLE_CHECKOUTABLE_TEMPLATES', False)
 
 # constants
 ICON_LOCATION = 'misc_/IssueTrackerProduct'
