@@ -6,6 +6,7 @@
 import unittest
 
 import sys, os
+import stat
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 
@@ -167,15 +168,115 @@ class POP3TestCase(TestBase):
         ae = tracker.createAcceptingEmail(account.getId(), 'mail@example.com')
         self.assertEqual(ae.aq_parent.absolute_url(), account.absolute_url())
         
+        self.assertEqual(ae.getEmailAddress(), 'mail@example.com')
+        self.assertFalse(ae.doSendConfirm())
+        self.assertFalse(ae.revealIssueURL())
+        
+        ## try to mess with it
+        # invalid email address
+        self.assertRaises(ValueError, tracker.createAcceptingEmail, account.getId(), 'mail @ example.com')
+        # non-existant pop3 account
+        self.assertRaises(AttributeError, tracker.createAcceptingEmail, 'zxy', 'mail@example.com')
+        
+        ## test to edit the accepting email object
+        ae.editDetails(email_address='www@example.com', send_confirm=True, reveal_issue_url=True)
+        self.assertEqual(ae.getEmailAddress(), 'www@example.com')
+        self.assertTrue(ae.doSendConfirm())
+        self.assertTrue(ae.revealIssueURL())
+        
+    def test_acceptingEmailMatch(self):
+        """ try creating a accepting email address and add some whitelist and blacklist 
+        email addresses. """
+        
+        tracker = self.folder.tracker
+        account = tracker.createPOP3Account('mail.example.com', 'peter', 'secret')
+        
+        ae = tracker.createAcceptingEmail(account.getId(), 'mail@example.com')
+        
+        # just blacklist
+        ae.editDetails(blacklist_emails=['test@peterbe.com'])
+        
+        self.assertFalse(ae.acceptOriginatorEmail('TEST@peterbe.COM'))
+        self.assertTrue(ae.acceptOriginatorEmail('TEST.ElSE@peterbe.COM'))
+        
+        ae.editDetails(blacklist_emails=['*@peterbe.com'], whitelist_emails=['exception@peterbe.com'])
+        
+        self.assertFalse(ae.acceptOriginatorEmail('TEST@peterbe.COM'))
+        self.assertTrue(ae.acceptOriginatorEmail('eXception@peterbe.COM'))        
         
                  
         
+        
+from poplib import POP3, error_proto
+
+class FakePOP3(POP3):
+    
+    username = 'test'
+    password = 'test'
+    files = []
+
+    def __init__(self, hostname, port=110):
+        
+        #for file in files:
+        #    assert os.path.isfile(file), "%s does not exist" % file
+        self.hostname = hostname
+        self.port = port
+            
+        #self.username = username
+        #self.password = password
+
+    def getwelcome(self):
+        return "Welcome to fake account"
+
+    def user(self, user):
+        if user != self.username:
+            raise error_proto("Wrong username.")
+
+    def pass_(self, pswd):
+        if pswd != self.password:
+            raise error_proto("Wrong password.")
+
+    def list(self, which=None):
+        # eg. ('+OK 4 messages:', ['1 71017', '2 2201', '3 7723', '4 44152'], 34)
+        files = self.files
+        responses = []
+        for i, f in enumerate(files):
+            responses.append('%s %s' % (i+1, os.stat(f)[stat.ST_SIZE]))
+        return ('+OK %s messages:' % len(files), responses, None)
+
+    def retr(self, which):
+        # ['response', ['line', ...], octets]
+        filename = self.files[which-1]
+        return ('response', open(filename, 'r').xreadlines(), None)
+
+    def quit(self):
+        pass
+        
 
 class EmailInTestCase(TestBase):
+    """
+    Here we'll try to actually send some emails in to the issuetracker by
+    setting up a fake POP3 server. 
+    """
     
-    def test_acceptingEmail(self):
+    def test_emailIn1(self):
         """ test something """
         tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        FakePOP3.files = [abs_path('email-in-1.email')]
+        result = tracker.check4MailIssues(connect_class=FakePOP3, verbose=False)
+        self.assertEqual(result, 'Created 1 issue')
+
+        # this should have created an issue 
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+        
+        
+        
         
         
         
