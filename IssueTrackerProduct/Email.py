@@ -212,7 +212,7 @@ class AcceptingEmail(SimpleItem.SimpleItem,
     
     def doSendConfirm(self):
         """ return send_confirm """
-        return getattr(self, 'send_confirm', 0)
+        return getattr(self, 'send_confirm', False)
     
     def getWhitelistEmails(self):
         """ return whitelist_emails """
@@ -223,7 +223,7 @@ class AcceptingEmail(SimpleItem.SimpleItem,
         return getattr(self, 'blacklist_emails', [])
 
     def revealIssueURL(self):
-        """ return if the URL of the issue should be revealed in the 
+        """ return if the URL of the issue should be revealed in the
         email coming back. 
         Since this attribute was introduced late, we have to assume 
         that the attribute isn't always available. 

@@ -1991,6 +1991,8 @@ class IssueTrackerIssue(IssueTracker):
             try:
                 if assignments[-1].getState() == 1:
                     info.append('assigned')
+                elif assignments[-1].getState() == 0:
+                    info.append('reassigned')                    
             except AttributeError:
                 pass
 

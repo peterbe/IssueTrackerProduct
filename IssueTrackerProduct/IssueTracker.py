@@ -8391,7 +8391,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         email_address = email_address.strip()
         if not self.ValidEmailAddress(email_address):
-            raise "InvalidEmailAddress", "Email address is invalid"
+            raise ValueError, "Email address is invalid %r" % email_address
 
         always_notify = ",".join(self.always_notify)
         always_notify = self.preParseEmailString(always_notify, aslist=1)
@@ -8509,9 +8509,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             response = self.REQUEST.RESPONSE
             response.redirect(url)
             
-    def check4MailIssues(self, verbose=False):
+    def check4MailIssues(self, verbose=False, connect_class=None):
         """ connect to a pop3 account and possibly create 
-        some issues """
+        some issues.
+        
+        The parameter @connect_class is if you want to override what class
+        should be instanciated to open the POP3 connection.
+        
+        """
         
         if email_Parser is None:
             raise "NoEmailPackage", "The email package is not installed"
@@ -8531,10 +8536,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for account in self.getPOP3Accounts():
             v.append('Opening account host %s:%s' % (account.getHostname(),account.getPort()))
             
-            if account.doSSL():
-                connect_class = POP3_SSL
-            else:
-                connect_class = POP3
+            if connect_class is None:
+                if account.doSSL():
+                    connect_class = POP3_SSL
+                else:
+                    connect_class = POP3
             
             try:
                 M = connect_class(account.getHostname(), port=account.getPort())
@@ -8649,10 +8655,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if reply_issue_id_found:
                     return self._processInboundEmailReply(email, reply_issue_id_found)
             
-            
         # is the root of the issuetracker to be found in the email body
         elif matchUrlInBody(email['body'], self.getRoot().absolute_url()):
-
 
             if self.issueprefix:
                 issue_url_regex = r'(http|https)://\S+/%s/(%s|%s%s)' % \
@@ -8679,14 +8683,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if re.findall(whole_url_regex, email['body']):
                     whole_url, __, reply_issue_id_found = re.findall(whole_url_regex, email['body'])[0]
                     
-                
         if reply_issue_id_found:
             try:
                 self.getIssueObject(reply_issue_id_found)
             except:
                 reply_issue_id_found = None
 
-        
 
         # Is this email a reply to something this issuetracker has already
         # sent out. The first test checks if the body contains a URL to 
@@ -8843,11 +8845,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 _methodname = inspect.stack()[1][3]
                 LOG("IssueTrackerProduct.check4MailIssues()", ERROR,
                     'Could not send always-notify emails',
-                    error=sys.exc_info())        
+                    error=sys.exc_info())
             
-            # if we made it all the way down to here, then the email
-            # was added as an issue.
-            return True
+        # if we made it all the way down to here, then the email
+        # was added as an issue.
+        return True
                         
 
     def _processInboundEmailReply(self, email, issueid):
@@ -9223,23 +9225,27 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         basepath = os.path.join(INSTANCE_HOME, 'var') 
         for i in range(numMessages):
-            emailfile = cStringIO.StringIO()
+            #emailfile = cStringIO.StringIO()
+            emailstring = []
             
             for line in pop3instance.retr(i+1)[1]:
                 # XXX Hmm? Should this perhaps be 
                 # emailfile.write(line.encode('latin-1')+'\n')
-                # instead. 
-                emailfile.write(line+'\n')
+                # instead.
+                
+                emailstring.append(line.strip())
+            # by stripping the lines above and then merging them with a \n
+            # I can be certain each line is one \n apart
+            emailstring = '\n'.join(emailstring)
             
             p = email_Parser.Parser()
-            emailfile.seek(0) # rewind for reading
-            msg = p.parse(emailfile)
+            #emailfile.seek(0) # rewind for reading
+            msg = p.parsestr(emailstring)
             
-            emailfile.seek(0)
             # again, should that second line not be 
-            # cStringIO.StringIO(emailfile.read().encode('latin-1')) ??
+            # cStringIO.StringIO(emailstring.encode('latin-1')) ??
             e = {'is_spam': False, 
-                 'originalfile':cStringIO.StringIO(emailfile.read()),
+                 'originalfile':cStringIO.StringIO(emailstring),
                  '_character_set':'us-ascii',
                  }
             e['fileattachments']={}
@@ -9247,7 +9253,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             charset_regex = re.compile(r'charset=["\']?([^"\']+)["\']?', re.I)
             
             
-            # this makes sure all the headers are written in lowercase 
+            # this makes sure all the headers are written in lowercase
             # whitespace stripped
             for key, value in msg.items():
                 e[ss(key)] = value
@@ -9284,7 +9290,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             content_html = ''
             content_plain = ''
             for part in msg.walk():
-                if part.get_main_type() == 'multipart':
+                if part.is_multipart():
+                #if part.get_content_type() == 'multipart':
                     continue
                 name = part.get_param('name')
                 if name is None:
@@ -9297,7 +9304,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     # case, this attachment is ignorable. Tough!
                     continue
                 if name == None:
-                    if str(part.get_subtype()).lower() == 'html':
+                    if str(part.get_content_type()).lower() == 'html':
                         content_html = content
                     else:
                         content_plain = content
@@ -9362,8 +9369,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 e['message_number'] = i + 1
                 emails.append(e)
         
-            emailfile.close()
-            del emailfile
+            del emailstring
             
         return emails
                 

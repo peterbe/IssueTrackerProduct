@@ -60,7 +60,6 @@ class IssueTrackerIssueAssignment(IssueTrackerIssue):
         self.state = state # 1=Assigned 0=Reassigned -1=Rejected
         self.email_sent = bool(email_sent)
 
-
     def getTitle(self):
         """ return title """
         return self.showState()

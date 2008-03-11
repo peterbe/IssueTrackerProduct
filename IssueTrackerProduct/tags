@@ -12,6 +12,7 @@ AddManyIssues	IssueTracker.py	/^    def AddManyIssues(self, REQUEST, **kw):$/;"	
 AddParam2URL	Utils.py	/^def AddParam2URL(url, params={}, unicode_encoding='utf8', $/;"	f
 AllowIssueAttributeChange	IssueTracker.py	/^    def AllowIssueAttributeChange(self):$/;"	m	class:IssueTracker
 AllowIssueSubscription	IssueTracker.py	/^    def AllowIssueSubscription(self):$/;"	m	class:IssueTracker
+AllowShowAll	IssueTracker.py	/^    def AllowShowAll(self):$/;"	m	class:IssueTracker
 Always2Notify	IssueTracker.py	/^    def Always2Notify(self, format='email', emailtoskip=None, requireemail=False,$/;"	m	class:IssueTracker
 AnonymousOptionsExtend	Issue.py	/^    def AnonymousOptionsExtend(self):$/;"	m	class:IssueTrackerIssue
 AssertAllProperties	IssueTracker.py	/^    def AssertAllProperties(self, REQUEST=None):$/;"	m	class:IssueTracker
@@ -419,7 +420,7 @@ disableAutoLogin	IssueTracker.py	/^    def disableAutoLogin(self, REQUEST=None):
 disableRememberSavedfilterPersistently	IssueTracker.py	/^    def disableRememberSavedfilterPersistently(self, REQUEST=None):$/;"	m	class:IssueTracker
 disableShowNextactionIssues	IssueTracker.py	/^    def disableShowNextactionIssues(self, REQUEST=None):$/;"	m	class:IssueTracker
 dispatch	Notification.py	/^    def dispatch(self):$/;"	m	class:IssueTrackerNotification
-dispatcher	IssueTracker.py	/^    def dispatcher(self, notificationobjects=None, REQUEST=None):$/;"	m	class:IssueTracker
+dispatcher	IssueTracker.py	/^    def dispatcher(self, notificationobjects=None, min_age_minutes=0, REQUEST=None):$/;"	m	class:IssueTracker
 displayBriefTitle	IssueTracker.py	/^    def displayBriefTitle(self, title):$/;"	m	class:IssueTracker
 displayMenuItem	IssueTracker.py	/^    def displayMenuItem(self, menuinfo, underline_first_letter=None):$/;"	m	class:IssueTracker
 doAutoLogin	IssueTracker.py	/^    def doAutoLogin(self):$/;"	m	class:IssueTracker
@@ -596,6 +597,7 @@ getModifyDate	Issue.py	/^    def getModifyDate(self):$/;"	m	class:IssueTrackerIs
 getModifyDate	Thread.py	/^    def getModifyDate(self):$/;"	m	class:IssueTrackerDraftIssueThread
 getModifyDate	Thread.py	/^    def getModifyDate(self):$/;"	m	class:IssueTrackerIssueThread
 getModifyTimestamp	Issue.py	/^    def getModifyTimestamp(self):$/;"	m	class:IssueTrackerIssue
+getModifyTimestamp	IssueTracker.py	/^    def getModifyTimestamp(self):$/;"	m	class:IssueTracker
 getMyFollowupDrafts	IssueTracker.py	/^    def getMyFollowupDrafts(self, skip_draft_id=None, autosaved_only=False):$/;"	m	class:IssueTracker
 getMyIssueDrafts	IssueTracker.py	/^    def getMyIssueDrafts(self, skip_draft_issue_id=None, autosaved_only=False):$/;"	m	class:IssueTracker
 getMyIssueDraftsSeparated	IssueTracker.py	/^    def getMyIssueDraftsSeparated(self):$/;"	m	class:IssueTracker
@@ -648,6 +650,7 @@ getRecentIssues	IssueTracker.py	/^    def getRecentIssues(self, length=None, che
 getRecentOtherDraftThreadAuthor	Issue.py	/^    def getRecentOtherDraftThreadAuthor(self, only_fromname=False, max_age_seconds=20,$/;"	m	class:IssueTrackerIssue
 getRecentReportRuns	IssueTracker.py	/^    def getRecentReportRuns(self, length=None):$/;"	m	class:IssueTracker
 getRecentSearchTerms	IssueTracker.py	/^    def getRecentSearchTerms(self, length=None):$/;"	m	class:IssueTracker
+getReportIssues	IssueTracker.py	/^    def getReportIssues(self, report_id):$/;"	m	class:IssueTracker
 getReportsContainer	IssueTracker.py	/^    def getReportsContainer(self):$/;"	m	class:IssueTracker
 getRoot	IssueTracker.py	/^    def getRoot(self):$/;"	m	class:IssueTracker
 getRootRelativeURL	IssueTracker.py	/^    def getRootRelativeURL(self):$/;"	m	class:IssueTracker

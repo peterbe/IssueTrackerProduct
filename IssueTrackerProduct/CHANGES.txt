@@ -1,4 +1,6 @@
 -
+    Bug fixed: Reassigned issues didn't say "assigned" on the List
+    Issues. Thanks NiBar (Real#0711)
 
     New feature: Added new method called getReportIssues() that takes
     the id of the report as an only parameter and it returns all the 
