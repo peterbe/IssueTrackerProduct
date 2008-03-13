@@ -155,3 +155,10 @@ function hideAssignmentForm() {
    $('#assignment-form-rest').hide(300);
    $('#assignee').css('color','#666');
 }
+
+// If the AJAX doesn't work for some reason, pause the autorefresh for a
+// very long time and show a little notice message. 
+$('').ajaxError(function(event, request, settings){
+   clairvoyantinterval = refreshinterval = 60; //seconds
+   showAJAXProblemWarning(settings.url);
+});

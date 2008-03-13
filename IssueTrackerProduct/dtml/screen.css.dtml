@@ -508,3 +508,22 @@ a.fileattachment-tip {
   text-decoration:none;
   color:#666;
 }
+
+div.problem-warning-message {
+  position:absolute;
+  top:60px;
+  right:20px;
+  width:350px;
+  border:1px solid red;
+  background-color:#CCCC99;
+  padding:3px;
+}
+
+div.problem-warning-message a.close {
+  float:right;
+}
+
+div.problem-warning-message p.error {
+  font-weight:bold;
+  margin-top:0;
+}

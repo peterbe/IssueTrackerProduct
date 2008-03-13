@@ -29,7 +29,7 @@ function checkRefresh() {
 }
 
 var refreshinterval,orig_refreshinterval;
-refreshinterval=orig_refreshinterval=5;
+refreshinterval=orig_refreshinterval=5; // seconds
 function startautorefresh() {
   checkRefresh();
   r_timer=window.setTimeout(startautorefresh, refreshinterval*1000);
@@ -43,9 +43,11 @@ $(function() {
    });
    
    startautorefresh();
+   
+
 });
 
-
+ 
   
 function _deldraft(draftid, method) {
   $('li.draft-'+draftid).remove();
@@ -56,3 +58,11 @@ function _deldraft(draftid, method) {
 }
 function deldraft(draftid) { return _deldraft(draftid, 'DeleteDraftIssue'); }
 function deldraftfollowup(draftid) { return _deldraft(draftid, 'DeleteDraftFollowup'); }
+
+
+// If the AJAX doesn't work for some reason, pause the autorefresh for a
+// very long time and show a little notice message. 
+$('').ajaxError(function(event, request, settings){
+   refreshinterval = 60; //seconds
+   showAJAXProblemWarning(settings.url);
+});

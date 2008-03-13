@@ -126,5 +126,23 @@ $.fn.fastSerialize = function() {
     return a;
 };
 
+function showAJAXProblemWarning(url) {
+   if ($('#ajax-problem-warning').size()) return;
+   
+   // show a nice message that the AJAX call didn't work
+   container = $('<div id="ajax-problem-warning">')
+     .addClass('problem-warning-message')
+       .append($('<a href="#">').addClass('close').click(function() {
+          $('#ajax-problem-warning').remove();
+          return false;
+       }).text('close'))
+         .append($('<p>')
+                 .addClass('error').text('Currently having network connection problems.'))
 
-
+   $('#main').append(container);
+   
+   window.setTimeout(function() {
+      $('#ajax-problem-warning').fadeOut().remove();
+   }, 60*1000);
+   
+}

@@ -1,4 +1,8 @@
 -
+
+    New feature: All AJAX periodic updates are halted if there's a
+    network error. 
+
     Bug fixed: Reassigned issues didn't say "assigned" on the List
     Issues. Thanks NiBar (Real#0711)
 

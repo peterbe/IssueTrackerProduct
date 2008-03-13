@@ -2698,10 +2698,12 @@ class IssueTrackerIssue(IssueTracker):
         # And this can be used to help us figure out the names of the emails 
         # stored in the notification objects.
         emails2names = {}
+        
         for valid, name_email in checked:
-            n, e = name_email
             if not valid:
                 continue
+            
+            n, e = name_email
             
             if n:
                 emails2names[e.lower()] = n.strip()

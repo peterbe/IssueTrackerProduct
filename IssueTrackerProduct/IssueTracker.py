@@ -9217,11 +9217,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return [] # no point going on
         
         emails = []
-        accepting_email_objects = account.getAcceptingEmails()
         
-        already_message_ids = [x.getEmailMessageId() for x in self.getIssueObjects()]
-        already_message_ids = [ss(x) for x in already_message_ids if x]
-        
+        already_message_ids = self._getAllAlreadyMessageIds()        
             
         basepath = os.path.join(INSTANCE_HOME, 'var') 
         for i in range(numMessages):
@@ -9237,141 +9234,178 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # by stripping the lines above and then merging them with a \n
             # I can be certain each line is one \n apart
             emailstring = '\n'.join(emailstring)
-            
-            p = email_Parser.Parser()
-            #emailfile.seek(0) # rewind for reading
-            msg = p.parsestr(emailstring)
-            
-            # again, should that second line not be 
-            # cStringIO.StringIO(emailstring.encode('latin-1')) ??
-            e = {'is_spam': False, 
-                 'originalfile':cStringIO.StringIO(emailstring),
-                 '_character_set':'us-ascii',
-                 }
-            e['fileattachments']={}
 
-            charset_regex = re.compile(r'charset=["\']?([^"\']+)["\']?', re.I)
-            
-            
-            # this makes sure all the headers are written in lowercase
-            # whitespace stripped
-            for key, value in msg.items():
-                e[ss(key)] = value
-                if ss(key) == 'content-type':
-                    if charset_regex.findall(value):
-                        e['_character_set'] = charset_regex.findall(value)[0]
-                        
-                elif ss(key) == 'subject':
-                    if isinstance(value, str) and value.lower().find('?iso-8859') > -1:
-                        unicode_value, value_encoding = email_Header.decode_header(value)[0]
-                        if value_encoding is not None:
-                            value = unicode_value.decode(value_encoding)
-                            value = value.encode(value_encoding)
-                        else:
-                            value = unicode_value
-                        e[ss(key)] = value
-                    
-                if not e.has_key('message_id') and ss(key) in ('message-id','messageid'):
-                    # This might seem stupid but it makes sure that if possible
-                    # there is a header in 'e' that is spellt exactly like 
-                    # this. Not all emails might call the header 'Message-Id'
-                    e['message_id'] = value
-                    
-                    # this is a crucial check. The whole point of bothering about the
-                    # Message-ID is to prevent processing emails that have already
-                    # been uploaded. See above how we create the variable 
-                    # 'already_message_ids' and now we can use that to test if this
-                    # email has already been processed
-                    if ss(value) in already_message_ids:
-                        # a ha! We have already processed this email as an issue!
-                        continue
-                    
-                
-            content_html = ''
-            content_plain = ''
-            for part in msg.walk():
-                if part.is_multipart():
-                #if part.get_content_type() == 'multipart':
-                    continue
-                name = part.get_param('name')
-                if name is None:
-                    name = part.get_filename()
-                try:
-                    content = part.get_payload(decode=1)
-                except:
-                    # This might happen if the part is too unnormal
-                    # for the email package to deal with. In that
-                    # case, this attachment is ignorable. Tough!
-                    continue
-                if name == None:
-                    if str(part.get_content_type()).lower() == 'html':
-                        content_html = content
-                    else:
-                        content_plain = content
-                else:
-                    e['fileattachments'][name] = content
-                    
-            if content_html and content_plain:
-                e['body'] = content_plain
-                e['body_html'] = content_html
-            elif content_html:
-                if self._isHTMLBody(content_html):
-                    if html2safehtml is not None:
-                        content_html = self._stripHTMLBody(content_html)
-                        e['display_format'] = 'plaintext'
-                    else:
-                        m = "stripogram module not installed to strip HTML emails"
-                        LOG(self.__class__.__name__, WARNING, m)
-                        e['display_format'] = 'html'
-                e['body'] = content_html
-            else:
-                e['body'] = content_plain
-                
+            email = self._processEmailString(emailstring, account,
+                                             already_message_ids=already_message_ids)
 
-            if SPAMBAYES_CHECK:
-                # http://spambayes.sourceforge.net
-                header = 'X-Spambayes-Classification'
-                if e.get(header, '') == SPAMBAYES_CHECK or e.get(header.lower()) == SPAMBAYES_CHECK:
-                    # this is spam!!
-                    e['is_spam'] = True
-                    
-            # Maybe it wasn't sent directly To, but CC
-            if e.get('cc','') != '':
-                e['to'] = "%s, %s"%(e.get('to',''), e['cc'])
-            # check whom it's to
-            extractor = self.preParseEmailString
-            try:
-                to = e['to']
-            except KeyError:
-                # emails that don't have a To: part are dodgy
-                logger.warn("One email is missing To: part (subject=%r, from=%s)" % \
-                            (e.get('subject','*no subject*'), e.get('from','*no from*')))
-                continue
-                
-            tolist = extractor(to, aslist=1, allnotifyables=0)
-            
-            tolist_simplified = [ss(x) for x in tolist]
-            intersection = []
-            originator = self.preParseEmailString(e['from'])
-            for ae in accepting_email_objects:
-                if ss(ae.getEmailAddress()) in tolist_simplified:
-                    intersection.append(ae.getEmailAddress())
-                    try:
-                        if not ae.acceptOriginatorEmail(originator):
-                            e['is_blacklisted'] = True
-                    except:
-                        LOG(self.__class__.__name__, WARNING,
-                            "Failed to do a white-/blacklist check on %s" % e['from'],
-                            error=sys.exc_info())
-                        
-            if intersection:
-                e['to'] = intersection[0]
-                e['message_number'] = i + 1
-                emails.append(e)
-        
-            del emailstring
+            if email:
+                email['message_number'] = i + 1
+                emails.append(email)
             
         return emails
+    
+    def _getAllAlreadyMessageIds(self):
+        """ return a list of message ids of emails previously processes """
+        already_message_ids = [x.getEmailMessageId() for x in self.getIssueObjects()]
+        return [ss(x) for x in already_message_ids if x]        
+    
+    def _processEmailString(self, emailstring, account, already_message_ids=None):
+        """ return a dictionary of the parsed email or None if the email isn't welcome.
+        The dictionary contains all the headers of the email plus a few extra keys:
+            o is_spam (bool)
+            o originalfile (file object containing the whole emailstring)
+            o _character_set
+            o fileattachments (dict)
+            
+        The @account parameter is expecting to be a POP3Account object that contains
+        a list of accepting emails.
+            
+        If an email contains both a HTML part and a plaintext part the returned
+        dictionary will have both 'body' and 'body_html' items.
+        
+        The parameter @already_message_ids is optional and is available as a parameter
+        for optimization. If you're going to call _processEmailString() 10 times for 
+        10 emails in an inbox you don't want to call _getAllAlreadyMessageIds() 10
+        times.
+            
+        """
+        p = email_Parser.Parser()
+        #emailfile.seek(0) # rewind for reading
+        msg = p.parsestr(emailstring)
+        
+        # again, should that second line not be 
+        # cStringIO.StringIO(emailstring.encode('latin-1')) ??
+        e = {'is_spam': False, 
+             'originalfile':cStringIO.StringIO(emailstring),
+             '_character_set':'us-ascii',
+             }
+        e['fileattachments']={}
+
+        charset_regex = re.compile(r'charset=["\']?([^"\']+)["\']?', re.I)
+        
+        if already_message_ids is None:
+            already_message_ids = self._getAllAlreadyMessageIds()
+        
+        # this makes sure all the headers are written in lowercase
+        # whitespace stripped
+        for key, value in msg.items():
+            e[ss(key)] = value
+            if ss(key) == 'content-type':
+                if charset_regex.findall(value):
+                    e['_character_set'] = charset_regex.findall(value)[0]
+                    
+            elif ss(key) == 'subject':
+                if isinstance(value, str) and value.lower().find('?iso-8859') > -1:
+                    unicode_value, value_encoding = email_Header.decode_header(value)[0]
+                    if value_encoding is not None:
+                        value = unicode_value.decode(value_encoding)
+                        value = value.encode(value_encoding)
+                    else:
+                        value = unicode_value
+                    e[ss(key)] = value
+                
+            if not 'message_id' in e and ss(key) in ('message-id','messageid'):
+                # This might seem stupid but it makes sure that if possible
+                # there is a header in 'e' that is spellt exactly like 
+                # this. Not all emails might call the header 'Message-Id'
+                e['message_id'] = value
+                
+                # this is a crucial check. The whole point of bothering about the
+                # Message-ID is to prevent processing emails that have already
+                # been uploaded. See above how we create the variable 
+                # 'already_message_ids' and now we can use that to test if this
+                # email has already been processed
+                if ss(value) in already_message_ids:
+                    # a ha! We have already processed this email as an issue!
+                    continue
+                
+            
+        content_html = ''
+        content_plain = ''
+        for part in msg.walk():
+            if part.is_multipart():
+            #if part.get_content_type() == 'multipart':
+                continue
+            name = part.get_param('name')
+            if name is None:
+                name = part.get_filename()
+            try:
+                content = part.get_payload(decode=1)
+            except:
+                # This might happen if the part is too unnormal
+                # for the email package to deal with. In that
+                # case, this attachment is ignorable. Tough!
+                continue
+            if name == None:
+                if str(part.get_content_type()).lower() == 'html':
+                    content_html = content
+                else:
+                    content_plain = content
+            else:
+                e['fileattachments'][name] = content
+                
+        if content_html and content_plain:
+            e['body'] = content_plain
+            e['body_html'] = content_html
+        elif content_html:
+            if self._isHTMLBody(content_html):
+                if html2safehtml is not None:
+                    content_html = self._stripHTMLBody(content_html)
+                    e['display_format'] = 'plaintext'
+                else:
+                    m = "stripogram module not installed to strip HTML emails"
+                    LOG(self.__class__.__name__, WARNING, m)
+                    e['display_format'] = 'html'
+            e['body'] = content_html
+        else:
+            e['body'] = content_plain
+            
+
+        if SPAMBAYES_CHECK:
+            # http://spambayes.sourceforge.net
+            header = 'X-Spambayes-Classification'
+            if e.get(header, '') == SPAMBAYES_CHECK or e.get(header.lower()) == SPAMBAYES_CHECK:
+                # this is spam!!
+                e['is_spam'] = True
+                
+        # Maybe it wasn't sent directly To, but CC
+        if e.get('cc','') != '':
+            e['to'] = "%s, %s"%(e.get('to',''), e['cc'])
+        # check whom it's to
+        extractor = self.preParseEmailString
+        try:
+            to = e['to']
+        except KeyError:
+            # emails that don't have a To: part are dodgy
+            logger.warn("One email is missing To: part (subject=%r, from=%s)" % \
+                        (e.get('subject','*no subject*'), e.get('from','*no from*')))
+            return
+            
+        tolist = extractor(to, aslist=1, allnotifyables=0)
+        
+        tolist_simplified = [ss(x) for x in tolist]
+        intersection = []
+        originator = self.preParseEmailString(e['from'])
+        accepting_email_objects = account.getAcceptingEmails()
+        for ae in accepting_email_objects:
+            if ss(ae.getEmailAddress()) in tolist_simplified:
+                intersection.append(ae.getEmailAddress())
+                try:
+                    if not ae.acceptOriginatorEmail(originator):
+                        e['is_blacklisted'] = True
+                except:
+                    LOG(self.__class__.__name__, WARNING,
+                        "Failed to do a white-/blacklist check on %s" % e['from'],
+                        error=sys.exc_info())
+                    
+        if intersection:
+            e['to'] = intersection[0]
+            
+            return e
+        
+        del emailstring
+        
+                
                 
     def _getIntersection(self, list1, list2):
         """ if 'A, C, D' in ['a','b'] should return True """
