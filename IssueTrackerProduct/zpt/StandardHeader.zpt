@@ -65,13 +65,6 @@
 <!--METALbody-->
 
 </div><!--/metal:body-->
-
-<!--<div id="ajax-problem-warning" class="problem-warning-message">
-  <a href="#" class="close" onclick="$('#ajax-problem-warning').remove();return false">close</a>
-  <p class="error">Unable to connect!</p>
-</div>-->
-
-
 </div>
 
 <div class="clearerR">&nbsp;</div>
