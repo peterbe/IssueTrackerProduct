@@ -60,9 +60,11 @@ function deldraft(draftid) { return _deldraft(draftid, 'DeleteDraftIssue'); }
 function deldraftfollowup(draftid) { return _deldraft(draftid, 'DeleteDraftFollowup'); }
 
 
+/* FEATURE ON HOLD 
 // If the AJAX doesn't work for some reason, pause the autorefresh for a
 // very long time and show a little notice message. 
 $('').ajaxError(function(event, request, settings){
    refreshinterval = 60; //seconds
    showAJAXProblemWarning(settings.url);
 });
+ */

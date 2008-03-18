@@ -8562,7 +8562,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             emails = self._appendEmailIssueData(emails, account)
             v.append('Keep and process %s of them' % len(emails))
         
-        
             # Now, create the issues
             #
             for email in emails:

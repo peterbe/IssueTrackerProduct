@@ -3,6 +3,7 @@
 ## <peter@fry-it.com>
 ##
 
+
 import unittest
 
 import sys, os
@@ -26,7 +27,6 @@ ZopeTestCase.installProduct('IssueTrackerProduct')
 
 #from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
 #from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE
-
 
 #------------------------------------------------------------------------------
 #
@@ -216,15 +216,9 @@ class FakePOP3(POP3):
     files = []
 
     def __init__(self, hostname, port=110):
-        
-        #for file in files:
-        #    assert os.path.isfile(file), "%s does not exist" % file
         self.hostname = hostname
         self.port = port
             
-        #self.username = username
-        #self.password = password
-
     def getwelcome(self):
         return "Welcome to fake account"
 
@@ -253,6 +247,8 @@ class FakePOP3(POP3):
         pass
         
 
+
+
 class EmailInTestCase(TestBase):
     """
     Here we'll try to actually send some emails in to the issuetracker by
@@ -260,7 +256,7 @@ class EmailInTestCase(TestBase):
     """
     
     def test_emailIn1(self):
-        """ test something """
+        """ test a very basic email in """
         tracker = self.folder.tracker
         u, p = 'test', 'test' # doesn't really matter
         account = tracker.createPOP3Account('mail.example.com', u, p)
@@ -269,17 +265,124 @@ class EmailInTestCase(TestBase):
         
         abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
         FakePOP3.files = [abs_path('email-in-1.email')]
-        result = tracker.check4MailIssues(connect_class=FakePOP3, verbose=False)
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+
+        result = tracker.check4MailIssues(verbose=False)
         self.assertEqual(result, 'Created 1 issue')
 
         # this should have created an issue 
         self.assertEqual(len(tracker.getIssueObjects()), 1)
         
         
+    def test_emailIn2(self):
+        """ test rejecting an email based on from address """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        ae.editDetails(blacklist_emails=['*@peterbe.com'], whitelist_emails=['special@peterbe.com'])
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        # this sends from mail@peterbe.com and another one from special@peterbe.com
+        
+        FakePOP3.files = [abs_path('email-in-1.email'), 
+                          abs_path('email-in-2.email')]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+
+        result = tracker.check4MailIssues(verbose=False)
+        self.assertEqual(result, 'Created 1 issue')
+
+        # this should have created an issue 
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+        
+    def test_emailIn3(self):
+        """ test setting section, urgency and type by the subject line """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        # this sends from mail@peterbe.com and another one from special@peterbe.com
+        
+        FakePOP3.files = [abs_path('email-in-3.email'),]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=False)
+        self.assertEqual(result, 'Created 1 issue')
+        
+        issue = tracker.getIssueObjects()[0]
+        self.assertEqual(issue.getSections(), ['General'])
+        self.assertEqual(issue.getUrgency(), 'critical')
+        self.assertEqual(issue.getType(), 'bug report')
+        self.assertEqual(issue.getTitle(), 'NonExistant: There is a problem')
         
         
+    def test_emailIn4(self):
+        """ Test emails CCed in """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-4.email' sends to peter@example.com but is CCed to
+        # mail@example.com
+        FakePOP3.files = [abs_path('email-in-4.email'),]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=False)
+        self.assertEqual(result, 'Created 1 issue')
+
+        # this should have created an issue 
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
         
         
+    def test_emailIn5(self):
+        """ Test emails in multipart """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-5.email' is multipart/alternative and the HTML part of it
+        # is not quoted.
+        FakePOP3.files = [abs_path('email-in-5.email'),]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=False)
+        self.assertEqual(result, 'Created 1 issue')
+        
+        issue = tracker.getIssueObjects()[0]
+        self.assertTrue(isinstance(issue.getTitle(), unicode))
+        
+        # XXX I'm not sure what this test is meant to test.
+        # Perhaps the functionality of emailing in HTML emails should
+        # change to show HTML safely.
+
+    
         
 def test_suite():
     from unittest import TestSuite, makeSuite

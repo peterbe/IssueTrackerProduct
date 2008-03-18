@@ -156,9 +156,12 @@ function hideAssignmentForm() {
    $('#assignee').css('color','#666');
 }
 
+/* FEATURE ON HOLD
 // If the AJAX doesn't work for some reason, pause the autorefresh for a
 // very long time and show a little notice message. 
-$('').ajaxError(function(event, request, settings){
+$(document).ajaxError(function(event, request, settings){
    clairvoyantinterval = refreshinterval = 60; //seconds
+   alert(settings.url);
    showAJAXProblemWarning(settings.url);
 });
+ */
