@@ -1,0 +1,63 @@
+From - Sat Mar 15 19:18:05 2008
+Delivered-To: peterbe@gmail.com
+Date: Fri, 14 Mar 2008 10:38:53 -0700
+Message-Id: <200803141738.m2EHcrWm030967@hugeapi.sav.sea.dotster.net>
+From: support@mydomain.com
+To: mail@example.com
+Content-Type: multipart/alternative; boundary=----_NextPart_000_002C_01BFABBF.4A7D6BA0
+MIME-Version: 1.0
+Subject: A multipart alternative problem in utf8
+
+------_NextPart_000_002C_01BFABBF.4A7D6BA0
+Content-Type: text/plain; charset="utf-8"
+
+THIS IS THE HTML PART 
+
+------_NextPart_000_002C_01BFABBF.4A7D6BA0
+Content-Type: text/html; charset="utf-8"
+
+<html>
+<body>
+
+<TITLE>Title of HTML PART</TITLE>
+<link href="http://www.dotster.com/images/dotnews/2005/mydomain/global.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+a:hover
+{
+	font-family: Arial, sans-serif; color: #ff9900; text-decoration: none;
+}
+-->
+  </style>
+	<form action="https://secure.registerapi.com/order/renreport/index.php">
+	<input type="hidden" name="siteid" value="20788">
+
+<table width="100%"  border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td height="75" valign="bottom" background="http://www.dotster.com/images/dotnews/2005/mydomain/rennot_bg01.gif">
+      <table width="581"  border="0" cellspacing="13">
+        <tr>
+	  <td width="24%">THIS IS THE HTML EMAIL </td>
+        </tr>
+      </table></td>
+  </tr>
+  <tr>
+</table>  
+</form>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><br>
+</p>
+
+</body>
+</html>
+
+------_NextPart_000_002C_01BFABBF.4A7D6BA0--
+
+
