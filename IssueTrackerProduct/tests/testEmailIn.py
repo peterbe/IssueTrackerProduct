@@ -25,9 +25,6 @@ ZopeTestCase.installProduct('SiteErrorLog')
 ZopeTestCase.installProduct('PythonScripts')
 ZopeTestCase.installProduct('IssueTrackerProduct')
 
-#from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
-#from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE
-
 #------------------------------------------------------------------------------
 #
 # Some constants

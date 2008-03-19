@@ -196,7 +196,6 @@ class IssueTrackerTestCase(TestBase):
         if tracker.doDispatchOnSubmit():
             self.assertTrue(notification.isDispatched())
             
-            
     def test_debatingIssue_withSmartAvoidanceOfNotifications(self):
         """ If A posts an issue, B follows up and shortly there after A 
         follows up too, then if the automatic dispatcher is switched off,

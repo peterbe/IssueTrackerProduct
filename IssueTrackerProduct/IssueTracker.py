@@ -1017,14 +1017,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def getIssueObjects(self):
         """ return what objectValues does but with varying container """
         container = self._getIssueContainer()
-        brothers = self._getBrothers()
-        if brothers:
-            all = list(container.objectValues(ISSUE_METATYPE))
-            for brother in brothers:
-                all.extend(brother.getIssueObjects())
-            return all
-        else:
-            return container.objectValues(ISSUE_METATYPE)
+        all = list(container.objectValues(ISSUE_METATYPE))
+        try:
+            brothers = self._getBrothers()
+            if brothers:
+                for brother in brothers:
+                    all.extend(brother.getIssueObjects())
+        except KeyError, msg:
+            tmpl = 'Reference to join-in issue trackers (%s) is broken in %s'
+            paths = ', '.join(self.getBrotherPaths())
+            logger.warn(tmpl % (paths, self.absolute_url_path()))
+        
+        return all
+        
     
     def getIssueItems(self):
         """ return what objectItems does but with varying container """

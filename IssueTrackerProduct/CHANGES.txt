@@ -1,5 +1,9 @@
 -
 
+    Bug fixed: getIssueObjects() would break with KeyError if a
+    reference to a join-in issuetracker (see bottom of Advanced 
+    properties) is broken.
+
     Bug fixed: Reassigned issues didn't say "assigned" on the List
     Issues. Thanks NiBar (Real#0711)
 
