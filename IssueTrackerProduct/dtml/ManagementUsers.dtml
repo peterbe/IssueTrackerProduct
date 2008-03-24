@@ -54,9 +54,8 @@ div.area { background-color:#efefef;
 <div class="area">
 <p><strong>Issue Assignment</strong></p>
 
-<dtml-let userfolders="getAllIssueUserFolders()" 
+<dtml-let userfolders="getAllIssueUserFolders()"
           all_users="getAllIssueUsers(userfolders, filter=0)">
-
 <dtml-if "UseIssueAssignment()">
 
 <dtml-if all_users>

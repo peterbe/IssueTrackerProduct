@@ -379,6 +379,27 @@ class EmailInTestCase(TestBase):
         # Perhaps the functionality of emailing in HTML emails should
         # change to show HTML safely.
 
+    def test_jp_regression_tests(self):
+        """ these tests come from a bug report by Jesse.
+        """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'helpdesktest@example3.org'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-5.email' is multipart/alternative and the HTML part of it
+        # is not quoted.
+        FakePOP3.files = [abs_path('jp-0.email'), abs_path('jp-1.email')]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=False)
+        self.assertEqual(result, 'Created 2 issues')
     
         
 def test_suite():

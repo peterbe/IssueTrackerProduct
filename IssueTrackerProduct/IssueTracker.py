@@ -6801,7 +6801,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if all_mailhosts:
                 mailhost = all_mailhosts[0] # first one
             else:
-                raise "AttributeError", "MailHost object not found"
+                raise AttributeError, "MailHost object not found"
             
         return mailhost
         
@@ -9233,8 +9233,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # XXX Hmm? Should this perhaps be 
                 # emailfile.write(line.encode('latin-1')+'\n')
                 # instead.
-                
-                emailstring.append(line.strip())
+                emailstring.append(line.rstrip())
             # by stripping the lines above and then merging them with a \n
             # I can be certain each line is one \n apart
             emailstring = '\n'.join(emailstring)

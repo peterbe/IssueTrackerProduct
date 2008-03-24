@@ -250,6 +250,7 @@ _generateReport	IssueTracker.py	/^    def _generateReport(self, report):$/;"	m	c
 _generateTempFolder	IssueTracker.py	/^    def _generateTempFolder(self):$/;"	m	class:IssueTracker
 _getACLCookie	IssueTracker.py	/^    def _getACLCookie(self, name, action='email'):$/;"	m	class:IssueTracker
 _getACLUserName	IssueTracker.py	/^    def _getACLUserName(self):$/;"	m	class:IssueTracker
+_getAllAlreadyMessageIds	IssueTracker.py	/^    def _getAllAlreadyMessageIds(self):$/;"	m	class:IssueTracker
 _getAllScriptIds	IssueTracker.py	/^    def _getAllScriptIds(self):$/;"	m	class:ReportsContainer
 _getAllScriptItems	IssueTracker.py	/^    def _getAllScriptItems(self):$/;"	m	class:ReportsContainer
 _getAllScripts	IssueTracker.py	/^    def _getAllScripts(self):$/;"	m	class:ReportsContainer
@@ -309,6 +310,7 @@ _postCopy	IssueTracker.py	/^    def _postCopy(self, container, op=0):$/;"	m	clas
 _prepare_feed	IssueTracker.py	/^    def _prepare_feed(self, s):$/;"	m	class:IssueTracker
 _prerender_comment	Thread.py	/^    def _prerender_comment(self):$/;"	m	class:IssueTrackerIssueThread
 _prerender_description	Issue.py	/^    def _prerender_description(self):$/;"	m	class:IssueTrackerIssue
+_processEmailString	IssueTracker.py	/^    def _processEmailString(self, emailstring, account, already_message_ids=None):$/;"	m	class:IssueTracker
 _processInboundEmail	IssueTracker.py	/^    def _processInboundEmail(self, email, combos):$/;"	m	class:IssueTracker
 _processInboundEmailReply	IssueTracker.py	/^    def _processInboundEmailReply(self, email, issueid):$/;"	m	class:IssueTracker
 _reason2saveDraft	Issue.py	/^    def _reason2saveDraft(self, request):$/;"	m	class:IssueTrackerIssue
@@ -388,7 +390,7 @@ canUpgrade	upgrade.py	/^    def canUpgrade(self):$/;"	m	class:VersionController
 changeAssignment	Issue.py	/^    def changeAssignment(self, assignee, send_email=False):$/;"	m	class:IssueTrackerIssue
 changeUserOptions	IssueTracker.py	/^    def changeUserOptions(self, remember_savedfilter_persistently=False,$/;"	m	class:IssueTracker
 changeWhichSubListURL	IssueTracker.py	/^    def changeWhichSubListURL(self, newtype):$/;"	m	class:IssueTracker
-check4MailIssues	IssueTracker.py	/^    def check4MailIssues(self, verbose=False):$/;"	m	class:IssueTracker
+check4MailIssues	IssueTracker.py	/^    def check4MailIssues(self, verbose=False, connect_class=None):$/;"	m	class:IssueTracker
 cleanSectionsList	IssueTracker.py	/^    def cleanSectionsList(self, sections):$/;"	m	class:IssueTracker
 cli	upgrade.py	/^def cli():$/;"	f
 colorizeThreadChange	IssueTracker.py	/^    def colorizeThreadChange(self, title):$/;"	m	class:IssueTracker
