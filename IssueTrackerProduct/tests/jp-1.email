@@ -1,0 +1,43 @@
+Return-path: <jp@jptechnical.com>
+Envelope-to: helpdesktest@example3.org
+Delivery-date: Thu, 20 Mar 2008 15:49:29 -0500
+Received: from example by element.websitewelcome.com with local-bsmtp (Exim 4.68)
+	(envelope-from <jp@jptechnical.com>)
+	id 1JcRhZ-0002D3-31
+	for helpdesktest@example3.org; Thu, 20 Mar 2008 15:49:29 -0500
+X-Spam-Checker-Version: SpamAssassin 3.3.0-r613124 (2008-01-18) on
+	element.websitewelcome.com
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.4 required=8.0 tests=AWL,RP_MATCHES_RCVD
+	autolearn=disabled version=3.3.0-r613124
+Received: from mail.jptechnical.com ([71.216.183.25]:3776 helo=jptechnical.com)
+	by element.websitewelcome.com with esmtp (Exim 4.68)
+	(envelope-from <jp@jptechnical.com>)
+	id 1JcRhY-0002CZ-Dy
+	for helpdesktest@example3.org; Thu, 20 Mar 2008 15:49:28 -0500
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+Subject: Test for IssueTrackerProduct mail parser 2
+X-MimeOLE: Produced By Microsoft Exchange V6.5
+Date: Thu, 20 Mar 2008 13:49:28 -0700
+Message-ID: <466ECD862F94B149B3642E566C67C8D38FB5@companyweb>
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: Test for IssueTrackerProduct mail parser 2
+thread-index: AciKy8xpS209BBl9Sw2H5n/1F1iZ9A==
+From: "Jesse Perry" <jp@jptechnical.com>
+To: <helpdesktest@example3.org>
+
+This is the content of the email. This is from MS Outlook 2003 through
+exchange. This one, however, is text only.
+
+Jesse Perry=20
+jp@jptechnical.com=20
+JP Technical=20
+www.jptechnical.com=20
+office 360-829-6550=20
+fax 775-257-0630=20
+

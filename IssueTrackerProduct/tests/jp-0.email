@@ -1,0 +1,165 @@
+Return-path: <jp@jptechnical.com>
+Envelope-to: helpdesktest@example3.org
+Delivery-date: Thu, 20 Mar 2008 15:48:49 -0500
+Received: from example by element.websitewelcome.com with local-bsmtp (Exim 4.68)
+	(envelope-from <jp@jptechnical.com>)
+	id 1JcRgv-00024O-2B
+	for helpdesktest@example3.org; Thu, 20 Mar 2008 15:48:49 -0500
+X-Spam-Checker-Version: SpamAssassin 3.3.0-r613124 (2008-01-18) on
+	element.websitewelcome.com
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.4 required=8.0 tests=AWL,HTML_MESSAGE,
+	RP_MATCHES_RCVD autolearn=disabled version=3.3.0-r613124
+Received: from mail.jptechnical.com ([71.216.183.25]:3772 helo=jptechnical.com)
+	by element.websitewelcome.com with esmtp (Exim 4.68)
+	(envelope-from <jp@jptechnical.com>)
+	id 1JcRgu-00024F-SW
+	for helpdesktest@example3.org; Thu, 20 Mar 2008 15:48:49 -0500
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----_=_NextPart_001_01C88ACB.CD608363"
+Subject: Test for IssueTrackerProduct mail parser
+X-MimeOLE: Produced By Microsoft Exchange V6.5
+Date: Thu, 20 Mar 2008 13:48:49 -0700
+Message-ID: <466ECD862F94B149B3642E566C67C8D38FB4@companyweb>
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: Test for IssueTrackerProduct mail parser
+thread-index: AciKy8xpS209BBl9Sw2H5n/1F1iZ9A==
+From: "Jesse Perry" <jp@jptechnical.com>
+To: <helpdesktest@example3.org>
+
+This is a multi-part message in MIME format.
+
+------_=_NextPart_001_01C88ACB.CD608363
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+This is the content of the email. This is from MS Outlook 2003 through
+exchange.
+
+=20
+
+Jesse Perry=20
+
+jp@jptechnical.com <mailto:jp@jptechnical.com> =20
+JP Technical=20
+www.jptechnical.com
+<outbind://35-000000009F3A6DEBBFB02A48BC5BCE879F0A61B007000308BF5B8A2F33
+49ACC9E0E8460E3249000000002FEF00000308BF5B8A2F3349ACC9E0E8460E3249000000
+01975F0000/exchweb/bin/redir.asp?URL=3Dhttp://www.jptechnical.com/> =20
+office 360-829-6550=20
+fax 775-257-0630=20
+
+=20
+
+
+------_=_NextPart_001_01C88ACB.CD608363
+Content-Type: text/html;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:o=3D"urn:schemas-microsoft-com:office:office" =
+xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns=3D"http://www.w3.org/TR/REC-html40">
+
+<head>
+<META HTTP-EQUIV=3D"Content-Type" CONTENT=3D"text/html; =
+charset=3Dus-ascii">
+<meta name=3DGenerator content=3D"Microsoft Word 11 (filtered medium)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:Arial;
+	color:windowtext;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+
+</head>
+
+<body lang=3DEN-US link=3Dblue vlink=3Dpurple>
+
+<div class=3DSection1>
+
+<p class=3DMsoNormal><font size=3D2 face=3DArial><span =
+style=3D'font-size:10.0pt;
+font-family:Arial'>This is the content of the email. This is from MS =
+Outlook
+2003 through exchange.<o:p></o:p></span></font></p>
+
+<p class=3DMsoNormal><font size=3D2 face=3DArial><span =
+style=3D'font-size:10.0pt;
+font-family:Arial'><o:p>&nbsp;</o:p></span></font></p>
+
+<p class=3DMsoNormal =
+style=3D'mso-margin-top-alt:auto;mso-margin-bottom-alt:auto'><font
+size=3D2 color=3Dblack face=3DVerdana><span =
+style=3D'font-size:10.0pt;font-family:Verdana;
+color:black'>Jesse Perry </span></font><font size=3D2 =
+face=3DVerdana><span
+style=3D'font-size:10.0pt;font-family:Verdana'><o:p></o:p></span></font><=
+/p>
+
+<p class=3DMsoNormal =
+style=3D'mso-margin-top-alt:auto;mso-margin-bottom-alt:auto'><font
+size=3D2 face=3DVerdana><span =
+style=3D'font-size:10.0pt;font-family:Verdana'><a
+href=3D"mailto:jp@jptechnical.com" target=3D"_blank"
+title=3D"mailto:jp@jptechnical.com"><span =
+title=3D"mailto:jp@jptechnical.com">jp@jptechnical.com</span></a>
+<br>
+JP Technical <br>
+<a
+href=3D"outbind://35-000000009F3A6DEBBFB02A48BC5BCE879F0A61B007000308BF5B=
+8A2F3349ACC9E0E8460E3249000000002FEF00000308BF5B8A2F3349ACC9E0E8460E32490=
+0000001975F0000/exchweb/bin/redir.asp?URL=3Dhttp://www.jptechnical.com/"
+target=3D"_blank"
+title=3D"outbind://35-000000009F3A6DEBBFB02A48BC5BCE879F0A61B007000308BF5=
+B8A2F3349ACC9E0E8460E3249000000002FEF00000308BF5B8A2F3349ACC9E0E8460E3249=
+00000001975F0000/exchweb/bin/redir.asp?URL=3Dhttp://www.jptechnical.com/&=
+#10;blocked::/exchweb/bin/redir.asp?URL=3Dhttp://www."><span
+title=3D"outbind://35-000000009F3A6DEBBFB02A48BC5BCE879F0A61B007000308BF5=
+B8A2F3349ACC9E0E8460E3249000000002FEF00000308BF5B8A2F3349ACC9E0E8460E3249=
+00000001975F0000/exchweb/bin/redir.asp?URL=3Dhttp://www.jptechnical.com/"=
+>www.jptechnical.com</span></a>
+<br>
+office 360-829-6550 <br>
+fax 775-257-0630 </span></font><font size=3D2 face=3DVerdana><span
+style=3D'font-size:10.0pt;font-family:Verdana'><o:p></o:p></span></font><=
+/p>
+
+<p class=3DMsoNormal><font size=3D3 face=3D"Times New Roman"><span =
+style=3D'font-size:
+12.0pt'><o:p>&nbsp;</o:p></span></font></p>
+
+</div>
+
+</body>
+
+</html>
+
+------_=_NextPart_001_01C88ACB.CD608363--
