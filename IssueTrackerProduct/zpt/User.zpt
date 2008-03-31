@@ -287,7 +287,6 @@ Display format:
 <br />&nbsp;
 
 
-<a name="followedup"></a>
 <div id="followedup" 
  tal:define="mythreads options/mythreads; threadcounts options/threadcounts;
 	     len_mythreads python:len(mythreads);
