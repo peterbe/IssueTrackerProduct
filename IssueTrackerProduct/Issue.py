@@ -581,12 +581,14 @@ class IssueTrackerIssue(IssueTracker):
         if not self.isConfidential() or self.hasManagerRole() or self.isYourIssue():
             #self.RememberIssueVisit(self.getId())
             self.RememberRecentIssue(self.getId(), 'viewed')
-            fake_fileattachments = self._getFakeFileattachments()
-            if fake_fileattachments:
-                m = "Filename entered but no file content"
-                SubmitError = {'fileattachment':m}
-                self.REQUEST.set('previewissue',None)
-                return self.ShowIssue(self, self.REQUEST, SubmitError=SubmitError, **kw)
+            
+            if REQUEST.get('fileattachment', []):
+                fake_fileattachments = self._getFakeFileattachments(REQUEST.get('fileattachment'))
+                if fake_fileattachments:
+                    m = "Filename entered but no file content"
+                    SubmitError = {'fileattachment':m}
+                    self.REQUEST.set('previewissue',None)
+                    return self.ShowIssue(self, self.REQUEST, SubmitError=SubmitError, **kw)
             
             self._uploadTempFiles()
             return self.ShowIssue(self, self.REQUEST, **kw)
@@ -965,10 +967,11 @@ class IssueTrackerIssue(IssueTracker):
                     else:
                         self._rememberProvenNotSpambot()            
 
-            fake_fileattachments = self._getFakeFileattachments()
-            if fake_fileattachments:
-                m = "Filename entered but no file content"
-                SubmitError['fileattachment'] = m
+            if REQUEST.get('fileattachment', []):
+                fake_fileattachments = self._getFakeFileattachments(request.get('fileattachment'))
+                if fake_fileattachments:
+                    m = "Filename entered but no file content"
+                    SubmitError['fileattachment'] = m
 
             if SubmitError:
                 return self.ShowIssue(self, REQUEST, SubmitError=SubmitError)
@@ -1066,7 +1069,8 @@ class IssueTrackerIssue(IssueTracker):
             self._moveTempfiles(followupobject)
     
             # upload new file attachments
-            self._uploadFileattachments(followupobject)
+            if request.get('fileattachment', []):
+                self._uploadFileattachments(followupobject, request.get('fileattachment'))
             
             self.nullifyTempfolderREQUEST()
             
@@ -2946,7 +2950,8 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         return ('title', 'description', 'status', 'type', 'urgency',
                 'sections', 'fromname', 'email', 'url2issue',
                 'confidential', 'hide_me', 'display_format',
-                'acl_adder', 'assignee_identifier', 'is_autosave')
+                'acl_adder', 'assignee_identifier', 'is_autosave',
+                'Tempfolder_fileattachments')
 
     def get__dict__nicely(self):
         """ same as get__dict__keys() but we wrap it nicely """

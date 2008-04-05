@@ -18,7 +18,7 @@ function autosave() {
    $.post('AutoSaveDraftIssue', $(document.ai).fastSerialize(),
           function(resp) {
              if (resp) {
-               $('input[name="draft_issue_id"]').val(resp);
+                $('input[name="draft_issue_id"]').val(resp);
              }
           });
    

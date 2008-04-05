@@ -24,7 +24,8 @@ ZopeTestCase.installProduct('PythonScripts')
 ZopeTestCase.installProduct('IssueTrackerProduct')
 
 from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
-from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE, DEBUG
+from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE, \
+ DEBUG, ISSUE_DRAFT_METATYPE, TEMPFOLDER_REQUEST_KEY
 
 #------------------------------------------------------------------------------
 #
@@ -84,6 +85,36 @@ if 'Security' in issue.getSections():
 
 #------------------------------------------------------------------------------
 
+class NewFileUpload:
+    def __init__(self, file_path):
+        self.file = open(file_path)
+        self.filename = os.path.basename(file_path)
+        self.file_path = file_path
+        
+    def read(self, bytes=None):
+        if bytes:
+            return self.file.read(bytes)
+        else:
+            return self.file.read()
+    
+    def seek(self, bytes, mode=0):
+        self.file.seek(bytes, mode)
+        
+    def tell(self):
+        return self.file.tell()
+        
+class DodgyNewFileUpload:
+    """ a file upload that returns a blank string no when you read it """
+    
+    def __init__(self, file_path):
+        self.file = open(file_path)
+        self.filename = os.path.basename(file_path)
+        self.file_path = file_path    
+    
+    def read(self, bytes=None, mode=0):
+        return ""
+    
+#------------------------------------------------------------------------------    
 
 class TestBase(ZopeTestCase.ZopeTestCase):
 
@@ -608,7 +639,84 @@ class IssueTrackerTestCase(TestBase):
         
         issue = tracker.getIssueObjects()[0]
         self.assertEqual(issue.getModifyTimestamp(), tracker.getModifyTimestamp())
+
+    def test_okFileAttachment(self):
+        """ try to add an issue with a crap file attachment """
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        request.set('title', u'TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('fileattachment', NewFileUpload(os.path.abspath(__file__)))
         
+        tracker.SubmitIssue(request)
+        issue = tracker.getIssueObjects()[0]
+        self.assertEqual(issue.countFileattachments(), 1)
+        
+    def test_crapFileAttachment(self):
+        """ try to add an issue with a crap file attachment """
+        
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        request.set('title', u'TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('fileattachment', DodgyNewFileUpload(os.path.abspath(__file__)))
+        
+        # this should fail to add an issue
+        tracker.SubmitIssue(request)
+        self.assertEqual(len(tracker.getIssueObjects()), 0)
+        
+        # this time, try to upload it with a file that is empty
+        empty_file = os.path.join(os.path.dirname(__file__), 'size0_file.jpg')
+        request.set('fileattachment', NewFileUpload(os.path.abspath(empty_file)))
+        
+        tracker.SubmitIssue(request)
+        self.assertEqual(len(tracker.getIssueObjects()), 0)
+        
+        
+    def test_saveIssueDraft(self):
+        """ try to add an issue with a crap file attachment """
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        title = u'TITLE'; request.set('title', title)
+        fromname = u'From name'; request.set('fromname', fromname)
+        email = u'email@address.com'; request.set('email', email)
+        description = u'DESCRIPTION'; request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('fileattachment', NewFileUpload(os.path.abspath(__file__)))
+        
+        tracker.SaveDraftIssue(request)
+
+        # Because getMyIssueDrafts() depends on cookies and cookies don't
+        # work in ZopeTestCase :( we have to fake this a bit
+        drafts = tracker.getDraftsContainer().objectValues(ISSUE_DRAFT_METATYPE)
+        assert len(drafts) == 1
+
+        # Now check that draft
+        draft = drafts[0]
+        self.assertEqual(draft.getTitle(), title)
+        self.assertEqual(draft.getDescription(), description)
+        self.assertEqual(draft.getFromname(), fromname)
+        self.assertEqual(draft.getEmail(), email)
+        self.assertEqual(draft.getType(), tracker.getDefaultType())
+        self.assertEqual(draft.getUrgency(), tracker.getDefaultUrgency())
+        
+        # from this it will be possible to get the files back via the
+        # tempfolder
+        assert request.get(TEMPFOLDER_REQUEST_KEY), "no tempfolder set in request"
+        tempfolder = tracker._getTempFolder()
+        files = tempfolder[request.get(TEMPFOLDER_REQUEST_KEY)].objectValues('File')
+        assert files, "no temp files"
+        temp_file = files[0]
+        self.assertEqual(temp_file.getId(), os.path.basename(__file__))
         
         
         

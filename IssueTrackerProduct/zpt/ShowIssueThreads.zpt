@@ -31,10 +31,10 @@
 				
     <a class="plink"
        tal:condition="python:in_completelist"
-       tal:attributes="href string:#i-${thread/aq_parent/getId}-${repeat/thread/number}">#</a>
+       tal:attributes="href string:#i-${thread/aq_parent/getId}-${repeat/thread/number}">permanent link</a>
     <a class="plink"
        tal:condition="not:in_completelist"
-       tal:attributes="href string:#i${repeat/thread/number}">#</a>
+       tal:attributes="href string:#i${repeat/thread/number}">permanent link</a>
                                 
 	
     </div>

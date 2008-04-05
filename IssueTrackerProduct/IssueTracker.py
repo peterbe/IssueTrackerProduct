@@ -137,7 +137,7 @@ from Utils import unicodify
 from Webservices import IssueTrackerWebservices
 from Permissions import *
 from Constants import *
-
+from Errors import NotAFileError
 
 
 #----------------------------------------------------------------------------
@@ -1111,9 +1111,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def translateSortorderOption(self, variable):
         """ return a nice representation of the variable for the Properties tab. """
         if variable == 'modifydate':
-            return _("Modification date")
+            return _(u"Modification date")
         elif variable == 'issuedate':
-            return _("Creation date")
+            return _(u"Creation date")
         else:
             return variable.capitalize()
 
@@ -2961,8 +2961,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             upload_folder = request[TEMPFOLDER_REQUEST_KEY]
             # Maybe the actual folder doesn't exist any more
             tempfolder = self._getTempFolder()
-            if upload_folder is None or not hasattr(tempfolder, upload_folder):
-                return input_field%initsize
+            if upload_folder is None or not safe_hasattr(tempfolder, upload_folder):
+                return input_field % initsize
             files = tempfolder[upload_folder].objectValues('File')
             try:
                 file = files[index]
@@ -3000,8 +3000,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             temp_folder_id = request.get(rkey)
         
         if request.has_key('fileattachment'):
+            files = request.get('fileattachment')
+            if not isinstance(files, (tuple, list)):
+                files = [files]
+                
             # fileattachment is a list, deal with each item
-            for file in request.get('fileattachment'):
+            for file in files:
                 if self._isFile(file):
                     if temp_folder_id is None:
                         temp_folder_id = self._generateTempFolder()
@@ -3031,7 +3035,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if temp_folder_id is not None:
                 request.set(rkey, temp_folder_id)
 
-        return "anything"
+        return temp_folder_id
     
     security.declarePublic('_removeUnConfirmedFiles')
     def _removeUnConfirmedFiles(self):
@@ -3066,9 +3070,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if getattr(file, 'filename').strip() != '':
                 # read 1 byte
                 if file.read(1) == "":
-                    m = _("Filename provided (%s) but not file content")
-                    m = m%getattr(file, 'filename')
-                    raise "NotAFile", m
+                    m = _(u"Filename provided (%s) but not file content")
+                    m = m % getattr(file, 'filename')
+                    raise NotAFileError, m
                 else:
                     file.seek(0) #rewind file
                     return True
@@ -3368,10 +3372,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
 
         # Check that all attempts of file attachments really are files
-        fake_fileattachments = self._getFakeFileattachments()
-        if fake_fileattachments:
-            m = _("Filename entered but no actual file content")
-            SubmitError['fileattachment'] = m
+        if request.get('fileattachment', []):
+            fake_fileattachments = self._getFakeFileattachments(request.get('fileattachment'))
+            if fake_fileattachments:
+                m = _("Filename entered but no actual file content")
+                SubmitError['fileattachment'] = m
             
         # Check the spambot prevention
         if self.useSpambotPrevention():
@@ -3535,7 +3540,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self._moveTempfiles(issue)
 
         # upload new file attachments
-        self._uploadFileattachments(issue)
+        if request.get('fileattachment', []):
+            self._uploadFileattachments(issue, request.get('fileattachment'))
 
         # create assignment object
         if assignee is not None:
@@ -3699,16 +3705,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
 
 
-    def _getFakeFileattachments(self):
+    def _getFakeFileattachments(self, files):
         """ upload all new file attachments """
-        request = self.REQUEST
-
+        if not isinstance(files, (tuple, list)):
+            files = [files]
+            
         fakes = []
 
-        for file in request.get('fileattachment', []):
+        for file in files:
             try:
                 ok = self._isFile(file)
-            except "NotAFile":
+            except NotAFileError:
                 # if this exception is raised, it means that the user
                 # didn't press the "Browse..." button but rather wrote
                 # something for the file name.
@@ -3870,11 +3877,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # del!!
         
     
-    def _uploadFileattachments(self, destination):
+    def _uploadFileattachments(self, destination, files):
         """ upload all new file attachments """
-        request = self.REQUEST
+        if not isinstance(files, (tuple, list)):
+            files = [files]
 
-        for file in request.get('fileattachment', []):
+        for file in files:
             if self._isFile(file):
                 filename = getattr(file, 'filename')
                 id=filename[max(filename.rfind('/'),
@@ -3895,8 +3903,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                             # this IOError
                             pass
                 except:
-                    LOG(self.__class__, PROBLEM, "Could not upload file "\
-                        "id=%s"%id)
+                    
+                    logger.warn("Could not upload file id=%s" % id, exc_info=True)
+            else:
+                logger.warn("Uploaded file %s was not a valid file" % file)
 
 
     security.declarePublic('_moveTempfiles')
@@ -4874,7 +4884,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return a suitable page title for this list (ListIssues or CompleteList) """
         request = self.REQUEST
         if request.get('q'):
-            return "Search Results"
+            return _(u"Search Results")
         elif request.get('report'):
             try:
                 # try to find the actual title of the report itself
@@ -4884,21 +4894,21 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     return "Report: %s" % report.title_or_id()
                 
             except:
-                return "Report"
+                return _(u"Report")
         elif request.get('i'):
             i = ss(request.get('i'))
             if i == 'assigned':
-                return "Issues assigned to you"
+                return _(u"Issues assigned to you")
             elif i == 'added':
-                return "Issues you have added"
+                return _(u"Issues you have added")
             elif i == 'followedup':
-                return "Issues you have followed up on"
+                return _(u"Issues you have followed up on")
             elif i == 'subscribed':
-                return "Issues you have subscribed to"
+                return _(u"Issues you have subscribed to")
             else:
-                return "Your Issues"
+                return _(u"Your Issues")
         else:
-            return "List Issues"
+            return _(u"List Issues")
             
     
     def setWhichList(self, what):
@@ -5983,9 +5993,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             main_option = self.getFilterlogic()
             
             if main_option == 'show':
-                start = _("Only ")
+                start = _(u"Only ")
             else:
-                start = _("Hide ")
+                start = _(u"Hide ")
                 
             name = ""
             if f_statuses:
@@ -10836,8 +10846,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             return Utils.uniqify(ids_cookie+ids_user)
         
-
-
             
     def getMyIssueDrafts(self, skip_draft_issue_id=None, autosaved_only=False):
         """ return a list of issue draft objects """
@@ -11097,9 +11105,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                  or \
                  draft_issue_id is not None \
                ):
-
             draft_issue_id = __saver(REQUEST, draft_issue_id)
-            
             kw['draft_issue_id'] = draft_issue_id
             kw['draft_saved'] = True
             
@@ -11199,6 +11205,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                  is_autosave=is_autosave,
                  Tempfolder_fileattachments=rget('Tempfolder_fileattachments'),
                  )
+                 
 
         # remember this
         issueuser = self.getIssueUser()
@@ -11244,7 +11251,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         attachments when needing to """
         try:
             self._uploadTempFiles()
-        except "NotAFile":
+        except NotAFileError:
             REQUEST.set('previewissue', None)
             m = _("Filename entered but no actual file content")
             if kw.has_key('SubmitError'):
