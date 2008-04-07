@@ -112,8 +112,8 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         
         #self.has_redirected = False
         
-    def tearDown(self):
-        pass
+#    def tearDown(self):
+#        pass
 
 
 class POP3TestCase(TestBase):

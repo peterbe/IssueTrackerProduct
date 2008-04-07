@@ -149,8 +149,6 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         
         #self.has_redirected = False
         
-    def tearDown(self):
-        pass
     
 class IssueTrackerTestCase(TestBase):
     
@@ -717,6 +715,49 @@ class IssueTrackerTestCase(TestBase):
         assert files, "no temp files"
         temp_file = files[0]
         self.assertEqual(temp_file.getId(), os.path.basename(__file__))
+
+    def test_searchIssues(self):
+        """ basic search tests """
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        title = u'titles are working'; request.set('title', title)
+        fromname = u'From name'; request.set('fromname', fromname)
+        email = u'email@address.com'; request.set('email', email)
+        description = u'DESCRIPTION is a in the this test'
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('fileattachment', NewFileUpload(os.path.abspath(__file__)))
+        
+        tracker.SubmitIssue(request)
+        assert tracker.getIssueObjects()
+        
+        issue = tracker.getIssueObjects()[0]
+
+        # search and find it
+        q = 'working'
+        self.assertEqual(issue, tracker._searchCatalog(q, search_only_on=None)[0])
+        self.assertEqual(issue, tracker._searchCatalog(q, search_only_on='title')[0])
+        
+        # don't expect to find it
+        q = 'notmentioned'
+        self.assertEqual(tracker._searchCatalog(q, search_only_on='description'), [])
+        self.assertEqual(tracker._searchCatalog(q), [])
+        
+        # search fuzzy and find it
+        q = 'title'
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
+        # it should be case insensitive
+        q = 'DeScriPtion'
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
+        
+        # low level test of searching by filename
+        self.assertEqual(issue, tracker._searchByFilename(os.path.basename(__file__))[0])
+        # and do it fuzzy
+        self.assertEqual(issue, tracker._searchByFilename(os.path.basename(__file__).upper())[0])
+        # or without the extension
+        name = os.path.splitext(os.path.basename(__file__))[0]
+        self.assertEqual(issue, tracker._searchByFilename(name)[0])
         
         
         

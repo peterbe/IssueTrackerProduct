@@ -99,6 +99,7 @@ from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
 from App.ImageFile import ImageFile
 from ZPublisher.HTTPRequest import record
+from zExceptions import NotFound, Unauthorized
 
 # Is CMF installed?
 try:
@@ -137,7 +138,7 @@ from Utils import unicodify
 from Webservices import IssueTrackerWebservices
 from Permissions import *
 from Constants import *
-from Errors import NotAFileError
+from Errors import *
 
 
 #----------------------------------------------------------------------------
@@ -2878,12 +2879,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         stack = request['TraversalRequestNameStack']
         popped = []
         
-        # XXX this works but I'm still not sure I want to do it
-        #print "BEFORE", stack
-        #if stack and self._isUsingBTreeFolder() and BTREEFOLDER2_ID not in stack:
-        #    stack.append(BTREEFOLDER2_ID)
-        #print "AFTER", stack
-        #print
 
         _special = 'REQUEST'
         # things to pop out
@@ -3520,8 +3515,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     display_format, acl_adder=acl_adder)
                     
 
-        # catalog it
-        issue.index_object()
         
         # remember it
         #self.RememberAddedIssue(genid)
@@ -3538,10 +3531,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         # Also upload the fileattachments
         self._moveTempfiles(issue)
-
+        
         # upload new file attachments
         if request.get('fileattachment', []):
             self._uploadFileattachments(issue, request.get('fileattachment'))
+            
+        # catalog it
+        issue.index_object()
 
         # create assignment object
         if assignee is not None:
@@ -3625,10 +3621,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                                  incontainer=self._getIssueContainer())
             
         if title.strip() == '':
-            raise "NoSubject", "Issue has no subject line"
+            raise IssueInputError, "Issue has no subject line"
         
         if status.lower() not in [x.lower() for x in self.getStatuses()]:
-            raise "NoStatus", "Unrecognized issue status %r" % status
+            raise IssueInputError, "Unrecognized issue status %r" % status
         
         if type_ not in self.types:
             raise ValueError, "Unrecognized issue type"
@@ -3663,7 +3659,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 object = self.unrestrictedTraverse(userfolderpath)
                 assert name in object.user_names()
             except:
-                raise "NoACLAdder", "No ACL user object found"
+                raise NoACLAdderError, "No ACL user object found"
             
         # Fine, submit it
         create_method = self._createIssueObject
@@ -4582,7 +4578,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def saveEmailstring(self, to):
         """ Save to string as a cookie """
-        raise "DeprecatedError"
+        raise DeprecatedError
         key = EMAILSTRING_COOKIEKEY
         key = self.defineInstanceCookieKey(key)
         self.set_cookie(key, to)
@@ -4602,7 +4598,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def saveEmailfriends(self, friends):
         """ Save to string as a cookie with '|' between each """
-        raise "DeprecatedError"
+        raise DeprecatedError
         if not isinstance(friends, list):
             friends = [friends]
         key = EMAILFRIENDS_COOKIEKEY
@@ -5076,7 +5072,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             elif page == 'completelist':
                 page = '/CompleteList'
             else:
-                raise "NotFound"
+                raise NotFound
             self.REQUEST.RESPONSE.redirect(self.getRootURL()+page)
         
     def HideFilter(self, page='ListIssues', REQUEST=None):
@@ -5089,7 +5085,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         elif page == 'completelist':
             page = '/CompleteList'
         else:
-            raise "NotFound"
+            raise NotFound
         
         url = self.getRootURL()+page
         if REQUEST is not None:
@@ -5288,8 +5284,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         #        extra.vocabulary = 'Vocabulary'
         #        zcatalog.addIndex(idx, 'TextIndex', extra)
             
-        #raise "STOP", 'lukasz'
-    
         zctextindexes = (
           ('title', 'getTitle_idx'),
           ('description', 'getDescription_idx'),
@@ -5446,14 +5440,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     userfolderpath, name = assignee_identifier.split(',')
                 except ValueError:
                     m = "Invalid assignee identifier (%s)"
-                    raise "AssigneeNotFound", m % assignee_identifier
+                    raise AssigneeNotFoundError, m % assignee_identifier
                 
                 userfolder = self.unrestrictedTraverse(userfolderpath)
                 if name in userfolder.user_names():
                     user = self.getIssueUserObject(assignee_identifier)
                 else:
                     m = "Invalid assignee identifier (%s)"
-                    raise "AssigneeNotFound", m % assignee_identifier
+                    raise AssigneeNotFoundError, m % assignee_identifier
             
                 to_name = user.getFullname()
                 to_email = user.getEmail()
@@ -6169,7 +6163,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             elif page == 'completelist':
                 page = '/CompleteList'
             else:
-                raise "NotFound"
+                raise NotFound
             url = self.getRootURL()+page
             url = Utils.AddParam2URL(url, {'saved-filter':id})
             REQUEST.RESPONSE.redirect(url)
@@ -6263,7 +6257,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ delete filtervaluers that have this exact filtername, and match also
         either the acl_adder or adder_fromname and adder_email together. """
         if not (acl_adder or adder_fromname and adder_email or cookie_key):
-            raise "Unmatchable", "must provide either acl_adder or "\
+            raise UnmatchableError, "must provide either acl_adder or "\
                                  "adder_fromname and adder_email or cookie_key"
 
         container = self._getFilterValueContainer()
@@ -6628,7 +6622,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             request.RESPONSE.redirect(request.URL1+listpage)
         else:
             msg = "The issueID could not be found in the REQUEST"
-            raise "IssueTrackerError", msg
+            raise ValueError, msg
 
 
     ## Sys admin
@@ -7086,9 +7080,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             _exact_title_search = catalog.searchResults(title=q)
             catalogs += _exact_title_search
         
-            _title_search = catalog.searchResults(title=titleq)
-            catalogs += _title_search
-        
+            if not _exact_title_search:
+                _title_search = catalog.searchResults(title=titleq)
+                catalogs += _title_search
+                
         ss_q = ss(q)
         
         if ss_q in [ss(x) for x in self.statuses]:
@@ -8205,11 +8200,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         try:
             portnr = int(portnr)
         except ValueError:
-            raise "InvalidPort", "Port number must be a number"
+            raise ValueError, "Port number must be a number"
         
         root = self.getPOP3Root()
         if hasattr(root, genid):
-            raise "DuplicateId", "POP3Account already exists"
+            raise ValueError, "POP3Account already exists"
         
         pop3account = POP3Account(genid, hostname, username, password,
                                   portnr,
@@ -8337,7 +8332,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 portnr = int(portnr)
                 account.manage_editAccount(portnr=portnr)
             except ValueError:
-                raise "InvalidPort", "Port number must be a number"
+                raise ValueError, "Port number must be a number"
         if username is not None and username.strip() != '':
             account.manage_editAccount(username=username.strip())
         if password is not None and password.strip() != password_dummy:
@@ -8411,7 +8406,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         always_notify = ",".join(self.always_notify)
         always_notify = self.preParseEmailString(always_notify, aslist=1)
         if email_address.lower() in [x.lower() for x in always_notify]:
-            raise "BusyEmailAddress", "%s is already used as always-notify"%\
+            raise ValueError, "Email %s is already used as always-notify"%\
                   email_address
         
         genid = email_address.replace('@','-at-').lower()
@@ -8462,7 +8457,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
             email_address = request.get(rkey_email_address)
             if not self.ValidEmailAddress(email_address):
-                raise "InvalidEmail", "Invalid email address %s"%email_address
+                raise ValueError, "Invalid email address %s"%email_address
             defaultsections = request.get(rkey_defaultsections)
             default_type = request.get(rkey_default_type)
             default_urgency = request.get(rkey_defaul_urgency)
@@ -8534,7 +8529,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """
         
         if email_Parser is None:
-            raise "NoEmailPackage", "The email package is not installed"
+            raise NotImplementedError, "The email package is not installed"
         
         # a variable where we will collect all the messages if the verbose
         # parameter is True
@@ -9755,7 +9750,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         try:
             period = int(period)
         except:
-            raise "PeriodNotInteger", "The period must be an integer"
+            raise ValueError, "The period must be an integer"
         start_date = allissues[0].issuedate
         end_date = allissues[-1].issuedate
         difference_days = end_date - start_date
@@ -10518,7 +10513,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         zopeuser = self.getZopeUser()
         
         if not (issueuser or cmfuser or zopeuser):
-            raise "Unauthorized", "Not logged in"
+            raise Unauthorized, "Not logged in"
         
         if issueuser:
             path = issueuser.getIssueUserIdentifier()[0]
@@ -10539,7 +10534,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             REQUEST.set('change','details')
             return self.User(REQUEST, SubmitError=SubmitError)
         elif SubmitError:
-            raise "SubmitError", SubmitError
+            raise DataSubmitError, SubmitError
         
         
         # Go on, make the changes
@@ -10591,7 +10586,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         issueuser = self.getIssueUser()
         if not issueuser:
             m = "Not logged in as a user of Issue User Folder"
-            raise "NoIssueUser", m
+            raise UserSubmitError, m
 
         path = issueuser.getIssueUserIdentifier()[0]
         userfolder = self.unrestrictedTraverse(path)
@@ -10609,7 +10604,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             REQUEST.set('change','details')
             return self.User(REQUEST, SubmitError=SubmitError)
         elif SubmitError:
-            raise "SubmitError", SubmitError
+            raise DataSubmitError, SubmitError
 
         # Go on, make the changes
 
@@ -10665,12 +10660,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         issueuser = self.getIssueUser()
         if not issueuser:
             m = "Not logged in as a user of Issue User Folder"
-            raise "NoIssueUser", m
+            raise UserSubmitError, m
 
         # Check 2. Must have to change password
         if not issueuser.mustChangePassword():
             m = "You do not *have* to change password"
-            raise "NoMustChangePassword", m
+            raise UserSubmitError, m
 
         path = issueuser.getIssueUserIdentifier()[0]
         userfolder = self.unrestrictedTraverse(path)
@@ -10728,7 +10723,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         issueuser = self.getIssueUser()
         if not issueuser:
             m = "Not logged in as a user of Issue User Folder"
-            raise "NotIssueUser", m
+            raise UserSubmitError, m
 
         path = issueuser.getIssueUserIdentifier()[0]
         userfolder = self.unrestrictedTraverse(path)
@@ -10753,7 +10748,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             REQUEST.set('change', 'password')
             return page(REQUEST, SubmitError=SubmitError)
         elif SubmitError:
-            raise "SubmitError", SubmitError
+            raise DataSubmitError, SubmitError
 
         # Cool, let's move on
         vars = {'name':issueuser.getUserName(),
@@ -11642,7 +11637,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             pagetitle = "Issues you have followed up on "
 
         else:
-            raise "NothingToList", "No recognized action of what to list"
+            raise ValueError, "No recognized action of what to list"
 
         nr_issues = len(issues)
         if nr_issues == 0:
@@ -12391,7 +12386,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for path in all_paths:
             obj = self.restrictedTraverse(path)
             if obj.absolute_url().find(rooturl) == -1:
-                raise "SubmitError", "Invalid path to object %r" % path
+                raise DataSubmitError, "Invalid path to object %r" % path
 
             container = aq_parent(aq_inner(obj))
             container.manage_delObjects([obj.getId()])

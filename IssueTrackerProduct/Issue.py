@@ -35,6 +35,7 @@ from TemplateAdder import addTemplates2Class
 import Utils
 from Utils import unicodify
 from Constants import *
+from Errors import *
 from Permissions import VMS, ChangeIssuePermission
 from I18N import _
 
@@ -683,7 +684,7 @@ class IssueTrackerIssue(IssueTracker):
                     return hours_ + minutes_/60.0
                 
         # still here?!
-        raise "InvalidHours", "Hours not recognized, enter only a numeral (or decimal)"
+        raise ValueError, "Hours not recognized, enter only a numeral (or decimal)"
                     
             
         
@@ -2557,14 +2558,14 @@ class IssueTrackerIssue(IssueTracker):
             userfolderpath, name = assignee_identifier.split(',')
         except ValueError:
             m = "Invalid assignee identifier (%s)"
-            raise "AssigneeNotFound", m % assignee_identifier
+            raise AssigneeNotFoundError, m % assignee_identifier
         
         userfolder = self.unrestrictedTraverse(userfolderpath)
         if name in userfolder.user_names():
             user = self.getIssueUserObject(assignee_identifier)
         else:
             m = "Invalid assignee identifier (%s)"
-            raise "AssigneeNotFound", m % assignee_identifier
+            raise AssigneeNotFoundError, m % assignee_identifier
 
         acl_adder = ''
         issueuser = self.getIssueUser()
@@ -2616,12 +2617,8 @@ class IssueTrackerIssue(IssueTracker):
 
     def _sendAssignementEmail(self, to_name, to_email, from_name, from_email):
         """ Send a simple email to he who was assigned this issue """
-
-        raise "Deprecated", "We're using _sendAssignmentNotification() instead"
-        #self.sendEmail(msg, To, From, Subject, 
-        #               swallowerrors=not(DEBUG and True or False),
-        #               headers={EMAIL_ISSUEID_HEADER: self.getGlobalIssueId()})
-        
+        raise DeprecatedError, "We're using _sendAssignmentNotification() instead"
+    
     
     def _sendAssignmentNotification(self, assignment, to_email):
         """ create a notification object about this new assignment object """

@@ -35,7 +35,7 @@ from I18N import _
 manage_addIssueTrackerIssueThreadForm = DTMLFile('dtml/NotImplemented', globals())
 def manage_addIssueTrackerIssueThread(*args, **kw):
     """ This is not supported """
-    raise "WrongUse", "This method should not be used"
+    raise NotImplementedError, "This method should not be used"
 
 #----------------------------------------------------------------------------
 

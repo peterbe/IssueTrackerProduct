@@ -1,5 +1,8 @@
 -
 
+    Bug fixed: Search on title with wildcards (e.g. *keyword* matching
+    'subkeywords') only if no other title searches matched.
+
     Bug fixed: Emails with tabs in header values were before
     incorrectly stripped of this whitespace causing the set of headers
     to be shortened. Thanks Jesse Perry
