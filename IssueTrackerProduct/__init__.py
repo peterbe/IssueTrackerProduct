@@ -96,7 +96,16 @@ def initialize(context):
                 ReportScript.manage_addIssueReportScript,
                 ),
             icon='www/issuereportscript.gif',
-        )        
+        )
+        
+        def registerIcon(filename, **kw):
+            _registerIcon(OFS.misc_.misc_.IssueTrackerProduct, filename, **kw)
+            
+        def registerJS(filename, **kw):
+            _registerJS(OFS.misc_.misc_.IssueTrackerProduct, filename, **kw)
+        
+        def registerCSS(filename, **kw):
+            _registerCSS(OFS.misc_.misc_.IssueTrackerProduct, filename, **kw)
 
         registerIcon('issue.gif')
         registerIcon('issuedraft.gif')
@@ -270,7 +279,7 @@ def my_guess_content_type(path, data):
     return content_type, enc
 
 
-def registerIcon(filename, idreplacer={}, epath=None, startpath='www'):
+def _registerIcon(product, filename, idreplacer={}, epath=None, startpath='www'):
     # A helper function that takes an image filename (assumed
     # to live in a 'www' subdirectory of this package). It 
     # creates an ImageFile instance and adds it as an attribute
@@ -285,14 +294,14 @@ def registerIcon(filename, idreplacer={}, epath=None, startpath='www'):
     
     for k,v in idreplacer.items():
         objectid = objectid.replace(k,v)
-    setattr(OFS.misc_.misc_.IssueTrackerProduct, 
+    setattr(product,
             objectid, 
             #App.ImageFile.ImageFile(os.path.join(path, filename), globals())
             BetterImageFile(os.path.join(path, filename), globals())
             )
             
-def registerJS(filename, path='js', slim_if_possible=True):
-    product = OFS.misc_.misc_.IssueTrackerProduct
+def _registerJS(product, filename, 
+                path='js', slim_if_possible=True):
     objectid = filename
     setattr(product,
             objectid, 
@@ -307,8 +316,7 @@ def registerJS(filename, path='js', slim_if_possible=True):
             setattr(obj, 'path', new_path)
     
 
-def registerCSS(filename, path='css', slim_if_possible=True):
-    product = OFS.misc_.misc_.IssueTrackerProduct
+def _registerCSS(product, filename, path='css', slim_if_possible=True):
     objectid = filename
     setattr(product,
             objectid, 
