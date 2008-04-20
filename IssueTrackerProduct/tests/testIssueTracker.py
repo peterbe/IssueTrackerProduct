@@ -4,6 +4,7 @@
 ##
 
 import unittest
+from pprint import pprint
 
 import sys, os
 if __name__ == '__main__':
@@ -12,7 +13,7 @@ if __name__ == '__main__':
 from Globals import SOFTWARE_HOME    
 from Testing import ZopeTestCase
 from AccessControl import getSecurityManager
-from AccessControl.SecurityManagement import newSecurityManager
+from AccessControl.SecurityManagement import newSecurityManager, noSecurityManager
 
 import Acquisition
 
@@ -131,8 +132,8 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         dispatcher.manage_addIssueTracker('tracker', 'Issue Tracker')
         
         # install an error_log
-        dispatcher = self.folder.manage_addProduct['SiteErrorLog']
-        dispatcher.manage_addErrorLog()
+        #dispatcher = self.folder.manage_addProduct['SiteErrorLog']
+        #dispatcher.manage_addErrorLog()
 
         # install a MailHost
         if not DEBUG:
@@ -149,6 +150,28 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         
         #self.has_redirected = False
         
+    def set_cookie(self, key, value, expires=365, path='/',
+                   across_domain_cookie_=False,
+                   **kw):
+        
+        self.app.REQUEST.cookies[key] = value
+        
+class TestFunctionalBase(ZopeTestCase.FunctionalTestCase):
+
+    def afterSetUp(self):
+        # install an issue tracker
+        dispatcher = self.folder.manage_addProduct['IssueTrackerProduct']
+        dispatcher.manage_addIssueTracker('tracker', 'Issue Tracker')
+
+        # install a MailHost
+        if not DEBUG:
+            dispatcher = self.folder.manage_addProduct['MailHost']
+            dispatcher.manage_addMailHost('MailHost')
+
+        request = self.app.REQUEST
+        sdm = self.app.session_data_manager
+        request.set('SESSION', sdm.getSessionData())
+            
     
 class IssueTrackerTestCase(TestBase):
     
@@ -758,13 +781,191 @@ class IssueTrackerTestCase(TestBase):
         # or without the extension
         name = os.path.splitext(os.path.basename(__file__))[0]
         self.assertEqual(issue, tracker._searchByFilename(name)[0])
+
         
         
+    def test_filterIssues(self):
+        """ test to call filter issues and note how the filter should be saved and 
+        should be reusable later. """
+        
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        # first, the user who performs this test is a normal zope acl 
+        # user. Let's add a name and email so that we can make sure 
+        # this is information is saved in the saved filter
+        self.set_cookie(tracker.getCookiekey('name'), u'Bob')
+        self.set_cookie(tracker.getCookiekey('email'), u'bob@test.com')
+            
+        # initially there shouldn't be a folder called 'saved-filters'
+        self.assertFalse(hasattr(tracker, 'saved-filters'))
+        # and there shouldn't be a zcatalog called 'saved-filters-catalog'
+        self.assertFalse(hasattr(tracker, 'saved-filters-catalog'))
+        
+        # On the homepage, the links to see only say issues "On hold" is
+        # /ListIssues?Filterlogic=show&f-statuses=on%20hold
+        # Let's mimick that:
+        request.set('Filterlogic','show')
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        # this should now have create the saved-filters folder 
+        # and the saved-filters-catalog
+        self.assertTrue(hasattr(tracker, 'saved-filters'))
+        self.assertTrue(hasattr(tracker, 'saved-filters-catalog'))
+        
+        # let's look at what was created in the saved-filters folder
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        
+        # since I'm here logged into Zope as a normal Zope user
+        # we can expect to find that the saved filter should be to me
+        zopeuser = tracker.getZopeUser()
+        path = '/'.join(zopeuser.getPhysicalPath())
+        name = zopeuser.getUserName()
+        acl_adder = ','.join([path, name])
+        saved_filter = saved_filters[0]
+        
+        self.assertEqual(saved_filter.acl_adder, acl_adder)
+        self.assertEqual(saved_filter.getTitle(), u"Only on hold issues")
+        # this is who created the filter (quite unimportant)
+        self.assertEqual(saved_filter.adder_fromname, u'Bob')
+        self.assertEqual(saved_filter.adder_email, 'bob@test.com')
+        # and we didn't need to associate with a cookie key
+        self.assertEqual(saved_filter.key, '')
+        
+        # the logic was to show
+        self.assertEqual(saved_filter.filterlogic, 'show')
+        
+        # some attributes are automatically set for the issue metadata
+        self.assertEqual(saved_filter.sections, None)
+        self.assertEqual(saved_filter.urgencies, None)
+        self.assertEqual(saved_filter.types, None)
+        self.assertEqual(saved_filter.statuses, [u'on hold'])
+        
+        # We should have a saved-filters-catalog created
+        catalog = tracker.getFilterValuerCatalog()
+        self.assertTrue(catalog is not None)
+        # and there should only be one brain it right now
+        self.assertTrue(len(catalog.searchResults()) == 1)
+        
+        saved_filter_from_brain = catalog.searchResults()[0].getObject()
+        self.assertTrue(saved_filter_from_brain == saved_filter)
+        
+        # the high level function getMySavedFilters() uses the catalog
+        # to extract the saved filters with the most recent one
+        # first.
+        saved_filter_from_mysavedfilters = tracker.getMySavedFilters()[0]
+        self.assertTrue(saved_filter_from_mysavedfilters == saved_filter)
+        
+
+        # If you run ListIssuesFiltered() again, it should have to create 
+        # one more new saved filter
+        tracker.ListIssuesFiltered()
+        
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        
+        # But if we change the parameters a little bit it should have 
+        # created a new saved filter
+        request.set('f-statuses','taken')
+        tracker.ListIssuesFiltered()
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 2)
+        
+        # getMySavedFilters() is smart in that it returns the filters ordered.
+        # Test that the more recent one comes first
+        saved_filters_from_mysavedfilters = tracker.getMySavedFilters()
+        self.assertEqual(saved_filters_from_mysavedfilters[0].statuses, [u'taken'])
+        
+        
+        
+        # Some options that can be passed directly to _ListIssuesFiltered
+        # are: 
+        #   skip_filter
+        #   skip_sort
+        #
+        # To set these for ListIssuesFiltered() you have to put them in the
+        # REQUEST. These are useful if you for example want to ignore possibly
+        # filters in session such as for the homepage where it uses 
+        # ListIssuesFiltered() but without any filtering.
+        # The skip_sort is useful to set when you don't want any sorting since
+        # sorting will only cost time.
+        # XXX: Only able to test this WITH issues
+
+        
+    def test_filterIssues_anonymous_user(self):
+        """ test filtering issues when the user is not logged in """
+        # when *not* logged in there are two ways to remember a saved filter:
+        #   by name and email
+        #   by a cookie key
+        # Let's first try to filter issues as a complete nobody
+        
+        noSecurityManager()
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        tracker.set_cookie = self.set_cookie
+        
+        # On the homepage, the links to see only say issues "On hold" is
+        # /ListIssues?Filterlogic=show&f-statuses=on%20hold
+        # Let's mimick that:
+        request.set('Filterlogic','show')
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        # let's look at what was created in the saved-filters folder
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        saved_filter = saved_filters[0]
+        self.assertTrue(saved_filter.getKey() in request.cookies.values())
+        
+        # run it again and it shouldn't create another saved filter
+        tracker.ListIssuesFiltered()
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        
+    def test_filterIssues_anonymous_named_user(self):
+        """ test filtering when the user is no logged in but has a name
+        and email in the cookie. """
+        
+        noSecurityManager()
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        tracker.set_cookie = self.set_cookie
+        
+        self.set_cookie(tracker.getCookiekey('name'), u'Bob')
+        self.set_cookie(tracker.getCookiekey('email'), u'bob@test.com')
+        
+        # On the homepage, the links to see only say issues "On hold" is
+        # /ListIssues?Filterlogic=show&f-statuses=on%20hold
+        # Let's mimick that:
+        request.set('Filterlogic','show')
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        # let's look at what was created in the saved-filters folder
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        saved_filter = saved_filters[0]
+        self.assertEqual(saved_filter.adder_email, 'bob@test.com')
+        self.assertEqual(saved_filter.adder_fromname, u'Bob')
+        
+        # run it again and it shouldn't create another saved filter
+        tracker.ListIssuesFiltered()
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)        
+    
+        
+        
+#class IssueTrackerFunctionalTestCase(TestFunctionalBase):
         
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
     suite.addTest(makeSuite(IssueTrackerTestCase))
+#    suite.addTest(makeSuite(IssueTrackerFunctionalTestCase))
     return suite
     
 if __name__ == '__main__':
