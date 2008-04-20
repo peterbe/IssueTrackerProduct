@@ -9,8 +9,7 @@
 	   tal:attributes="href here/ManagerLink">Managers</a></p>
 </tal:block>
 
-<tal:block tal:condition="python:here.hasManagerRole() or not here.PrivateStatistics()"
- tal:define="url_quote_plus nocall:modules/Products/PythonScripts/standard/url_quote_plus">
+<tal:block tal:condition="python:here.hasManagerRole() or not here.PrivateStatistics()">
 
 
 <table tal:define="statuslist here/CountStatuses; 
@@ -28,7 +27,7 @@
   <tbody tal:condition="statuslist_count"
          tal:repeat="statuscount statuslist" tal:attributes="class python:test(path('repeat/statuscount/odd'), 'lodd','leven')">
       <tr tal:define="percentage python:int(round(float(statuscount[1])/statuslist_count*100))">
-        <td><a tal:define="status python:statuscount[0]; status_url_quoted python:url_quote_plus(status)"
+        <td><a tal:define="status python:statuscount[0]; status_url_quoted python:here.ascii_url_quote_plus(status)"
         tal:attributes="href python:here.getStatus2ListLink(status)" tal:content="python:status.capitalize()">Status</a></td>
         <td align="left">&nbsp;
 	  <span tal:replace="python:statuscount[1]">count</span>
@@ -67,21 +66,22 @@
   <thead>
 	<tr class="lhead">
 		<td>Issues by sections</td>
-		<td width="75" align="center"
-		tal:repeat="status here/getStatuses"><a 
-		tal:define="status_url_quoted python:url_quote_plus(status)"
+		<td width="85" align="center"
+		tal:repeat="status here/getStatuses"><a
+		tal:define="status_url_quoted python:here.ascii_url_quote_plus(status)"
         tal:attributes="href python:here.getStatus2ListLink(status)" tal:content="python:status.capitalize()">Status</a>
 		
 		</td>
-		<td width="75" align="center">Total</td>
+		<td width="85" align="center">Total</td>
 	</tr>
   </thead>
   <tbody tal:repeat="sectioncount sectionslist" tal:attributes="class python:test(path('repeat/sectioncount/odd'), 'lodd','leven')">
       <tr>
-	  	<td><a tal:define="section python:sectioncount[0]; section_url_quoted python:url_quote_plus(section)" 
+	  	<td><a tal:define="section python:sectioncount[0]; 
+                                   section_url_quoted python:here.ascii_url_quote_plus(section)"
 		tal:attributes="href python:here.getSection2ListLink(section)" tal:content="section">Something</a></td>
 		<td tal:repeat="status here/getStatuses" align="center">
-		<span tal:replace="python:sectioncount[1][status]"></span>
+                <span tal:replace="python:here.unsafe_unicode_dict_getitem(sectioncount[1], status)"></span>
 		</td>
 		<td align="center" class="strong" tal:content="python:here.totalCountSections(sectioncount[1])"></td>
       </tr>

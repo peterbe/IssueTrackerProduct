@@ -387,13 +387,13 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
         """ create draft thread """
         self.id = str(id)
         self.issueid = issueid
-        self.action = action
-        self.title = title
-        self.comment = comment
+        self.action = unicodify(action)
+        self.title = unicodify(title)
+        self.comment = unicodify(comment)
         if isinstance(threaddate, basestring):
             threaddate = DateTime(threaddate)
         self.threaddate = threaddate
-        self.fromname = fromname
+        self.fromname = unicodify(fromname)
         self.email = email
         self.display_format = display_format
         
@@ -476,6 +476,7 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
         """ return a simplified description where the title is shown
         and then as much of the description as possible. """
         title = self.getTitle()
+        
         if title is None:
             title = self.action
         if not title.strip():
@@ -500,9 +501,9 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
                 desc = self.lengthLimit(desc, maxlength-len(title))
                 
             if html:
-                return "<b>%s</b>, %s"%(shortened, desc)
+                return u"<b>%s</b>, %s"%(shortened, desc)
             else:
-                return "%s, %s"%(shortened, desc)
+                return u"%s, %s"%(shortened, desc)
     
             
     def get__dict__keys(self):

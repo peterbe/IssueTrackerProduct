@@ -657,7 +657,7 @@ issue towards the top of List Issues.
   </td>
   <td align="left" valign="top">
 
-      <textarea name="statuses-and-verbs:lines" rows="6" cols="37"><dtml-var "_.string.join(getStatusesMerged(cleaned=1), '\n')" html_quote></textarea>
+      <textarea name="statuses-and-verbs:<dtml-var UNICODE_ENCODING>:ulines" rows="6" cols="37"><dtml-var "_.string.join(getStatusesMerged(cleaned=1), '\n')" html_quote></textarea>
 
       </td>
   <td align="left" valign="top">

@@ -878,6 +878,17 @@ class IssueTrackerTestCase(TestBase):
         saved_filters_from_mysavedfilters = tracker.getMySavedFilters()
         self.assertEqual(saved_filters_from_mysavedfilters[0].statuses, [u'taken'])
         
+        # Test the function getCurrentlyUsedSavedFilter(request_only=True)
+        assert tracker.getCurrentlyUsedSavedFilter() is None
+        
+        saved_filter_id = tracker.getCurrentlyUsedSavedFilter(request_only=False)
+        # now check that this is the correct one
+        self.assertEqual(saved_filter_id, saved_filters_from_mysavedfilters[0].getId())
+        # another (more long winded) way of checking this is by that since the 
+        # last filter was to filter by "taken". Check that this is what the 
+        # filter does that comes from getCurrentlyUsedSavedFilter(request_only=False)
+        current_saved_filter = getattr(getattr(tracker, 'saved-filters'), saved_filter_id)
+        self.assertEqual(current_saved_filter.statuses, [u'taken'])
         
         
         # Some options that can be passed directly to _ListIssuesFiltered
@@ -956,6 +967,65 @@ class IssueTrackerTestCase(TestBase):
         tracker.ListIssuesFiltered()
         saved_filters = getattr(tracker, 'saved-filters').objectValues()
         self.assertEqual(len(saved_filters), 1)        
+    
+
+    def test_filterIssues_recycleable(self):
+        """ test to call filter issues and note how the filter should be saved and 
+        should be reusable later. 
+        When you *go back* to run a filter you've already done before it should be
+        able to reuse an existing object instead of having to create a new one."""
+
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        # 1
+        request.set('Filterlogic','show')
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+
+        # 2
+        request.set('f-statuses','taken')
+        tracker.ListIssuesFiltered()
+        
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 2)
+        
+        # 3
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 2)
+        
+        
+    def test_unicode_in_statuses(self):
+        """ test that it's possible to set a verb:action pair to the 
+        statuses that is unicode. """
+        
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        for status, verb in tracker.getStatusesMerged(aslist=True):
+            self.assertTrue(isinstance(status, unicode))
+            self.assertTrue(isinstance(verb, unicode))
+            
+        # All the default ones are easy, lets spice it up a bit
+        statuses_and_verbs = [u'open, open', 
+                              u'taken, take', 
+                              u'on hold, put on hold', 
+                              u'a pr\xe9c\xe9dente, faire pr\xe9c\xe9dente', 
+                              u'rejected, reject', 
+                              u'completed, complete']
+        request.set('statuses-and-verbs', statuses_and_verbs)
+        
+        tracker.manage_editIssueTrackerProperties(carefulbooleans=True, REQUEST=request)
+        
+        for status, verb in tracker.getStatusesMerged(aslist=True):
+            self.assertTrue(isinstance(status, unicode))
+            self.assertTrue(isinstance(verb, unicode))
     
         
         

@@ -67,6 +67,9 @@ tal:attributes="action action">
 
 
 <div tal:condition="request/ShowFilterOptions|nothing" id="filteroptions">
+<tal:block tal:define="dummy  here/getAndSetContentType" tal:replace="nothing">
+  If this template is called on its own from AJAX, we have to make sure the content-type is set.
+</tal:block>
 <tal:block condition="request/force_filtervaluer_update|nothing">
   <span tal:define="dummy here/forceFilterValuerUpdate" 
       tal:replace="nothing">
@@ -93,7 +96,7 @@ tal:attributes="action action">
  tal:define="rooturl here/getRootURL; 
              page python:test(here.whichList()=='CompleteList','CompleteList', 'ListIssues');
              filterlogic here/getFilterlogic" name="foptions"
-tal:attributes="action string:${rooturl}/"	     >
+ tal:attributes="action string:${rooturl}/">
 
 <input type="hidden" name="i" tal:condition="request/i|nothing"
  tal:attributes="value request/i"/>
@@ -175,7 +178,9 @@ tal:attributes="action string:${rooturl}/"	     >
               <tr>
                 <td><b>Name </b></td>
                 <td>
-                  <input name="f-fromname" size="25" tal:attributes="value python:here.getFilterValue('fromname', filterlogic, default='')" />
+                  <input size="25" 
+		         tal:attributes="value python:here.getFilterValue('fromname', filterlogic, default='');
+			                 name string:f-fromname:${here/UNICODE_ENCODING}:ustring" />
                 </td>
               </tr>
               <tr>

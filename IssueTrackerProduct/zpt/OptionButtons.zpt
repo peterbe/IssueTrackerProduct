@@ -3,10 +3,9 @@
      onkeypress="softsubmit('AddFollowup');return false;">Add&nbsp;followup</a>&nbsp;</li>
     
     <li tal:condition="here/hasManagerRole" tal:repeat="button here/getOptionButtons"
-      ><a tal:define="action python:button[0]"
-          tal:attributes="href string:?action=${action}; 
-	                  onclick string:softsubmit('${action}');;return false;;;
-			  onkeypress string:softsubmit('${action}');;return false;;"
-          tal:content="structure python:button[1].replace(' ','&nbsp;')"></a>&nbsp;</li>
+      ><a tal:attributes="href string:?action=${button/action_quoted};
+	                  onclick string:softsubmit('${button/action}');;return false;;;
+			  onkeypress string:softsubmit('${button/action}');;return false;;"
+          tal:content="structure python:button['verb'].replace(' ','&nbsp;')"></a>&nbsp;</li>
 </ul>
 <br style="clear:both" />

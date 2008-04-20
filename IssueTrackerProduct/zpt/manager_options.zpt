@@ -25,12 +25,10 @@
     <tr tal:define="buttons here/getOptionButtons; status here/status">
 	<tal tal:repeat="button buttons">
 	<td width="90" class="actionbuttonbox" align="center"
-	    tal:define="action python:button[0]"
-	    tal:attributes="onclick string:window.open('${here/ActionURL}?${action}=1', '_top')">
+	    tal:attributes="onclick string:window.open('${here/ActionURL}?${button/action}=1', '_top')">
 	    <a href="dumt" class="actionbuttonbox"
-	    tal:define="action python:button[0]"
-	    tal:attributes="href string:?${action}=1"
-	    tal:content="python:button[1]">Open</a>
+	    tal:attributes="href string:?${button/action}=1"
+	    tal:content="button/verb]">Open</a>
 	</td>
 	</tal>
     </tr>

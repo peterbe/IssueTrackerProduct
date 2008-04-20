@@ -81,17 +81,17 @@ REPORTS_CONTAINER_METATYPE = 'Report Scripts Container'
 #DEFAULT_TYPES = ('general', 'announcement', 'idea', 'bug report',
 #                 'feature request','question',
 #                 'usability','other')
-DEFAULT_TYPES = (_('general'), _('announcement'), _('idea'), 
-                 _('bug report'), _('feature request'), _('question'),
-                 _('usability'), _('other'),
+DEFAULT_TYPES = (_(u'general'), _(u'announcement'), _(u'idea'), 
+                 _(u'bug report'), _(u'feature request'), _(u'question'),
+                 _(u'usability'), _(u'other'),
                  )
 
 DEFAULT_TYPE = DEFAULT_TYPES[0]
 #DEFAULT_URGENCIES = ('low','normal','high','critical')
-DEFAULT_URGENCIES = (_('low'), _('normal'), _('high'), _('critical'))
+DEFAULT_URGENCIES = (_(u'low'), _(u'normal'), _(u'high'), _(u'critical'))
 DEFAULT_ALWAYS_NOTIFY = ()
 DEFAULT_URGENCY = DEFAULT_URGENCIES[1]
-DEFAULT_SECTIONS_OPTIONS = (_('General'), _('Homepage'), _('Other'))
+DEFAULT_SECTIONS_OPTIONS = (_(u'General'), _(u'Homepage'), _(u'Other'))
 DEFAULT_SECTIONS = [DEFAULT_SECTIONS_OPTIONS[0]]
 DEFAULT_WHEN_IGNORE_WORD = 'ignored'
 DEFAULT_DISPLAY_DATE = '%d/%m %Y %H:%M'
@@ -104,8 +104,8 @@ DEFAULT_ALLOW_SHOW_ALL = True
 DEFAULT_ISSUEPREFIX = ''
 DEFAULT_NO_FILEATTACHMENTS = getEnvInt('ITP_NO_FILEATTACHMENTS', 3)
 DEFAULT_NO_FOLLOWUP_FILEATTACHMENTS = getEnvInt('ITP_NO_FOLLOWUP_FILEATTACHMENTS', 3)
-DEFAULT_STATUSES = (_('open'),_('taken'),_('on hold'),_('rejected'),_('completed'))
-DEFAULT_STATUSES_VERBS = (_('open'),_('take'),_('put on hold'),_('reject'),_('complete'))
+DEFAULT_STATUSES = (_(u'open'), _(u'taken'), _(u'on hold'), _(u'rejected'), _(u'completed'))
+DEFAULT_STATUSES_VERBS = (_(u'open'), _(u'take'), _(u'put on hold'), _(u'reject'), _(u'complete'))
 DEFAULT_DISPLAY_FORMATS = ('plaintext','structuredtext')
 DEFAULT_DEFAULT_DISPLAY_FORMAT = DEFAULT_DISPLAY_FORMATS[0]
 DEFAULT_DISPATCH_ON_SUBMIT = True
@@ -113,7 +113,7 @@ DEFAULT_RANDOMID_LENGTH = getEnvInt('ITP_ID_LENGTH', 3)
 DEFAULT_ALLOW_ISSUEATTRCHANGE = True
 DEFAULT_STOP_CACHE = True
 DEFAULT_ALLOW_SUBSCRIPTION = False
-DEFAULT_PRIVATE_STATISTICS = True
+DEFAULT_PRIVATE_STATISTICS = False
 DEFAULT_PRIVATE_REPORTS = True
 DEFAULT_SAVE_DRAFTS = True
 DEFAULT_SHOW_CONFIDENTIAL_OPTION = False
@@ -169,6 +169,7 @@ DEFAULT_NOTIFYABLECONTAINER_TITLE = "Global IssueTracker notifyables"
 TEMPFOLDER_ID = 'temp-uploadfolder'
 DRAFTSFOLDER_ID = 'drafts'
 FILTERVALUEFOLDER_ID = 'saved-filters'
+FILTERVALUECATALOG_ID = 'saved-filters-catalog'
 ISSUENOTIFICATIONS_ID = 'notifications'
 
 # Keys

@@ -57,10 +57,10 @@ class IssueTrackerIssue(IssueTracker):
     _properties=({'id':'title',         'type': 'ustring', 'mode':'w'},
                  {'id':'issuedate',     'type': 'date',   'mode':'w'},
                  {'id':'modifydate',    'type': 'date',   'mode':'w'},
-                 {'id':'status',        'type': 'string', 'mode':'w'},
-                 {'id':'type',          'type': 'string', 'mode':'w'},
-                 {'id':'urgency',       'type': 'string', 'mode':'w'},
-                 {'id':'sections',      'type': 'lines',  'mode':'w'},
+                 {'id':'status',        'type': 'ustring', 'mode':'w'},
+                 {'id':'type',          'type': 'ustring', 'mode':'w'},
+                 {'id':'urgency',       'type': 'ustring', 'mode':'w'},
+                 {'id':'sections',      'type': 'ulines',  'mode':'w'},
                  {'id':'fromname',      'type': 'ustring', 'mode':'w'},
                  {'id':'email',         'type': 'string', 'mode':'w'},
                  {'id':'acl_adder',     'type': 'string', 'mode':'w'},
@@ -690,7 +690,7 @@ class IssueTrackerIssue(IssueTracker):
         
     def getPreviewTitle(self, oldstatus, action):
         """ Get what the title of thread will be (via the web only) """
-        action = ss(action)
+        action = unicodify(ss(action))
         
         statuses_and_verbs = self.getStatusesMerged(asdict=1)
         lowercase_values = {}
@@ -721,7 +721,7 @@ class IssueTrackerIssue(IssueTracker):
         SubmitError = options.get('SubmitError')
         draft_followup_id = options.get('draft_followup_id', request.get('draft_followup_id'))
         
-            
+        request_action = unicodify(request.get('action'))
         
         draft_saved = options.get('draft_saved')
         
@@ -745,16 +745,17 @@ class IssueTrackerIssue(IssueTracker):
                     request.set('display_format', draft_object.display_format)
 
 
-        if ss(request.get('action')) == 'delete':
+        if request_action == 'delete':
             return self.form_delete(SubmitError=SubmitError)
 
-        if ss(request.get('action')) == 'rejectassignment':
+        if request_action == 'rejectassignment':
             otherTitle = "Reject issue assignment"
             request.set('otherActionTitle', otherTitle)
             request.set('otherComment', "Optional comment")
             request.set('otherAction', 'rejectassignment')
-        elif ss(request.get('action')) != 'addfollowup':
-            title, action, comment = self._constructOtherTitles(self.status, request.get('action'))
+            
+        elif request_action != 'addfollowup':
+            title, action, comment = self._constructOtherTitles(self.status, request_action)
             if title:
                 request.set('otherActionTitle', title)
             if action:
@@ -770,17 +771,17 @@ class IssueTrackerIssue(IssueTracker):
         """ return a suitable title for the action and verb """
         issuestatus = issuestatus.lower()
         action = ss(action).replace(' ','')
-        otherTitle = "Added Issue Followup"
-        otherAction = "Add Followup"
-        otherComment = ""
+        otherTitle = _(u"Added Issue Followup")
+        otherAction = _(u"Add Followup")
+        otherComment = u""
         
         for status, verb in self.getStatusesMerged(aslist=1):
             if ss(verb).replace(' ','') == action:
-                otherTitle = 'Change status from '
-                otherTitle += '<i>%s</i> '%issuestatus.capitalize()
-                otherTitle += 'to <i>%s</i>'%status.capitalize()
+                otherTitle = _(u'Change status from') + u' '
+                otherTitle += u'<i>%s</i> ' % issuestatus.capitalize()
+                otherTitle += u'to <i>%s</i>' % status.capitalize()
                 otherAction = verb.capitalize()
-                otherComment = "Optional comment"
+                otherComment = _(u"Optional comment")
                 break
             
         return otherTitle, otherAction, otherComment
@@ -856,7 +857,7 @@ class IssueTrackerIssue(IssueTracker):
         SubmitError = {}
 
         issueobject = self
-        action = ss(action)
+        action = unicodify(ss(action))
         oldstatus = self.status
         prefix = self.issueprefix
                 
@@ -899,6 +900,7 @@ class IssueTrackerIssue(IssueTracker):
         elif action == 'addfollowup':
             addfollowup = 1
             req_manager = 0
+            
 
         if req_manager and not self.hasManagerRole():
             # the chosen action requires manager role,
@@ -1906,18 +1908,31 @@ class IssueTrackerIssue(IssueTracker):
         return all
 
     def getOptionButtons(self):
-        """ Return 2D dict of status the issue can change to """
+        """ Return list of dicts of actions and verbs """
         res=[]
+        
+        def url_quote_unicodeaware(s):
+            # if the string is a unicode string,
+            # first convert it to a non-unicode string
+            # then apply url_quote.
+            if isinstance(s, unicode):
+                return Utils.url_quote(s.encode(UNICODE_ENCODING))
+            else:
+                return Utils.url_quote(s)
 
         issuestatus = self.status.lower()
         for item in self.getStatusesMerged(aslist=1):
             status, verb = item
             if issuestatus != status.lower():
                 action = verb.replace(' ','').capitalize()
+                action_quoted = url_quote_unicodeaware(action)
                 
-                res.append([action, verb.capitalize()])
+                #res.append([action, verb.capitalize()])
+                res.append({'action':action, 'verb':verb.capitalize(),
+                            'action_quoted':action_quoted})
                 
-        res.append(['Delete','Delete',])
+        res.append({'action':u'Delete', 'verb':u'Delete', 
+                    'action_quoted':url_quote_unicodeaware('Delete')})
 
         return res
 
@@ -2078,14 +2093,14 @@ class IssueTrackerIssue(IssueTracker):
                 msg = "'filenames' KeywordIndex missing "\
                   "but added as parameter. "\
                   "Press Update Everything button."
-                LOG(self.__class__.__name__, INFO, msg)
+                logger.info(msg)
         else:
             if indexes.has_key('filenames'):
                 idxs.append('filenames')
             else:
                 msg = "'filenames' KeywordIndex missing. "\
                       "Press Update Everything button"
-                LOG(self.__class__.__name__, INFO, msg)
+                logger.info(msg)
                 
         catalog.catalog_object(self, path, idxs=idxs)
  

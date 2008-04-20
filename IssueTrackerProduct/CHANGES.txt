@@ -1,5 +1,24 @@
 -
 
+    Bug fixed: Having statuses containing unicode characters could
+    break the statistics page. Thanks Rene Bonvin. (Real#0735)
+
+    New feature: Basic statistics is not private by default from now
+    on. You can still make it private from the Advanced Properties page.
+    
+    New feature: Statuses can now be configured to contain unicode
+    characters. 
+    
+    New feature: The persistent list of saved filters is now indexed
+    with a separate ZCatalog to vastly speed up lookups of old saved
+    filters.
+    
+    Bug fixed: Saved filters containing unicode characters could cause
+    a UnicodeDecodeError.    
+
+    Bug fixed: Unicode characters in a filtered name would show
+    incorrectly when loading the filter options.
+
     Bug fixed: Search on title with wildcards (e.g. *keyword* matching
     'subkeywords') only if no other title searches matched.
 

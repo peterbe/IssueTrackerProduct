@@ -115,7 +115,7 @@ except:
         pass
     _has_ZCTextIndex = 0
 
-# Zope 2.7 has OrderedFolder baked into the core, oldies have to install it manually
+# Zope >=2.7 has OrderedFolder baked into the core, oldies have to install it manually
 try:
     from OFS.OrderedFolder import OrderedFolder as ZopeOrderedFolder
 except ImportError:
@@ -287,6 +287,20 @@ class IssueTrackerFolderBase(Folder.Folder, Persistent):
         """ wrap this improvement to Zope's html_quote in Utils """
         return Utils.safe_html_quote(text)
     
+    def ascii_url_quote(self, s):
+        """ return a string url quoted even it's it a unicode string """
+        if isinstance(s, unicode):
+            return Utils.url_quote(s.encode(UNICODE_ENCODING))
+        else:
+            return Utils.url_quote(s)
+        
+    def ascii_url_quote_plus(self, s):
+        """ return a string url quoted (with +) even it's it a unicode string """
+        if isinstance(s, unicode):
+            return Utils.url_quote_plus(s.encode(UNICODE_ENCODING))
+        else:
+            return Utils.url_quote_plus(s)        
+    
     def tag_quote(self, text):
         """ wrap Utils """
         return Utils.tag_quote(text)
@@ -294,6 +308,45 @@ class IssueTrackerFolderBase(Folder.Folder, Persistent):
     def splitTerms(self, term):
         """ wrap Utils script because it's need in ZPTs """
         return Utils.splitTerms(term)
+    
+    def getContentType(self, content_type='text/html', 
+                             charset=UNICODE_ENCODING):
+        """ return the content type header value """
+        return '%s; charset=%s' % (content_type, charset)
+    
+    def getAndSetContentType(self, content_type='text/html', 
+                                   charset=UNICODE_ENCODING):
+        """ return the content type header value and set it on 
+        self.REQUEST.RESPONSE
+        """
+        value = self.getContentType(content_type=content_type, charset=charset)
+        self.REQUEST.RESPONSE.setHeader('Content-Type', value)
+        return value
+        
+    def unsafe_unicode_dict_getitem(self, dictionary, item):
+        """ Return the value of this item in a dictionary object.
+        
+        Simply call the __getitem__ of this dictionary to pluck out an
+        item.
+        
+        Why call this unsafe_...() ?
+        If you try to do this in a guarded context (e.g. Script (Python) 
+        (or Page Template)) you'll get an Unauthorized error:
+            
+          d = {u'\xa3':1}
+          d[u'\xa3'] # will raise an Unauthorized error
+          
+          # this works however
+          d = {u'\xa3':1, u'asciiable':1}
+          d[u'asciiable']
+        
+        Why? I don't know. The place where it happens is the parental guardian
+        function guarded_getitem() from ZopeGuards.py
+        
+        By instead calling the __getitem__ from here in unrestricted python
+        we can bypass this.
+        """
+        return dictionary[item]
     
 
 
@@ -513,8 +566,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         verbs = self.getStatusesVerbs()
         
         if cleaned:
-            statuses = [x.strip() for x in statuses if x.strip()]
-            verbs = [x.strip() for x in verbs if x.strip()]
+            statuses = [unicodify(x.strip()) for x in statuses if x.strip()]
+            verbs = [unicodify(x.strip()) for x in verbs if x.strip()]
 
             _big_warning = False
             if len(statuses) > len(verbs):
@@ -534,7 +587,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 msg = "The status list (statuses and verbs) is out of sync and "\
                       "has had to be temporarily merged to work. Please revisit "\
                       "the Properties tab."
-                LOG(self.__class__.__name__, WARNING, msg)
+                logger.warn(msg)
 
             self.statuses = statuses
             self.statuses_verbs = verbs
@@ -1253,8 +1306,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if isinstance(get(each), int):
                     dict[each] = get(each)
                 else:
-                    LOG(self.meta_type, WARNING,
-                        '%s not integer'%get(each), '')
+                    logger.warn('%s not integer' % get(each))
                         
         for each in lists:
             if hk(each) and isinstance(get(each), list):
@@ -1273,8 +1325,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 self.statuses = L1
                 self.statuses_verbs = L2
             else:
-                LOG(self.__class__.__name__, PROBLEM,
-                    "Statuses and verbs not list type")
+                logger.warn("Statuses and verbs not list type")
 
         # another special one
         if hk('always_notify'):
@@ -1706,9 +1757,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         msgs.append(self.CleanOldSavedFilters(user_excess_clean=True,
                                               implode_if_possible=True,
                                               clean_keyed_only_filtervaluers=True))
+                                              
+        if base_hasattr(self, FILTERVALUEFOLDER_ID):
+            if self.getFilterValuerCatalog() is None:
+                self._setupFilterValuerCatalog()
+                msgs.append('Created ZCatalog for saved filters')
+                
+            msgs.append(self.UpdateFilterValuerCatalog())
                                     
-        #msg.append(self.FixNonUnicodeIssues())
-        
         msg = '\n'.join([x for x in msgs if x])
         
         if DestinationURL:
@@ -1901,7 +1957,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 
             if age > treshold:
                 del_ids.append(filtervaluer.getId())
-                
+
         if del_ids:
             msg = "Deleted %s old saved filters" % len(del_ids)
         else:
@@ -1912,7 +1968,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if implode_if_possible:
                 if self._implodeFilterValueContainerIfPossible():
                     msg += "\nDeleted saved filters folder because it was empty"
-            
+                    catalog = self.getFilterValuerCatalog()
+                    if catalog is not None:
+                        catalog.manage_catalogClear()
+
             if REQUEST is None:
                 return msg
             else:
@@ -3249,7 +3308,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         has_cookie = self.has_cookie
         get_cookie = self.get_cookie
         set_cookie = self.set_cookie
-
       
         #
         # Tune the data a bit
@@ -3901,8 +3959,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 except:
                     
                     logger.warn("Could not upload file id=%s" % id, exc_info=True)
-            else:
-                logger.warn("Uploaded file %s was not a valid file" % file)
 
 
     security.declarePublic('_moveTempfiles')
@@ -4828,10 +4884,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         value = default
         if request.has_key(filterkey_simple):
             value = request.get(filterkey_simple)
-            if key in ('statuses', 'sections', 'urgencies', 'types') \
-                   and isinstance(value, basestring):
-                value = [value]
-                
+            value = unicodify(value)
+            if key in ('statuses', 'sections', 'urgencies', 'types'):
+                if isinstance(value, basestring):
+                    value = [value]
+                else:
+                    # make sure each is a unicode string
+                    value = [unicodify(item) for item in value]
+                    
         elif not request_only and self.has_session(filterkey):
             value = self.get_session(filterkey)
             
@@ -5223,6 +5283,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else: # backward compatability
             return self.Catalog
         
+    def getFilterValuerCatalog(self):
+        """ return the saved-filters-catalog or None if it does not exist.
+        """
+        return getattr(self, FILTERVALUECATALOG_ID, None)
+        
+        
     def InitZCatalog(self, t={}):
         """ create a ZCatalog called 'ICatalog' and change its properties
         accordingly """
@@ -5292,8 +5358,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         )
         for idx, indexed_attrs in zctextindexes:
             
-            
-            
             extras = Empty()
             extras.doc_attr = indexed_attrs
             # 'Okapi BM25 Rank' is good if you match small search terms
@@ -5315,15 +5379,46 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 zcatalog.addIndex(idx, 'ZCTextIndex', extras)
                 t['ZCTextIndex'] = idx
                 
-        # now we need to say that certain indexes must use
-        # the vocabulary.
-        #titleidx = indexes.get('title')
-        #if titleidx.vocabulary_id != 'Vocabulary':
-        #    titleidx.manage_setPreferences('Vocabulary')
             
         return t
-
-
+    
+    def _setupFilterValuerCatalog(self):
+        """ create a ZCatalog for the saved filters """
+        oid = FILTERVALUECATALOG_ID
+        if not oid in self.objectIds('ZCatalog'):
+            self.manage_addProduct['ZCatalog'].manage_addZCatalog(oid, 'ZCatalog for saved filters')
+        
+        zcatalog = self.getFilterValuerCatalog() # asserts that it works
+        assert zcatalog is not None, "saved filters catalog not created"
+        indexes = zcatalog._catalog.indexes
+        
+        #if 'meta_type' not in zcatalog.schema():
+        #    zcatalog.addColumn('meta_type')            
+            
+        idxs = ('meta_type','acl_adder','key', 'title', 
+                'adder_fromname', 'adder_email')
+        for fieldindex in idxs:
+            if not indexes.has_key(fieldindex):
+                zcatalog.addIndex(fieldindex, 'FieldIndex')
+                
+        pathindexes = [('path','getPhysicalPath'),]
+        for idx, indexed_attrs in pathindexes:
+            if not indexes.has_key(idx):
+                extra = record()
+                extra.indexed_attrs = indexed_attrs
+                zcatalog.addIndex(idx, 'PathIndex', extra)
+                
+        dateindexes = [('mod_date','getModificationDate'),]
+        for idx, indexed_attrs in dateindexes:
+            if not indexes.has_key(idx):
+                extra = record()
+                extra.indexed_attrs = indexed_attrs
+                zcatalog.addIndex(idx, 'DateIndex', extra)
+                
+        return zcatalog
+                
+                
+    security.declareProtected(VMS, 'UpdateCatalog')
     def UpdateCatalog(self, REQUEST=None):
         """ Re-find items in the Catalog """
         request = self.REQUEST
@@ -5357,6 +5452,41 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             desturl = self.getRootURL()+"/manage_ManagementForm"
             url = method(desturl,{'manage_tabs_message':msg})
             self.REQUEST.RESPONSE.redirect(url)
+            
+            
+    security.declareProtected(VMS, 'UpdateFilterValuerCatalog')
+    def UpdateFilterValuerCatalog(self, REQUEST=None):
+        """ Re-find items in the saved filters catalog """
+        request = self.REQUEST
+
+        catalog = self.getFilterValuerCatalog()
+        
+        # Zope 2.8.0 migration hell
+        if not hasattr(catalog._catalog, '_length'):
+            if hasattr(catalog._catalog, 'migrate__len__'):
+                # perform the zope 2.8.0 migration script
+                catalog._catalog.migrate__len__()
+            else:
+                # That's ok. This means that the _catalog object didn't
+                # have the zope 2.8.0 migration method which effectively means that
+                # we don't need to do the migration :)
+                pass
+            
+        catalog.manage_catalogClear()
+        
+        container = self._getFilterValueContainer()
+        
+        for filter_valuer in container.objectValues(FILTEROPTION_METATYPE):
+            filter_valuer.index_object()
+
+        msg = "%s updated." % catalog.getId()
+        if REQUEST is None:
+            return msg
+        else:
+            method = Utils.AddParam2URL
+            desturl = self.getRootURL()+"/manage_ManagementForm"
+            url = method(desturl,{'manage_tabs_message':msg})
+            self.REQUEST.RESPONSE.redirect(url)            
 
 
     ## Notification related
@@ -5966,9 +6096,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def guessNewFiltername(self):
         """ pass """
         
-        default = ""
+        default = u""
         if self.hasFilter():
-            name = ''
 
             # get filter setup
             filterlogic = self.getFilterlogic()
@@ -5982,32 +6111,32 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             f_urgencies = getFVal('urgencies')
             f_types = getFVal('types')
             f_fromname = getFVal('fromname')
-            f_email = getFVal('email')            
+            f_email = getFVal('email')
             
             main_option = self.getFilterlogic()
             
             if main_option == 'show':
-                start = _(u"Only ")
+                start = _(u"Only") + " "
             else:
-                start = _(u"Hide ")
+                start = _(u"Hide") + " "
                 
-            name = ""
+            name = u""
             if f_statuses:
-                name += ", ".join(f_statuses) + _(" issues ")
+                name += ", ".join(f_statuses) + " " +  _("issues") + " "
             if f_sections:
-                name += _("in ") + ", ".join(f_sections) + " "
+                name += _("in") + " " + ", ".join(f_sections) + " "
             if f_urgencies:
-                name += _("that are ") + ", ".join(f_urgencies) + " "
+                name += _("that are") + " " + ", ".join(f_urgencies) + " "
             if f_types:
-                name += _("of type ") + ", ".join(f_types) + " "
+                name += _("of type") + " " + ", ".join(f_types) + " "
                 
             if f_fromname and f_email:
                 L = [f_fromname.strip(), f_email.strip()]
-                name += _("by ") + ', '.join(L) + " "
+                name += _("by") + " " + ', '.join(L) + " "
             elif f_fromname:
-                name += _("by ") + f_fromname.strip() + " "
+                name += _("by") + " " + f_fromname.strip() + " "
             elif f_email:
-                name += _("by ") + f_email.strip() + " "
+                name += _("by") + " " + f_email.strip() + " "
                 
             if name:
                 return start + name.strip()
@@ -6040,7 +6169,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # 1. get all the values of the filter. when we do this
         # it will automatically pick up all the new values and store
         # them in a session.
-        
+
         filterlogic = self.getFilterlogic()
 
         def getFVal(key, zope=self, filterlogic=filterlogic):
@@ -6105,13 +6234,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             path = '/'.join(zopeuser.getPhysicalPath())
             name = zopeuser.getUserName()
             acl_adder = ','.join([path, name])
-        else:
-            email_cookiekey = self.getCookiekey('email')
-            name_cookiekey = self.getCookiekey('name')
-            fromname = self.get_cookie(name_cookiekey)
-            email = self.get_cookie(email_cookiekey)
+            
+        fromname = self.get_cookie(self.getCookiekey('name'))
+        email = self.get_cookie(self.getCookiekey('email'))
 
-        if not (acl_adder or fromname and email):
+        if not acl_adder and not (fromname or email):
             # the user hasn't identified herself, then create a cookie key
             # and use that instead
             
@@ -6125,17 +6252,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # attach this to the user
                 self.set_cookie(ckey, cookie_key, 
                                 days=FILTERVALUER_EXPIRATION_DAYS)
-        
+
         valuer = self._getOrCreateFilterValuer(fname, acl_adder,
                            fromname=fromname, email=email,
                            cookie_key=cookie_key)
-        
-        
+
         # 3.4. 
         # to save time the next time, save that id that was created here
         self.set_session('last_savedfilter_id', valuer.getId())
         if self.rememberSavedfilterPersistently():
-            #self.set_session('last_savedfilter_id', valuer.getId())
             key = LAST_SAVEDFILTER_ID_COOKIEKEY
             key = self.defineInstanceCookieKey(key)
             self.set_cookie(key, valuer.getId(),
@@ -6175,21 +6300,22 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def _getOrCreateFilterValuer(self, filtername, acl_adder, fromname, email, 
                                  cookie_key):
         """ if we can't find a matching filtername already, create a new one """
-        # 1. create a container if not already having one
         container = self._getFilterValueContainer()
         
         found_filters = self._findOldMatchingFilters(filtername, acl_adder,
                             adder_fromname=fromname, adder_email=email,
                             cookie_key=cookie_key)
-                            
+
         if found_filters:
+            
             found_filters = self.sortSequence(found_filters, (('mod_date',),))
             valuer = found_filters[0] # default sort is newest first
             
             # update the mod_date on the most recent one and...
             valuer.updateModDate()
             
-            # ...delete the rest
+            # ...delete the rest. The reason we do this is that there's no point 
+            # in keeping filters (if there are any) that have this filtername.
             rest = found_filters[1:]
             if rest:
                 ids = [x.getId() for x in rest]
@@ -6200,10 +6326,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         try:
                             container.manage_delObjects([restid])
                         except:
-                            LOG(self.__class__.__name__, INFO, 
-                                "Could not delete valuerid %r" % restid,
-                                error=sys.exc_info())
-                        
+                            logger.error("Could not delete valuerid %r" % restid,
+                                         exc_info=True)
 
             return valuer
         
@@ -6214,9 +6338,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             id = str(id + 1)
         else:
             id = str(len(container.objectValues())+1)
-            if hasattr(container, id):
+            if safe_hasattr(container, id):
                 id = str(int(id) + 1)
-                while hasattr(container, id):
+                while safe_hasattr(container, id):
                     id = str(int(id) + 1)
             container.manage_addProperty('id_counter', int(id)+1, 'int')
         
@@ -6233,15 +6357,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             valuer.set('adder_email', email)
         if cookie_key:
             valuer.set('key', cookie_key)
-        
+
+        valuer.index_object()
 
         try:
             if len(container) > FILTERVALUEFOLDER_THRESHOLD_CLEANING:
                 msg = self.CleanOldSavedFilters(user_excess_clean=1)
-                LOG(self.__class__.__name__, INFO, str(msg))
+                logger.info(str(msg))
         except:
-            LOG(self.__class__.__name__, ERROR, "Failed to check for filtervaluer excess",
-                error=sys.exc_info())
+            logger.error("Failed to check for filtervaluer excess",
+                         exc_info=True)
             try:
                 err_log = self.error_log
                 err_log.raising(sys.exc_info())
@@ -6251,7 +6376,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return valuer
     
         
-    def _findOldMatchingFilters(self, filtername, acl_adder=None,
+    def OLD__findOldMatchingFilters(self, filtername, acl_adder=None,
                                 adder_fromname=None, adder_email=None,
                                 cookie_key=None):
         """ delete filtervaluers that have this exact filtername, and match also
@@ -6276,12 +6401,55 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                             
         return finds
     
+    
+    def _findOldMatchingFilters(self, filtername, acl_adder=None,
+                                adder_fromname=None, adder_email=None,
+                                cookie_key=None):
+        """ delete filtervaluers that have this exact filtername, and match also
+        either the acl_adder or adder_fromname and adder_email together. """
+        if not (acl_adder or adder_fromname and adder_email or cookie_key):
+            raise UnmatchableError, "must provide either acl_adder or "\
+                                 "adder_fromname and adder_email or cookie_key"
+
+
+        search = {'title':filtername}
+        search['meta_type'] = FILTEROPTION_METATYPE
+        search['sort_on'] = 'mod_date'
+        search['sort_order'] = 'reverse'
+        
+        if acl_adder:
+            search['acl_adder'] = acl_adder
+        elif cookie_key:
+            search['key'] = cookie_key
+        else:
+            search['adder_fromname'] = adder_fromname
+            search['adder_email'] = adder_email
+            
+            
+        catalog = self.getFilterValuerCatalog()
+        if catalog is None:
+            catalog = self._setupFilterValuerCatalog()
+            
+        objects = []
+        for brain in catalog.searchResults(**search):
+            try:
+                object = brain.getObject()
+                assert object.getTitle().lower() == filtername.lower(), \
+                "%r != %r" % (object.getTitle().lower(), filtername.lower())
+            except KeyError:
+                logger.warn("Saved filters catalog out of sync. Press Update Everything")
+                continue
+            objects.append(object)
+            
+        return objects
+    
+    
     def _getFilterValueContainer(self):
         """ return a BTreeFolder2 or a folder object where we can
         save all the filter value objects """
         folderid = FILTERVALUEFOLDER_ID
         root = self.getRoot()
-        if hasattr(root, folderid):
+        if safe_hasattr(root, folderid):
             return getattr(root, folderid)
         else:
             if self.manage_canUseBTreeFolder():
@@ -6289,6 +6457,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             else:
                 _adder = root.manage_addFolder
             _adder(folderid)
+            self._setupFilterValuerCatalog()
             return getattr(root, folderid)
         
     def _implodeFilterValueContainerIfPossible(self):
@@ -6318,63 +6487,67 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return the filtervaluer object """
         return getattr(self._getFilterValueContainer(), objectid)
     
-    def getMySavedFilters(self, howmany=10):
+    
+    def getMySavedFilters(self, howmany=10): # New, cataloged saved filter
         """ return an list of filtervaluer objects that belongs
         to the current user """
         folderid = FILTERVALUEFOLDER_ID
         root = self.getRoot()
-        if not hasattr(root, folderid):
+        if not safe_hasattr(root, folderid):
             return []
         
-        try:
-            container = self._getFilterValueContainer()
-            all = container.objectValues(FILTEROPTION_METATYPE)
-        except:
-            try:
-                err_log = self.error_log
-                err_log.raising(sys.exc_info())
-            except:
-                pass            
-            all = []
-        mine = []
-        if all:
-            issueuser = self.getIssueUser()
-            zopeuser = self.getZopeUser()
-            acl_adder = fromname = email = key = None
-            if issueuser:
-                acl_adder = issueuser.getIssueUserIdentifierString()
-            elif zopeuser:
-                path = '/'.join(zopeuser.getPhysicalPath())
-                name = zopeuser.getUserName()
-                acl_adder = ','.join([path, name])
+        issueuser = self.getIssueUser()
+        zopeuser = self.getZopeUser()
+        search = {}
+        if issueuser:
+            search['acl_adder'] = issueuser.getIssueUserIdentifierString()
             
-            if not issueuser:
-                email_cookiekey = self.getCookiekey('email')
-                name_cookiekey = self.getCookiekey('name')
-                key = self.getCookiekey('saved-filters')
-                key = self.defineInstanceCookieKey(key)
-                
-                fromname = self.get_cookie(name_cookiekey)
-                email = self.get_cookie(email_cookiekey)
-                key = self.get_cookie(key)
-
-            for each in all:
-                if acl_adder is not None and acl_adder == each.acl_adder:
-                    mine.append(each)
-                elif fromname and email and fromname == each.adder_fromname and \
-                           email == each.adder_email:
-                    mine.append(each)
-                elif key and each.getKey() == key:
-                    mine.append(each)
-
-        if howmany:
-            mine = mine[:howmany]
-            
-        # sort them by add_date
-        mine = self.sortSequence(mine, (('mod_date',),))
-        mine.reverse()
+        elif zopeuser:
+            path = '/'.join(zopeuser.getPhysicalPath())
+            name = zopeuser.getUserName()
+            search['acl_adder'] = ','.join([path, name])
         
-        return mine
+        else:
+            email_cookiekey = self.getCookiekey('email')
+            name_cookiekey = self.getCookiekey('name')
+            key = self.getCookiekey('saved-filters')
+            key = self.defineInstanceCookieKey(key)
+            
+            key = self.get_cookie(key)
+            fromname = self.get_cookie(name_cookiekey)
+            email = self.get_cookie(email_cookiekey)
+            
+            if fromname or email:
+                if fromname:
+                    search['adder_fromname'] = fromname
+                if email:
+                    search['adder_email'] = email
+            else:
+                search['key'] = key
+                
+        if not search:
+            # then there's nothing to identify this user by
+            # so we can't fish out her saved filters
+            return []
+        else:
+            search['meta_type'] = FILTEROPTION_METATYPE
+            search['sort_on'] = 'mod_date'
+            search['sort_order'] = 'reverse'
+            if howmany:
+                search['sort_limit'] = int(howmany)
+            
+        # now use this to make a catalog search
+        catalog = self.getFilterValuerCatalog()
+        if catalog is None:
+            catalog = self._setupFilterValuerCatalog()
+        
+        objects = []
+        for brain in catalog.searchResults(**search):
+            objects.append(brain.getObject())
+            
+        return objects
+            
+            
 
     def getCurrentlyUsedSavedFilter(self, request_only=True):
         """ look for saved-filter key in request or in session """
@@ -9654,12 +9827,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # Lastly we want to organize res by self.statuses order
         for status in self.getStatuses():
             status = status.lower()
+            
             if res.has_key(status):
                 #sc = StatusCount(status, res[status])
                 tres.append([status, res[status]])
             else:
                 #sc = StatusCount(status)
                 tres.append([status, 0])
+                
         return tres
     
     def totalCountStatus(self, statuslist):
@@ -9669,6 +9844,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for item in statuslist:
             count += item[1]
         return count
+    
             
     def CountSections(self):
         """ for every section, count how many for each status 
@@ -9677,8 +9853,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         allsections = {}
         allissues = self.getIssueObjects()
         for issue in allissues:
-            status = issue.status.lower()
-            for section in issue.sections:
+            status = unicodify(issue.getStatus().lower())
+            for section in issue.getSections():
+                section = unicodify(section)
                 if not allsections.has_key(section):
                     allsections[section] = {}
                 if not allsections[section].has_key(status):
@@ -9691,7 +9868,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 allsections[section] = {}
             allsections[section] = self._allStatuses(allsections[section])
             res.append([section, allsections[section]])
-                
+
+        #from pprint import pprint
+        #pprint(res)
+        #print ""
+        #for count in res:
+        #    print count[0], count[1]
+        #    for status in self.getStatuses():
+        #        print "\t", repr(status), count[1][status]
+        #    print 
         return res
                 
     def _allStatuses(self, dict):
@@ -11709,9 +11894,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         
         file = cStringIO.StringIO()
-        file.write("Bug Reporting File\n%s\n\n"%DateTime())
-        file.write("Error type: %s\n"%err_type)
-        file.write("Error value: %s\n\n"%err_value)
+        file.write("Bug Reporting File\n%s\n\n" % DateTime())
+        file.write("Error type: %s\n" % err_type)
+        file.write("Error value: %r\n\n" % err_value)
         
         error_log = self.error_log
             
@@ -11816,12 +12001,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if display_format:
             params['display_format'] = display_format
             
-        text = "An error occured when I tried to...\n\n"
-        text += "\n"+"-"*50+"\n"
+        text = u"An error occured when I tried to...\n\n"
+        text += u"\n"+"-"*50+"\n"
         if error_type:
-            text += "Error type: %s\n"%error_type
+            text += u"Error type: %s\n"%error_type
             if error_value:
-                text += "Error value: %s\n"%error_value
+                text += u"Error value: %s\n" % unicodify(error_value)
                 
 
         if error_traceback:
@@ -11833,9 +12018,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             except:
                 def _check_permission(*a, **k):
                     return False
-                LOG("standard_error_message", ERROR, 
-                            "_check_permission() function disabled", 
-                            error=sys.exc_info())
+                logger.error("_check_permission() function disabled",
+                            exc_info=True)
 
             try:
                 error_log = self.error_log
@@ -12558,23 +12742,24 @@ from Email import POP3Account
 
 #----------------------------------------------------------------------------
 
-class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager):
+class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
+                   CatalogAware):
     """ a simple class that helps us remember a set of filter options. """
     
     meta_type = FILTEROPTION_METATYPE
     
-    _properties = ({'id':'title',         'type':'string', 'mode':'w'},
-                   {'id':'adder_fromname','type':'string', 'mode':'w'},
+    _properties = ({'id':'title',         'type':'ustring', 'mode':'w'},
+                   {'id':'adder_fromname','type':'ustring', 'mode':'w'},
                    {'id':'adder_email',   'type':'string', 'mode':'w'},
                    {'id':'acl_adder',     'type':'string', 'mode':'w'},
                    {'id':'key',           'type':'string', 'mode':'r'},
                    {'id':'mod_date',      'type':'date',   'mode':'w'},
                    {'id':'filterlogic',   'type':'string', 'mode': 'w'},
-                   {'id':'statuses',      'type':'lines',  'mode': 'w'},
-                   {'id':'sections',      'type':'lines',  'mode': 'w'},
-                   {'id':'urgencies',     'type':'lines',  'mode': 'w'},
-                   {'id':'types',         'type':'lines',  'mode': 'w'},
-                   {'id':'fromname',      'type':'string', 'mode': 'w'},
+                   {'id':'statuses',      'type':'ulines',  'mode': 'w'},
+                   {'id':'sections',      'type':'ulines',  'mode': 'w'},
+                   {'id':'urgencies',     'type':'ulines',  'mode': 'w'},
+                   {'id':'types',         'type':'ulines',  'mode': 'w'},
+                   {'id':'fromname',      'type':'ustring', 'mode': 'w'},
                    {'id':'email',         'type':'string', 'mode': 'w'},
                    )
 
@@ -12584,12 +12769,12 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager):
         self.id = id
         self.title = title
         self.acl_adder = ''
-        self.adder_fromname = ''
+        self.adder_fromname = u''
         self.adder_email = ''
         self.key = '' # Used by people who don't have a name
         self.mod_date = DateTime()
         self.usage_count = 0
-
+        
     def getId(self):
         return self.id
     
@@ -12636,8 +12821,17 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager):
         return getattr(self, 'usage_count', 0)
 
 
-
-
+    ##
+    ## Indexing
+    ##
+    
+    def index_object(self):
+        """A common method to allow Findables to index themselves."""
+        idxs = ['meta_type','acl_adder','adder_fromname','adder_email',
+                'key','mod_date','path','title']
+        path = '/'.join(self.getPhysicalPath())
+        catalog = self.getFilterValuerCatalog()
+        catalog.catalog_object(self, path, idxs=idxs)
 
 
 #----------------------------------------------------------------------------
@@ -12649,7 +12843,7 @@ class ReportsContainer(ZopeOrderedFolder):
     
     meta_type = REPORTS_CONTAINER_METATYPE
 
-    icon = '%s/issuereportscontainer.gif'%ICON_LOCATION
+    icon = '%s/issuereportscontainer.gif' % ICON_LOCATION
     
     security = ClassSecurityInfo()
     
