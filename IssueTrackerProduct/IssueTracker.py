@@ -4890,7 +4890,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     value = [value]
                 else:
                     # make sure each is a unicode string
-                    value = [unicodify(item) for item in value]
+                    if isinstance(value, (tuple, list)):
+                        value = [unicodify(item) for item in value]
+                    else:
+                        logger.warn("Not sure what to do with %r (%s)" % (value, type(value)))
                     
         elif not request_only and self.has_session(filterkey):
             value = self.get_session(filterkey)
