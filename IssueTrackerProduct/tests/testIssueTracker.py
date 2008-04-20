@@ -40,6 +40,8 @@ app = ZopeTestCase.app()
         
 # Set up sessioning objects
 ZopeTestCase.utils.setupCoreSessions(app)
+
+ZopeTestCase.utils.setupSiteErrorLog(app)
         
 # Set up example applications
 #if not hasattr(app, 'Examples'):
@@ -999,6 +1001,38 @@ class IssueTrackerTestCase(TestBase):
         
         saved_filters = getattr(tracker, 'saved-filters').objectValues()
         self.assertEqual(len(saved_filters), 2)
+        
+    def test_filterIssues_from_cookie_after_purge(self):
+        """ If all the saved-filters are deleted and someone has a cookie
+        of an old savedfilter, if the saved filter is deleted, getting it
+        from the cookie shouldn't raise an AttributeError.
+        """
+        
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        tracker.set_cookie = self.set_cookie
+        
+        ckey = tracker.getCookiekey('remember_savedfilter_persistently')
+        tracker.set_cookie(ckey, 1)
+        
+        # 1
+        request.set('Filterlogic','show')
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        self.assertTrue('__issuetracker_savedfilter_id-tracker' in request.cookies)
+        
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        
+        # now, mess with it
+        tracker.manage_delObjects(['saved-filters','saved-filters-catalog'])
+
+        # if the cookie causes an AttributeError, then ListIssuesFiltered()
+        # here wouldn't work. Just running this is the final test.
+        tracker.ListIssuesFiltered()
+        
         
         
     def test_unicode_in_statuses(self):

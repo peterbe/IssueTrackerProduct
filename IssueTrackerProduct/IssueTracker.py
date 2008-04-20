@@ -6218,8 +6218,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if last_savedfilter_id:
                 self.set_session('last_savedfilter_id', last_savedfilter_id)
                 
-        if last_savedfilter_id:
+        if last_savedfilter_id and self.hasSavedFilterObject(last_savedfilter_id):
             last_saved_filter = self.getSavedFilterObject(last_savedfilter_id)
+            
             if last_saved_filter.getTitle() == fname:
                 return
         
