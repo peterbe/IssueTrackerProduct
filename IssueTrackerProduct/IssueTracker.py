@@ -4882,7 +4882,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         request = self.REQUEST
 
         value = default
-        if request.has_key(filterkey_simple):
+        if request.has_key(filterkey_simple) and request.get(filterkey_simple) is not None:
             value = request.get(filterkey_simple)
             value = unicodify(value)
             if key in ('statuses', 'sections', 'urgencies', 'types'):
