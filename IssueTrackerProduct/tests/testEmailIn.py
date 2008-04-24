@@ -267,8 +267,8 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3
 
-        result = tracker.check4MailIssues(verbose=False)
-        self.assertEqual(result, 'Created 1 issue')
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
 
         # this should have created an issue 
         self.assertEqual(len(tracker.getIssueObjects()), 1)
@@ -293,8 +293,8 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3
 
-        result = tracker.check4MailIssues(verbose=False)
-        self.assertEqual(result, 'Created 1 issue')
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
 
         # this should have created an issue 
         self.assertEqual(len(tracker.getIssueObjects()), 1)
@@ -316,8 +316,8 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3
         
-        result = tracker.check4MailIssues(verbose=False)
-        self.assertEqual(result, 'Created 1 issue')
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
         
         issue = tracker.getIssueObjects()[0]
         self.assertEqual(issue.getSections(), ['General'])
@@ -344,8 +344,8 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3
         
-        result = tracker.check4MailIssues(verbose=False)
-        self.assertEqual(result, 'Created 1 issue')
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
 
         # this should have created an issue 
         self.assertEqual(len(tracker.getIssueObjects()), 1)
@@ -369,8 +369,8 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3
         
-        result = tracker.check4MailIssues(verbose=False)
-        self.assertEqual(result, 'Created 1 issue')
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
         
         issue = tracker.getIssueObjects()[0]
         self.assertTrue(isinstance(issue.getTitle(), unicode))
@@ -398,8 +398,8 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3
         
-        result = tracker.check4MailIssues(verbose=False)
-        self.assertEqual(result, 'Created 2 issues')
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 2 issues') > -1)
     
         
 def test_suite():

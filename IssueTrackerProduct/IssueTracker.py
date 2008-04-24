@@ -8756,8 +8756,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
             # Get messages...
             #
-            emails = self.getPOP3Messages(M, account)
+            sub_v = []
+            emails = self.getPOP3Messages(M, account, log=sub_v)
+            v.extend(['\t%s' % x for x in sub_v])
             v.append('Downloaded %s emails' % len(emails))
+            
             
             # ...parsed.
             emails = self._appendEmailIssueData(emails, account)
@@ -8776,7 +8779,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 elif email.get('is_blacklisted', False):
                     v.append('\tEmail originator is blacklisted (%s)' % email['email'])
                     
-                elif self._processInboundEmail(email, combos=combos):
+                elif self._processInboundEmail(email, combos=combos, log=v):
                     v.append('\tSaved email %r' % email.get('subject', email.get('title','')[:50]))
                     count += 1
                 elif verbose:
@@ -8803,8 +8806,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return msg
         
         
-    def _processInboundEmail(self, email, combos):
-        """ take this accepting email and upload it as an issue """
+    def _processInboundEmail(self, email, combos, log=[]):
+        """ take this accepting email and upload it as an issue 
+        
+        Write all verbose messages as strings into the list @log.
+        """
         if email.get('fromname','') == '':
             email['fromname'] = combos.get(email.get('email','').lower(),'')
             email['fromname'] = email['fromname'].replace('<','').replace('>','')
@@ -8842,22 +8848,30 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # special header for the emails
         _key = EMAIL_ISSUEID_HEADER
         if email.get(_key, email.get(_key.lower(), None)):
+            log.append('\t%r header in email' % _key)
             reply_issue_id_found = email.get(_key, email.get(_key.lower()))
             reply_issue_id_found = reply_issue_id_found.replace('%s#' % _root_id, '')
             reply_issue_id_found = reply_issue_id_found.strip()
             if reply_issue_id_found:
+                log.append('\t\treply issue ID found: %r' % reply_issue_id_found)
                 try:
-                    self.getIssueObject(reply_issue_id_found)
+                    obj = self.getIssueObject(reply_issue_id_found)
+                    log.append('\t\t\t...as object URL %s' % obj.absolute_url_path())
                 except AttributeError:
                     LOG(self.__class__.__name__, ERROR, 
                         "Reply to issue %s doesn't exit" % reply_issue_id_found)
                     reply_issue_id_found = None
+                    log.append("\t\t\t...but doesn't exist as object")
                 if reply_issue_id_found:
-                    return self._processInboundEmailReply(email, reply_issue_id_found)
+                    sub_log = []
+                    reply_result = self._processInboundEmailReply(email, reply_issue_id_found,
+                                                                  log=sub_log)
+                    log.extend(['\t\t%s' % x for x in sub_log])
+                    return reply_result
             
         # is the root of the issuetracker to be found in the email body
         elif matchUrlInBody(email['body'], self.getRoot().absolute_url()):
-
+            log.append('\tfound the url %r the body of the email' % self.getRoot().absolute_url())
             if self.issueprefix:
                 issue_url_regex = r'(http|https)://\S+/%s/(%s|%s%s)' % \
                   (_root_id, _issueid_pattern, self.issueprefix, _issueid_pattern)
@@ -8871,7 +8885,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if re.findall(issue_url_regex, email['body']):
                 __, reply_issue_id_found = re.findall(issue_url_regex, email['body'])[0]
                 reply_issue_id_found = reply_issue_id_found.strip()
-                
+                log.append('\t\tan issue URL is found in the body of the email')
             else:
                 # it could very well be that the issuetracker is pointed to by
                 # a top domain (eg. real.issuetrackerproduct.com) so the root
@@ -8882,13 +8896,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 whole_url_regex = '(%s)' % issue_url_regex
                 if re.findall(whole_url_regex, email['body']):
                     whole_url, __, reply_issue_id_found = re.findall(whole_url_regex, email['body'])[0]
+                    log.append('\t\tan issue URL is found in the body of the email')
+                    
                     
         if reply_issue_id_found:
             try:
                 self.getIssueObject(reply_issue_id_found)
             except:
                 reply_issue_id_found = None
-
+            log.append('\ta reply issue ID is found %r' % reply_issue_id_found)
 
         # Is this email a reply to something this issuetracker has already
         # sent out. The first test checks if the body contains a URL to 
@@ -8903,11 +8919,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if email['body'].find(rendered_signature) > -1:
                 # if we find an exact match on the signature, this email is a reply
                 # of some sort on an email sent from this issuetracker
+                log.append("\t\tcertain it's a reply because it has the same signature")
                 return self._processInboundEmailReply(email, reply_issue_id_found)
         
             elif 0 < email['title'].find('%s: new issue:' % _root_title) < 6:
                 # the subject line of the email has the "new issue:" thing
                 # in the subject line near the begning.
+                log.append("\t\tcertain it's a reply because the expected title")
                 return self._processInboundEmailReply(email, reply_issue_id_found)
             
             elif 0 < email['title'].find('%s: ' % _root_title) < 6:
@@ -8949,8 +8967,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                           sections=email['sections'], type=email['type'],
                           urgency=email['urgency'],
                           email_message_id=email.get('message_id', None)):
+            log.append('\tfound that the email is a duplicate of an already existing issue')
             return False
-                          
             
         create = self.createIssueObject
         issue = create(None, unicodify(email['title']), 
@@ -8977,8 +8995,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         try:
             issue._setEmailOriginal(email['originalfile'].read())
         except:
-            LOG(self.__class__.__name__, ERROR, "Failed to upload the original as a file",
-                error=sys.exc_info())
+            logger.error("Failed to upload the original as a file",
+                         exc_info=True)
 
         # Possibly send a return email
         if email['acceptingemail'].doSendConfirm():
@@ -9402,8 +9420,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return item
             
             
-    def getPOP3Messages(self, pop3instance, account, dele=None):
-        """ get messages from pop3 object """
+    def getPOP3Messages(self, pop3instance, account, dele=None, log=[]):
+        """ get messages from pop3 object.
+        
+        Write all verbose messages as strings into the list @log.
+        """
         
         if dele is not None:
             import warnings
@@ -9413,8 +9434,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             warnings.warn(m, DeprecationWarning)
             
         numMessages = len(pop3instance.list()[1])
+        log.append('0 messages in pop3 server to download')
+        
         if not numMessages:
-            return [] # no point going on
+            return [], v # no point going on
         
         emails = []
         
@@ -9434,10 +9457,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # I can be certain each line is one \n apart
             emailstring = '\n'.join(emailstring)
 
+            sub_log = []
             email = self._processEmailString(emailstring, account,
-                                             already_message_ids=already_message_ids)
+                                already_message_ids=already_message_ids,
+                                log=sub_log)
 
+            log.extend(['\t%s' % x for x in sub_log])
             if email:
+                log.append('keeping message no. %s' % (i+1))
                 email['message_number'] = i + 1
                 emails.append(email)
             
@@ -9448,8 +9475,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         already_message_ids = [x.getEmailMessageId() for x in self.getIssueObjects()]
         return [ss(x) for x in already_message_ids if x]        
     
-    def _processEmailString(self, emailstring, account, already_message_ids=None):
-        """ return a dictionary of the parsed email or None if the email isn't welcome.
+    def _processEmailString(self, emailstring, account, already_message_ids=None, 
+                            log=[]):
+        """ return a dictionary of the parsed email or None if the email isn't welcome
+        and a list of verbose messages that are used by the caller of this function to 
+        display what happened here.
         The dictionary contains all the headers of the email plus a few extra keys:
             o is_spam (bool)
             o originalfile (file object containing the whole emailstring)
@@ -9466,8 +9496,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for optimization. If you're going to call _processEmailString() 10 times for 
         10 emails in an inbox you don't want to call _getAllAlreadyMessageIds() 10
         times.
-            
+        
+        Write all verbose messages as strings into the list @log.
         """
+        
         p = email_Parser.Parser()
         #emailfile.seek(0) # rewind for reading
         msg = p.parsestr(emailstring)
@@ -9566,6 +9598,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if e.get(header, '') == SPAMBAYES_CHECK or e.get(header.lower()) == SPAMBAYES_CHECK:
                 # this is spam!!
                 e['is_spam'] = True
+                log.append('trapped as Spambayes spam!')
+            else:
+                log.append('passed Spambayes spam check')
                 
         # Maybe it wasn't sent directly To, but CC
         if e.get('cc','') != '':
@@ -9573,24 +9608,30 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # check whom it's to
         extractor = self.preParseEmailString
         try:
-            to = e['to']
+            to = e['to']            
         except KeyError:
             # emails that don't have a To: part are dodgy
             logger.warn("One email is missing To: part (subject=%r, from=%s)" % \
                         (e.get('subject','*no subject*'), e.get('from','*no from*')))
-            return
+            log.append("unable to extract 'To:' header from email")
+            return 
             
         tolist = extractor(to, aslist=1, allnotifyables=0)
         
         tolist_simplified = [ss(x) for x in tolist]
+        log.append('To %r' % str(tolist_simplified))
+        
         intersection = []
         originator = self.preParseEmailString(e['from'])
         accepting_email_objects = account.getAcceptingEmails()
         for ae in accepting_email_objects:
+            log.append('\tcomparing %r with %s' % (ae.getEmailAddress(), str(tolist_simplified)))
             if ss(ae.getEmailAddress()) in tolist_simplified:
                 intersection.append(ae.getEmailAddress())
+                log.append('\t\tmatches on %s' % str(intersection))
                 try:
                     if not ae.acceptOriginatorEmail(originator):
+                        log.append('\t\t\ttblacklisted from address (%r)' % originator)
                         e['is_blacklisted'] = True
                 except:
                     LOG(self.__class__.__name__, WARNING,
@@ -9599,10 +9640,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     
         if intersection:
             e['to'] = intersection[0]
-            
             return e
         
         del emailstring
+        
         
                 
                 
