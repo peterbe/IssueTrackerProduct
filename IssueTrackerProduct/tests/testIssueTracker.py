@@ -116,7 +116,7 @@ class DodgyNewFileUpload:
     
     def read(self, bytes=None, mode=0):
         return ""
-    
+
 #------------------------------------------------------------------------------    
 
 class TestBase(ZopeTestCase.ZopeTestCase):
@@ -157,6 +157,11 @@ class TestBase(ZopeTestCase.ZopeTestCase):
                    **kw):
         
         self.app.REQUEST.cookies[key] = value
+        
+    #def beforeTearDown(self):
+    def afterClear(self):
+        global __trapped_emails__
+        __trapped_emails__ = []
         
 class TestFunctionalBase(ZopeTestCase.FunctionalTestCase):
 
@@ -220,7 +225,8 @@ class IssueTrackerTestCase(TestBase):
     def test_debatingIssue(self):
         """ test posting a followup under a different email address than the original """
         tracker = self.folder.tracker
-        
+        tracker.sitemaster_email = 'something@valid.com'
+
         request = self.app.REQUEST
         request.set('title', u'TITLE')
         request.set('fromname', u'From name')
@@ -249,6 +255,13 @@ class IssueTrackerTestCase(TestBase):
         self.assertEqual(notification.getEmails(), [u'email@address.com'])
         if tracker.doDispatchOnSubmit():
             self.assertTrue(notification.isDispatched())
+
+        # we should now expect an email to have been sent to email@address.com
+        assert __trapped_emails__, "not trapped emails"
+        latest_email = __trapped_emails__[0]
+        self.assertTrue(latest_email['mto'].find('email@address.com') > -1)
+        self.assertTrue(latest_email['mfrom'].find('something@valid.com') > -1)
+        
             
     def test_debatingIssue_withSmartAvoidanceOfNotifications(self):
         """ If A posts an issue, B follows up and shortly there after A 
@@ -337,6 +350,7 @@ class IssueTrackerTestCase(TestBase):
         # let's look at the latest notification
         notification = issue.getCreatedNotifications(sort=True)[1]
         self.assertEqual(notification.getEmails(), [A, C])
+        
         
         
     def test_debatingIssue_withSmartAvoidanceOfNotifications_part2(self):
@@ -1071,8 +1085,32 @@ def test_suite():
     suite.addTest(makeSuite(IssueTrackerTestCase))
 #    suite.addTest(makeSuite(IssueTrackerFunctionalTestCase))
     return suite
+
+
+from Products.MailHost.MailHost import MailBase
+def _monkeypatch_send(self, mfrom, mto, messageText):
+    if 0:
+        import inspect
+        print "_send(%r, %r, %r)" % (mfrom, mto, messageText[:40]+'...')
+        for i in range(2,6):
+            try:
+                #caller_module = inspect.stack()[i][1]
+                caller_method = inspect.stack()[i][3]
+                caller_method_line = inspect.stack()[i][2]
+            except IndexError:
+                break
+            print "\t%s:%s"%(caller_method, caller_method_line)
+        print ""
+    
+    __trapped_emails__.append(dict(mfrom=mfrom, mto=mto, messageText=messageText))
+    
+    #print >>sys.stderr, "from:%s To:%s" % (mfrom, mto)
+MailBase._send = _monkeypatch_send
+__trapped_emails__ = []
     
 if __name__ == '__main__':
     framework()
+    
+    
         
 

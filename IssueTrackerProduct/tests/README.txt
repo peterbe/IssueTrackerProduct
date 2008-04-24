@@ -16,3 +16,8 @@ To just run testIssueTracker.py but only test called test_debatingIssue()
 
 Include --keepbytecode when the set of tests gets large. At the time of
 writing, this doesn't make any difference to the time it takes.
+
+If you're testing this in Zope 2.8 you'll have to use this syntax
+instead:
+
+./bin/zopectl test --dir Products/IssueTrackerProduct/tests testEmailIn
