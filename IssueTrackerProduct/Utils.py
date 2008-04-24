@@ -34,7 +34,7 @@ def structured_text(txt):
                 level=int(os.environ.get('STX_DEFAULT_LEVEL',3)),
                 header=0)
 
-from addhrefs import addhrefs, __version__ as addhrefs_version
+from addhrefs import addhrefs, improveURL, __version__ as addhrefs_version
 _major, _minor = addhrefs_version.split('.')[:2]
 try: 
     _major = int(_major)
@@ -926,6 +926,19 @@ def ShowDescription(text, display_format='',
     """
     if not text: # blank or None
         return ""
+    
+    if urllinkfunction is None:
+        # add one that is able to truncate really long URLs
+        def urllinkfunction(url, maxlength=80):
+            if len(url) > maxlength:
+                title = url[:47] + '...' + url[-30:]
+                tooltip = 'Right click to copy the whole URL'
+                return '<a href="%s" title="%s">%s</a>' % \
+                (improveURL(url), tooltip, title)
+                
+            else:
+                return '<a href="%s">%s</a>' % (improveURL(url), url)
+            
 
     if display_format == 'structuredtext':
         #st=_replace_special_chars(text)

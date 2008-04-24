@@ -73,7 +73,9 @@ unexpected. The errors were:</p>
   
   <tal:value condition="python:test(err_value and (err_value != err_message), 1, 0)">
   <b>Error value:</b>
-  <code tal:content="structure err_value"></code><br />
+  <code tal:content="structure err_value"></code>
+  <br />
+  <br />
   </tal:value>
 </p>  
 
@@ -107,7 +109,7 @@ has not been defined in that block of code.
   <p><a tal:attributes="href err_log_url">Error log details</a></p>
 </div>
 
-<div tal:condition="not:here/doDebug">
+<div tal:condition="python:not here.doDebug() and not here.ignoreExceptionType(err_type)">
   <h3>How to report this error</h3>
   <p>If this error is highly unexpected you might want to contribute to the 
   IssueTrackerProduct project how you encountered the error and its presence. To do this, you need to 

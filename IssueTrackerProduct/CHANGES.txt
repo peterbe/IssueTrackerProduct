@@ -1,5 +1,8 @@
 -
 
+    New feature: Really long URLs in the text that extend beyond the
+    box it's in is truncated shorter.
+
     Bug fixed: Having statuses containing unicode characters could
     break the statistics page. Thanks Rene Bonvin. (Real#0735)
 

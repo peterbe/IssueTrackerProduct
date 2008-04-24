@@ -11968,6 +11968,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         return fileobject
 
+    
+    def ignoreExceptionType(self, error_type):
+        """ return true if this type of exception can be ignored """
+        ignored_exceptions = self.error_log.getProperties().get('ignored_exceptions', [])
+        return error_type in ignored_exceptions
+        
         
     def bugreportingURL(self, error_type=None, error_value=None,
                         error_traceback=None):
@@ -11980,6 +11986,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     
     def bugreportingForm(self, error_type=None, error_value=None,
                         error_traceback=None, submit_value='Issue Tracker'):
+        
         url, params = self._getBugReportingParameters(error_type=error_type,
                                                       error_value=error_value,
                                                       error_traceback=error_traceback)
