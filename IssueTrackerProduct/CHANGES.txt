@@ -1,5 +1,12 @@
 -
 
+    New feature: If you pass the spambot prevention test it's
+    remembered in a cookie for the next 60 days rather than just for
+    the session.
+    
+    New feature: When you've added an issue the URL it redirects to no
+    longer ends with ?NewIssues=Submitted. Cleaner URLs.
+
     New feature: Really long URLs in the text that extend beyond the
     box it's in is truncated shorter.
 

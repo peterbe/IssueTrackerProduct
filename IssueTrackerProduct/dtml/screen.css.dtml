@@ -410,12 +410,6 @@ div.assignment {
   padding:6px;
 }
 
-.announcement {
-  border:1px solid black;
-  background-color:#efefef;
-  margin-bottom:15px;
-}
-
 img.fileatt { 
   vertical-align:middle;
   padding:3px;

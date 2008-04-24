@@ -253,6 +253,7 @@ RECENTHISTORY_ADDISSUEIDKEY = '__issuetracker_recenthistory_addissueid'
 RECENTHISTORY_REPORTSKEY = '__issuetracker_recenthistory_reports'
 SHOW_FILTEROPTIONS_KEY = '__issuetracker_show_filteroptions'
 FILTEROPTIONS_KEY = '__issuetracker_filteroptions'
+ALREADY_NOT_SPAMBOT_COOKIE_KEY = '__it_AlreadyNotSpambot'
 
 
 # Misc

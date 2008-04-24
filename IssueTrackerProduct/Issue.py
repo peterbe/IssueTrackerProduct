@@ -251,7 +251,21 @@ class IssueTrackerIssue(IssueTracker):
     def _setACLAdder(self, acl_adder):
         """ set acl_adder """
         self.acl_adder = acl_adder
+
         
+    def isRecentlyAdded(self):
+        """ return true if the issue was recently added.
+        This will be true just after you press save on the Add Issue page.
+        """
+        if self.REQUEST.get('HTTP_REFERER','').split('/')[-1] in ('AddIssue','QuickAddIssue'):
+            # but perhaps you've been on the page for a while now and decide to reload it
+            if (DateTime()-self.getIssueDate()) * 24 * 60 < 1:
+                # not older than one minute
+                return True
+        elif self.REQUEST.get('NewIssue'): # the old way
+            return True
+        
+        return False
         
     def isYourIssue(self):
         """ return true if the currently logged in user is the same 

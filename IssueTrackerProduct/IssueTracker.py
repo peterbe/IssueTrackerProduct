@@ -19,6 +19,7 @@ Danny W. Adair of Asterisk Ltd for getRolesInContext(self) bug report and patch.
 import string, os, re, sys
 import random
 import poplib
+from urlparse import urlparse
 
 try:
     from poplib import POP3, POP3_SSL
@@ -3448,6 +3449,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         if int(nr) != int(self.captcha_numbers_map.get(captchas_used[i])):
                             errors = True
                             break
+                    except TypeError:
+                        logger.warn("Couldn't make %r or %r into ints"  % (nr, self.captcha_numbers_map.get(captchas_used[i])))
+                        errors = True
+                        break
                     except ValueError:
                         errors = True
                         break
@@ -3552,7 +3557,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         if _existing_issue:
             url = _existing_issue.absolute_url()
-            url += '?NewIssue=Submitted'
+            url += '?NewIssue=Submitted' 
             
             if _rfg('draft_issue_id'):
                 self._dropDraftIssue(_rfg('draft_issue_id'))
@@ -3628,13 +3633,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             #typ, val, tb = sys.exc_info()
             #_classname = self.__class__.__name__
             #_methodname = inspect.stack()[1][3]
-            LOG("IssueTrackerProduct.SubmitIssue()", ERROR,
-                'Could not send always-notify emails',
-                error=sys.exc_info())            
-            
+            logger.error('Could not send always-notify emails',
+                         exc_info=True)
 
         # Where to next?
-        redirect_url = '%s?NewIssue=Submitted'%(issue.absolute_url())
+        #redirect_url = '%s?NewIssue=Submitted'%(issue.absolute_url())
+        redirect_url = issue.absolute_url()
+        
         request.RESPONSE.redirect(redirect_url)
 
 
@@ -3663,7 +3668,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return None
         
     
-                             
+    # XXX! Why is this not made private??
     def createIssueObject(self, id, title, status, type_, urgency, sections,
                           fromname, email, url2issue, confidential, hide_me,
                           description, display_format, issuedate=None, index=0,
@@ -3784,30 +3789,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return fakes
     
     
-    def useSpambotPrevention(self):
-        """ return true if spambot prevention should be used """
-        if self.ShowSpambotPrevention():
-            if self.getIssueUser() or self.getZopeUser() or self.getCMFUser():
-                return False
-            skey = ALREADY_NOT_SPAMBOT_SESSION_KEY
-            if self.get_session(skey, False):
-                return False
-            
-            return True
-        
-        return False
-                
-            
-    def _rememberProvenNotSpambot(self):
-        """ set a session variable on this user that proves that she's not a 
-        spambot. 
-        """
-        # XXX Perhaps this should be a cookie??
-        skey = ALREADY_NOT_SPAMBOT_SESSION_KEY
-        self.set_session(skey, True)
 
-                
-
+    ##
+    ## Generating IDs for issues, threads and drafts
+    ## 
+    
     def generateID(self, length, prefix='', meta_type=ISSUE_METATYPE,
                    incontainer=None, use_stored_counter=True):
         """ see if there is an internal counter already,
@@ -3866,6 +3852,34 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
 
 
+        
+    ##
+    ## Spambot
+    ## 
+    
+    
+    def useSpambotPrevention(self):
+        """ return true if spambot prevention should be used """
+        if self.ShowSpambotPrevention():
+            if self.getIssueUser() or self.getZopeUser() or self.getCMFUser():
+                return False
+            ckey = ALREADY_NOT_SPAMBOT_COOKIE_KEY
+            if self.get_cookie(ckey, False):
+                return False
+            
+            return True
+        
+        return False
+                
+            
+    def _rememberProvenNotSpambot(self):
+        """ set a session variable on this user that proves that she's not a 
+        spambot. 
+        """
+        ckey = ALREADY_NOT_SPAMBOT_COOKIE_KEY
+        self.set_cookie(ckey, True, expires=60, across_domain_cookie_=True)
+
+        
     def _moveUpSections(self, sections):
         """ when an issue has been created, prioritize it's sections globally.
         """
@@ -12364,8 +12378,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return the HTML needed to be included in the forms to catch out
         spambots. 
         """
-        skey = ALREADY_NOT_SPAMBOT_SESSION_KEY
-        if self.get_session(skey):
+        ckey = ALREADY_NOT_SPAMBOT_COOKIE_KEY
+        if self.get_cookie(ckey):
             return ''
         
         parts = []

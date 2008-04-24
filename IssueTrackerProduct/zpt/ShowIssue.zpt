@@ -17,6 +17,14 @@ form {
   margin-bottom:0;
   margin-top:0;
 }
+
+table.announcement {
+  border:1px solid black;
+  background-color:#efefef;
+  margin-bottom:15px;
+}
+
+
 </style>
 
 <style type="text/css"
@@ -48,14 +56,15 @@ form {
 
 
 
-<div align="center" tal:condition="python:request.has_key('NewIssue')">
+<div align="center" class="announcement" tal:condition="here/isRecentlyAdded">
 <table class="announcement" cellpadding="6" border="0">
   <!--<tr tal:define="always_notified python:here.Always2Notify(emailtoskip=here.email, format='merged', requireemail=1, include_assignee=1)">-->
   <tr tal:define="notified_users here/getNotifiedUsersByNotificationsAndAssignment">
     <td valign="top" align="left">
-            <a tal:attributes="href request/URL1" style="float:right"
+            <a style="float:right" title="Close"
+               tal:attributes="href request/URL1; onclick python:test(not request.get('NewIssue'),'return closeAnnouncement()')"
                tal:condition="not:python:here.doShowAlwaysNotifyStatus() and notified_users"
-             ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
+             ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close" border="0" /></a>
 
 	    <h3>Issue added!</h3>
 	    <p><b><a href="URL1"
@@ -69,8 +78,9 @@ form {
     </td>
 
     <td valign="top" tal:condition="python:here.doShowAlwaysNotifyStatus() and notified_users">
-            <a tal:attributes="href request/URL1" style="float:right"
-             ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close annoucement" border="0" /></a>
+            <a style="float:right" title="Close"
+               tal:attributes="href request/URL1;onclick python:test(not request.get('NewIssue'),'return closeAnnouncement()')"
+             ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close" border="0" /></a>
              <br clear="right" />
              
 		<p>
@@ -232,7 +242,6 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 <script type="text/javascript" tal:condition="not:useaccesskeys">if($('#textarea').size()) $('#textarea')[0].focus();</script>
 <script type="text/javascript" tal:condition="useaccesskeys">if($('#textarea').size()) $('#textarea')[0].focus();disableKS();</script>
 </tal:block>
-
 
 </div>
 </html>
