@@ -3668,7 +3668,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return None
         
     
-    # XXX! Why is this not made private??
+    security.declareProtected(AddIssuesPermission, 'SubmitIssue')
     def createIssueObject(self, id, title, status, type_, urgency, sections,
                           fromname, email, url2issue, confidential, hide_me,
                           description, display_format, issuedate=None, index=0,
