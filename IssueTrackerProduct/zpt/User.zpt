@@ -132,7 +132,8 @@ tal:attributes="id python:test(request.get('change'),'rightcorner_change','right
  tal:content="python:request.get('changemsg')"></div>
 <b tal:condition="issueuser" tal:content="string:${issueuser/getFullname}, ${issueuser/getEmail}"></b>
 <b tal:condition="cmfuser" tal:content="python:cmfuser.getProperty('fullname')+', '+cmfuser.getProperty('email')"></b>
-<!--<b tal:condition="not:python:issueuser or cmfuser" tal:content="python:here.getSavedUser('fromname')+', '+here.getSavedUser('email')"></b><br />-->
+<b tal:condition="python:not issueuser and not cmfuser" 
+   tal:content="python:here.getSavedUser('fromname')+', '+here.getSavedUser('email')"></b><br />
 
 <tal:block define="df here/getSavedTextFormat">
 Display format: 
