@@ -14,6 +14,7 @@ class IssueTrackerWebservices:
     def ws_countIssues(self):
         """ return how many issues there in this issuetracker """
         return self.countIssueObjects()
+
     
     def ws_SubmitIssue(self, title, description, fromname, email, 
                        display_format=None,

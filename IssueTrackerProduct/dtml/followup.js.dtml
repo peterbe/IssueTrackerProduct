@@ -115,7 +115,6 @@ $(function() {
    
    if ($('span.q_highlight').size() && $('a.backlink')) {
       // make a javascript link that removes the highlighting
-      //console.log();
       $('a.backlink').parent('div').append(
          $('<a>').attr('href','.').addClass('highlight-toggle').addClass('q_highlight')
                                            .click(function() {toggleHighlight();return false})
