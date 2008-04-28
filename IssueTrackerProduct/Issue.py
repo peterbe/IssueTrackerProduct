@@ -735,7 +735,7 @@ class IssueTrackerIssue(IssueTracker):
         SubmitError = options.get('SubmitError')
         draft_followup_id = options.get('draft_followup_id', request.get('draft_followup_id'))
         
-        request_action = unicodify(request.get('action'))
+        request_action = unicodify(request.get('action')).lower()
         
         draft_saved = options.get('draft_saved')
         
@@ -761,6 +761,8 @@ class IssueTrackerIssue(IssueTracker):
 
         if request_action == 'delete':
             return self.form_delete(SubmitError=SubmitError)
+        
+        print "request_action", request_action
 
         if request_action == 'rejectassignment':
             otherTitle = "Reject issue assignment"

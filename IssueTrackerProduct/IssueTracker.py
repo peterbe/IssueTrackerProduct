@@ -4840,16 +4840,18 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if use_request and request.get(s):
             return unicodify(request[s])
         elif self.get_cookie(cookie):
+            
             if s =='fromname':
                 return unicodify(self.get_cookie(cookie))
             else:
                 return self.get_cookie(cookie)
+            
         elif acl_username:
             r = self._getACLCookie(acl_username, s)
             
             if name_email == 'email':
                 if r is None:
-                    r = ""
+                    return ""
                 else:
                     return r
             else:
