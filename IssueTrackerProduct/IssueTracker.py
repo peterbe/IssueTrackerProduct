@@ -6383,7 +6383,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         try:
             if len(container) > FILTERVALUEFOLDER_THRESHOLD_CLEANING:
                 msg = self.CleanOldSavedFilters(user_excess_clean=1)
-                logger.info(str(msg))
+                logger.info("Cleaned old saved filters %s" % str(msg))
         except:
             logger.error("Failed to check for filtervaluer excess",
                          exc_info=True)
