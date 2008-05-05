@@ -982,6 +982,37 @@ class IssueTrackerTestCase(TestBase):
         # run it again and it shouldn't create another saved filter
         tracker.ListIssuesFiltered()
         saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        
+        
+    def test_filterIssues_anonymous_named_user_no_email(self):
+        """ test filtering when the user is no logged in but has a name
+        and email in the cookie. """
+        
+        noSecurityManager()
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        tracker.set_cookie = self.set_cookie
+        
+        self.set_cookie(tracker.getCookiekey('name'), u'Bob')
+        
+        # On the homepage, the links to see only say issues "On hold" is
+        # /ListIssues?Filterlogic=show&f-statuses=on%20hold
+        # Let's mimick that:
+        request.set('Filterlogic','show')
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        # let's look at what was created in the saved-filters folder
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
+        self.assertEqual(len(saved_filters), 1)
+        saved_filter = saved_filters[0]
+        self.assertEqual(saved_filter.adder_fromname, u'Bob')
+        
+        # run it again and it shouldn't create another saved filter
+        tracker.ListIssuesFiltered()
+        saved_filters = getattr(tracker, 'saved-filters').objectValues()
         self.assertEqual(len(saved_filters), 1)        
     
 

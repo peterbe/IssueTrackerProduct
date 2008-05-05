@@ -1,3 +1,8 @@
+- 
+
+    Bug fixed: Saving filters when only the fromname is known would
+    raise an UnmatchableError.
+    
 - 0.9.1
 
     Bug fixed: Saved cookies with where only the name is known could

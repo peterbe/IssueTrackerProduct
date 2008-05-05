@@ -6258,7 +6258,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         fromname = self.get_cookie(self.getCookiekey('name'))
         email = self.get_cookie(self.getCookiekey('email'))
 
-        if not acl_adder and not (fromname or email):
+        if not (acl_adder or fromname or email):
             # the user hasn't identified herself, then create a cookie key
             # and use that instead
             
@@ -6396,38 +6396,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return valuer
     
         
-    def OLD__findOldMatchingFilters(self, filtername, acl_adder=None,
-                                adder_fromname=None, adder_email=None,
-                                cookie_key=None):
-        """ delete filtervaluers that have this exact filtername, and match also
-        either the acl_adder or adder_fromname and adder_email together. """
-        if not (acl_adder or adder_fromname and adder_email or cookie_key):
-            raise UnmatchableError, "must provide either acl_adder or "\
-                                 "adder_fromname and adder_email or cookie_key"
-
-        container = self._getFilterValueContainer()
-        finds = []
-        for filtervaluer in container.objectValues(FILTEROPTION_METATYPE):
-            if filtervaluer.getTitle() == filtername:
-                if acl_adder and filtervaluer.acl_adder == acl_adder:
-                    finds.append(filtervaluer)
-                elif cookie_key and filtervaluer.getKey() == cookie_key:
-                    finds.append(filtervaluer)
-                else: # match by fromname and email
-                    fn = filtervaluer.adder_fromname
-                    fe = filtervaluer.adder_email
-                    if fn == adder_fromname and fe == adder_email:
-                        finds.append(filtervaluer)
-                            
-        return finds
-    
     
     def _findOldMatchingFilters(self, filtername, acl_adder=None,
                                 adder_fromname=None, adder_email=None,
                                 cookie_key=None):
         """ delete filtervaluers that have this exact filtername, and match also
         either the acl_adder or adder_fromname and adder_email together. """
-        if not (acl_adder or adder_fromname and adder_email or cookie_key):
+        if not (acl_adder or adder_fromname or adder_email or cookie_key):
             raise UnmatchableError, "must provide either acl_adder or "\
                                  "adder_fromname and adder_email or cookie_key"
 
@@ -6442,8 +6417,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         elif cookie_key:
             search['key'] = cookie_key
         else:
-            search['adder_fromname'] = adder_fromname
-            search['adder_email'] = adder_email
+            assert adder_fromname or adder_email, "one must exist"
+            if adder_fromname:
+                search['adder_fromname'] = adder_fromname
+            if adder_email:
+                search['adder_email'] = adder_email
             
             
         catalog = self.getFilterValuerCatalog()
