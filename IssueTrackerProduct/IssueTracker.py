@@ -11512,7 +11512,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return the list of sections as unicode strings if they're not """
         for i, item in enumerate(sections):
             if isinstance(item, str):
-                sections[i] = unicodify(item)
+                try:
+                    sections[i] = unicodify(item)
+                except TypeError:
+                    logger.error("Tried to convert %r to unicode in %r" %(item, sections))
+                    raise 
         return sections
     
     def QuickAddIssue(self, REQUEST, **kw):
