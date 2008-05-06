@@ -8716,7 +8716,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         count = 0 # total count
         
         for account in self.getPOP3Accounts():
-            v.append('Opening account host %s:%s' % (account.getHostname(),account.getPort()))
+            v.append('Opening account host %s:%s' % \
+                     (account.getHostname(),account.getPort()))
             
             if connect_class is None:
                 if account.doSSL():
@@ -9541,6 +9542,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             name = part.get_param('name')
             if name is None:
                 name = part.get_filename()
+                
             try:
                 content = part.get_payload(decode=1)
             except:
@@ -9548,8 +9550,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # for the email package to deal with. In that
                 # case, this attachment is ignorable. Tough!
                 continue
-            if name == None:
-                if str(part.get_content_type()).lower() == 'html':
+            
+            if name is None:
+                if str(part.get_content_type()).lower() in ('html', 'text/html'):
                     content_html = content
                 else:
                     content_plain = content
@@ -9568,10 +9571,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     m = "stripogram module not installed to strip HTML emails"
                     LOG(self.__class__.__name__, WARNING, m)
                     e['display_format'] = 'html'
+                
             e['body'] = content_html
         else:
             e['body'] = content_plain
-            
 
         if SPAMBAYES_CHECK:
             # http://spambayes.sourceforge.net

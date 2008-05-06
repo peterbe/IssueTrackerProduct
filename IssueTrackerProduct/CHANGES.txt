@@ -1,4 +1,8 @@
 -
+
+    Bug fixed: When accepting multipart emails and html2safehtml is
+    not installed the default part to keep is now the text/plain part.
+
     Bug fixed: Loading a saved draft followup that didn't have an
     action would raise an error.
     

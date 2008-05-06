@@ -354,20 +354,7 @@ class EmailInTestCase(TestBase):
     def test_emailIn5(self):
         """ Test emails in multipart """
         tracker = self.folder.tracker
-        u, p = 'test', 'test' # doesn't really matter
-        account = tracker.createPOP3Account('mail.example.com', u, p)
-        email = 'mail@example.com'
-        ae = tracker.createAcceptingEmail(account.getId(), email)
-        
-        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
-        
-        # 'email-in-5.email' is multipart/alternative and the HTML part of it
-        # is not quoted.
-        FakePOP3.files = [abs_path('email-in-5.email'),]
-
-        # Monkey patch!
-        from Products.IssueTrackerProduct import IssueTracker
-        IssueTracker.POP3 = FakePOP3
+        self._send_in_emails('email-in-5.email')
         
         result = tracker.check4MailIssues(verbose=True)
         self.assertTrue(result.find('Created 1 issue') > -1)
@@ -378,6 +365,44 @@ class EmailInTestCase(TestBase):
         # XXX I'm not sure what this test is meant to test.
         # Perhaps the functionality of emailing in HTML emails should
         # change to show HTML safely.
+        
+        
+    def test_emailInMultipart(self):
+        """ when emailing in an email with multipart text and html, 
+        favor the text part.
+        """
+        tracker = self.folder.tracker
+        self._send_in_emails('multipart-email-with-ms.email',
+                             accepting_email='ims@issuetrackerproduct.com')
+        
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
+        
+        issue = tracker.getIssueObjects()[0]
+        description = issue.description
+        self.assertTrue('THIS IS THE PLAIN PART' in description)
+        display_format = issue.display_format
+        self.assertEqual(display_format, 'plaintext')
+        
+    def _send_in_emails(self, email_filenames, accepting_email='mail@example.com'):
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = accepting_email
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-5.email' is multipart/alternative and the HTML part of it
+        # is not quoted.
+        
+        if not isinstance(email_filenames, (tuple, list)):
+            email_filenames = [email_filenames]
+        FakePOP3.files = [abs_path(x) for x in email_filenames]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3        
 
     def test_jp_regression_tests(self):
         """ these tests come from a bug report by Jesse.
