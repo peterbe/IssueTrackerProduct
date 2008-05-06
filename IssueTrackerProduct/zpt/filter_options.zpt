@@ -22,7 +22,13 @@ function _doload(url, d, outid) {
   return false;
 }
 
+var _loaded_filteroptions = false;
 function loadfilteroptions(f) {
+  if (_loaded_filteroptions) {
+    //alert('not loading again');
+    return false;
+    }
+  
   var d = 'force_filtervaluer_update=1&';
   for (i=0;i < f.elements.length;i++) {
     ob = f.elements[i];
@@ -30,11 +36,15 @@ function loadfilteroptions(f) {
   }
   var url = f.action.replace(/\/ListIssues|\/CompleteList/,'/filter_options').split('?')[0];
   if (url.indexOf('?')>-1) { d += url.substring(url.indexOf('?')+1, url.length-1); url = url.substring(0, url.indexOf('?')); }
-  return _doload(url, d, 'filteroptions');
+  var loaded = _doload(url, d, 'filteroptions')
+  _loaded_filteroptions = true;
+  return loaded;
 }
 
 function unloadfilteroptions(f) {
-  return _doload(f.action+'filter_options', 'ShowFilterOptions:int=0&', 'filteroptions');
+  var unloaded = _doload(f.action+'filter_options', 'ShowFilterOptions:int=0&', 'filteroptions')
+  _loaded_filteroptions = false;
+  return unloaded;
 }
 //--></script>
 <div tal:condition="not:request/ShowFilterOptions|nothing" id="filteroptions">

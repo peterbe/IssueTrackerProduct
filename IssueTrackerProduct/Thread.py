@@ -273,11 +273,9 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
     def getComment_idx(self):
         return self.getComment()
         
-
     def unindex_object(self):
         """A common method to allow Findables to unindex themselves."""
         self.getCatalog().uncatalog_object('/'.join(self.getPhysicalPath()))
-
         
     security.declareProtected(VMS, 'manage_editProperties')
     def manage_editProperties(self, REQUEST):

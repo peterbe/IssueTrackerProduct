@@ -1,5 +1,8 @@
 - 
 
+    Bug fixed: Saved filters container was never imploded even if the 
+    container had more saved filters in it than allowed.
+    
     Bug fixed: Saving filters when only the fromname is known would
     raise an UnmatchableError.
     

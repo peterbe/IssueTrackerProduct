@@ -4,7 +4,10 @@
 ##
 
 import unittest
+import re
 from pprint import pprint
+from time import time
+from random import randint
 
 import sys, os
 if __name__ == '__main__':
@@ -14,6 +17,7 @@ from Globals import SOFTWARE_HOME
 from Testing import ZopeTestCase
 from AccessControl import getSecurityManager
 from AccessControl.SecurityManagement import newSecurityManager, noSecurityManager
+from DateTime import DateTime
 
 import Acquisition
 
@@ -26,7 +30,8 @@ ZopeTestCase.installProduct('IssueTrackerProduct')
 
 from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
 from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE, \
- DEBUG, ISSUE_DRAFT_METATYPE, TEMPFOLDER_REQUEST_KEY
+ DEBUG, ISSUE_DRAFT_METATYPE, TEMPFOLDER_REQUEST_KEY, \
+ FILTERVALUEFOLDER_THRESHOLD_CLEANING, FILTEROPTION_METATYPE
 
 #------------------------------------------------------------------------------
 #
@@ -117,6 +122,9 @@ class DodgyNewFileUpload:
     def read(self, bytes=None, mode=0):
         return ""
 
+
+from Products.IssueTrackerProduct.IssueTracker import FilterValuer
+        
 #------------------------------------------------------------------------------    
 
 class TestBase(ZopeTestCase.ZopeTestCase):
@@ -647,10 +655,6 @@ class IssueTrackerTestCase(TestBase):
 
         assert getSecurityManager().getUser().getUserName() == 'user'
         
-        #print getSecurityManager().getUser().getRoles()
-        #tracker.SubmitIssue(request)
-        #self.assertEqual(len(tracker.getIssueObjects()), 1)
-        #issue = tracker.getIssueObjects()[0]
 
 
     def test_getModifyTimestamp(self):
@@ -1077,8 +1081,92 @@ class IssueTrackerTestCase(TestBase):
         # if the cookie causes an AttributeError, then ListIssuesFiltered()
         # here wouldn't work. Just running this is the final test.
         tracker.ListIssuesFiltered()
+
         
+    def test_clean_saved_filters(self):
+        """ CleanOldSavedFilters() is called by manage_UpdateEverything() but
+        also if the number of saved filters exceeds FILTERVALUEFOLDER_THRESHOLD_CLEANING.
+        We'll first try the manual way of cleaning.
+        """
+        tracker = self.folder.tracker
         
+        container = tracker._getFilterValueContainer()
+        for i in range(100):
+            oid = 'random-%s' % i
+            instance = FilterValuer(oid, 'filter name')
+            container._setObject(oid, instance)
+            valuer = container._getOb(oid)
+            
+            if randint(1, 5) == 1:
+                valuer.set('acl_adder', 'fake acl adder')
+            elif randint(1, 4) == 1:
+                valuer.set('key', str(randint(1, 10)))
+            else:
+                valuer.set('adder_email', 'email')
+                
+            valuer.mod_date = DateTime(time() - randint(1000, 1000000)*10)
+            valuer.index_object()
+            
+        
+        max_ = FILTERVALUEFOLDER_THRESHOLD_CLEANING
+        count_filtervaluers = len(container.objectIds())
+        assert count_filtervaluers < max_
+        
+        # there should also be equally many indexed objects as there
+        # are reported by len(objectids)
+        catalog = tracker.getFilterValuerCatalog()
+        search = {'meta_type': FILTEROPTION_METATYPE}
+        brains = catalog.searchResults(**search)
+        assert len(brains) == count_filtervaluers
+        
+        # there are now 100 old saved filters whose
+        # bobobase_modification_time ranges between 4 to 0 months old
+        msg = tracker.CleanOldSavedFilters()
+        msg_regex = re.compile('Deleted (\d+) old saved filters')
+        no_deleted = int(msg_regex.findall(msg)[0])
+        
+        self.assertTrue(no_deleted < count_filtervaluers)
+        left = count_filtervaluers - no_deleted
+        
+        brains = catalog.searchResults(**search)
+        assert len(brains) == left, \
+        "no. brains=%s, left=%s" %(len(brains), left)
+        
+
+        
+    def test_clean_saved_filters_then_implode(self):
+        """ Similar to test_clean_saved_filters() except this time we're
+        making sure ALL saved filters are so old that if we send
+        implode_if_possible=True to CleanOldSavedFilters() and expect the 
+        container to disappear.
+        """
+        tracker = self.folder.tracker
+        container = tracker._getFilterValueContainer()
+        for i in range(100):
+            oid = 'random-%s' % i
+            instance = FilterValuer(oid, 'filter name')
+            container._setObject(oid, instance)
+            valuer = container._getOb(oid)
+            
+            if randint(1, 5) == 1:
+                valuer.set('acl_adder', 'fake acl adder')
+            elif randint(1, 4) == 1:
+                valuer.set('key', str(randint(1, 10)))
+            else:
+                valuer.set('adder_email', 'email')
+                
+            valuer.mod_date = DateTime(time() - randint(1000, 1000000)*1000)
+            valuer.index_object()
+            
+        self.assertTrue('saved-filters' in tracker.objectIds())
+        msg = tracker.CleanOldSavedFilters(implode_if_possible=True)
+        self.assertTrue('saved-filters' not in tracker.objectIds())
+        
+        # and the catalog should be empty
+        catalog = tracker.getFilterValuerCatalog()
+        search = {'meta_type': FILTEROPTION_METATYPE}
+        brains = catalog.searchResults(**search)
+        self.assertTrue(len(brains) == 0)
         
     def test_unicode_in_statuses(self):
         """ test that it's possible to set a verb:action pair to the 
@@ -1100,7 +1188,8 @@ class IssueTrackerTestCase(TestBase):
                               u'completed, complete']
         request.set('statuses-and-verbs', statuses_and_verbs)
         
-        tracker.manage_editIssueTrackerProperties(carefulbooleans=True, REQUEST=request)
+        tracker.manage_editIssueTrackerProperties(carefulbooleans=True, 
+                                                  REQUEST=request)
         
         for status, verb in tracker.getStatusesMerged(aslist=True):
             self.assertTrue(isinstance(status, unicode))

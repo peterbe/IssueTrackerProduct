@@ -1955,14 +1955,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # half-expired (see elif statement above) thus being less 
                 # lenient against these kind of objects.
                 treshold = treshold / 2
-                
+
             if age > treshold:
                 del_ids.append(filtervaluer.getId())
+                filtervaluer.unindex_object()
 
         if del_ids:
             msg = "Deleted %s old saved filters" % len(del_ids)
         else:
-            msg = ""
+            msg = "No old saved filters to delete"
         container.manage_delObjects(del_ids)
         
         if not user_excess_clean:
@@ -6381,7 +6382,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         valuer.index_object()
 
         try:
-            if len(container) > FILTERVALUEFOLDER_THRESHOLD_CLEANING:
+            if len(container.objectIds()) > FILTERVALUEFOLDER_THRESHOLD_CLEANING:
                 msg = self.CleanOldSavedFilters(user_excess_clean=1)
                 logger.info("Cleaned old saved filters %s" % str(msg))
         except:
@@ -6461,7 +6462,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def _implodeFilterValueContainerIfPossible(self):
         """ delete the save-filters container if it's empty """
         container = self._getFilterValueContainer()
-        if len(container) == 0:
+        if len(container.objectIds()) == 0:
             objid = container.getId()
             assert objid == FILTERVALUEFOLDER_ID
             parent = aq_parent(aq_inner(container))
@@ -12882,6 +12883,11 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
         path = '/'.join(self.getPhysicalPath())
         catalog = self.getFilterValuerCatalog()
         catalog.catalog_object(self, path, idxs=idxs)
+        
+    def unindex_object(self):
+        catalog = self.getFilterValuerCatalog()
+        catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
+        
 
 
 #----------------------------------------------------------------------------
