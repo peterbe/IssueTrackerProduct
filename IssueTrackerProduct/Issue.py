@@ -733,9 +733,10 @@ class IssueTrackerIssue(IssueTracker):
         
         # extract what we need from this caller templates options
         SubmitError = options.get('SubmitError')
-        draft_followup_id = options.get('draft_followup_id', request.get('draft_followup_id'))
+        draft_followup_id = options.get('draft_followup_id', 
+                                        request.get('draft_followup_id'))
         
-        request_action = unicodify(request.get('action')).lower()
+        request_action = unicodify(request.get('action','')).lower()
         
         draft_saved = options.get('draft_saved')
         

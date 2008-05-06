@@ -1,5 +1,10 @@
-- 
-
+-
+    Bug fixed: Loading a saved draft followup that didn't have an
+    action would raise an error.
+    
+    Bug fixed: Loading filter options in Konquerer would load the AJAX
+    request 3 times for one click.
+    
     Bug fixed: Saved filters container was never imploded even if the 
     container had more saved filters in it than allowed.
     
