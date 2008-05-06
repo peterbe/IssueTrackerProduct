@@ -1,4 +1,4 @@
--
+- 0.9.2
 
     Bug fixed: When accepting multipart emails and html2safehtml is
     not installed the default part to keep is now the text/plain part.
