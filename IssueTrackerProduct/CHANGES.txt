@@ -1,4 +1,4 @@
--
+- 0.9.3
 
     Bug fixed: NameError when checking for emails in and nothing to
     download. Thanks Luciano (Real#0743)
