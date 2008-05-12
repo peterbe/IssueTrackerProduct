@@ -9419,7 +9419,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         log.append('0 messages in pop3 server to download')
         
         if not numMessages:
-            return [], v # no point going on
+            return [] # no point going on
         
         emails = []
         

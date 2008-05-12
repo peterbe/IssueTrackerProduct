@@ -366,6 +366,17 @@ class EmailInTestCase(TestBase):
         # Perhaps the functionality of emailing in HTML emails should
         # change to show HTML safely.
         
+    def test_emailIn_none(self):
+        """ Test emails in multipart """
+        tracker = self.folder.tracker
+        self._send_in_emails([])
+
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 0 issue') > -1)
+        
+        issues = len(tracker.getIssueObjects())
+        self.assertEqual(issues, 0)
+        
         
     def test_emailInMultipart(self):
         """ when emailing in an email with multipart text and html, 

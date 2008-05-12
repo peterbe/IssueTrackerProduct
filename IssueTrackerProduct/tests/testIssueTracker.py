@@ -1155,7 +1155,7 @@ class IssueTrackerTestCase(TestBase):
             else:
                 valuer.set('adder_email', 'email')
                 
-            valuer.mod_date = DateTime(time() - randint(1000, 1000000)*1000)
+            valuer.mod_date = DateTime(time() - randint(1000, 10000)*3600)
             valuer.index_object()
             
         self.assertTrue('saved-filters' in tracker.objectIds())
