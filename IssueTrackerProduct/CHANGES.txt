@@ -1,3 +1,7 @@
+- 0.10.0
+
+    New feature: Custom fields!
+
 - 0.9.3
 
     Bug fixed: Loading a saved draft followup that didn't have an
