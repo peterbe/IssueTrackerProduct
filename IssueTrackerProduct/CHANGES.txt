@@ -1,5 +1,19 @@
 - 0.9.3
 
+    Bug fixed: Loading a saved draft followup that didn't have an
+    action would raise an error.
+    
+    Bug fixed: Loading filter options in Konquerer would load the AJAX
+    request 3 times for one click.
+    
+    Bug fixed: Saved filters container was never imploded even if the 
+    container had more saved filters in it than allowed.
+    
+    Bug fixed: Saving filters when only the fromname is known would
+    raise an UnmatchableError.
+    
+- 0.9.1
+
     Bug fixed: NameError when checking for emails in and nothing to
     download. Thanks Luciano (Real#0743)
     
@@ -39,6 +53,25 @@
 
     New feature: Really long URLs in the text that extend beyond the
     box it's in is truncated shorter.
+
+    Bug fixed: Having statuses containing unicode characters could
+    break the statistics page. Thanks Rene Bonvin. (Real#0735)
+
+    New feature: Basic statistics is not private by default from now
+    on. You can still make it private from the Advanced Properties page.
+    
+    New feature: Statuses can now be configured to contain unicode
+    characters. 
+    
+    New feature: The persistent list of saved filters is now indexed
+    with a separate ZCatalog to vastly speed up lookups of old saved
+    filters.
+    
+    Bug fixed: Saved filters containing unicode characters could cause
+    a UnicodeDecodeError.    
+
+    Bug fixed: Unicode characters in a filtered name would show
+    incorrectly when loading the filter options.
 
     Bug fixed: Having statuses containing unicode characters could
     break the statistics page. Thanks Rene Bonvin. (Real#0735)

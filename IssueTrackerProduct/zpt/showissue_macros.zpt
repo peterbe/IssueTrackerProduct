@@ -1,0 +1,151 @@
+<metal:block define-macro="detailsform">
+
+  <form action="#i" method="post" enctype="multipart/form-data"
+  tal:define="allowed2change here/isAllowedToChangeIssues;
+              change python:allowed2change and not show_many and request.get('change')=='Details';
+              errors python:options.get('SubmitError',{})"
+  tal:attributes="method python:test(change, 'post','get')"
+  >
+  
+  <span tal:condition="python:options.get('SubmitError')"
+        tal:replace="structure python:here.show_submissionerror_message(SubmitError=options.get('SubmitError'))">
+  </span>
+
+  
+  <table class="idetails-table" summary="Details" border="0"
+   tal:attributes="ondblclick python:test(allowed2change and not show_many, 'location.href=location.href+\'?change=Details#i\'')">
+    <tr tal:condition="python:change and here.UseEstimatedTime()">
+      <td class="ilabel">Estimated time</td>
+      <td>
+        <input name="estimated_time_hours" size="7" 
+         tal:define="preval python:request.get('estimated_time_hours', here.getEstimatedTimeHours())"
+         tal:attributes="value python:here.showTimeHours(preval)" />  (hours)
+      </td>
+    </tr>
+    <tr tal:condition="python:not change and here.getEstimatedTimeHours()">
+      <td class="ilabel">Estimated time</td>
+      <td tal:content="python:here.showTimeHours(here.getEstimatedTimeHours(), show_unit=1)">
+      </td>
+    </tr>    
+    <tr tal:condition="python:change and here.UseActualTime()">
+      <td class="ilabel">Actual time</td>
+      <td>
+        <input name="actual_time_hours" size="7" 
+         tal:define="preval python:request.get('actual_time_hours', here.getActualTimeHours())"
+         tal:attributes="value python:here.showTimeHours(preval)" /> (hours)
+      </td>
+    </tr>
+    <tr tal:condition="python:not change and here.getActualTimeHours()">
+      <td class="ilabel">Actual time</td>
+      <td tal:content="python:here.showTimeHours(here.getActualTimeHours(), show_unit=1)">
+      </td>
+    </tr>    
+    <tr tal:condition="python:change and here.ShowConfidentialOption()">
+      <td class="ilabel">Confidential</td>
+      <td>
+        <input type="checkbox" name="confidential:boolean" value="1" 
+         tal:attributes="checked python:test(here.isConfidential())" />
+      </td>      
+    </tr>
+    <tr tal:condition="python:not change and here.isConfidential()">
+      <td colspan="2"><acronym title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym></td>
+    </tr>    
+    <tr>
+      <td class="ilabel">Sections:</td>
+      <td tal:condition="not:change"
+          tal:content="python:', '.join(here.getSections())">Homepage, Other
+      </td>
+      <td tal:condition="change">
+        <select name="sections:list" multiple="multiple" 
+         tal:define="sections here/getSections"
+         tal:attributes="size python:min(6, len(here.sections_options))">
+            <option tal:repeat="option here/sections_options" 
+                tal:attributes="value option; selected python:option in sections"
+                tal:content="option">Section</option>
+	</select>
+      </td>
+    </tr>
+    <tr>
+      <td class="ilabel">Type:</td>
+      <td tal:condition="not:change" tal:content="here/type">
+      </td>
+      <td tal:condition="change">
+        <select name="type" tal:define="types here/types; size python:min(6, len(types)); type here/getType" tal:attributes="size size">
+          <option 
+           tal:repeat="option types" 
+           tal:attributes="value option;
+                           selected python:option==type" 
+           tal:content="option">Types</option>
+	</select>
+      </td>
+    </tr>
+    <tr>
+      <td class="ilabel">Urgency:</td>
+      <td tal:condition="not:change"
+          tal:content="here/urgency" tal:attributes="class here/getUrgencyCSSSelector">
+      </td>
+      <td tal:condition="change"> 
+        <select tal:define="urgencies here/urgencies;
+                            size python:min(6, len(urgencies)); 
+                            urgency here/getUrgency"
+         tal:attributes="size size" name="urgency">
+            <option  tal:repeat="option urgencies" tal:attributes="value option; selected python:urgency == option" tal:content="option">Urgencies</option>
+	</select>
+      </td>
+    </tr>
+    <tr tal:condition="python:here.url2issue and not change">
+      <td class="ilabel">URL:</td>
+      <td><a tal:attributes="href python:here.showURL2Issue(here.url2issue, href=1)"
+                 tal:content="python:here.showURL2Issue(here.url2issue)">http://url</a></td>
+    </tr>
+    <tr tal:condition="python:change and here.ShowIssueURLOption()">
+      <td class="ilabel">URL:</td>
+      <td>
+        <input name="url2issue" tal:attributes="value here/url2issue" size="30" />
+      </td>
+    </tr>
+    <tal:block condition="not:change">
+    <tr tal:repeat="data here/getCustomFieldsData">
+      <td class="ilabel"
+          tal:define="field data/field"
+          tal:content="string:${field/getTitle}:"></td>
+      <td tal:define="field data/field">
+        <br tal:replace="structure python:field.showValue(data['value'])" />
+        <tal:block condition="change">
+          <tal:input replace="structure python:field.render(request.get(field.getId(), data['value']), skip_extra_css=False)" />
+          <span class="submiterror" tal:condition="python:errors.get(field.getId())"
+      	        tal:content="python:here.ShowSubmitError(options, field.getId())"></span>
+        </tal:block>                  
+                  
+            
+      </td>
+    </tr>
+    </tal:block>
+    
+    <tal:block condition="change">
+    <tr tal:repeat="field here/getCustomFieldObjects">
+      <td class="ilabel"
+          tal:content="string:${field/getTitle}:"></td>
+      <td>
+        <tal:input replace="structure python:field.render(request.get(field.getId(), here.getCustomFieldData(field.getId())))" />
+	<span class="submiterror" tal:condition="python:errors.get(field.getId())"
+		  tal:content="python:here.ShowSubmitError(options, field.getId())"></span>
+            
+      </td>
+    </tr>
+    </tal:block>    
+    <tr>
+      <td>&nbsp;</td>
+      <td tal:condition="change">
+        <input type="submit" name="editIssueDetails:method" value="Save changes" />
+      </td>
+      <td tal:condition="not:change">
+        <input type="hidden" name="change" value="Details" />
+        <input type="submit"  value="change details" class="smallbutton"
+         tal:condition="python:allowed2change and not show_many"/>
+      </td>      
+    </tr>
+  </table>
+  </form>
+  
+</metal:block>

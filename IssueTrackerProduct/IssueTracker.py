@@ -137,6 +137,7 @@ import Notifyables
 import Utils
 from Utils import unicodify
 from Webservices import IssueTrackerWebservices
+from CustomField import CustomFieldsIssueTrackerBase
 from Permissions import *
 from Constants import *
 from Errors import *
@@ -401,7 +402,8 @@ class Empty:
 #----------------------------------------------------------------------------
 
 class IssueTracker(IssueTrackerFolderBase, CatalogAware,
-                   Notifyables.Notifyables, IssueTrackerWebservices
+                   Notifyables.Notifyables, IssueTrackerWebservices,
+                   CustomFieldsIssueTrackerBase,
                    ):
     """ IssueTracker class """
     
@@ -894,7 +896,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return if we should allow for extended options to an issue """
         #### XXXXXXX more work needed here
         return 0
-
+    
+    
     def getIssueAssignmentBlacklist(self, check_each=False):
         """ return _assignment_blacklist """
         list = getattr(self.getRoot(), '_assignment_blacklist',[])
@@ -3470,6 +3473,28 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 else:
                     self._rememberProvenNotSpambot()
 
+        # Check any of the added custom fields if they have a validation expression
+        for field in self.getCustomFieldObjects():
+            if field.isMandatory():
+                # if the input type is 'file' bool(request.get(field.getId())) will
+                # be true even if the file was empty
+                if field.getInputType() == 'file':
+                    # only considered empty if the file is not a file
+                    if request.get(field.getId()):
+                        # we need to make the check
+                        if not getattr(request.get(field.getId()), 'filename', None):
+                            SubmitError[field.getId()] = _(u"Empty")
+                    else:
+                        SubmitError[field.getId()] = _(u"Empty")
+                elif not request.get(field.getId()):
+                    SubmitError[field.getId()] = _(u"Empty")
+            else:
+                valid, message = field.testValidValue(request.get(field.getId()))
+                if not valid:
+                    if not message:
+                        message = '*failed the validation test*'
+                    SubmitError[field.getId()] = message
+        
                     
         # Look for a script or something that plugs in to the IssueTrackerProduct
         # if you in your customization want to validate your own things
@@ -3578,7 +3603,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     confidential, hide_me, description,
                     display_format, acl_adder=acl_adder)
                     
-
+                    
+        for field in self.getCustomFieldObjects():
+            value = request.get(field.getId())
+            if field.getInputType() == 'file':
+                if getattr(value, 'filename', None):
+                    issue.setCustomFieldData(field, field.getId(), value)
+            elif value:
+                issue.setCustomFieldData(field, field.getId(), value)
         
         # remember it
         #self.RememberAddedIssue(genid)
@@ -3951,6 +3983,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if not isinstance(files, (tuple, list)):
             files = [files]
 
+        ids = []
         for file in files:
             if self._isFile(file):
                 filename = getattr(file, 'filename')
@@ -3963,6 +3996,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 id = Utils.badIdFilter(id)
                 try:
                     destination.manage_addFile(id, file)
+                    ids.append(id)
                     fileobject = getattr(destination, id)
                     if self._canCreateThumbnail(fileobject):
                         try:
@@ -3972,8 +4006,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                             # this IOError
                             pass
                 except:
-                    
                     logger.warn("Could not upload file id=%s" % id, exc_info=True)
+                    
+        return ids
 
 
     security.declarePublic('_moveTempfiles')
@@ -4294,6 +4329,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             row.append(', '.join(issue.getSections()))
             row.append(issue.getUrgency())
             row.append(issue.getType())
+            
+            for field in self.getCustomFieldObjects():
+                row.append(issue.getCustomFieldData(field.getId(), ''))
+            
             writer.writerow(row)
             
             
@@ -4314,6 +4353,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         row = ['Issue ID','Subject', 'Status', 'Fromname','Email',
                self.translateSortorderOption(self.getDefaultSortorder()),
                'Sections', 'Urgency', 'Type']
+               
+        for field in self.getCustomFieldObjects():
+            row.append(field.getTitle())
         writer.writerow(row)
 
     security.declarePublic('CDATAText')
@@ -6092,15 +6134,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if checkrequest and request.get(rkey) and int(request[rkey]):
             # Someone has chosen to show filter options
             return True
+        
+        field_ids = [x.getId() for x in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions())]
 
-        for key in ('statuses','sections','urgencies','types',
-                    'fromname','email'):
+        for key in ['statuses','sections','urgencies','types',
+                    'fromname','email']+field_ids:
             if checkrequest and request.get('f-%s'%key):
                 return True
             elif self.get_session('f-%s-show'%key) or self.get_session('f-%s-block'%key):
-                
                 return True
-
+            
         return False
 
     def hasStoredFilter(self):
@@ -6133,6 +6176,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             f_fromname = getFVal('fromname')
             f_email = getFVal('email')
             
+            
             main_option = self.getFilterlogic()
             
             if main_option == 'show':
@@ -6158,6 +6202,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             elif f_email:
                 name += _("by") + " " + f_email.strip() + " "
                 
+            _start_where = False
+            for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
+                fvval = getFVal(field.getId())
+                
+                if fvval is not None:
+                    if not _start_where:
+                        name += _(u"where") + " "
+                        _start_where = True
+                    name +=  "%s: %s " % (field.getTitle(), fvval)
+
             if name:
                 return start + name.strip()
             else:
@@ -6201,7 +6255,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         f_urgencies = getFVal('urgencies')
         f_types = getFVal('types')
         f_fromname = getFVal('fromname')
-        f_email = getFVal('email')        
+        f_email = getFVal('email')
+
+        custom_filters = {}
+        for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
+            fvval = getFVal(field.getId())
+            if fvval is not None:
+                custom_filters[field.getId()] = getFVal(field.getId())
         
         
         _c_key = LAST_SAVEDFILTER_ID_COOKIEKEY
@@ -6288,7 +6348,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                             days=FILTERVALUER_EXPIRATION_DAYS)
         
         
-        
         # 3.5. Load all the values in for the filter
         valuer.set('filterlogic', filterlogic)
         valuer.set('statuses', f_statuses)
@@ -6297,6 +6356,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         valuer.set('types', f_types)
         valuer.set('fromname', f_fromname)
         valuer.set('email', f_email)
+
+        if custom_filters:
+            valuer.set_custom_fields_filter(custom_filters)
         
         
         if REQUEST is not None:
@@ -7495,8 +7557,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         # 3. Mandatory filter
         if not self.hasManagerRole():
-            issues = [issue for issue in issues 
-                      if not issue.isConfidential() or issue.isYourIssue()]
+            issues = [issue for issue in issues if issue.canViewIssue()]
+            #issues = [issue for issue in issues 
+            #          if not issue.isConfidential() or issue.isYourIssue()]
 
         # 4. Sort them
         if not skip_sort:
@@ -7579,6 +7642,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         f_fromname = getFVal('fromname')
         f_email = getFVal('email')
         
+        custom_filters = {}
+        for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
+            fvval = getFVal(field.getId())
+            if fvval is not None:
+                custom_filters[field.getId()] = getFVal(field.getId())
         
         if _do_save_filter:
             self.saveFilterOption()
@@ -7589,7 +7657,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if filterlogic == 'show' and \
                f_statuses is None and f_sections is None and \
                f_urgencies is None and f_types is None and \
-               f_fromname is None and f_email is None:
+               f_fromname is None and f_email is None and \
+               not custom_filters:
             # Filter logic is to show only selected items but
             # nothing has been set so just return everything
             for issue in issues:
@@ -7604,15 +7673,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             f_fromname_regex = _maker(f_fromname)
         
         for issue in issues:
-            if issue.isConfidential() and not (has_managerrole or issue.isYourIssue()):
+            if not issue.canViewIssue():
+            #if issue.isConfidential() and not (has_managerrole or issue.isYourIssue()):
                 continue
+            
                 
             if filterlogic == 'show':
+                
 
-                #do_add = true
                 if f_statuses is not None:
                     if issue.status not in f_statuses:
-                 #       do_add = False
                         continue
                     
                 if f_sections is not None:
@@ -7627,26 +7697,30 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         
                 if f_urgencies is not None:
                     if issue.urgency not in f_urgencies:
-                   #     checked.append(issue)
                         continue
                     
                 if f_types is not None:
                     if issue.type not in f_types:
-                    #    checked.append(issue)
                         continue
 
                 if f_fromname is not None:
-                    ##if f_fromname and ss(f_fromname) != ss(issue.getFromname()):
                     if f_fromname and not f_fromname_regex.findall(issue.getFromname()):
-                     #   checked.append(issue)
                         continue
 
                 if f_email is not None:
                     if f_email and ss(f_email) != ss(issue.getEmail()):
-                      #  checked.append(issue)
                         continue
-
                     
+                custom_filter_match = False
+                for field_id, value in custom_filters.items():
+                    issue_value = issue.getCustomFieldData(field_id)
+                    if value != issue_value:
+                        custom_filter_match = True
+                        break
+                    
+                if custom_filter_match:
+                    continue
+                
                 checked.append(issue)
                     
             else:
@@ -7680,6 +7754,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if f_email: # conditional covers both None and ""
                     if ss(f_email) == ss(issue.getEmail()):
                         continue
+                    
+                custom_filter_match = False
+                for field_id, value in custom_filters.items():
+                    issue_value = issue.getCustomFieldData(field_id)
+                    if issue_value == value:
+                        custom_filter_match = True
+                
+                if custom_filter_match:
+                    continue
+                    
                 # if none of the above skipped the loop, do this
                 checked.append(issue)
         return checked
@@ -9911,15 +9995,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 allsections[section] = {}
             allsections[section] = self._allStatuses(allsections[section])
             res.append([section, allsections[section]])
-
-        #from pprint import pprint
-        #pprint(res)
-        #print ""
-        #for count in res:
-        #    print count[0], count[1]
-        #    for status in self.getStatuses():
-        #        print "\t", repr(status), count[1][status]
-        #    print 
+            
         return res
                 
     def _allStatuses(self, dict):
@@ -12645,7 +12721,7 @@ zpts = ('zpt/StandardHeader',
         {'f':'zpt/QuickAddIssue', 'n':'QuickAddIssueTemplate',
          'optimize':OPTIMIZE and 'xhtml'},
         {'f':'zpt/AddManyIssues', 'n':'AddManyIssuesTemplate',
-         'optimize':False},#OPTIMIZE and 'xhtml'},         
+         'optimize':False},#OPTIMIZE and 'xhtml'},
         'zpt/preview_issue',
         {'f':'zpt/index_html', 'optimize':OPTIMIZE and 'xhtml'},
         'zpt/list_issues_top_bar',
@@ -12654,6 +12730,7 @@ zpts = ('zpt/StandardHeader',
         'zpt/show_submissionerror_message',
         {'f':'zpt/AddIssue', 'n':'AddIssueTemplate',
          'optimize':OPTIMIZE and 'xhtml'},
+        'zpt/addissue_macros',
         {'f':'zpt/User', 'n':'UserTemplate',
          'optimize':OPTIMIZE and 'xhtml'},
         'zpt/User_must_change_password',
@@ -12661,6 +12738,7 @@ zpts = ('zpt/StandardHeader',
         'zpt/show_drafts_simple',
         'zpt/show_next_actions',        
         'zpt/filter_options',
+        'zpt/listissues_macros',
         'zpt/richList',
         'zpt/compactList',
         'zpt/search_widget',
@@ -12668,6 +12746,8 @@ zpts = ('zpt/StandardHeader',
         
         'zpt/Statistics',
         'zpt/ShowIssueData',
+        'zpt/showissue_macros',
+        
         'zpt/ShowIssueThreads',
         'zpt/What-is-StructuredText',
         'zpt/What-is-WYSIWYG',        
@@ -12826,6 +12906,7 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
         self.adder_fromname = u''
         self.adder_email = ''
         self.key = '' # Used by people who don't have a name
+        self.custom_filters = {}
         self.mod_date = DateTime()
         self.usage_count = 0
         
@@ -12847,8 +12928,12 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
         return getattr(self, 'key', None)
         
     def set(self, key, value):
-        assert key in [x['id'] for x in self._properties], "Unrecognized property key"
+        if not key in [x['id'] for x in self._properties]:
+            raise ValueError, "Unrecognized property key %r" % key
         self.__dict__[key] = value
+        
+    def set_custom_fields_filter(self, custom_filters):
+        self.custom_filters = custom_filters
 
         
     def populateRequest(self, request):
@@ -12862,6 +12947,9 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
         rset('f-types', self.types)
         rset('f-fromname', self.fromname)
         rset('f-email', self.email)
+        
+        for field_id, value in getattr(self, 'custom_filters', {}).items():
+            rset('f-%s' % field_id, value)
         
         
     def incrementUsageCount(self):

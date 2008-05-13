@@ -76,6 +76,9 @@ ISSUEASSIGNMENT_METATYPE = 'Issue Tracker Assignment'
 FILTEROPTION_METATYPE = 'Issue Tracker Filter Option'
 REPORTSCRIPT_METATYPE = 'Issue Tracker Report Script'
 REPORTS_CONTAINER_METATYPE = 'Report Scripts Container'
+CUSTOMFIELD_METATYPE = 'Issue Tracker Custom Field'
+CUSTOMFIELDFOLDER_METATYPE = 'Issue Tracker Custom Field Folder'
+CUSTOMFIELD_VALIDATION_EXPRESSION_METATYPE = 'Issue Tracker Custom Field Validation Expression'
 
 # properties
 #DEFAULT_TYPES = ('general', 'announcement', 'idea', 'bug report',

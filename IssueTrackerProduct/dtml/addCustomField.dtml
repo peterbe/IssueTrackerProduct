@@ -1,0 +1,124 @@
+<dtml-var manage_page_header>
+
+<dtml-var "manage_form_title(this(), _,
+           form_title='Add Issue Tracker Custom Field',
+	   )">
+<p class="form-help">
+Custom fields are shown on the Add Issue page and extends the Issue Tracker with more input.
+</p>
+
+
+<form action="manage_addCustomField" method="get" name="f">
+<table cellspacing="0" cellpadding="2" border="0">
+  <tr id="idrow">
+    <td align="left" valign="top">
+    <div class="form-label">
+    Id
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <input type="text" name="oid" size="40" />
+    </td>
+  </tr>
+  <tr id="namerow">
+    <td align="left" valign="top">
+    <div class="form-optional">
+    Title
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <input type="text" name="title" size="40" value="<dtml-var "REQUEST.get('name','')">" />
+    </td>
+  </tr>
+  <tr id="idrow">
+    <td align="left" valign="top">
+    <div class="form-label">
+    Input type
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <select name="input_type">
+      <option value="text">text</option>
+      <option value="textarea">textarea</option>
+      <option value="select">select</option>
+      <option value="checkbox">checkbox</option>
+      <option value="radio">radio</option>
+      <option value="file">file</option>
+      <option value="password">password</option>
+    </select>
+    </td>
+  </tr>
+  
+  <tr id="idrow">
+    <td align="left" valign="top">
+    <div class="form-label">
+    Python type
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <select name="python_type">
+         <option value="boolean">boolean</option>
+         <option value="date">date</option>
+         <option value="float">float</option>
+         <option value="int">int</option>
+         <option value="lines">lines</option>
+         <option value="long">long</option>
+         <option value="string">string</option>
+         <option value="ulines">ulines</option>
+         <option selected="selected" value="ustring">ustring</option>
+    </select>
+    </td>
+  </tr>  
+  
+  <dtml-unless "meta_type == 'Issue Tracker Custom Field Folder'">
+  <tr>
+    <td align="left" valign="top">
+    <div class="form-optional">
+    Place in custom fields folder
+    </div>
+    </td>
+    <td align="left" valign="top">
+    <p class="form-help">
+    <input type="checkbox" name="create_in_folder" value="1" checked="checked" />
+    Puts all fields in one place where their order can be changed. (Recommended. 
+    <a href="#create_in_folder" onclick="document.getElementById('create_in_folder').style['display']=''">More info</a>)</p>
+    </td>
+  </tr>
+  </dtml-unless>
+  
+  
+  <tr>
+    <td align="left" valign="top">
+    </td>
+    <td align="left" valign="top">
+    <div class="form-element">
+    <input class="form-element" type="submit" name="add" 
+     value=" Add " /> 
+    <input class="form-element" type="submit" name="add_and_edit"
+     value=" Add and Edit " />
+     
+    </div>
+    </td>
+  </tr>
+</table>
+</form>
+
+
+<br />&nbsp;
+
+<div id="create_in_folder" style="display:none">
+<h4>About putting custom fields in a folder</h4>
+<p>The ID (<code>custom_fields</code>) of folder that the custom field is add into is  programmed into the IssueTrackerProduct.
+In the IssueTrackerProduct's Add Issue page it's hardwired to look for this folder and if found it will automatically
+include it as part of the Add Issue page. This folder is also ordered which means that you can control the sort order
+that the custom fields should appear which might have an impact on the user experience.</p>
+
+<p>The alternative is to create the custom field on its own outside a custom folder but then they have to be added 
+directly inside the IssueTrackerProduct instance and you can't contol the order.</p>
+
+<p>An added advantage of putting all custom fields in a folder is they can be acquired via Zope's acquisition. This means that
+if you have two issuetrackers where you want both to use your custom fields you can create the custom fields in the trackers' 
+parent folder and all issuetrackers will be able to use the custom fields.</p>
+</div>
+
+<dtml-var manage_page_footer>

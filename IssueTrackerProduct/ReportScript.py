@@ -164,4 +164,4 @@ class ReportScript(PythonScript):
     
     
         
-InitializeClass(ReportScript)    
+InitializeClass(ReportScript)

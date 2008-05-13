@@ -1,0 +1,68 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+<h2 tal:define="manage_tabs_message options/manage_tabs_message | nothing"
+    tal:replace="structure here/manage_tabs">Tabs</h2>
+    
+<style type="text/css">
+</style>
+
+<h4>Existing validation expressions</h4>
+<div class="expression" tal:repeat="expr here/getValidationExpressions">
+<form action="manage_editValidationExpression" method="post" >
+<input type="hidden" name="id" tal:attributes="value expr/getId" />
+<dl>
+  <dt><label>TALES expression:</label></dt>
+  <dd>
+    <input name="expression" value="" size="60" tal:attributes="value expr/expression" />
+  </dd>
+  
+  <dt><label>Message if not passed:</label></dt>
+  <dd>
+    <textarea name="message:utext" cols="50" rows="3" tal:content="expr/message"></textarea>
+  </dd>  
+</dl>
+<input type="submit" value="Save expression" />
+<input type="submit" value="Delete expression" style="font-size:80%" name="delete"
+       onclick="return confirmDelete(this.form)" />
+<br/>&nbsp;
+</form>
+
+</div>
+
+
+
+<div id="new-expression" tal:attributes="style python:test(not request.get('add_expression'),'display:none')">
+<h4>Add new validation expression</h4>
+<form action="manage_addValidationExpression" method="post">
+<dl>
+  <dt><label>TALES expression:</label></dt>
+  <dd>
+    <input name="expression" value="" size="60" tal:attributes="value request/expression|nothing" />
+  </dd>
+  
+  <dt><label>Message if not passed:</label></dt>
+  <dd>
+    <textarea name="message:utext" cols="50" rows="3" tal:content="python:request.get('message','Not valid')"></textarea>
+  </dd>  
+</dl>
+<input type="submit" value="Add expression" />
+</form>
+</div>
+
+<a href="manage_validation?add_expression=1#new-expression" onclick="return openNewForm()">Add new validation expression</a>
+
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-latest.min.js"></script>
+
+<script type="text/javascript">
+function openNewForm() {
+  $('#new-expression').show();
+  return false;
+}
+
+function confirmDelete(form) {
+  var certain = confirm("Delete this expression?");
+  return certain;
+}
+
+</script>
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

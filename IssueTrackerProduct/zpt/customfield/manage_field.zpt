@@ -1,0 +1,136 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+<h2 tal:define="manage_tabs_message options/manage_tabs_message | nothing"
+    tal:replace="structure here/manage_tabs">Tabs</h2>
+    
+<style type="text/css">
+dl label {
+  font-family:Verdana,Helvetica,sans-serif;
+  font-size:10pt;
+  font-weight:bold;
+}
+a.small {
+  font-size:70%;
+  text-decoration:underline;
+}  
+</style>
+
+<form action="manage_saveFieldProperties" method="post">
+
+<h3>Attributes</h3>
+<dl>
+  <dt><label>Title</label></dt>
+  <dd><input name="title:ustring" tal:attributes="value here/getTitle" size="40" /></dd>
+
+  <dt><label>Input type <abbr title="Be careful since a change here will reset certain attributes">*</abbr></label></dt>
+  <dd><input name="input_type:string" tal:attributes="value here/input_type" size="40" /></dd>
+  
+  <dt><label>Python type</label></dt>
+  <dd><select name="python_type:string" 
+              tal:define="preval here/python_type">
+         <option tal:repeat="T here/getOKPythonTypes"
+                 tal:attributes="value T;selected python:test(T==here.python_type)"
+                 tal:content="T"></option>
+      </select>
+  </dd>
+  
+  <dt><label>Mandatory</label></dt>
+  <dd><input type="checkbox" name="mandatory:boolean" tal:attributes="checked here/isMandatory" value="1" /></dd>
+
+  <dt><label>Include in filter options</label></dt>
+  <dd><input type="checkbox" name="include_in_filter_options:boolean" tal:attributes="checked here/includeInFilterOptions" value="1" /></dd>
+
+  <dt><label>Visibility (expression)</label></dt>
+  <dd>
+    <input name="visibility_expression:string" size="50" tal:attributes="value python:here.getVisibilityExpression()" />
+  </dd>
+  
+  <dt><label>Extra CSS</label></dt>
+  <dd><textarea name="extra_css:utext" tal:content="here/extra_css" cols="60" rows="6"></textarea></dd>
+
+  <dt><label>Extra JavaScript</label></dt>
+  <dd><textarea name="extra_js:utext" tal:content="here/extra_js" cols="60" rows="6"></textarea></dd>
+  
+  <tal:block condition="python:here.input_type in ('select','radio','checkbox')">
+  
+    <dt class="options-expression">
+       <label>Options (expression)</label>
+       <a href="#" class="small" onclick="return toggleOptionsInput2List()">enter a list</a>
+
+    </dt>
+    <dd class="options-expression">
+       <input name="options_expression:string" size="50" tal:attributes="value python:here.getOptionsExpression()" />
+    </dd>
+    
+    <dt class="options-list">
+       <label>Options (list)</label>
+       <a href="#" class="small" onclick="return toggleOptionsInput2Expression()">enter an expression</a>
+    </dt>
+    <dd class="options-list">
+       <em tal:condition="here/getOptionsExpression">Remove the expression first</em>
+       <textarea tal:condition="not:here/getOptionsExpression"
+                 name="options:utext" tal:content="python:here.getOptionsFlat()" cols="40" rows="10"></textarea>
+    </dd>    
+    
+  </tal:block>
+  
+  
+</dl>  
+  
+  
+<dl class="attributes">
+
+  <tal:block repeat="key python:here.getCoreAttributeKeys()">
+    <dt><label tal:content="structure python:here.getCoreAttributeKeyLabel(key, html_ok=True)"></label></dt>
+    <dd><input size="50"
+               tal:attributes="value python:here.getCoreAttribute(key);
+                               name python:here.getCoreAttributeKeyName(key)" />
+         &nbsp;
+         <a class="small"
+            tal:attributes="href string:manage_deleteFieldProperty?key=${key}">delete</a>
+   </dd>
+  </tal:block>
+  
+  <!--<dt><label>DOM ID <abbr title="DOM element ID, not Zope object ID">**</abbr></label></dt>
+  <dd><input name="dom_id:string" tal:attributes="value python:here.getCoreAttribute('dom_id', '')" size="40" /></dd>
+  -->
+  
+</dl>
+
+<input type="submit" value="Save" />
+</form>
+
+
+<h3>Add attribute</h3>
+<form action="manage_addFieldProperty" method="post">
+
+<select name="key" onchange="changeAddSelect(this)">
+  <option value="">Select or enter new</option>
+  <option value="++other++">Other (specify)</option>
+  <option value="">&nbsp;</option>
+  <option tal:repeat="key python:here.getCoreAttributeKeySuggestions()"
+          tal:attributes="value key"
+          tal:content="python:here.getCoreAttributeKeyLabel(key)"></option>
+  
+</select>
+
+<div id="other" style="display:none">
+  <input name="new_key" value=""  size="40" />
+  <input type="submit" value="Add" />
+
+</div>
+
+
+</form>
+
+<br />
+
+<h3>Preview</h3>
+<pre style="background-color:#efefef; padding:10px;" tal:content="here/preview_render">
+</pre>
+
+
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-latest.min.js"></script>
+
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/manage-customfield.js"></script>
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

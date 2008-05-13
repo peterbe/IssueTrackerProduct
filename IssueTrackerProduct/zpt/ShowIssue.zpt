@@ -167,7 +167,7 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
   <!-- id=issue -->
   <a name="i"></a>
   <div tal:attributes="id python:test(not in_completelist, 'issuedata')"
-       tal:content="structure here/ShowIssueData">Show the actual issue data
+       tal:content="structure python:here.ShowIssueData(SubmitError=options.get('SubmitError',{}))">Show the actual issue data
   </div>
   <!--/ id=issue-->
   

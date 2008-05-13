@@ -17,6 +17,7 @@ import Issue
 import Email
 import IssueUserFolder
 import ReportScript
+import CustomField
 import Utils
 from Constants import *
 from Permissions import *
@@ -42,7 +43,10 @@ def dummyFunction(zope):
 
 def initialize(context):
     """ Initialize IssueTracker product """
-    if 1:#try:
+    from Globals import DevelopmentMode
+    
+    
+    try:
 
 
         context.registerClass(
@@ -98,6 +102,24 @@ def initialize(context):
             icon='www/issuereportscript.gif',
         )
         
+        context.registerClass(
+            CustomField.CustomField,
+            constructors=(
+                CustomField.manage_addCustomFieldForm,
+                CustomField.manage_addCustomField,
+                ),
+            icon='www/customfield.png',
+        )
+        
+        context.registerClass(
+            CustomField.CustomFieldFolder,
+            constructors=(
+                CustomField.manage_addCustomFieldFolderForm,
+                CustomField.manage_addCustomFieldFolder,
+                ),
+            icon='www/customfieldfolder.png',
+        )        
+        
         def registerIcon(filename, **kw):
             _registerIcon(OFS.misc_.misc_.IssueTrackerProduct, filename, **kw)
             
@@ -129,9 +151,11 @@ def initialize(context):
         registerIcon('gradhead.png')
         registerIcon('gradissuehead.png')
         registerIcon('gradtablehead.png')
+        registerIcon('customfieldfolder.png')
         registerJS('core.js')
         registerJS('jquery-latest.min.js', slim_if_possible=False)
         registerJS('jquery-latest.pack.js', slim_if_possible=False) # legacy
+        registerJS('manage-customfield.js')
         
         
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())
@@ -156,7 +180,9 @@ def initialize(context):
 
         ##context.registerHelp()
         ##context.registerHelpTitle('IssueTrackerProduct Help')
-    else:#except:
+    except:
+        if DevelopmentMode:
+            raise
         """If you can't register the product, tell someone. 
         
         Zope will sometimes provide you with access to "broken product" and

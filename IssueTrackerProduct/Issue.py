@@ -17,7 +17,8 @@ except ImportError:
 # Zope
 from Acquisition import aq_inner, aq_parent
 from Globals import InitializeClass
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, getSecurityManager
+from persistent.mapping import PersistentMapping
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
 from webdav.WriteLockInterface import WriteLockInterface
@@ -38,6 +39,7 @@ from Constants import *
 from Errors import *
 from Permissions import VMS, ChangeIssuePermission
 from I18N import _
+from CustomField import CustomFieldsIssueBase
 
 #----------------------------------------------------------------------------
 
@@ -49,7 +51,7 @@ ss = lambda s: s.strip().lower() # to save some typing space
 
 #----------------------------------------------------------------------------
 
-class IssueTrackerIssue(IssueTracker):
+class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     """ Issues class as containers """
 
     meta_type = ISSUE_METATYPE
@@ -75,7 +77,7 @@ class IssueTrackerIssue(IssueTracker):
                  )
     
     
-    security=ClassSecurityInfo()
+    security = ClassSecurityInfo()
 
     manage_options = (
         {'label':'Contents', 'action':'manage_main'},
@@ -123,6 +125,8 @@ class IssueTrackerIssue(IssueTracker):
         if acl_adder is None:
             acl_adder = ''
         self.acl_adder = acl_adder
+        
+        self.custom_fields_data = PersistentMapping()
 
 
     def getId(self):
@@ -593,7 +597,7 @@ class IssueTrackerIssue(IssueTracker):
     security.declareProtected('View', 'index_html')
     def index_html(self, REQUEST, *args, **kw):
         """ show the issue """
-        if not self.isConfidential() or self.hasManagerRole() or self.isYourIssue():
+        if self.canViewIssue():
             #self.RememberIssueVisit(self.getId())
             self.RememberRecentIssue(self.getId(), 'viewed')
             
@@ -611,6 +615,11 @@ class IssueTrackerIssue(IssueTracker):
             response = self.REQUEST.RESPONSE
             listpage = '/%s'%self.whichList()
             response.redirect(self.getRootURL()+listpage)
+        
+    security.declarePrivate('canViewIssue')
+    def canViewIssue(self):
+        """return true if you should be allowed to see the issue """
+        return not self.isConfidential() or self.hasManagerRole() or self.isYourIssue()
 
     def isConfidential(self):
         """ check confidential property """
@@ -1277,6 +1286,13 @@ class IssueTrackerIssue(IssueTracker):
 
         return threadobject
 
+    
+    def isAllowedToChangeIssues(self):
+        """ return true if the logged in user is allowed to change issue details """
+        user = getSecurityManager().getUser()
+        here = self
+        return self.AllowIssueAttributeChange() and user.has_permission(ChangeIssuePermission, here)
+    
 
     security.declareProtected(ChangeIssuePermission, 'editIssueDetails')
     def editIssueDetails(self, sections=None, type=None, urgency=None,
@@ -1285,10 +1301,45 @@ class IssueTrackerIssue(IssueTracker):
                          actual_time_hours=None,
                          REQUEST=None):
         """ used post submission to change some of the smaller details. """
-        
         assert self.AllowIssueAttributeChange(), "Issue attribute change not enabled"
         
-        #assert self.hasManagerRole() or self.isCreator(), "Not allowed to change this issue"
+        if REQUEST is not None:
+            SubmitError = {}
+            # validate the custom fields
+            # Check any of the added custom fields if they have a validation expression
+            for field in self.getCustomFieldObjects():
+                if field.isMandatory():
+                    # if the input type is 'file' bool(request.get(field.getId())) will
+                    # be true even if the file was empty
+                    if field.getInputType() == 'file':
+                        # only considered empty if the file is not a file
+                        if REQUEST.get(field.getId()):
+                            # we need to make the check
+                            if not getattr(REQUEST.get(field.getId()), 'filename', None):
+                                SubmitError[field.getId()] = _(u"Empty")
+                        else:
+                            SubmitError[field.getId()] = _(u"Empty")
+                    elif not REQUEST.get(field.getId()):
+                        SubmitError[field.getId()] = _(u"Empty")
+                    else:
+                        valid, message = field.testValidValue(REQUEST.get(field.getId()))
+                        if not valid:
+                            if not message:
+                                message = '*failed the validation test*'
+                            SubmitError[field.getId()] = message
+                else:
+                    valid, message = field.testValidValue(REQUEST.get(field.getId()))
+                    if not valid:
+                        if not message:
+                            message = '*failed the validation test*'
+                        SubmitError[field.getId()] = message
+            
+            # this perhaps needs to be improved
+            if SubmitError:
+                page = self.ShowIssue
+                REQUEST.set('change', 'Details')
+                return page(REQUEST, SubmitError=SubmitError)
+            
         
         # Section must be a list and might only allow for recognized values
         if sections is not None:
@@ -1336,6 +1387,12 @@ class IssueTrackerIssue(IssueTracker):
             hours = self._parseTimeHours(actual_time_hours)
             assert isinstance(hours, float)
             self.actual_time_hours = hours
+            
+            
+        if REQUEST is not None:
+            # we can save custom fields
+            for field in self.getCustomFieldObjects():
+                self.setCustomFieldData(field, field.getId(), REQUEST.get(field.getId()))
             
             
         self._updateModifyDate()
@@ -2755,6 +2812,7 @@ class IssueTrackerIssue(IssueTracker):
 
 zpts = ({'f':'zpt/ShowIssue', 'optimize':OPTIMIZE and 'xhtml'},
         'zpt/OptionButtons',
+        
         'zpt/tell_a_friend',
         'zpt/form_followup',
         'zpt/quick_form_followup',
