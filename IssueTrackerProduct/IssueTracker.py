@@ -136,6 +136,7 @@ from TemplateAdder import addTemplates2Class, CTP
 import Notifyables
 import Utils
 from Utils import unicodify
+from bot_user_agents import is_bot_user_agent
 from Webservices import IssueTrackerWebservices
 from CustomField import CustomFieldsIssueTrackerBase
 from Permissions import *
@@ -7624,7 +7625,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # no need to save again
                 _do_save_filter = False
                 
-
+        # If you're running a public issuetracker and spider bots are hitting 
+        # your issuetracker you do not want to persistently save the filters
+        # since they won't use the filter options to reuse their used filters.
+        if _do_save_filter and is_bot_user_agent(request.get('HTTP_USER_AGENT','')):
+            _do_save_filter = False
 
         # get filter setup
         filterlogic = self.getFilterlogic()

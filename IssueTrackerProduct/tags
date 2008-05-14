@@ -30,6 +30,10 @@ Cancel	IssueTracker.py	/^    def Cancel(self, REQUEST, *args, **kw):$/;"	m	class
 CleanOldSavedFilters	IssueTracker.py	/^    def CleanOldSavedFilters(self, user_excess_clean=False, $/;"	m	class:IssueTracker
 CountSections	IssueTracker.py	/^    def CountSections(self):$/;"	m	class:IssueTracker
 CountStatuses	IssueTracker.py	/^    def CountStatuses(self, since=None):$/;"	m	class:IssueTracker
+CustomField	CustomField.py	/^class CustomField(Folder):$/;"	c
+CustomFieldFolder	CustomField.py	/^class CustomFieldFolder(ZopeOrderedFolder):$/;"	c
+CustomFieldsIssueBase	CustomField.py	/^class CustomFieldsIssueBase:$/;"	c
+CustomFieldsIssueTrackerBase	CustomField.py	/^class CustomFieldsIssueTrackerBase:$/;"	c
 DataSubmitError	Errors.py	/^class DataSubmitError(Exception):$/;"	c
 DeleteDraftFollowup	IssueTracker.py	/^    def DeleteDraftFollowup(self, id, return_show_drafts_simple=False,$/;"	m	class:IssueTracker
 DeleteDraftIssue	IssueTracker.py	/^    def DeleteDraftIssue(self, id, return_show_drafts_simple=False,$/;"	m	class:IssueTracker
@@ -41,6 +45,7 @@ DisallowDuplicateIssueSubjects	IssueTracker.py	/^    def DisallowDuplicateIssueS
 Download2FS	ReportScript.py	/^    def Download2FS(self, REQUEST=None, RESPONSE=None):$/;"	m	class:ReportScript
 Empty	IssueTracker.py	/^class Empty:$/;"	c
 EncodeEmailDisplay	IssueTracker.py	/^    def EncodeEmailDisplay(self):$/;"	m	class:IssueTracker
+Expression	Expression.py	/^class Expression (Persistent):$/;"	c
 ExtensionForm	Issue.py	/^    def ExtensionForm(self, options):$/;"	m	class:IssueTrackerIssue
 FilterValuer	IssueTracker.py	/^                   CatalogAware):$/;"	c
 GenerateNotifyableId	IssueTrackerNotifyables.py	/^    def GenerateNotifyableId(self, email, length=10, int_length=None):$/;"	m	class:Notifyables
@@ -48,6 +53,7 @@ GenerateNotifyableId	Notifyables.py	/^    def GenerateNotifyableId(self, email, 
 HeadingLinks	IssueTracker.py	/^    def HeadingLinks(self, display, sortname, default=0, inverted=0,$/;"	m	class:IssueTracker
 HideFilter	IssueTracker.py	/^    def HideFilter(self, page='ListIssues', REQUEST=None):$/;"	m	class:IssueTracker
 HighlightQ	IssueTracker.py	/^    def HighlightQ(self, text, q=None, highlight_html=None, highlight_digits=False):$/;"	m	class:IssueTracker
+ICustomField	interfaces.py	/^class ICustomField(Interface):$/;"	c
 IncludeDescriptionInNotifications	IssueTracker.py	/^    def IncludeDescriptionInNotifications(self):$/;"	m	class:IssueTracker
 InitZCatalog	IssueTracker.py	/^    def InitZCatalog(self, t={}):$/;"	m	class:IssueTracker
 IssueInputError	Errors.py	/^class IssueInputError(Exception):$/;"	c
@@ -55,7 +61,7 @@ IssueTracker	IssueTracker.py	/^                   ):$/;"	c
 IssueTrackerDraftIssue	Issue.py	/^class IssueTrackerDraftIssue(IssueTrackerIssue):$/;"	c
 IssueTrackerDraftIssueThread	Thread.py	/^class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):$/;"	c
 IssueTrackerFolderBase	IssueTracker.py	/^class IssueTrackerFolderBase(Folder.Folder, Persistent):$/;"	c
-IssueTrackerIssue	Issue.py	/^class IssueTrackerIssue(IssueTracker):$/;"	c
+IssueTrackerIssue	Issue.py	/^class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):$/;"	c
 IssueTrackerIssueAssignment	Assignment.py	/^class IssueTrackerIssueAssignment(IssueTrackerIssue):$/;"	c
 IssueTrackerIssueThread	Thread.py	/^class IssueTrackerIssueThread(IssueTrackerIssue):$/;"	c
 IssueTrackerNotification	Notification.py	/^                               ):$/;"	c
@@ -167,6 +173,7 @@ UserChangeDetails	IssueTracker.py	/^    def UserChangeDetails(self, fullname, em
 UserSubmitError	Errors.py	/^class UserSubmitError(Exception):$/;"	c
 ValidEmailAddress	IssueTracker.py	/^    def ValidEmailAddress(self, email):$/;"	m	class:IssueTrackerFolderBase
 ValidEmailAddress	Utils.py	/^def ValidEmailAddress(address, debug=None):$/;"	f
+ValidationExpression	CustomField.py	/^class ValidationExpression(SimpleItem, PropertyManager):$/;"	c
 VersionController	upgrade.py	/^class VersionController:$/;"	c
 XXX_NO_LONGER_USED_encodeEmailString	Utils.py	/^def XXX_NO_LONGER_USED_encodeEmailString(email, title=None, nolink=0):$/;"	f
 XXXglobal_relative_url	IssueTracker.py	/^    def XXXglobal_relative_url(self, object_or_url):$/;"	m	class:IssueTracker
@@ -177,9 +184,14 @@ _ShouldNotBeNone	Utils.py	/^def _ShouldNotBeNone(result): return result is None$
 _Zero2None	IssueTracker.py	/^    def _Zero2None(self, dict):$/;"	m	class:IssueTracker
 __before_publishing_traverse__	IssueTracker.py	/^    def __before_publishing_traverse__(self, object, request=None):$/;"	m	class:IssueTracker	file:
 __before_publishing_traverse__	IssueTracker.py	/^    def __before_publishing_traverse__(self, object, request=None):$/;"	m	class:ReportsContainer	file:
+__call__	Expression.py	/^    def __call__(self, econtext):$/;"	m	class:Expression	file:
 __init__	Assignment.py	/^    def __init__(self, id, acl_assignee, state,$/;"	m	class:IssueTrackerIssueAssignment
+__init__	CustomField.py	/^    def __init__(self, id, expression, message):$/;"	m	class:ValidationExpression
+__init__	CustomField.py	/^    def __init__(self, id, title=u'', extra_css='', extra_js=''):$/;"	m	class:CustomFieldFolder
+__init__	CustomField.py	/^    def __init__(self, id, title=u'', input_type="text", python_type='ustring',$/;"	m	class:CustomField
 __init__	Email.py	/^    def __init__(self, id, email_address, defaultsections,$/;"	m	class:AcceptingEmail
 __init__	Email.py	/^    def __init__(self, id, hostname, username, password, portnr=110,$/;"	m	class:POP3Account
+__init__	Expression.py	/^    def __init__(self, text):$/;"	m	class:Expression
 __init__	Issue.py	/^    def __init__(self, id, title, status, issuetype, urgency, sections,$/;"	m	class:IssueTrackerIssue
 __init__	Issue.py	/^    def __init__(self, id, title=None, status=None,$/;"	m	class:IssueTrackerDraftIssue
 __init__	IssueTracker.py	/^    def __init__(self, id, title):$/;"	m	class:FilterValuer
@@ -199,6 +211,7 @@ __init__	Thread.py	/^    def __init__(self, id, issueid, action, title=None,$/;"
 __init__	Thread.py	/^    def __init__(self, id, title, comment, threaddate, fromname, email,$/;"	m	class:IssueTrackerIssueThread
 __init__	__init__.py	/^    def __init__(self, path, _prefix=None, $/;"	m	class:BetterImageFile
 __init__	upgrade.py	/^    def __init__(self, home_path='.', verbose=False):$/;"	m	class:VersionController
+__str__	CustomField.py	/^    def __str__(self):$/;"	m	class:CustomField	file:
 _acceptEmailsToSiteMaster	IssueTracker.py	/^    def _acceptEmailsToSiteMaster(self):$/;"	m	class:IssueTracker
 _add2bucket	IssueTracker.py	/^    def _add2bucket(self, bucket, key, opened=False, closed=False):$/;"	m	class:IssueTracker
 _addQuerystring	IssueTracker.py	/^    def _addQuerystring(self, url, encode=True):$/;"	m	class:IssueTracker
@@ -278,6 +291,8 @@ _getDefaultFilterValueShow	IssueTracker.py	/^    def _getDefaultFilterValueShow(
 _getDraftIssueIds	IssueTracker.py	/^    def _getDraftIssueIds(self, separate=False):$/;"	m	class:IssueTracker
 _getDraftThreadIds	Issue.py	/^    def _getDraftThreadIds(self, separate=False):$/;"	m	class:IssueTrackerIssue
 _getDraftThreadIds	IssueTracker.py	/^    def _getDraftThreadIds(self, separate=False):$/;"	m	class:IssueTracker
+_getExprContext	CustomField.py	/^    def _getExprContext(self, object, extra_namespaces={}):$/;"	m	class:CustomField
+_getExprContext	CustomField.py	/^    def _getExprContext(self, object, extra_namespaces={}):$/;"	m	class:CustomFieldsIssueTrackerBase
 _getFakeFileattachments	IssueTracker.py	/^    def _getFakeFileattachments(self, files):$/;"	m	class:IssueTracker
 _getFilterValueContainer	IssueTracker.py	/^    def _getFilterValueContainer(self):$/;"	m	class:IssueTracker
 _getFormattedComment	Thread.py	/^    def _getFormattedComment(self):$/;"	m	class:IssueTrackerIssueThread
@@ -317,6 +332,7 @@ _moveUpSections	IssueTracker.py	/^    def _moveUpSections(self, sections):$/;"	m
 _parseExternalEditBody	Issue.py	/^    def _parseExternalEditBody(self, body):$/;"	m	class:IssueTrackerDraftIssue
 _parseTimeHours	Issue.py	/^    def _parseTimeHours(self, hours):$/;"	m	class:IssueTrackerIssue
 _postCopy	IssueTracker.py	/^    def _postCopy(self, container, op=0):$/;"	m	class:IssueTracker
+_prepareByType	CustomField.py	/^    def _prepareByType(self):$/;"	m	class:CustomField
 _prepare_feed	IssueTracker.py	/^    def _prepare_feed(self, s):$/;"	m	class:IssueTracker
 _prerender_comment	Thread.py	/^    def _prerender_comment(self):$/;"	m	class:IssueTrackerIssueThread
 _prerender_description	Issue.py	/^    def _prerender_description(self):$/;"	m	class:IssueTrackerIssue
@@ -381,6 +397,8 @@ _updateModifyDate	Issue.py	/^    def _updateModifyDate(self):$/;"	m	class:IssueT
 _uploadFileattachments	IssueTracker.py	/^    def _uploadFileattachments(self, destination, files):$/;"	m	class:IssueTracker
 _uploadTempFiles	IssueTracker.py	/^    def _uploadTempFiles(self):$/;"	m	class:IssueTracker
 _validIssueIDList	IssueTracker.py	/^    def _validIssueIDList(self, comma_delimited_string):$/;"	m	class:IssueTracker
+_valid_options_expression	CustomField.py	/^    def _valid_options_expression(self):$/;"	m	class:CustomField
+_wrapPythonTypeName	CustomField.py	/^    def _wrapPythonTypeName(self, prefix=''):$/;"	m	class:CustomField
 _write_csv_headers	IssueTracker.py	/^    def _write_csv_headers(self, writer):$/;"	m	class:IssueTracker
 abbr	IssueTracker.py	/^            def abbr(label, date):$/;"	f	function:IssueTracker.showDate
 acceptOriginatorEmail	Email.py	/^    def acceptOriginatorEmail(self, email, default_accept=True):$/;"	m	class:AcceptingEmail
@@ -396,6 +414,7 @@ assertAllProperties	Issue.py	/^    def assertAllProperties(self):$/;"	m	class:Is
 assertAllProperties	Thread.py	/^    def assertAllProperties(self):$/;"	m	class:IssueTrackerIssueThread
 aurl	IssueTracker.py	/^    def aurl(self, url, params={}, ignore=[]):$/;"	m	class:IssueTracker
 badIdFilter	Utils.py	/^def badIdFilter(fileid, replacement=''):$/;"	f
+base_hasattr	CustomField.py	/^def base_hasattr(obj, name):$/;"	f
 base_hasattr	IssueTracker.py	/^def base_hasattr(obj, name):$/;"	f
 benchmark_ShowDescription	Utils.py	/^def benchmark_ShowDescription():$/;"	f
 bugreportingForm	IssueTracker.py	/^    def bugreportingForm(self, error_type=None, error_value=None,$/;"	m	class:IssueTracker
@@ -403,6 +422,7 @@ bugreportingURL	IssueTracker.py	/^    def bugreportingURL(self, error_type=None,
 calculateStatusScoreProgress	IssueTracker.py	/^    def calculateStatusScoreProgress(self, status_values):$/;"	m	class:IssueTracker
 canLogout	IssueTracker.py	/^    def canLogout(self):$/;"	m	class:IssueTracker
 canUpgrade	upgrade.py	/^    def canUpgrade(self):$/;"	m	class:VersionController
+canViewIssue	Issue.py	/^    def canViewIssue(self):$/;"	m	class:IssueTrackerIssue
 changeAssignment	Issue.py	/^    def changeAssignment(self, assignee, send_email=False):$/;"	m	class:IssueTrackerIssue
 changeUserOptions	IssueTracker.py	/^    def changeUserOptions(self, remember_savedfilter_persistently=False,$/;"	m	class:IssueTracker
 changeWhichSubListURL	IssueTracker.py	/^    def changeWhichSubListURL(self, newtype):$/;"	m	class:IssueTracker
@@ -421,6 +441,7 @@ createAcceptingEmail	Email.py	/^    def createAcceptingEmail(self, id, email_add
 createAcceptingEmail	IssueTracker.py	/^    def createAcceptingEmail(self, id, email_address, defaultsections=None, $/;"	m	class:IssueTracker
 createAssignment	Issue.py	/^    def createAssignment(self, assignee_identifier, state=1,$/;"	m	class:IssueTrackerIssue
 createErrorFileObject	IssueTracker.py	/^    def createErrorFileObject(self, options):$/;"	m	class:IssueTracker
+createExprContext	Expression.py	/^def createExprContext(folder, issuetracker, object, **extra_namespaces):$/;"	f
 createIssueObject	IssueTracker.py	/^    def createIssueObject(self, id, title, status, type_, urgency, sections,$/;"	m	class:IssueTracker
 createNotifyGroupId	IssueTrackerNotifyables.py	/^    def createNotifyGroupId(self, group):$/;"	m	class:Notifyables
 createNotifyGroupId	Notifyables.py	/^    def createNotifyGroupId(self, group):$/;"	m	class:Notifyables
@@ -472,6 +493,7 @@ filterTooRecent	IssueTracker.py	/^    def filterTooRecent(self, recenthistory):$
 filter_function	Issue.py	/^        def filter_function(notification, email):$/;"	f	function:IssueTrackerIssue._removeUnsentNotifications
 fixDictofLists	Utils.py	/^def fixDictofLists(dict):$/;"	f
 fixSectionsSubmission	IssueTracker.py	/^    def fixSectionsSubmission(self):$/;"	m	class:IssueTracker
+flat_to_list	CustomField.py	/^def flat_to_list(string):$/;"	f
 forceFilterValuerUpdate	IssueTracker.py	/^    def forceFilterValuerUpdate(self):$/;"	m	class:IssueTracker
 generateID	IssueTracker.py	/^    def generateID(self, length, prefix='', meta_type=ISSUE_METATYPE,$/;"	m	class:IssueTracker
 getACLAdder	Assignment.py	/^    def getACLAdder(self):$/;"	m	class:IssueTrackerIssueAssignment
@@ -516,8 +538,17 @@ getCommentPure	Thread.py	/^    def getCommentPure(self):$/;"	m	class:IssueTracke
 getComment_idx	Thread.py	/^    def getComment_idx(self):$/;"	m	class:IssueTrackerIssueThread
 getContentType	IssueTracker.py	/^    def getContentType(self, content_type='text\/html', $/;"	m	class:IssueTrackerFolderBase
 getCookiekey	IssueTracker.py	/^    def getCookiekey(self, which):$/;"	m	class:IssueTracker
+getCoreAttribute	CustomField.py	/^    def getCoreAttribute(self, *key_and_default):$/;"	m	class:CustomField
+getCoreAttributeKeyLabel	CustomField.py	/^    def getCoreAttributeKeyLabel(self, key, html_ok=False):$/;"	m	class:CustomField
+getCoreAttributeKeyName	CustomField.py	/^    def getCoreAttributeKeyName(self, key):$/;"	m	class:CustomField
+getCoreAttributeKeySuggestions	CustomField.py	/^    def getCoreAttributeKeySuggestions(self):$/;"	m	class:CustomField
+getCoreAttributeKeys	CustomField.py	/^    def getCoreAttributeKeys(self):$/;"	m	class:CustomField
 getCreatedNotifications	Issue.py	/^    def getCreatedNotifications(self, sort=False):$/;"	m	class:IssueTrackerIssue
 getCurrentlyUsedSavedFilter	IssueTracker.py	/^    def getCurrentlyUsedSavedFilter(self, request_only=True):$/;"	m	class:IssueTracker
+getCustomFieldData	CustomField.py	/^    def getCustomFieldData(self, key, default=None):$/;"	m	class:CustomFieldsIssueBase
+getCustomFieldObjects	CustomField.py	/^    def getCustomFieldObjects(self, field_ids_filter=None):$/;"	m	class:CustomFieldsIssueTrackerBase
+getCustomFieldsCombinedCSS	CustomField.py	/^    def getCustomFieldsCombinedCSS(self, field_ids_filter=None):$/;"	m	class:CustomFieldsIssueTrackerBase
+getCustomFieldsData	CustomField.py	/^    def getCustomFieldsData(self, field_ids_filter=None):$/;"	m	class:CustomFieldsIssueBase
 getDefaultDisplayFormat	IssueTracker.py	/^    def getDefaultDisplayFormat(self):$/;"	m	class:IssueTracker
 getDefaultSections	IssueTracker.py	/^    def getDefaultSections(self):$/;"	m	class:IssueTracker
 getDefaultSortorder	IssueTracker.py	/^    def getDefaultSortorder(self):$/;"	m	class:IssueTracker
@@ -525,6 +556,7 @@ getDefaultSortorderOptions	IssueTracker.py	/^    def getDefaultSortorderOptions(
 getDefaultTellAFriendMessage	Issue.py	/^    def getDefaultTellAFriendMessage(self, added=False):$/;"	m	class:IssueTrackerIssue
 getDefaultType	IssueTracker.py	/^    def getDefaultType(self):$/;"	m	class:IssueTracker
 getDefaultUrgency	IssueTracker.py	/^    def getDefaultUrgency(self):$/;"	m	class:IssueTracker
+getDeleteableAttributeKeys	CustomField.py	/^    def getDeleteableAttributeKeys(self):$/;"	m	class:CustomField
 getDescription	Issue.py	/^    def getDescription(self):$/;"	m	class:IssueTrackerIssue
 getDescriptionPure	Issue.py	/^    def getDescriptionPure(self):$/;"	m	class:IssueTrackerIssue
 getDescription_idx	Issue.py	/^    def getDescription_idx(self):$/;"	m	class:IssueTrackerIssue
@@ -547,6 +579,7 @@ getEnvBool	Constants.py	/^def getEnvBool(key, default):$/;"	f
 getEnvInt	Constants.py	/^def getEnvInt(key, default):$/;"	f
 getEnvStr	Constants.py	/^def getEnvStr(key, default):$/;"	f
 getEstimatedTimeHours	Issue.py	/^    def getEstimatedTimeHours(self):$/;"	m	class:IssueTrackerIssue
+getExprContext	Expression.py	/^def getExprContext(context, object=None, extra_namespaces={}, use_cache_if_possible=False):$/;"	f
 getFVal	IssueTracker.py	/^            def getFVal(key, zope=self, filterlogic=filterlogic):$/;"	f	function:IssueTracker.guessNewFiltername
 getFVal	IssueTracker.py	/^        def getFVal(key, zope=self, filterlogic=filterlogic):$/;"	f	function:IssueTracker._filterIssues
 getFVal	IssueTracker.py	/^        def getFVal(key, zope=self, filterlogic=filterlogic):$/;"	f	function:IssueTracker.saveFilterOption
@@ -575,6 +608,7 @@ getGroupsByIds	IssueTrackerNotifyables.py	/^    def getGroupsByIds(self, ids):$/
 getGroupsByIds	Notifyables.py	/^    def getGroupsByIds(self, ids):$/;"	m	class:Notifyables
 getHeader	IssueTracker.py	/^    def getHeader(self):               $/;"	m	class:IssueTracker
 getHostname	Email.py	/^    def getHostname(self):$/;"	m	class:POP3Account
+getId	CustomField.py	/^    def getId(self):$/;"	m	class:CustomField
 getId	Email.py	/^    def getId(self):$/;"	m	class:AcceptingEmail
 getId	Email.py	/^    def getId(self):$/;"	m	class:POP3Account
 getId	Issue.py	/^    def getId(self):$/;"	m	class:IssueTrackerIssue
@@ -583,6 +617,7 @@ getId	IssueTracker.py	/^    def getId(self):$/;"	m	class:IssueTracker
 getId	IssueTrackerNotifyables.py	/^    def getId(self):$/;"	m	class:IssueTrackerNotifyableGroup
 getId	Notifyables.py	/^    def getId(self):$/;"	m	class:IssueTrackerNotifyableGroup
 getId	ReportScript.py	/^    def getId(self):$/;"	m	class:ReportScript
+getInputType	CustomField.py	/^    def getInputType(self):$/;"	m	class:CustomField
 getIssueAssignmentBlacklist	IssueTracker.py	/^    def getIssueAssignmentBlacklist(self, check_each=False):$/;"	m	class:IssueTracker
 getIssueDate	Issue.py	/^    def getIssueDate(self):$/;"	m	class:IssueTrackerDraftIssue
 getIssueDate	Issue.py	/^    def getIssueDate(self):$/;"	m	class:IssueTrackerIssue
@@ -649,7 +684,12 @@ getNotifyablesEmailName	IssueTrackerNotifyables.py	/^    def getNotifyablesEmail
 getNotifyablesEmailName	Notifyables.py	/^    def getNotifyablesEmailName(self, only=None):$/;"	m	class:Notifyables
 getNotifyablesObjectContainer	IssueTrackerNotifyables.py	/^    def getNotifyablesObjectContainer(self, only=None):$/;"	m	class:Notifyables
 getNotifyablesObjectContainer	Notifyables.py	/^    def getNotifyablesObjectContainer(self, only=None):$/;"	m	class:Notifyables
+getOKPythonTypes	CustomField.py	/^    def getOKPythonTypes(self):$/;"	m	class:CustomField
 getOptionButtons	Issue.py	/^    def getOptionButtons(self):$/;"	m	class:IssueTrackerIssue
+getOptions	CustomField.py	/^    def getOptions(self):$/;"	m	class:CustomField
+getOptionsExpression	CustomField.py	/^    def getOptionsExpression(self):$/;"	m	class:CustomField
+getOptionsFlat	CustomField.py	/^    def getOptionsFlat(self):$/;"	m	class:CustomField
+getOptionsIterable	CustomField.py	/^    def getOptionsIterable(self):$/;"	m	class:CustomField
 getOrdinalth	IssueTracker.py	/^    def getOrdinalth(self, daynr, html=0):$/;"	m	class:IssueTrackerFolderBase
 getOutlookBatchSize	IssueTracker.py	/^    def getOutlookBatchSize(self):$/;"	m	class:IssueTracker
 getOutlookDaylabels	IssueTracker.py	/^    def getOutlookDaylabels(self, issues):$/;"	m	class:IssueTracker
@@ -662,6 +702,7 @@ getPluginPaths	IssueTracker.py	/^    def getPluginPaths(self):$/;"	m	class:Issue
 getPort	Email.py	/^    def getPort(self):$/;"	m	class:POP3Account
 getPreviewSections	IssueTracker.py	/^    def getPreviewSections(self):$/;"	m	class:IssueTracker
 getPreviewTitle	Issue.py	/^    def getPreviewTitle(self, oldstatus, action):$/;"	m	class:IssueTrackerIssue
+getPythonType	CustomField.py	/^    def getPythonType(self):$/;"	m	class:CustomField
 getRandomString	IssueTracker.py	/^    def getRandomString(self, length=5, loweronly=0, numbersonly=0):$/;"	m	class:IssueTrackerFolderBase
 getRandomString	IssueTrackerNotifyables.py	/^    def getRandomString(self, length=5, loweronly=0, numbersonly=0):$/;"	m	class:IssueTrackerNotifyableContainer
 getRandomString	Notifyables.py	/^    def getRandomString(self, length=5, loweronly=0, numbersonly=0):$/;"	m	class:IssueTrackerNotifyableContainer
@@ -709,6 +750,7 @@ getSuccessEmails	Notification.py	/^    def getSuccessEmails(self):$/;"	m	class:I
 getThreadDate	Thread.py	/^    def getThreadDate(self):$/;"	m	class:IssueTrackerIssueThread
 getThreadObjects	Issue.py	/^    def getThreadObjects(self):$/;"	m	class:IssueTrackerIssue
 getTitle	Assignment.py	/^    def getTitle(self):$/;"	m	class:IssueTrackerIssueAssignment
+getTitle	CustomField.py	/^    def getTitle(self):$/;"	m	class:CustomField
 getTitle	Email.py	/^    def getTitle(self):$/;"	m	class:AcceptingEmail
 getTitle	Email.py	/^    def getTitle(self):$/;"	m	class:POP3Account
 getTitle	Issue.py	/^    def getTitle(self):$/;"	m	class:IssueTrackerIssue
@@ -732,6 +774,8 @@ getUsageCount	IssueTracker.py	/^    def getUsageCount(self):$/;"	m	class:FilterV
 getUserAchievements	IssueTracker.py	/^    def getUserAchievements(self):$/;"	m	class:IssueTracker
 getUserLists	IssueUserFolder.py	/^    def getUserLists(self):$/;"	m	class:IssueUser
 getUsername	Email.py	/^    def getUsername(self):$/;"	m	class:POP3Account
+getValidationExpressions	CustomField.py	/^    def getValidationExpressions(self):$/;"	m	class:CustomField
+getVisibilityExpression	CustomField.py	/^    def getVisibilityExpression(self):$/;"	m	class:CustomField
 getWYSIWYGEditor	IssueTracker.py	/^    def getWYSIWYGEditor(self):$/;"	m	class:IssueTracker
 getWebmasterEmail	IssueUserFolder.py	/^    def getWebmasterEmail(self):$/;"	m	class:IssueUserFolder
 getWhitelistEmails	Email.py	/^    def getWhitelistEmails(self):$/;"	m	class:AcceptingEmail
@@ -789,6 +833,7 @@ idfunction	Utils.py	/^    def idfunction(x):$/;"	f	function:iuniqify
 ignoreExceptionType	IssueTracker.py	/^    def ignoreExceptionType(self, error_type):$/;"	m	class:IssueTracker
 imagesInMenu	IssueTracker.py	/^    def imagesInMenu(self):$/;"	m	class:IssueTracker
 improveURL	addhrefs.py	/^def improveURL(url):$/;"	f
+includeInFilterOptions	CustomField.py	/^    def includeInFilterOptions(self):$/;"	m	class:CustomField
 incrementUsageCount	IssueTracker.py	/^    def incrementUsageCount(self):$/;"	m	class:FilterValuer
 index_html	Issue.py	/^    def index_html(self, REQUEST, *args, **kw):$/;"	m	class:IssueTrackerIssue
 index_html	Issue.py	/^    def index_html(self, REQUEST=None):$/;"	m	class:IssueTrackerDraftIssue
@@ -799,11 +844,13 @@ index_object	IssueTracker.py	/^    def index_object(self):$/;"	m	class:FilterVal
 index_object	Thread.py	/^    def index_object(self, *args, **kws):$/;"	m	class:IssueTrackerDraftIssueThread
 index_object	Thread.py	/^    def index_object(self, idxs=['comment','meta_type','fromname','email']):$/;"	m	class:IssueTrackerIssueThread
 initialize	__init__.py	/^def initialize(context):$/;"	f
+isAllowedToChangeIssues	Issue.py	/^    def isAllowedToChangeIssues(self):$/;"	m	class:IssueTrackerIssue
 isAnonymous	IssueTracker.py	/^    def isAnonymous(self):$/;"	m	class:IssueTracker
 isAutosave	Issue.py	/^    def isAutosave(self):$/;"	m	class:IssueTrackerDraftIssue
 isAutosave	Thread.py	/^    def isAutosave(self):$/;"	m	class:IssueTrackerDraftIssueThread
 isConfidential	Issue.py	/^    def isConfidential(self):$/;"	m	class:IssueTrackerIssue
 isCreator	Issue.py	/^    def isCreator(self):$/;"	m	class:IssueTrackerIssue
+isDisabled	CustomField.py	/^    def isDisabled(self):$/;"	m	class:CustomField
 isDispatched	Notification.py	/^    def isDispatched(self):$/;"	m	class:IssueTrackerNotification
 isEmailSent	Assignment.py	/^    def isEmailSent(self):$/;"	m	class:IssueTrackerIssueAssignment
 isFromBrother	IssueTracker.py	/^    def isFromBrother(self, issue):$/;"	m	class:IssueTracker
@@ -812,6 +859,7 @@ isGlobalHere	Notifyables.py	/^    def isGlobalHere(self):$/;"	m	class:Notifyable
 isHidden	Issue.py	/^    def isHidden(self):$/;"	m	class:IssueTrackerIssue
 isImplicitlySubscribing	Issue.py	/^    def isImplicitlySubscribing(self, email):$/;"	m	class:IssueTrackerIssue
 isIssueUser	IssueTracker.py	/^    def isIssueUser(self):$/;"	m	class:IssueTracker
+isMandatory	CustomField.py	/^    def isMandatory(self):$/;"	m	class:CustomField
 isRecentlyAdded	Issue.py	/^    def isRecentlyAdded(self):$/;"	m	class:IssueTrackerIssue
 isSubscribing	Issue.py	/^    def isSubscribing(self, email):$/;"	m	class:IssueTrackerIssue
 isUsingCVS	upgrade.py	/^    def isUsingCVS(self):$/;"	m	class:VersionController
@@ -823,12 +871,16 @@ issueInfluxbyPeriod	IssueTracker.py	/^    def issueInfluxbyPeriod(self, period=1
 issueURLbyID	IssueTracker.py	/^    def issueURLbyID(self, issueID):$/;"	m	class:IssueTracker
 iuniqify	Utils.py	/^def iuniqify(seq):$/;"	f
 lengthLimit	IssueTracker.py	/^    def lengthLimit(self, string, maxsize=45, append='...'):$/;"	m	class:IssueTrackerFolderBase
+list_to_flat	CustomField.py	/^def list_to_flat(sequence):$/;"	f
 manage_AddToBlacklist	IssueTracker.py	/^    def manage_AddToBlacklist(self, add_identifiers, DestinationURL=None):$/;"	m	class:IssueTracker
 manage_FTPget	Issue.py	/^    def manage_FTPget(self, REQUEST, RESPONSE):$/;"	m	class:IssueTrackerDraftIssue
 manage_PropertiesWizard	IssueTracker.py	/^    def manage_PropertiesWizard(self, REQUEST, *args, **kw):$/;"	m	class:IssueTracker
 manage_RemoveFromBlacklist	IssueTracker.py	/^    def manage_RemoveFromBlacklist(self, remove_identifiers,$/;"	m	class:IssueTracker
 manage_UseIssueAssignmentToggle	IssueTracker.py	/^    def manage_UseIssueAssignmentToggle(self, DestinationURL=None):$/;"	m	class:IssueTracker
 manage_ViewPermissionToggle	IssueTracker.py	/^    def manage_ViewPermissionToggle(self, DestinationURL=None):$/;"	m	class:IssueTracker
+manage_addCustomField	CustomField.py	/^def manage_addCustomField(self, oid, title=u'', input_type='text', python_type='ustring',$/;"	f
+manage_addCustomFieldFolder	CustomField.py	/^def manage_addCustomFieldFolder(self, oid='custom_fields', $/;"	f
+manage_addFieldProperty	CustomField.py	/^    def manage_addFieldProperty(self, key=None, new_key=None, REQUEST=None):$/;"	m	class:CustomField
 manage_addIssueReportScript	ReportScript.py	/^def manage_addIssueReportScript(self, id, name='', url2script=None, $/;"	f
 manage_addIssueTracker	IssueTracker.py	/^def manage_addIssueTracker(dispatcher, id, title='', REQUEST=None):$/;"	f
 manage_addIssueTrackerIssueThread	Thread.py	/^def manage_addIssueTrackerIssueThread(*args, **kw):$/;"	f
@@ -842,6 +894,7 @@ manage_addNotifyableGroup	Notifyables.py	/^    def manage_addNotifyableGroup(sel
 manage_addNotifyables	IssueTrackerNotifyables.py	/^    def manage_addNotifyables(self, REQUEST):$/;"	m	class:Notifyables
 manage_addNotifyables	Notifyables.py	/^    def manage_addNotifyables(self, REQUEST):$/;"	m	class:Notifyables
 manage_addOtherProperty	IssueTracker.py	/^    def manage_addOtherProperty(self, id, value, type):$/;"	m	class:IssueTracker
+manage_addValidationExpression	CustomField.py	/^    def manage_addValidationExpression(self, expression, message=u'', REQUEST=None):$/;"	m	class:CustomField
 manage_afterAdd	Issue.py	/^    def manage_afterAdd(self, REQUEST, RESPONSE):$/;"	m	class:IssueTrackerDraftIssue
 manage_afterAdd	Issue.py	/^    def manage_afterAdd(self, REQUEST, RESPONSE):$/;"	m	class:IssueTrackerIssue
 manage_afterAdd	ReportScript.py	/^    def manage_afterAdd(self, REQUEST, RESPONSE):$/;"	m	class:ReportScript
@@ -861,7 +914,9 @@ manage_delNotifyables	IssueTrackerNotifyables.py	/^    def manage_delNotifyables
 manage_delNotifyables	Notifyables.py	/^    def manage_delNotifyables(self, REQUEST):$/;"	m	class:Notifyables
 manage_delOtherProperties	IssueTracker.py	/^    def manage_delOtherProperties(self, ids):$/;"	m	class:IssueTracker
 manage_delPOP3Accounts	IssueTracker.py	/^    def manage_delPOP3Accounts(self, ids=[], REQUEST=None):$/;"	m	class:IssueTracker
+manage_deleteFieldProperty	CustomField.py	/^    def manage_deleteFieldProperty(self, key, REQUEST=None):$/;"	m	class:CustomField
 manage_deleteIssuesAndThreads	IssueTracker.py	/^    def manage_deleteIssuesAndThreads(self, issuepaths=[], threadpaths=[],$/;"	m	class:IssueTracker
+manage_deleteValidationExpression	CustomField.py	/^    def manage_deleteValidationExpression(self, id, REQUEST=None):$/;"	m	class:CustomField
 manage_doUpgrade	IssueTracker.py	/^    def manage_doUpgrade(self, REQUEST=None):$/;"	m	class:IssueTracker
 manage_editAccount	Email.py	/^    def manage_editAccount(self, hostname=None, portnr=None,$/;"	m	class:POP3Account
 manage_editIssueTrackerProperties	IssueTracker.py	/^    def manage_editIssueTrackerProperties(self, carefulbooleans=False, $/;"	m	class:IssueTracker
@@ -873,10 +928,12 @@ manage_editNotifyableGroup	Notifyables.py	/^    def manage_editNotifyableGroup(s
 manage_editPOP3Account	IssueTracker.py	/^    def manage_editPOP3Account(self, id, hostname=None, portnr=None, username=None, $/;"	m	class:IssueTracker
 manage_editProperties	Issue.py	/^    def manage_editProperties(self, REQUEST):$/;"	m	class:IssueTrackerIssue
 manage_editProperties	Thread.py	/^    def manage_editProperties(self, REQUEST):$/;"	m	class:IssueTrackerIssueThread
+manage_editValidationExpression	CustomField.py	/^    def manage_editValidationExpression(self, id, expression, message, $/;"	m	class:CustomField
 manage_enableEmailRepliesSetting	IssueTracker.py	/^    def manage_enableEmailRepliesSetting(self, email, include_description_in_notifications=False,$/;"	m	class:IssueTracker
 manage_findIssuesContainingSpam	IssueTracker.py	/^    def manage_findIssuesContainingSpam(self):$/;"	m	class:IssueTracker
 manage_findPotentialBrothers	IssueTracker.py	/^    def manage_findPotentialBrothers(self):$/;"	m	class:IssueTracker
 manage_findThreadsContainingSpam	IssueTracker.py	/^    def manage_findThreadsContainingSpam(self):$/;"	m	class:IssueTracker
+manage_fix	CustomField.py	/^    def manage_fix(self):$/;"	m	class:CustomFieldsIssueTrackerBase
 manage_getUpgradeInfo	IssueTracker.py	/^    def manage_getUpgradeInfo(self):$/;"	m	class:IssueTracker
 manage_getUsersToConvert	IssueUserFolder.py	/^def manage_getUsersToConvert(self, withpasswords=False):$/;"	f
 manage_hasAquirableMailHost	IssueTracker.py	/^def manage_hasAquirableMailHost(self):$/;"	f
@@ -886,6 +943,7 @@ manage_isUsingBTreeFolder	IssueTracker.py	/^    def manage_isUsingBTreeFolder(se
 manage_isUsingCVS	IssueTracker.py	/^    def manage_isUsingCVS(self):$/;"	m	class:IssueTracker
 manage_passwordReminder	IssueUserFolder.py	/^    def manage_passwordReminder(self, name):$/;"	m	class:IssueUserFolder
 manage_saveBlackWhitelist	IssueTracker.py	/^    def manage_saveBlackWhitelist(self, id, acceptingemail_id, $/;"	m	class:IssueTracker
+manage_saveFieldProperties	CustomField.py	/^    def manage_saveFieldProperties(self, input_type=None, python_type=None,$/;"	m	class:CustomField
 manage_saveNotifyGroup	IssueTrackerNotifyables.py	/^    def manage_saveNotifyGroup(self, notify_group, REQUEST):$/;"	m	class:Notifyables
 manage_saveNotifyGroup	Notifyables.py	/^    def manage_saveNotifyGroup(self, notify_group, REQUEST):$/;"	m	class:Notifyables
 manage_savePluginPath	IssueTracker.py	/^    def manage_savePluginPath(self, path):$/;"	m	class:IssueTracker
@@ -909,6 +967,7 @@ populateREQUEST	Issue.py	/^    def populateREQUEST(self, request):$/;"	m	class:I
 populateRequest	IssueTracker.py	/^    def populateRequest(self, request):$/;"	m	class:FilterValuer
 preParseEmailString	IssueTracker.py	/^    def preParseEmailString(self, email_string, aslist=0, allnotifyables=1):$/;"	m	class:IssueTracker
 preParseEmailString	Utils.py	/^def preParseEmailString(es, names2emails={}, aslist=0):$/;"	f
+preview_render	CustomField.py	/^    def preview_render(self, *value, **extra_attributes):$/;"	m	class:CustomField
 printu	Utils.py	/^def printu(ustr):$/;"	f
 process_find	Issue.py	/^        def process_find(match):$/;"	f	function:IssueTrackerIssue._findIssueLinks
 redirectlogin	IssueTracker.py	/^    def redirectlogin(self, came_from=None):$/;"	m	class:IssueTracker
@@ -919,8 +978,13 @@ relative_url	IssueTracker.py	/^    def relative_url(self, url=None):$/;"	m	class
 relative_url_path	Issue.py	/^    def relative_url_path(self):$/;"	m	class:IssueTrackerIssue
 rememberSavedfilterPersistently	IssueTracker.py	/^    def rememberSavedfilterPersistently(self):$/;"	m	class:IssueTracker
 rememberSavedfilterPersistently	IssueUserFolder.py	/^    def rememberSavedfilterPersistently(self, default=False):$/;"	m	class:IssueUser
+render	CustomField.py	/^    def render(self, *value, **extra_attributes):$/;"	m	class:CustomField
+render_extra_css	CustomField.py	/^    def render_extra_css(self):$/;"	m	class:CustomField
+render_extra_js	CustomField.py	/^    def render_extra_js(self):$/;"	m	class:CustomField
+render_tag	CustomField.py	/^    def render_tag(self, *value, **extra_attributes):$/;"	m	class:CustomField
 revealIssueURL	Email.py	/^    def revealIssueURL(self):$/;"	m	class:AcceptingEmail
 safeId	Utils.py	/^def safeId(id, nospaces=0):$/;"	f
+safe_hasattr	CustomField.py	/^def safe_hasattr(obj, name, _marker=object()):$/;"	f
 safe_hasattr	IssueTracker.py	/^def safe_hasattr(obj, name, _marker=object()):$/;"	f
 safe_html_quote	IssueTracker.py	/^    def safe_html_quote(self, text):$/;"	m	class:IssueTrackerFolderBase
 safe_html_quote	Utils.py	/^def safe_html_quote(text):$/;"	f
@@ -945,6 +1009,7 @@ setACLCookieEmail	IssueTracker.py	/^    def setACLCookieEmail(self, email):$/;"	
 setACLCookieName	IssueTracker.py	/^    def setACLCookieName(self, fromname):$/;"	m	class:IssueTracker
 setAccessKeys	IssueUserFolder.py	/^    def setAccessKeys(self, toggle):$/;"	m	class:IssueUser
 setAssignment	Issue.py	/^    def setAssignment(self, assignee, send_email=False):$/;"	m	class:IssueTrackerIssue
+setCustomFieldData	CustomField.py	/^    def setCustomFieldData(self, field, key, value):$/;"	m	class:CustomFieldsIssueBase
 setDisplayFormat	IssueUserFolder.py	/^    def setDisplayFormat(self, displayformat):$/;"	m	class:IssueUser
 setMiscProperty	IssueUserFolder.py	/^    def setMiscProperty(self, key, value):$/;"	m	class:IssueUser
 setRememberSavedfilterPersistently	IssueUserFolder.py	/^    def setRememberSavedfilterPersistently(self, toggle):$/;"	m	class:IssueUser
@@ -955,6 +1020,7 @@ setWhichList	IssueTracker.py	/^    def setWhichList(self, what):$/;"	m	class:Iss
 setWhichSubList	IssueTracker.py	/^    def setWhichSubList(self, what):$/;"	m	class:IssueTracker
 setYieldCount	ReportScript.py	/^    def setYieldCount(self, count):$/;"	m	class:ReportScript
 set_cookie	IssueTracker.py	/^    def set_cookie(self, key, value, expires=365, path='\/',$/;"	m	class:IssueTracker
+set_custom_fields_filter	IssueTracker.py	/^    def set_custom_fields_filter(self, custom_filters):$/;"	m	class:FilterValuer
 set_session	IssueTracker.py	/^    def set_session(self, name, value, globally=0):$/;"	m	class:IssueTracker
 shortDescription	Issue.py	/^    def shortDescription(self, maxlength=55, html=True):$/;"	m	class:IssueTrackerDraftIssue
 shortDescription	Thread.py	/^    def shortDescription(self, maxlength=55, html=True):$/;"	m	class:IssueTrackerDraftIssueThread
@@ -978,6 +1044,7 @@ showThreadFileattachments	Thread.py	/^    def showThreadFileattachments(self, on
 showTimeHours	Issue.py	/^    def showTimeHours(self, value, show_unit=False):$/;"	m	class:IssueTrackerIssue
 showTitle	Issue.py	/^    def showTitle(self):$/;"	m	class:IssueTrackerIssue
 showURL2Issue	IssueTracker.py	/^    def showURL2Issue(self, url=None, href=0, maxlength=60):$/;"	m	class:IssueTracker
+showValue	CustomField.py	/^    def showValue(self, value):$/;"	m	class:CustomField
 sortSequence	IssueTracker.py	/^    def sortSequence(self, seq, params):$/;"	m	class:IssueTrackerFolderBase
 sorter	IssueTracker.py	/^            def sorter(x, y):$/;"	f	function:IssueTracker.getNextActionIssues
 splitStatusesAndVerbs	IssueTracker.py	/^    def splitStatusesAndVerbs(self, statuses_and_verbs):$/;"	m	class:IssueTracker
@@ -994,6 +1061,8 @@ tag_quote	Utils.py	/^def tag_quote(text):$/;"	f
 test	Utils.py	/^def test():$/;"	f
 test	addhrefs.py	/^def test():$/;"	f
 testAutoLogin	IssueTracker.py	/^    def testAutoLogin(self):$/;"	m	class:IssueTracker
+testValidValue	CustomField.py	/^    def testValidValue(self, value):$/;"	m	class:CustomField
+testValidValue	interfaces.py	/^    def testValidValue(value):$/;"	m	class:ICustomField
 test_AwareLengthLimit	Utils.py	/^def test_AwareLengthLimit():$/;"	f
 test_ShowDescription	Utils.py	/^def test_ShowDescription():$/;"	f
 test_ValidEmailAddress	Utils.py	/^def test_ValidEmailAddress():$/;"	f

@@ -72,7 +72,8 @@ def unicodify(s, encodings=(UNICODE_ENCODING, 'latin1', 'utf8')):
         raise UnicodeDecodeError, \
             "Unable to unicodify %r with these encodings %s" % (s, encodings)
     return s
-        
+
+
 
 def SimpleTextPurifier(text):
     text = text.replace('<p>&nbsp;</p>','')

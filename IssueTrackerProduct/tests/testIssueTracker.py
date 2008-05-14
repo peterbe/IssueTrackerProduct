@@ -1017,7 +1017,32 @@ class IssueTrackerTestCase(TestBase):
         # run it again and it shouldn't create another saved filter
         tracker.ListIssuesFiltered()
         saved_filters = getattr(tracker, 'saved-filters').objectValues()
-        self.assertEqual(len(saved_filters), 1)        
+        self.assertEqual(len(saved_filters), 1)
+        
+        
+    def test_filterIssues_anonymous_bot(self):
+        """ When the http user agent is a bot (Googlebot, msnbot etc.) don't
+        save the filter persistently.
+        """
+        
+        noSecurityManager()
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        
+        
+        request.set('HTTP_USER_AGENT',
+        "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+        
+        # On the homepage, the links to see only say issues "On hold" is
+        # /ListIssues?Filterlogic=show&f-statuses=on%20hold
+        # Let's mimick that:
+        request.set('Filterlogic','show')
+        request.set('f-statuses','on hold')
+        tracker.ListIssuesFiltered()
+        
+        # there shouldn't even be a folder called 'saved-filters'
+        self.assertEqual(getattr(tracker, 'saved-filters', None), None)
+        
     
 
     def test_filterIssues_recycleable(self):

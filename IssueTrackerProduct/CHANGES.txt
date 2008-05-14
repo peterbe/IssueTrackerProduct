@@ -1,3 +1,8 @@
+-
+   
+    New feature: Any filtering done by spider bots are not
+    persistently saved.
+
 - 0.10.0
 
     New feature: Custom fields!
