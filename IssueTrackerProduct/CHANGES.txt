@@ -1,4 +1,14 @@
 -
+
+    Bug fixed: Fixed a bug where some saved followup drafts weren't
+    saved as Unicode.
+    
+    Bug fixed: Custom field type validity check failed on values that
+    were already lists or tuples and don't need to be converted to a
+    list.
+    
+    Bug fixed: Custom fields that were "ulines" or "lines" and 
+    multiple="multiple" would become nested lists until flattened.
    
     New feature: Any filtering done by spider bots are not
     persistently saved.

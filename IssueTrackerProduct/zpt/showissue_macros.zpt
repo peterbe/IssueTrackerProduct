@@ -111,13 +111,6 @@
           tal:content="string:${field/getTitle}:"></td>
       <td tal:define="field data/field">
         <br tal:replace="structure python:field.showValue(data['value'])" />
-        <tal:block condition="change">
-          <tal:input replace="structure python:field.render(request.get(field.getId(), data['value']), skip_extra_css=False)" />
-          <span class="submiterror" tal:condition="python:errors.get(field.getId())"
-      	        tal:content="python:here.ShowSubmitError(options, field.getId())"></span>
-        </tal:block>                  
-                  
-            
       </td>
     </tr>
     </tal:block>

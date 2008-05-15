@@ -772,8 +772,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if request_action == 'delete':
             return self.form_delete(SubmitError=SubmitError)
         
-        print "request_action", request_action
-
         if request_action == 'rejectassignment':
             otherTitle = "Reject issue assignment"
             request.set('otherActionTitle', otherTitle)
@@ -1738,7 +1736,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         container = self.getDraftsContainer()
         draftobjects = container.objectValues(ISSUETHREAD_DRAFT_METATYPE)
         for draft in draftobjects:
-            if draft.comment == comment:
+            if unicodify(draft.comment) == comment:
                 return draft
         return None
     

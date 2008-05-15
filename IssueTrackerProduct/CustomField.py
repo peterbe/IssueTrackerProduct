@@ -57,6 +57,18 @@ CORE_ATTRIBUTES = ('title','input_type','extra_css','extra_js','options',
                    'include_in_filter_options',
                    )
 
+                   
+#----------------------------------------------------------------------------
+
+def _flatten_lines(nested_list):
+    all = []
+    for item in nested_list:
+        if isinstance(item, (tuple, list)):
+            all.extend(_flatten_lines(item))
+        else:
+            all.append(item)
+    return all
+    
 #----------------------------------------------------------------------------
 
 manage_addCustomFieldForm = DTMLFile('dtml/addCustomField', globals())
@@ -706,10 +718,30 @@ class CustomField(Folder):
             except DateError:
                 return False, u"Not a valid date"
         elif self.python_type == 'ulines':
-            try:
-                [unicode(x) for x in value.splitlines()]
-            except ValueError:
-                return False, u"Not a list of unicode strings"
+            if isinstance(value, basestring):
+                try:
+                    [unicode(x) for x in value.splitlines()]
+                except ValueError:
+                    return False, u"Not a list of unicode strings"
+            elif value is not None:
+                value = _flatten_lines(value)
+                try:
+                    [unicode(x) for x in value]
+                except ValueError:
+                    return False, u"Not a list of unicode strings"
+        elif self.python_type == 'lines':
+            if isinstance(value, basestring):
+                try:
+                    [str(x) for x in value.splitlines()]
+                except ValueError:
+                    return False, u"Not a list of strings"
+            elif value is not None:
+                value = _flatten_lines(value)
+                try:
+                    [str(x) for x in value]
+                except ValueError:
+                    return False, u"Not a list of strings"
+                
 
         # check each TALES expression
         for ve in self.getValidationExpressions():
@@ -1195,6 +1227,7 @@ class CustomFieldsIssueBase:
         """ append this to self.custom_fields_data (dict).
         The parameter @field is the custom field object. 
         """
+                
         if field.input_type == 'file':
             # upload the file into the issue and change @value to the id
             value.read(1)
@@ -1222,6 +1255,10 @@ class CustomFieldsIssueBase:
             elif isinstance(value, basestring):
                 value = [value]
             else:
+                # due to way Zope's cast handles <selects>
+                # with name "foo:ulines" you get
+                # ['one', ['two']]
+                value = _flatten_lines(value)
                 assert isinstance(value, list), "value not a list"
             # every item should be a str
             value = [str(x) for x in value]
@@ -1231,6 +1268,10 @@ class CustomFieldsIssueBase:
             elif isinstance(value, basestring):
                 value = [value]
             else:
+                # due to way Zope's cast handles <selects>
+                # with name "foo:ulines" you get
+                # ['one', ['two']]
+                value = _flatten_lines(value)                
                 assert isinstance(value, list), "value not a list"
             # every item should be a str
             value = [unicodify(x) for x in value]
