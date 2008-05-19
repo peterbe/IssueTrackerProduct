@@ -6208,10 +6208,23 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 fvval = getFVal(field.getId())
                 
                 if fvval is not None:
+                    
+                    if field.python_type in ('lines','ulines') and isinstance(fvval, (tuple, list)):
+                        # because of Zope's casting of multiple line selects with the 
+                        # cast ':ulines' or ':lines' it can happen that the value of 
+                        # such a submitted select becomes
+                        # [u'foo', [u'bar']]
+                        fvval = Utils.flatten_lines(fvval)                    
+                    
                     if not _start_where:
                         name += _(u"where") + " "
                         _start_where = True
-                    name +=  "%s: %s " % (field.getTitle(), fvval)
+                        
+                    if isinstance(fvval, (tuple, list)):
+                        fvval = [x.strip() for x in fvval if x.strip()]
+                        name +=  "%s: %s " % (field.getTitle(), ', '.join(fvval))
+                    else:
+                        name +=  "%s: %s " % (field.getTitle(), fvval)
 
             if name:
                 return start + name.strip()
@@ -6261,10 +6274,18 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         custom_filters = {}
         for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
             fvval = getFVal(field.getId())
+                
             if fvval is not None:
-                custom_filters[field.getId()] = getFVal(field.getId())
-        
-        
+                
+                if field.python_type in ('lines','ulines') and isinstance(fvval, (tuple, list)):
+                    # because of Zope's casting of multiple line selects with the 
+                    # cast ':ulines' or ':lines' it can happen that the value of 
+                    # such a submitted select becomes
+                    # [u'foo', [u'bar']]
+                    fvval = Utils.flatten_lines(fvval)
+                
+                custom_filters[field.getId()] = fvval
+
         _c_key = LAST_SAVEDFILTER_ID_COOKIEKEY
         _c_key = self.defineInstanceCookieKey(_c_key)
         
@@ -7651,7 +7672,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
             fvval = getFVal(field.getId())
             if fvval is not None:
-                custom_filters[field.getId()] = getFVal(field.getId())
+                
+                if field.python_type in ('lines','ulines') and isinstance(fvval, (tuple, list)):
+                    # because of Zope's casting of multiple line selects with the 
+                    # cast ':ulines' or ':lines' it can happen that the value of 
+                    # such a submitted select becomes
+                    # [u'foo', [u'bar']]
+                    fvval = Utils.flatten_lines(fvval)
+                    
+                custom_filters[field.getId()] = fvval
         
         if _do_save_filter:
             self.saveFilterOption()

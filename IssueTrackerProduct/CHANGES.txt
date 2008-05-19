@@ -1,5 +1,9 @@
 -
 
+    Bug fixed: Filtering on custom fields that are lines or ulines
+    would give a ugly filtername that looks like a repr of a python
+    list or tuple.
+
     Bug fixed: Custom field selects with forced values overrides the
     list of options.
 

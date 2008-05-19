@@ -73,6 +73,14 @@ def unicodify(s, encodings=(UNICODE_ENCODING, 'latin1', 'utf8')):
             "Unable to unicodify %r with these encodings %s" % (s, encodings)
     return s
 
+def flatten_lines(nested_list):
+    all = []
+    for item in nested_list:
+        if isinstance(item, (tuple, list)):
+            all.extend(flatten_lines(item))
+        else:
+            all.append(item)
+    return all
 
 
 def SimpleTextPurifier(text):

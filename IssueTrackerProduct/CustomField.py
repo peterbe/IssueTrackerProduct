@@ -58,16 +58,7 @@ CORE_ATTRIBUTES = ('title','input_type','extra_css','extra_js','options',
                    )
 
                    
-#----------------------------------------------------------------------------
 
-def _flatten_lines(nested_list):
-    all = []
-    for item in nested_list:
-        if isinstance(item, (tuple, list)):
-            all.extend(_flatten_lines(item))
-        else:
-            all.append(item)
-    return all
     
 #----------------------------------------------------------------------------
 
@@ -368,6 +359,11 @@ class CustomField(Folder):
         HTML stuff. 
         """
         
+        # if someone passes None as the first and only parameter to render()
+        # the value of variable 'value' will be (None,)
+        # This should be considered as if nothing is set
+        if value == (None,):
+            value = []
             
         if value and isinstance(value[0], InstanceType) and \
           value[0].__class__.__name__ =='HTTPRequest':
@@ -450,6 +446,7 @@ class CustomField(Folder):
                 v = value[0]
             elif 'value' in attributes:
                 v = attributes.pop('value')
+            
                 
             if not isinstance(v, (tuple, list)):
                 v = [v]
@@ -744,7 +741,7 @@ class CustomField(Folder):
                 except ValueError:
                     return False, u"Not a list of unicode strings"
             elif value is not None:
-                value = _flatten_lines(value)
+                value = Utils.flatten_lines(value)
                 try:
                     [unicode(x) for x in value]
                 except ValueError:
@@ -756,7 +753,7 @@ class CustomField(Folder):
                 except ValueError:
                     return False, u"Not a list of strings"
             elif value is not None:
-                value = _flatten_lines(value)
+                value = Utils.flatten_lines(value)
                 try:
                     [str(x) for x in value]
                 except ValueError:
@@ -1278,7 +1275,7 @@ class CustomFieldsIssueBase:
                 # due to way Zope's cast handles <selects>
                 # with name "foo:ulines" you get
                 # ['one', ['two']]
-                value = _flatten_lines(value)
+                value = Utils.flatten_lines(value)
                 assert isinstance(value, list), "value not a list"
             # every item should be a str
             value = [str(x) for x in value]
@@ -1291,7 +1288,7 @@ class CustomFieldsIssueBase:
                 # due to way Zope's cast handles <selects>
                 # with name "foo:ulines" you get
                 # ['one', ['two']]
-                value = _flatten_lines(value)                
+                value = Utils.flatten_lines(value)                
                 assert isinstance(value, list), "value not a list"
             # every item should be a str
             value = [unicodify(x) for x in value]

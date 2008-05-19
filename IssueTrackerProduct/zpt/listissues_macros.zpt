@@ -1,6 +1,6 @@
 <metal:block define-macro="filteroptionstable">
 
-<table border="1" cellspacing="0" style="background-color:#dedede;border:1px solid #666" cellpadding="7" align="center">
+<table border="0" cellspacing="0" style="background-color:#dedede;border:1px solid #666" cellpadding="7" align="center">
 	<tr tal:define="saved_filters python:here.getMySavedFilters(howmany=15); currently_used python:here.getCurrentlyUsedSavedFilter(request_only=0)">
 		<td colspan="3" tal:define="rooturl here/getRootURL"
 		 tal:attributes="colspan python:test(saved_filters, 2, 3)">
