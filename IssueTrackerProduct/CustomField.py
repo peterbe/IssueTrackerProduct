@@ -450,9 +450,14 @@ class CustomField(Folder):
                 v = value[0]
             elif 'value' in attributes:
                 v = attributes.pop('value')
+                
             if not isinstance(v, (tuple, list)):
                 v = [v]
-                    
+    
+            # if the value passed to render this select contains
+            # items that are not in the list of options, don't
+            # use the list of options.
+            _values_selected = []
             for option in self.getOptionsIterable():
                 if isinstance(option, (tuple, list)):
                     value, label = option
@@ -461,10 +466,25 @@ class CustomField(Folder):
                     
                 if value in v:
                     tmpl = u'<option value="%s" selected="selected">%s</option>'
+                    _values_selected.append(value)
                 else:
                     tmpl = u'<option value="%s">%s</option>'
                     
                 all_options.append(tmpl % (value, label))
+                
+            if Set(v) - Set(_values_selected):
+                # there were values that weren't in the list of options!
+                _values_not_in_options = list(Set(v) - Set(_values_selected))
+                
+                # if nothing was matched in the list of options,
+                # reset the whole all_options list.
+                if not _values_selected and all_options:
+                    all_options = []
+                
+                for value in _values_not_in_options:
+                    label = value
+                    tmpl = u'<option value="%s" selected="selected">%s</option>'
+                    all_options.append(tmpl % (value, label))
 
             filler['all_options'] = '\n'.join(all_options)
             

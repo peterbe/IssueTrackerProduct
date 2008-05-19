@@ -1,5 +1,8 @@
 -
 
+    Bug fixed: Custom field selects with forced values overrides the
+    list of options.
+
     Bug fixed: Fixed a bug where some saved followup drafts weren't
     saved as Unicode.
     

@@ -416,9 +416,69 @@ class CustomFieldTestCase(TestBase):
         fields = tracker.getCustomFieldObjects(filter_function)
         self.assertEqual(len(fields), 1)
         
+
+    def test_editingMultipleSelect(self):
+        """ this test came from running in to a bug and this test
+        reassures to not make the mistake again.
+        What Titus Brown would call a "stupidity test".
+        """
+        obj = self._createCustomField(id='locations', title='Locations', 
+                                      create_in_folder=True,
+                                      python_type='ulines',
+                                      input_type='select'
+                                      )
+        obj.options = [['','Select company first']]
+        obj.attributes['multiple'] = 'multiple'
+                                      
+        html = obj.render()
+        expect = '<select id="id_locations" multiple="multiple" '\
+                 'name="locations:utf-8:ulines" title="Locations">\n'\
+                 '<option value="">Select company first</option>\n'\
+                 '</select>'
+        self.assertEqual(html, expect)
+        
+        # that was easy, but what could happen is that an AJAX script writes
+        # options into select and those are saved.
+        
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        sdm = self.app.session_data_manager
+        request.set('SESSION', sdm.getSessionData())
+        
+        title = u'titles are working'; request.set('title', title)
+        fromname = u'From name'; request.set('fromname', fromname)
+        email = u'email@address.com'; request.set('email', email)
+        description = u'DESCRIPTION is a in the this test'
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        # important to use forms for later
+        request.form['locations'] = [u'foo', u'bar'] 
+        tracker.SubmitIssue(request)
+        
+        assert tracker.getIssueObjects()
+        issue = tracker.getIssueObjects()[0]
+        self.assertEqual(issue.getCustomFieldData('locations'),
+                         [u'foo', u'bar'])
+        
+        # a fancier way would be to display the value without any form
+        fieldsdata = issue.getCustomFieldsData('locations')
+        fielddata = fieldsdata[0]
+        assert fielddata['field'] == obj, "unable to get field via issue"
+        
+        value = issue.getCustomFieldData('locations')
+        self.assertEqual(obj.showValue(value), u'foo, bar')
+        
+        # Now if you go to edit the field with a REQUEST which has something
+        # in it it should take the REQUEST value before the default
+        html = obj.render(request)
+        assert 'locations' in request.form.keys()
+        self.assertTrue(html.find('<option value="foo" selected="selected">foo</option>')> -1)
+        self.assertTrue(html.find('<option value="bar" selected="selected">bar</option>')> -1)
         
         
-        
+
         
         
 
