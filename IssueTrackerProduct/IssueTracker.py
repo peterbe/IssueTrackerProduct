@@ -4332,7 +4332,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             row.append(issue.getType())
             
             for field in self.getCustomFieldObjects():
-                row.append(issue.getCustomFieldData(field.getId(), ''))
+                value = issue.getCustomFieldData(field.getId(), None)
+                if value is None:
+                    value = ''
+                elif not isinstance(value, basestring):
+                    value = field.showValue(value)
+                row.append(value)
             
             writer.writerow(row)
             
