@@ -1,4 +1,6 @@
 -
+    Bug fixed: Custom fields in filters where nothing is an option
+    could cause the filter to filter out all issues. 
 
     Bug fixed: Filtering on custom fields that are lines or ulines
     would give a ugly filtername that looks like a repr of a python

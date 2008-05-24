@@ -1046,7 +1046,7 @@ class CustomField(Folder):
                 if save_value == value:
                     return show_value
             
-        if self.python_type in ('lines','ulines'):
+        if self.python_type in ('lines','ulines') and isinstance(value, (tuple, list)):
             return ', '.join(value)
         elif self.input_type == 'password':
             return '*' * max(1, len(value))

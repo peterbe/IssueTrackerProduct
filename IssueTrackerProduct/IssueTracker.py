@@ -6219,7 +6219,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         # cast ':ulines' or ':lines' it can happen that the value of 
                         # such a submitted select becomes
                         # [u'foo', [u'bar']]
-                        fvval = Utils.flatten_lines(fvval)                    
+                        fvval = Utils.flatten_lines(fvval)
+                        
+                    if not fvval:
+                        continue
                     
                     if not _start_where:
                         name += _(u"where") + " "
@@ -6289,7 +6292,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     # [u'foo', [u'bar']]
                     fvval = Utils.flatten_lines(fvval)
                 
-                custom_filters[field.getId()] = fvval
+                if fvval:
+                    custom_filters[field.getId()] = fvval
 
         _c_key = LAST_SAVEDFILTER_ID_COOKIEKEY
         _c_key = self.defineInstanceCookieKey(_c_key)
@@ -7685,7 +7689,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     # [u'foo', [u'bar']]
                     fvval = Utils.flatten_lines(fvval)
                     
-                custom_filters[field.getId()] = fvval
+                if fvval:
+                    custom_filters[field.getId()] = fvval
         
         if _do_save_filter:
             self.saveFilterOption()
@@ -7705,7 +7710,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     checked.append(issue)
 
             return checked
-        
+    
         
         if f_fromname:
             _maker = Utils.createStandaloneWordRegex
@@ -7718,7 +7723,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
                 
             if filterlogic == 'show':
-                
 
                 if f_statuses is not None:
                     if issue.status not in f_statuses:
