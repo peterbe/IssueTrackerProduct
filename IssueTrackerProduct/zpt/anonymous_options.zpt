@@ -1,3 +1,4 @@
+<!-- deprecated? -->
 <table align="center" class="options_table" cellpadding="5" cellspacing="0">
     <tr>
 	<td>
@@ -9,7 +10,7 @@
 		    <a class="actionbuttonbox"
 		    href="?IssueAction_AddFollowup=1">Add followup</a>
 		</td>
-		<td width="90" class="actionbuttonbox" align="center" tal:condition="here/ShowDownloadButton" 
+		<td width="90" class="actionbuttonbox" align="center" tal:condition="here/ShowDownloadButton"
 		tal:attributes="onclick string:window.open('${here/ActionURL}/issue2TXT', '_top')">
 		    <a class="actionbuttonbox"
 		    href="issue2TXT">Download</a>

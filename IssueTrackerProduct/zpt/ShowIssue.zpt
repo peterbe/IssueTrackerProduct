@@ -58,7 +58,6 @@ table.announcement {
 
 <div align="center" class="announcement" tal:condition="here/isRecentlyAdded">
 <table class="announcement" cellpadding="6" border="0">
-  <!--<tr tal:define="always_notified python:here.Always2Notify(emailtoskip=here.email, format='merged', requireemail=1, include_assignee=1)">-->
   <tr tal:define="notified_users here/getNotifiedUsersByNotificationsAndAssignment">
     <td valign="top" align="left">
             <a style="float:right" title="Close"

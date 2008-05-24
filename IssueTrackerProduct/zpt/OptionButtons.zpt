@@ -1,7 +1,7 @@
 <ul id="navlist">
     <li><a href="?action=AddFollowup" onclick="softsubmit('AddFollowup');return false;" 
      onkeypress="softsubmit('AddFollowup');return false;">Add&nbsp;followup</a>&nbsp;</li>
-    
+
     <li tal:condition="here/hasManagerRole" tal:repeat="button here/getOptionButtons"
       ><a tal:attributes="href string:?action=${button/action_quoted};
 	                  onclick string:softsubmit('${button/action}');;return false;;;

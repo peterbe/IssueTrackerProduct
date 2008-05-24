@@ -474,7 +474,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.show_confidential_option = DEFAULT_SHOW_CONFIDENTIAL_OPTION
         self.show_hideme_option = DEFAULT_SHOW_HIDEME_OPTION
         self.show_issueurl_option = DEFAULT_SHOW_ISSUEURL_OPTION
-        self.show_download_button = DEFAULT_SHOW_DOWNLOAD_BUTTON
         self.encode_emaildisplay = DEFAULT_ENCODE_EMAILDISPLAY
         self.show_always_notify_status = DEFAULT_SHOW_ALWAYS_NOTIFY_STATUS
         self.images_in_menu = DEFAULT_IMAGES_IN_MENU
@@ -804,8 +803,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def ShowDownloadButton(self):
         """ return show_download_button """
-        default = DEFAULT_SHOW_DOWNLOAD_BUTTON
-        return getattr(self, 'show_download_button', default)
+        import warnings
+        m = "Download button is deprecated."
+        warnings.warn(m, DeprecationWarning)
+        return False
+    
+        #default = DEFAULT_SHOW_DOWNLOAD_BUTTON
+        #return getattr(self, 'show_download_button', default)
     
     def EncodeEmailDisplay(self):
         """ return encode_emaildisplay """
@@ -1279,7 +1283,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'private_reports',
                     'show_confidential_option','show_hideme_option',
                     'show_issueurl_option',
-                    'show_download_button','encode_emaildisplay',
+                    'encode_emaildisplay',
                     'show_always_notify_status',
                     'images_in_menu',
                     'use_issue_assignment',

@@ -885,6 +885,9 @@ issue.
   </td> 
 </tr>
 
+
+<dtml-comment>
+Deprecated feature. Remove later.
 <tr>
   <td align="left" valign="top">
   <div class="form-label">
@@ -904,6 +907,7 @@ issue.
   </p>
   </td> 
 </tr>
+</dtml-comment>
 
 <tr>
   <td align="left" valign="top">
