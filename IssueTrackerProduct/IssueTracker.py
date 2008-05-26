@@ -7719,6 +7719,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if f_fromname:
             _maker = Utils.createStandaloneWordRegex
             f_fromname_regex = _maker(f_fromname)
+            
+        is_list = lambda x: isinstance(x, (tuple, list))
         
         for issue in issues:
             if not issue.canViewIssue():
@@ -7757,13 +7759,22 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if f_email is not None:
                     if f_email and ss(f_email) != ss(issue.getEmail()):
                         continue
-                    
+
                 custom_filter_match = False
                 for field_id, value in custom_filters.items():
                     issue_value = issue.getCustomFieldData(field_id)
-                    if value != issue_value:
-                        custom_filter_match = True
-                        break
+                    if is_list(value) and is_list(issue_value):
+                        # the filter matches if all items in issue_value are
+                        # in value
+                        if Set(issue_value) - Set(value):
+                            # there IS something in issue_value that is NOT in value
+                            custom_filter_match = True
+                            break
+                        
+                    else:
+                        if value != issue_value:
+                            custom_filter_match = True
+                            break
                     
                 if custom_filter_match:
                     continue
