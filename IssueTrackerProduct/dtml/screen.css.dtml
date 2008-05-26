@@ -7,7 +7,7 @@ html, body {
   font-family:Arial, sans-serif, verdana;
 }
 
-p,td,th,div,span {
+p,td,th,li,div,span {
   font-size: x-small;
   voice-family: "\"}\"";
   voice-family: inherit;
