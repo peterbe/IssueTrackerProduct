@@ -11,7 +11,6 @@ from sets import Set
 from types import InstanceType
 
 # Zope
-from persistent.mapping import PersistentMapping
 from OFS.Folder import Folder
 from Globals import DTMLFile, InitializeClass, DevelopmentMode
 from AccessControl import ClassSecurityInfo
@@ -19,11 +18,16 @@ from Acquisition import aq_inner, aq_parent, aq_base
 from DateTime import DateTime
 from DateTime.DateTime import DateError
 
+try:
+    from persistent.mapping import PersistentMapping
+except ImportError:
+    # for old versions of Zope
+    PersistentMapping = dict
+
 # Product
 import Utils
 from Utils import unicodify
 from TemplateAdder import addTemplates2Class
-from interfaces import ICustomField
 from Constants import *
 from Permissions import VMS
 from Expression import Expression, getExprContext
