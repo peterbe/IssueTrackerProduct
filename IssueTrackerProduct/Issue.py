@@ -18,10 +18,16 @@ except ImportError:
 from Acquisition import aq_inner, aq_parent
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
-from persistent.mapping import PersistentMapping
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
 from webdav.WriteLockInterface import WriteLockInterface
+
+try:
+    from persistent.mapping import PersistentMapping
+except ImportError:
+    # for old versions of Zope
+    PersistentMapping = dict
+
 
 # Is CMF installed?
 try:
