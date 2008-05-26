@@ -11,7 +11,6 @@ from sets import Set
 from types import InstanceType
 
 # Zope
-from zope.interface import implements
 from persistent.mapping import PersistentMapping
 from OFS.Folder import Folder
 from Globals import DTMLFile, InitializeClass, DevelopmentMode
@@ -239,7 +238,6 @@ class CustomField(Folder):
     
     """
     
-    implements(ICustomField)
     
     meta_type = CUSTOMFIELD_METATYPE
     
