@@ -1,4 +1,7 @@
 -
+    Bug fixed: Uncataloging saved filters before the saved filters
+    catalog had been set up could cause an AttributeError.
+    
     Bug fixed: Custom fields in filters where nothing is an option
     could cause the filter to filter out all issues. 
 

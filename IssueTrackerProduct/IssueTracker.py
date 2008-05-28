@@ -13035,7 +13035,8 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
         
     def unindex_object(self):
         catalog = self.getFilterValuerCatalog()
-        catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
+        if catalog is not None:
+            catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
         
 
 
