@@ -1,4 +1,7 @@
 -
+    Bug fixed: IssueTracker User Folder allowed to save non-unicode
+    full names.
+    
     Bug fixed: Uncataloging saved filters before the saved filters
     catalog had been set up could cause an AttributeError.
     

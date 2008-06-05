@@ -116,7 +116,7 @@ Full name
 </div>
 </td>
 <td valign="top">
-<input type="text" name="fullname" size="30"
+<input type="text" name="fullname:ustring" size="30"
   value="<dtml-if expr="user.fullname"><dtml-var expr="user.fullname"></dtml-if>" />
 </td>
 </tr>
