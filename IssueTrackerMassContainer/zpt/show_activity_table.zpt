@@ -41,7 +41,7 @@
     </td>
     <td>
       <a tal:attributes="href issue/absolute_url_path"
-         ><span tal:replace="issue/title"></span> 
+         ><span tal:condition="issue/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span><span tal:replace="issue/title"></span> 
           <span class="status" tal:content="python:issue.status.capitalize()"></span></a>
     </td>
     <td>
