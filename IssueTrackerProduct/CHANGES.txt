@@ -1,4 +1,8 @@
 -
+
+    Bug fixed: Reloading Add Issue form with multiple select custom
+    fields selected would cause a TypeError. Thanks Nicolas.
+
     Bug fixed: IssueTracker User Folder allowed to save non-unicode
     full names.
     

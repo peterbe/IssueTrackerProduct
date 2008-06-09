@@ -446,6 +446,10 @@ class CustomField(Folder):
             v = []
             if value:
                 v = value[0]
+                # makes sure the value doesn't become a nested list
+                if isinstance(v, list):
+                    v = Utils.flatten_lines(v)
+                
             elif 'value' in attributes:
                 v = attributes.pop('value')
             
@@ -470,7 +474,7 @@ class CustomField(Folder):
                     tmpl = u'<option value="%s">%s</option>'
                     
                 all_options.append(tmpl % (value, label))
-                
+
             if Set(v) - Set(_values_selected):
                 # there were values that weren't in the list of options!
                 _values_not_in_options = list(Set(v) - Set(_values_selected))
