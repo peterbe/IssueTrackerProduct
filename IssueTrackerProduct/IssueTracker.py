@@ -12433,7 +12433,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def _getVersionControllerInstance(self):
         """ return an instance of the upgrade.VersionController class """
         here = package_home(globals())
-        assert here.endswith('IssueTrackerProduct')
+        assert here.endswith('IssueTrackerProduct'), \
+         "This installed product is not called IssueTrackerProduct (%s)" % here
         return VersionController(here)
 
     security.declareProtected(VMS, 'manage_canUpgrade')

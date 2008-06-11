@@ -56,8 +56,8 @@ tal:attributes="action action">
  <div style="float:right">
 
 <tal:block tal:define="saved_filter_id python:here.getCurrentlyUsedSavedFilter(request_only=0)">
-  <em tal:condition="saved_filter_id" tal:content="python:here.getSavedFilterObject(saved_filter_id).getTitle()"></em>
-  <em tal:condition="python:not saved_filter_id and here.hasFilter()">Filters are currently being used</em>
+  <em class="filter-title" tal:condition="saved_filter_id" tal:content="python:here.getSavedFilterObject(saved_filter_id).getTitle()"></em>
+  <em class="filter-title" tal:condition="python:not saved_filter_id and here.hasFilter()">Filters are currently being used</em>
 </tal:block>
 
 <input type="hidden" name="ShowFilterOptions" value="1" />

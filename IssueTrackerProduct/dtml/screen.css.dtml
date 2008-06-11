@@ -521,3 +521,7 @@ div.problem-warning-message p.error {
   font-weight:bold;
   margin-top:0;
 }
+
+em.filter-title {
+  font-weight:bold;
+}
