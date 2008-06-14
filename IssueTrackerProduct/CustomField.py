@@ -1290,12 +1290,15 @@ class CustomFieldsIssueBase:
                 value = list(value)
             elif isinstance(value, basestring):
                 value = [value]
+            elif value is None:
+                value = []
             else:
                 # due to way Zope's cast handles <selects>
                 # with name "foo:ulines" you get
                 # ['one', ['two']]
-                value = Utils.flatten_lines(value)                
-                assert isinstance(value, list), "value not a list"
+                if isinstance(value, list):
+                    value = Utils.flatten_lines(value)
+                assert isinstance(value, list), "value not a list it's a %s" % type(value)
             # every item should be a str
             value = [unicodify(x) for x in value]
         elif field.python_type == 'date':
