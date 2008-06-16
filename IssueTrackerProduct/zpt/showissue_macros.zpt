@@ -105,7 +105,7 @@
       </td>
     </tr>
     <tal:block condition="not:change">
-    <tr tal:repeat="data here/getCustomFieldsData">
+    <tr tal:repeat="data python:here.getCustomFieldsData(exclude_empty=True)">
       <td class="ilabel"
           tal:define="field data/field"
           tal:content="string:${field/getTitle}:"></td>

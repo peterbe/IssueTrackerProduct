@@ -1318,7 +1318,7 @@ class CustomFieldsIssueBase:
         self.custom_fields_data[key] = value
             
 
-    def getCustomFieldsData(self, field_ids_filter=None):
+    def getCustomFieldsData(self, field_ids_filter=None, exclude_empty=False):
         """ return a list of dict that contain the {field, key, value} """
         values = {}
         for key, value in getattr(self, 'custom_fields_data', {}).items():
@@ -1332,6 +1332,8 @@ class CustomFieldsIssueBase:
         for field in self.getRoot().getCustomFieldObjects(field_ids_filter=field_ids_filter):
             value = values.get(field.getId(), None)
             if value is None:
+                continue
+            if exclude_empty and not value:
                 continue
             fields.append(dict(field=field, value=value, key=field.getId()))
 
