@@ -72,10 +72,13 @@ Note:
  
 Changelog:
 
-    0.1.9    Possible to override the usage of checkoutable templates even if installed
+    0.1.10   Cosmetic improvements
     
-    0.1.8    Ability to set TEMPLATEADDER_LOG_USAGE environment variable to debug which
-             files get instanciated.
+    0.1.9    Possible to override the usage of checkoutable templates even if 
+             installed
+    
+    0.1.8    Ability to set TEMPLATEADDER_LOG_USAGE environment variable to debug 
+             which files get instanciated.
     
     0.1.7    Changed so that it can work with Zope 2.8.0
     
@@ -98,7 +101,7 @@ Changelog:
     
 """
 
-__version__='0.1.9'
+__version__='0.1.10'
 
 
 import os
@@ -122,6 +125,9 @@ LOG_USAGE = os.environ.get('TEMPLATEADDER_LOG_USAGE', None)
 
 from Constants import DISABLE_CHECKOUTABLE_TEMPLATES
 
+class UnrecognizedExtensionError(Exception):
+    pass
+
 #------------------------------------------------------------------------------
     
 
@@ -133,7 +139,7 @@ def addTemplates2Class(Class, templates, extension=None, optimize=None,
         dtml_adder = CTD
         zpt_adder = CTP
     else:
-        # If you don't want to use checkoutable templates, the reassign
+        # If you don't want to use checkoutable templates, then reassign
         dtml_adder = DTMLFile
         zpt_adder = PageTemplateFile
 
@@ -157,9 +163,8 @@ def addTemplates2Class(Class, templates, extension=None, optimize=None,
         else:
             # can't set 'optimize' this way
             dname = template.split('/')[-1]
-            
-        root = apply(os.path.join, template.split('/'))
-        f = root
+
+        f = root = os.path.join(*template.split('/'))
         
         # now we need to figure out what extension this file is
         if template.startswith('dtml/') or template.endswith('.dtml'):
@@ -176,18 +181,20 @@ def addTemplates2Class(Class, templates, extension=None, optimize=None,
                 
         if LOG_USAGE:
             tmpl = '%s\t%s\t%s\t%s\n'
-            open(LOG_USAGE.strip(),'a').write(tmpl % (Class.__name__, extension, f, description))
+            open(LOG_USAGE.strip(),'a').write(tmpl % \
+                 (Class.__name__, extension, f, description))
             
-        
+
         if extension == 'zpt':
-            setattr(Class, dname, zpt_adder(f, Globals, d=description,
-                                            __name__=dname,
-                                            optimize=optimize))
+            setattr(Class, dname, 
+                    zpt_adder(f, Globals, d=description, __name__=dname,
+                              optimize=optimize))
+                              
         elif extension == 'dtml':
-            setattr(Class, dname, dtml_adder(f, Globals, d=description,
-                                             optimize=optimize))
+            setattr(Class, dname, 
+                    dtml_adder(f, Globals, d=description, optimize=optimize))
                                                     
         else:
-            raise "UnrecognizedExtension", \
+            raise UnrecognizedExtensionError, \
                   "Unrecognized template extension %r" % extension
-                  
+

@@ -20,14 +20,9 @@
 <link rel="Shortcut Icon" href="/favicon.ico" type="image/x-icon" tal:attributes="href string:${root_relative_url}/favicon.ico" />
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-latest.min.js"></script>
 
-<script type="text/javascript" src="/misc_/IssueTrackerProduct/core.js"></script>
-
 <meta tal:replace="here/testAutoLogin" />
 
 
-<script type="text/javascript" tal:condition="here/useAccessKeys"
- tal:attributes="src string:${here/getRootRelativeURL}/keyboardshortcuts.js"></script>
-<script metal:define-slot="extrajs" tal:omit-tag=""></script>
 
 </head>
 
@@ -96,6 +91,11 @@
   </span>
 
 </tal:block>
+
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/core.js"></script>
+<script type="text/javascript" tal:condition="here/useAccessKeys"
+ tal:attributes="src string:${here/getRootRelativeURL}/keyboardshortcuts.js"></script>
+<script metal:define-slot="extrajs" tal:omit-tag=""></script>
 
 </body>
 </html>

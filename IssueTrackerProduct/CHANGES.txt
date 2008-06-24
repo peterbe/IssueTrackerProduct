@@ -1,4 +1,8 @@
 -
+    New feature: Only the firstname is show in the menu when logged in.
+    
+    New feature: Upgraded to the latest jQuery 1.2.6 and removed
+    jquery-latest.pack.js
 
     Bug fixed: Reloading Add Issue form with multiple select custom
     fields selected would cause a TypeError. Thanks Nicolas.

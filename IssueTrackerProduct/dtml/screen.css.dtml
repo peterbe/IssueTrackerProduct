@@ -95,7 +95,7 @@ abbr { text-decoration:none; border-bottom:0px solid #efefef; }
 /* For the tabs  ------------------------ */
 
 div#tabs {
-  width:800px;
+  width:850px;
 }
 
 ul#tabnav {

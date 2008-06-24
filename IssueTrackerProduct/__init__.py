@@ -154,7 +154,6 @@ def initialize(context):
         registerIcon('customfieldfolder.png')
         registerJS('core.js')
         registerJS('jquery-latest.min.js', slim_if_possible=False)
-        registerJS('jquery-latest.pack.js', slim_if_possible=False) # legacy
         registerJS('manage-customfield.js')
         
         

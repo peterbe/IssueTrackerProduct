@@ -168,6 +168,10 @@ def base_hasattr(obj, name):
     """Like safe_hasattr, but also disables acquisition."""
     return safe_hasattr(aq_base(obj), name)
 
+
+_first_name_regex = re.compile('^([A-Z][a-z]+)\s')
+    
+
 #----------------------------------------------------------------------------
 
 def manage_hasAquirableMailHost(self):
@@ -9908,7 +9912,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         elif zopeuser:
             _name = zopeuser.getUserName()
             if self.getSavedUser('fullname'):
-                _name = self.getSavedUser('fullname')
+                _name = self._extractFirstName(self.getSavedUser('fullname'))
             menu.append([_name, '/User', inURL('User')])
         else:
             menu.append(['Login', self.ManagerLink(1), False])
@@ -9925,6 +9929,18 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 menu[i][1] = rooturl + href
                 
         return menu
+
+    def _extractFirstName(self, fullname):
+        """ return only the first name of the fullname. If the fullname is 
+        'Peter Bengtsson' return 'Peter'. 
+        The only exception is the fullname is 'P Bengtsson' or something that
+        looks like an abbreviation like 'PAB Bengtsson'.
+        """
+        try:
+            return _first_name_regex.findall(fullname)[0]
+        except IndexError:
+            # Too bad
+            return fullname
 
     
     def displayMenuItem(self, menuinfo, underline_first_letter=None):
