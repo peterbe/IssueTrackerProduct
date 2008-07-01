@@ -25,7 +25,7 @@
 			    COMMENT here
 	    </blockquote>
 	    
-	    <em tal:condition="not:comment">No comment.</em>
+	    <p tal:condition="not:comment"><em>No comment.</em></p>
 
 	    <div align="right" tal:content="python:here.ZopeTime().strftime(here.display_date)">date</div>
 

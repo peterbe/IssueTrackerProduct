@@ -48,7 +48,7 @@
 			tal:replace="structure thread/showComment">
 			    COMMENT here
 	    </div>
-	    <em tal:condition="not:comment">No comment.</em>
+	    <p tal:condition="not:comment"><em>No comment.</em></p>
         </div>
 
 	    <div class="threaddate" tal:content="structure python:here.showDate(thread.getThreadDate())">date</div>
