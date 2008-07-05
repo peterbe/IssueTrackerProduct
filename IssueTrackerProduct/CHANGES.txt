@@ -1,4 +1,9 @@
--
+- 0.10.1
+
+    Bug fixed: Sometimes it was not possible to complete a followup
+    draft since the action was incorrectly set to "Add Followup" not
+    "AddFollowup".
+    
     New feature: Much performance improved home page now since
     CountStatuses() now uses the catalog instead. Must press Update
     Everything button.

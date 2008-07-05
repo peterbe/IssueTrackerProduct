@@ -5,6 +5,16 @@
 <script type="text/javascript"
  tal:attributes="src string:$ru/addissue.js"></script>
  
+<script type="text/javascript" tal:condition="python:here.SaveDrafts() and here.UseAutoSave()">
+$(function() {
+  $('#title').bind('focus', function() {
+    startautosave();
+  }).bind('blur', function() {
+    stopautosave();
+  });
+});
+</script>
+ 
 <script
  tal:define="conf here/getWYSIWYGEditor"
  tal:condition="python:here.getSavedTextFormat()=='html' and conf"
@@ -58,9 +68,7 @@
 		<td><b>Subject:</b></td>
 		<td>
          <input name="title" tabindex="1" size="40" maxlength="70" id="title"
-          tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
-                          onblur python:test(use_autosave, 'stopautosave()');
-                          value python:request.get('title','');
+          tal:attributes="value python:request.get('title','');
                           name string:title:${here/UNICODE_ENCODING}:ustring" />
                           
          <span class="submiterror" tal:condition="errors/title|nothing"
@@ -276,8 +284,8 @@
 </form>
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="not:request/previewissue|nothing">
-<script type="text/javascript" tal:condition="not:useaccesskeys">$.id('title').focus();</script>
-<script type="text/javascript" tal:condition="useaccesskeys">$.id('title').focus();disableKS();</script>
+<script type="text/javascript" tal:condition="not:useaccesskeys">$('#title')[0].focus();</script>
+<script type="text/javascript" tal:condition="useaccesskeys">$('#title')[0].focus();disableKS();</script>
 </tal:block>
 
 

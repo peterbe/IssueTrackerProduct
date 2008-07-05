@@ -11540,7 +11540,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def AutoSaveDraftIssue(self, REQUEST, draft_issue_id=None):
         """ called potentially by the Ajax script """
 
-        _saver = self._saveDraftIssue
         if self.SaveDrafts() and REQUEST.form and \
                (\
                  (not draft_issue_id and self._reason2saveDraft(REQUEST)) \
@@ -11548,7 +11547,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                  draft_issue_id \
                ):
 
-            draft_issue_id = _saver(REQUEST, draft_issue_id, is_autosave=True)
+            draft_issue_id = self._saveDraftIssue(REQUEST, draft_issue_id, is_autosave=True)
             return draft_issue_id
         else:
             return ""

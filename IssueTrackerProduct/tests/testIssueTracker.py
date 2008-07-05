@@ -1222,13 +1222,11 @@ class IssueTrackerTestCase(TestBase):
     
         
         
-#class IssueTrackerFunctionalTestCase(TestFunctionalBase):
         
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
     suite.addTest(makeSuite(IssueTrackerTestCase))
-#    suite.addTest(makeSuite(IssueTrackerFunctionalTestCase))
     return suite
 
 
@@ -1251,7 +1249,17 @@ def _monkeypatch_send(self, mfrom, mto, messageText):
     
     #print >>sys.stderr, "from:%s To:%s" % (mfrom, mto)
 MailBase._send = _monkeypatch_send
+
+if DEBUG:
+    def _monkeypatch_sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
+        __trapped_emails__.append(dict(mfrom=fr, mto=to, messageText=msg))
+        
+    from Products.IssueTrackerProduct.IssueTracker import IssueTracker
+    IssueTracker.sendEmail = _monkeypatch_sendEmail
+
 __trapped_emails__ = []
+
+
     
 if __name__ == '__main__':
     framework()

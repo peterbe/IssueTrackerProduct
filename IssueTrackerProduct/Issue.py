@@ -747,7 +747,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         draft_followup_id = options.get('draft_followup_id', 
                                         request.get('draft_followup_id'))
         
-        request_action = unicodify(request.get('action','')).lower()
         
         draft_saved = options.get('draft_saved')
         
@@ -770,7 +769,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if not request.get('display_format'):
                     request.set('display_format', draft_object.display_format)
 
-
+        request_action = unicodify(request.get('action','')).lower()
+                    
         if request_action == 'delete':
             return self.form_delete(SubmitError=SubmitError)
         
@@ -1829,12 +1829,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         root = self.getDraftsContainer()
         
         title = None
-        if action == 'AddFollowup':
+        if action.lower() == 'AddFollowup'.lower():
             title = _("Followup")
         else:
             title = action
-            
-            
+
         inst = IssueTrackerDraftIssueThread(id, issueid, action, title=title)
         root._setObject(id, inst)
         object = root._getOb(id)
