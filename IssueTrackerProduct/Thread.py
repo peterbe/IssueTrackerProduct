@@ -249,7 +249,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             REQUEST.RESPONSE.setHeader('Content-Type','text/plain')
         return self.original_email
     
-    def index_object(self, idxs=['comment','meta_type','fromname','email']):
+    def index_object(self, idxs=['comment','meta_type','fromname','email','path', 'modifydate']):
         """A common method to allow Findables to index themselves."""
         path = '/'.join(self.getPhysicalPath())
         catalog = self.getCatalog()
@@ -265,6 +265,13 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         indexes = catalog._catalog.indexes
         if 'filenames' not in idxs and indexes.has_key('filenames'):
             idxs.append('filenames')
+            
+        if 'path' in idxs and not indexes.has_key('path'):
+            idxs.remove('path')
+            
+        if 'modifydate' in idxs and not indexes.has_key('modifydate'):
+            idxs.remove('modifydate')
+            
         catalog.catalog_object(self, path, idxs=idxs)
         
     def getFromname_idx(self):

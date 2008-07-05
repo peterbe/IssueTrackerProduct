@@ -1,4 +1,8 @@
 -
+    New feature: Much performance improved home page now since
+    CountStatuses() now uses the catalog instead. Must press Update
+    Everything button.
+    
     New feature: Only the firstname is show in the menu when logged in.
     
     New feature: Upgraded to the latest jQuery 1.2.6 and removed

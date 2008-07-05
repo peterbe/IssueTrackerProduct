@@ -183,10 +183,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
     def getModifyDate(self):
         """ return modifydate """
-        if not hasattr(self, 'modifydate'): 
-            # this check is just for legacy reasons. It can probably safely 
-            # be delete at the end of 2005
-            self.modifydate = self.bobobase_modification_time()
         return self.modifydate        
 
     security.declareProtected('View', 'getModifyTimestamp')
@@ -935,7 +931,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if req_manager and not self.hasManagerRole():
             # the chosen action requires manager role,
             # but the person is not a manager
-            self.login(self, request)
+            self.redirectlogin(came_from=self.absolute_url())
    
         if past_tense is not None and self.status != past_tense:
             self.status = past_tense
@@ -2145,7 +2141,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
     def index_object(self, idxs=['id','title','description',
                                  'fromname','email','url2issue',
-                                 'meta_type']):
+                                 'meta_type','status','path',
+                                 'modifydate']):
         """A common method to allow Findables to index themselves."""
         path = '/'.join(self.getPhysicalPath())
         catalog = self.getCatalog()
@@ -2180,6 +2177,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                       "Press Update Everything button"
                 logger.info(msg)
                 
+        # Some Catalogs haven't been updated with the latest added index
+        # which is 'path'.
+        if 'path' in idxs and not indexes.has_key('path'):
+            idxs.remove('path')
+            
+        if 'status' in idxs and not indexes.has_key('status'):
+            idxs.remove('status')
+            
+        if 'modifydate' in idxs and not indexes.has_key('modifydate'):
+            idxs.remove('modifydate')
+            
         catalog.catalog_object(self, path, idxs=idxs)
  
     def getTitle_idx(self):

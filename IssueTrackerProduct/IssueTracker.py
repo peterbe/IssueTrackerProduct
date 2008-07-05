@@ -5374,6 +5374,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         zcatalog = self.getCatalog()
         indexes = zcatalog._catalog.indexes
         
+        
         if not hasattr(zcatalog, 'Lexicon'):
             # This default lexicon sucks because it doesn't support unicode.
             # Consider creating a http://www.zope.org/Members/shh/UnicodeLexicon
@@ -5396,36 +5397,33 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                    [wordsplitter, casenormalizer, stopwords])
             t['Lexicon'] = "Lexicon for ZCTextIndex created"
         
-#        if not hasattr(zcatalog, 'Vocabulary'):
-#            script = zcatalog.manage_addProduct['ZCatalog'].manage_addVocabulary
-#            script(id='Vocabulary', title='', globbing=1)
-#            t['Vocabulary'] = "It is recommended that you now run Update Catalog"
     
-        for fieldindex in ('id','meta_type'):
+        for fieldindex in ('id','meta_type','status'):
             if not indexes.has_key(fieldindex):
                 zcatalog.addIndex(fieldindex, 'FieldIndex')
                 
         for keywordindex in ('filenames',):
             if not indexes.has_key(keywordindex):
                 zcatalog.addIndex(keywordindex, 'KeywordIndex')
-            
+                
+        pathindexes = [('path','getPhysicalPath'),]
+        for idx, indexed_attrs in pathindexes:
+            if not indexes.has_key(idx):
+                extra = record()
+                extra.indexed_attrs = indexed_attrs
+                zcatalog.addIndex(idx, 'PathIndex', extra)                
         
         textindexes = ('email','url2issue')
         for idx in textindexes:
             if not indexes.has_key(idx):
                 zcatalog.addIndex(idx, 'TextIndex')
                 
-        #wrapped_textindexes = [('fromname','getTitle_idx')]
-        #for idx, indexed_attrs in wrapped_textindexes:
-        #    if indexes.has_key(idx) and not indexes[idx].call_methods:
-        #        # the old way!
-        #        indexes.pop(idx)
-        #    if not indexes.has_key(idx):
-        #        extra = record()
-        #        extra.indexed_attrs = indexed_attrs
-        #        extra.vocabulary = 'Vocabulary'
-        #        zcatalog.addIndex(idx, 'TextIndex', extra)
-            
+        dateindexes = ['modifydate',]
+        for idx in dateindexes:
+            if not indexes.has_key(idx):
+                #extra = record()
+                zcatalog.addIndex(idx, 'DateIndex')
+                
         zctextindexes = (
           ('title', 'getTitle_idx'),
           ('description', 'getDescription_idx'),
@@ -5457,6 +5455,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 
             
         return t
+    
     
     def _setupFilterValuerCatalog(self):
         """ create a ZCatalog for the saved filters """
@@ -9997,9 +9996,61 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         url = Utils.AddParam2URL(url, params)
         return url
     
+    
     def CountStatuses(self, since=None):
         """ Return how many Issues there are under each status since
             a certain time
+        """
+        
+        # Because of legacy, not all issuetrackers have an up to date
+        # catalog with the necessary indexes in which case we rely on the
+        # old (slow) way of counting statuses
+        indexes = self.getCatalog()._catalog.indexes
+        if indexes.has_key('status') and indexes.has_key('modifydate'):
+            return self._CountStatuses_catalog(since=since)
+        else:
+            return self._CountStatuses_objectValues(since=since)
+        
+        #t0=time()
+        #r = self._CountStatuses_objectValues(since=since)
+        #t1=time()
+        #print "OLD",
+        #print t1-t0
+        #print r
+        #t0=time()
+        #r2 = self._CountStatuses_catalog(since=since)
+        #t1 = time()
+        #print "NEW",
+        #print t1-t0
+        #print r2
+        #print ""
+        #return r
+    
+    
+    def _CountStatuses_catalog(self, since=None):
+        """ by counting in zcatalog """
+        sR = self.getCatalog().searchResults
+        tres = []
+        search = {'meta_type':ISSUE_METATYPE}
+        
+        # check that since isn't a string
+        if isinstance(since, basestring):
+            since = DateTime(since)
+        elif self.REQUEST.has_key('count_status_since'):
+            since = DateTime()-int(self.REQUEST['count_status_since'])
+            
+        if since is not None:
+            search['modifydate'] = {'query':since, 'range':'min'}
+            
+        for status in self.getStatuses():
+            search['status'] = status
+            tres.append([status, len(sR(**search))])
+            
+        return tres
+
+        
+    def _CountStatuses_objectValues(self, since=None):
+        """ Count by counting all issues as objects
         """
         #
         # NEEDS WORK!!
