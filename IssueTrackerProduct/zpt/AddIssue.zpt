@@ -4,16 +4,6 @@
 
 <script type="text/javascript"
  tal:attributes="src string:$ru/addissue.js"></script>
- 
-<script type="text/javascript" tal:condition="python:here.SaveDrafts() and here.UseAutoSave()">
-$(function() {
-  $('#title').bind('focus', function() {
-    startautosave();
-  }).bind('blur', function() {
-    stopautosave();
-  });
-});
-</script>
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="not:request/previewissue|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
