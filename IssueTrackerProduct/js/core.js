@@ -146,3 +146,10 @@ function showAJAXProblemWarning(url) {
    }, 60*1000);
    
 }
+
+
+function debug(text) {
+  ((window.console && console.log) ||
+   (window.opera && opera.postError) ||
+   window.alert).call(this, text);
+}

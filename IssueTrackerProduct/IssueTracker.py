@@ -9903,7 +9903,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         cmfuser = self.getCMFUser()
         
         if issueuser:
-            menu.append([issueuser.getFullname(), '/User', inURL('User')])
+            _name = issueuser.getFullname()
+            if _name:
+                _name = self._extractFirstName(_name)
+            menu.append([_name, '/User', inURL('User')])
 
         elif cmfuser:
             menu.append([cmfuser.getProperty('fullname'), '/User', inURL('User')])

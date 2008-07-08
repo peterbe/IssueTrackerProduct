@@ -1,12 +1,13 @@
-<dtml-call "doCache(hours=24)"><dtml-call "RESPONSE.setHeader('Content-Type','application/x-javascript')">
+<dtml-call "doCache(hours=48)"><dtml-call "RESPONSE.setHeader('Content-Type','application/x-javascript')">
+  
 
 var keyboard_shortcuts_enabled = true;
 
-function disableKS(e) { 
-  keyboard_shortcuts_enabled = false; 
+function disableKS(e) {
+   keyboard_shortcuts_enabled = false; 
 }
 function enableKS(e) { 
-  keyboard_shortcuts_enabled = true; 
+   keyboard_shortcuts_enabled = true; 
 }
 
 var curr_ilink_idx=-1;

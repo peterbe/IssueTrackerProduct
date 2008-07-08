@@ -1,3 +1,6 @@
+    Bug fixed: Javascript keyboard shortcuts not loaded correctly on
+    adding issue.
+
 - 0.10.1
 
     Bug fixed: Sometimes it was not possible to complete a followup

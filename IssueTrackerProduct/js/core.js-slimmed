@@ -37,3 +37,6 @@ function showAJAXProblemWarning(url){if($('#ajax-problem-warning').size()) retur
 .append($('<p>')
 .addClass('error').text('Currently having network connection problems.'))
 $('#main').append(container);window.setTimeout(function(){$('#ajax-problem-warning').fadeOut().remove();}, 60*1000);}
+function debug(text){((window.console && console.log) ||
+(window.opera && opera.postError) ||
+window.alert).call(this,text);}
