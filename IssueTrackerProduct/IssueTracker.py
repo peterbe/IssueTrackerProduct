@@ -135,7 +135,7 @@ from upgrade import VersionController
 from TemplateAdder import addTemplates2Class, CTP
 import Notifyables
 import Utils
-from Utils import unicodify
+from Utils import unicodify, asciify
 from bot_user_agents import is_bot_user_agent
 from Webservices import IssueTrackerWebservices
 from CustomField import CustomFieldsIssueTrackerBase
@@ -1869,6 +1869,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         count_threads = 0
         root = self.getRoot()
         
+        
+            
         for issue in root.getIssueObjects():
             # fix a few possible legacy issues with the issue
             if isinstance(issue.getTitle(), str):
@@ -1877,6 +1879,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 issue._unicode_description()
             if isinstance(issue.fromname, str):
                 issue.fromname = unicodify(issue.fromname)
+            # check if the email contains non-ascii
+            issue.email = asciify(issue.email)
             
                 
             d_before = issue._getFormattedDescription()
@@ -1891,7 +1895,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     thread._unicode_comment()
                 if isinstance(thread.fromname, str):
                     thread.fromname = unicodify(thread.fromname)
-                    
+                # check if the email contains non-ascii
+                thread.email = asciify(thread.email)
                     
                 c_before = thread._getFormattedComment()
                 thread._prerender_comment()

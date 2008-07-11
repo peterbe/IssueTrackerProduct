@@ -73,6 +73,10 @@ def unicodify(s, encodings=(UNICODE_ENCODING, 'latin1', 'utf8')):
             "Unable to unicodify %r with these encodings %s" % (s, encodings)
     return s
 
+def asciify(s, errors='xmlcharrefreplace'):
+    """ turns a str or unicode into ascii str """
+    return unicodify(s).encode('ascii', errors)
+
 def flatten_lines(nested_list):
     all = []
     for item in nested_list:

@@ -28,7 +28,7 @@
 	<span tal:define="fromname thread/getFromname;email thread/getEmail"
 	     tal:replace="structure python:here.ShowNameEmail(fromname,email)">
 				Name and Email</span>
-				
+
     <a class="plink"
        tal:condition="python:in_completelist"
        tal:attributes="href string:#i-${thread/aq_parent/getId}-${repeat/thread/number}">permanent link</a>

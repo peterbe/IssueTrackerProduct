@@ -40,7 +40,7 @@ except ImportError:
 from IssueTracker import IssueTracker, debug, safe_hasattr
 from TemplateAdder import addTemplates2Class
 import Utils
-from Utils import unicodify
+from Utils import unicodify, asciify
 from Constants import *
 from Errors import *
 from Permissions import VMS, ChangeIssuePermission
@@ -113,6 +113,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         self.urgency = urgency
         self.sections = sections
         self.fromname = unicodify(fromname)
+        if isinstance(email, basestring):
+            email = asciify(email, 'ignore')
         self.email = email
         self.url2issue = url2issue
         self.confidential = confidential
@@ -2680,7 +2682,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         elif not request.get('email') and self.has_cookie(email_cookiekey):
             email = self.get_cookie(email_cookiekey)
         else:
-            email = request.get('email','')
+            email = asciify(request.get('email',''), 'ignore')
             
         if issueuser and issueuser.getFullname():
             fromname = issueuser.getFullname()
@@ -2878,6 +2880,8 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         self.urgency = urgency
         self.sections = sections
         self.fromname = unicodify(fromname)
+        if isinstance(email, basestring):
+            email = asciify(email, 'ignore')
         self.email = email
         self.url2issue = url2issue
         self.confidential = confidential

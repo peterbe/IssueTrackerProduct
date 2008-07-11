@@ -27,6 +27,7 @@ ZopeTestCase.installProduct('SiteErrorLog')
 ZopeTestCase.installProduct('PythonScripts')
 ZopeTestCase.installProduct('IssueTrackerProduct')
 
+
 #------------------------------------------------------------------------------
 #
 # Some constants
@@ -84,7 +85,8 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         #self.has_redirected = False
 
         
-from Products.IssueTrackerProduct.Constants import UNICODE_ENCODING        
+from Products.IssueTrackerProduct.Constants import UNICODE_ENCODING, DEBUG
+from Globals import DevelopmentMode
 
 class CustomFieldTestCase(TestBase):
     """ 
@@ -295,7 +297,7 @@ class CustomFieldTestCase(TestBase):
                                       )
         html = obj.render()
         expect = '<input id="id_age" name="age:int" title="Age" />'
-        self.assertEqual(html, expect)
+        self.assertTrue(html.find(expect) > -1)
         
         self.app.REQUEST.form['age'] = 123
         html = obj.render(self.app.REQUEST)
@@ -310,7 +312,7 @@ class CustomFieldTestCase(TestBase):
         
         html = obj.render()
         expect = '<input id="id_age" name="age:int" title="Age" value="0" />'
-        self.assertEqual(html, expect)
+        self.assertTrue(html.find(expect) > -1)
 
         
     def test_basic_input_validation(self):
@@ -435,7 +437,9 @@ class CustomFieldTestCase(TestBase):
                  'name="locations:utf-8:ulines" title="Locations">\n'\
                  '<option value="">Select company first</option>\n'\
                  '</select>'
-        self.assertEqual(html, expect)
+                 
+        # the output can be padded with debugging stuff
+        self.assertTrue(html.find(expect) > 1)
         
         # that was easy, but what could happen is that an AJAX script writes
         # options into select and those are saved.

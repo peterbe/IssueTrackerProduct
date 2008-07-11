@@ -25,7 +25,7 @@ except ImportError:
 from Issue import IssueTrackerIssue
 from TemplateAdder import addTemplates2Class
 import Utils
-from Utils import unicodify
+from Utils import unicodify, asciify
 from Constants import *
 from Permissions import VMS
 from I18N import _
@@ -75,6 +75,8 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             threaddate = DateTime(threaddate)
         self.threaddate = threaddate
         self.fromname = unicodify(fromname)
+        if isinstance(email, basestring):
+            email = asciify(email, 'ignore')
         self.email = email
         if display_format:
             self.display_format = display_format
@@ -399,6 +401,8 @@ class IssueTrackerDraftIssueThread(IssueTrackerIssueThread):
             threaddate = DateTime(threaddate)
         self.threaddate = threaddate
         self.fromname = unicodify(fromname)
+        if isinstance(email, basestring):
+            email = asciify(email)
         self.email = email
         self.display_format = display_format
         

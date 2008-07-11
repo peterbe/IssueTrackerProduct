@@ -335,8 +335,63 @@ class ValidEmailAddressTestCase(unittest.TestCase):
         F('invalid.@foo.com')
         F('invalid@foo.')
         
+
+class UnicodifyAsciifyStrings(unittest.TestCase):
+    
+    def test_unicodify(self):
+        """ unicodify turns any string into unicode """
+        func = Utils.unicodify
         
+        # ascii to unicode
+        s = 'ok'
+        self.assertEqual(func(s), u'ok')
+        self.assertTrue(isinstance(func(s), unicode))
         
+        # unicode to unicode
+        s = u'ok'
+        self.assertEqual(func(s), u'ok')
+        self.assertTrue(isinstance(func(s), unicode))
+        
+        # ascii with unicode within
+        s = '\xa3'
+        self.assertEqual(func(s), u'\xa3')
+        self.assertTrue(isinstance(func(s), unicode))
+        
+        # unicode with unicode within
+        s = u'\xa3'
+        self.assertEqual(func(s), u'\xa3')
+        self.assertTrue(isinstance(func(s), unicode))
+        
+
+    def test_asciify(self):
+        """ asciify turns any string into an ascii string """
+        func = Utils.asciify
+        
+        # ascii to ascii
+        s = 'ok'
+        self.assertEqual(func(s), 'ok')
+        self.assertTrue(isinstance(func(s), str))
+        
+        # unicode to ascii
+        s = u'ok'
+        self.assertEqual(func(s), 'ok')
+        self.assertTrue(isinstance(func(s), str))
+        
+        # uncode with unicode characters in it
+        s = u'\xa3'
+        # since default error hander is 'xmlcharrefreplace'
+        self.assertEqual(func(s), '&#163;')
+        self.assertEqual(func(s, 'replace'), '?')
+        self.assertEqual(func(s, 'ignore'), '')
+        self.assertTrue(isinstance(func(s), str))
+        
+        # ascii with unicode in it
+        s = '\xa3'
+        # since default error hander is 'xmlcharrefreplace'
+        self.assertEqual(func(s), '&#163;')
+        self.assertEqual(func(s, 'replace'), '?')
+        self.assertEqual(func(s, 'ignore'), '')
+        self.assertTrue(isinstance(func(s), str))
         
     
         
@@ -349,6 +404,8 @@ def test_suite():
     suite.addTest(makeSuite(AddParam2URLTestCase))
     suite.addTest(makeSuite(StandaloneWordRegex))
     suite.addTest(makeSuite(ValidEmailAddressTestCase))
+    suite.addTest(makeSuite(UnicodifyAsciifyStrings))
+    
     return suite
     
 if __name__ == '__main__':
