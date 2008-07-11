@@ -1,3 +1,5 @@
+    Bug fixed: Email address allowed non-ascii characters.
+    
     Bug fixed: Javascript keyboard shortcuts not loaded correctly on
     adding issue.
 

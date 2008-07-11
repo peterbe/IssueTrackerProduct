@@ -960,6 +960,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             elif self.containsSpamKeywords(comment, verbose=True):
                 SubmitError['comment'] = _("Contains spam keywords")
                 
+            # first make sure the email address is ascii
+            request['email'] = asciify(request.get('email',''))
             _invalid_name_chars = re.compile('|'.join([re.escape(x) for x in list('<>;\\')]))
             if _invalid_name_chars.findall(request.get('fromname','')):
                 SubmitError['fromname'] = u'Contains not allowed characters'
@@ -1057,7 +1059,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             elif not request.get('email') and self.has_cookie(ckey):
                 email = self.get_cookie(ckey)
             elif request.get('email'):
-                self.set_cookie(ckey, email)
+                self.set_cookie(ckey, asciify(email, 'replace'))
                 
             if request.get('display_format'):
                 display_format = request.get('display_format')
@@ -1084,7 +1086,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 url += '#i%s' % self.countThreads()
                 return self.REQUEST.RESPONSE.redirect(url)
                 
-
             # create an Thread object
             create_method = issueobject._createThreadObject
             followupobject = create_method(genid, title, comment,

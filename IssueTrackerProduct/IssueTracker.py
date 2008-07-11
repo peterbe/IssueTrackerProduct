@@ -3335,7 +3335,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # strip whitespace
         for property in ['title','fromname','email',
                          'url2issue','display_format']:
-            request[property] = request.get(property,'').strip()
+            value = request.get(property, '').strip()
+            if property in ('email', 'display_format'):
+                value = asciify(value)
+            request[property] = value
+            
         # Special treatment needed in case STX is used upon display
         request['description'] = request.get('description','').strip()+' '
 
@@ -3383,9 +3387,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         # this prevents dodgy XSS attempts
         if _invalid_name_chars.findall(request['fromname']):
-            SubmitError['fromname'] = u'Contains not allowed characters'
+            SubmitError['fromname'] = u'Contains characters not allowed'
         if _invalid_name_chars.findall(request['email']):
-            SubmitError['email'] = u'Contains not allowed characters'
+            SubmitError['email'] = u'Contains characters not allowed'
         
             
         if not request.get('display_format','').strip():
@@ -3538,8 +3542,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             self.setACLCookieName(request.get('fromname'))
 
         if valid_emailaddress and not issueuser:
-            set_cookie(self.getCookiekey('email'), request.get('email'))
-            self.setACLCookieEmail(request.get('email'))
+            set_cookie(self.getCookiekey('email'), asciify(request.get('email'), 'ignore'))
+            self.setACLCookieEmail(asciify(request.get('email'), 'ignore'))
                 
         if request.get('display_format') in self.display_formats \
                and not issueuser:
@@ -3568,7 +3572,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         _rg = request.get
         title           = unicodify(_rg('title'))
         fromname        = unicodify(_rg('fromname'))
-        email           = _rg('email')
+        email           = asciify(_rg('email'), 'ignore')
         url2issue       = _rg('url2issue')
         type_            = _rg('type')
         urgency         = _rg('urgency')
@@ -11623,7 +11627,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         modifier(title=unicodify(rget('title')),
                  description=unicodify(rget('description')),
                  fromname=unicodify(rget('fromname')),
-                 email=rget('email'),
+                 email=asciify(rget('email'), 'ignore'),
                  acl_adder=acl_adder,
                  display_format=rget('display_format', self.getSavedTextFormat()),
                  status=rget('status'),
@@ -11654,7 +11658,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if rget('fromname') and not self.getSavedUser('fromname', use_request=False):
                 self.set_cookie(self.getCookiekey('name'), rget('fromname'))
             if rget('email') and not self.getSavedUser('email', use_request=False):
-                self.set_cookie(self.getCookiekey('email'), rget('email'))
+                self.set_cookie(self.getCookiekey('email'), asciify(rget('email'), 'ignore'))
         
             
         return draft_issue_id
