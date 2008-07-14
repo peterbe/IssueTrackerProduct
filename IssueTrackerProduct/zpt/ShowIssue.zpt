@@ -3,6 +3,14 @@
 
 <script type="text/javascript"
  tal:attributes="src string:$ru/followup.js"></script>
+
+<tal:block define="useaccesskeys here/useAccessKeys" condition="request/action|nothing">
+<script type="text/javascript" tal:condition="not:useaccesskeys">
+$(function() {if($('#textarea').size()) $('#textarea')[0].focus();});</script>
+<script type="text/javascript" tal:condition="useaccesskeys">
+$(function() {if($('#textarea').size()) $('#textarea')[0].focus();disableKS();});</script>
+</tal:block>
+
  
 <script
  tal:define="conf here/getWYSIWYGEditor"
@@ -237,10 +245,6 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 <!-- /Special options -->
 
 
-<tal:block define="useaccesskeys here/useAccessKeys" condition="request/action|nothing">
-<script type="text/javascript" tal:condition="not:useaccesskeys">if($('#textarea').size()) $('#textarea')[0].focus();</script>
-<script type="text/javascript" tal:condition="useaccesskeys">if($('#textarea').size()) $('#textarea')[0].focus();disableKS();</script>
-</tal:block>
 
 </div>
 </html>
