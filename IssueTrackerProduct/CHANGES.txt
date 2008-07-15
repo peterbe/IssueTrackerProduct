@@ -1,3 +1,6 @@
+    Bug fixed: Javascript shortcuts not working when writing a
+    non-quick followup (e.g. completing an issue)
+    
     Bug fixed: Email address allowed non-ascii characters.
     
     Bug fixed: Javascript keyboard shortcuts not loaded correctly on
