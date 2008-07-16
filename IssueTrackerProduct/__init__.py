@@ -205,8 +205,11 @@ import OFS, App
 from App.Common import rfc1123_date
 from ZPublisher.Iterators import filestream_iterator
 from Globals import package_home, DevelopmentMode
-from OFS.content_types import guess_content_type
-
+try:
+    from zope.app.content_types import guess_content_type
+except ImportError:
+    from OFS.content_types import guess_content_type
+    
 FILESTREAM_ITERATOR_THRESHOLD = 2 << 16 # 128 Kb (from LocalFS StreamingFile.py)
 
 

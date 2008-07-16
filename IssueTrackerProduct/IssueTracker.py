@@ -4616,7 +4616,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ prepare the text for XML usage """
         return "<![CDATA[%s]]>" % s
 
-    def showURL2Issue(self, url=None, href=0, maxlength=60):
+    def showURL2Issue(self, url=None, href=0, maxlength=70):
         """ display the url2issue for ShowIssueData """
         if url is None:
             url = self.url2issue

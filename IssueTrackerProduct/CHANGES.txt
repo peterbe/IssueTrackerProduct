@@ -1,3 +1,6 @@
+    Bug fixed: Fix to make it work in Zope 2.11 with content_types
+    being deprecated. Real#0759, Thanks Pat Heffernan.
+    
     Bug fixed: Javascript shortcuts not working when writing a
     non-quick followup (e.g. completing an issue)
     
