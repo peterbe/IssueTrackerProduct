@@ -536,6 +536,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     
     def manage_afterAdd(self, REQUEST, RESPONSE):
         """ intercept so that we prerender always """
+        return
         try:
             self._prerender_description()    
         except:

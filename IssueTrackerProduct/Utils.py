@@ -970,7 +970,11 @@ def ShowDescription(text, display_format='',
             st = st.replace(k,v)
 
         if isinstance(st, str):
-            st = html_entity_fixer(st, skipchars=('"',))
+            try:
+                st = html_entity_fixer(st, skipchars=('"',))
+            except UnicodeDecodeError:
+                # badly stored string. Legacy problem. 
+                pass
             
         st = structured_text(st)
         

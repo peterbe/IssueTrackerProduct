@@ -3673,7 +3673,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             script(issue)
             
         # tell the people who wants to know
-        if 1: #try:
+        if 1:#try:
             self.sendAlwaysNotify(issue, email=email, assignee=assignee)
         else: #except:
             try:
@@ -4084,29 +4084,34 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         assignee_email = assignee_user.getEmail()
                 except:
                     pass
-                
         
-        always_emailstring = ', '.join(self.getAlwaysNotify())
-        tosend = self._alwaysNotifyMessage(issue, always_emailstring)
-        __, to, __, __ = tosend
+        send_emails = self.Always2Notify(format='email', emailtoskip=email,
+                                         include_assignee=False)
+                                         
+        # skip the assignee
+        if assignee_email:
+            send_emails = [x for x in send_emails 
+                             if x.lower() != assignee_email.lower()]
+
+        if send_emails:
+            self.sendIssueNotifications(issue, send_emails)
+            
 
         issueid_header = issue.getGlobalIssueId()
 
-        if to is not None:
-            send_emails = []
-            email = ss(str(email))
-            for to_each in self.preParseEmailString(to, aslist=1):
-                if ss(to_each) == email:
-                    continue
-                elif assignee_email and ss(to_each) == assignee_email:
-                    continue
-
-                #self.sendEmail(msg, to_each, fr, subject, swallowerrors=True,
-                #               headers={EMAIL_ISSUEID_HEADER: issueid_header})
-                send_emails.append(to_each)
-                
-            if send_emails:
-                self.sendIssueNotifications(issue, send_emails)
+        #if to is not None:
+        #    send_emails = []
+        #    email = ss(str(email))
+        #    for to_each in self.preParseEmailString(to, aslist=1):
+        #        if ss(to_each) == email:
+        #            continue
+        #        elif assignee_email and ss(to_each) == assignee_email:
+        #            continue
+        #
+        #        send_emails.append(to_each)
+        #        
+        #    if send_emails:
+        #        self.sendIssueNotifications(issue, send_emails)
                  
 
     security.declarePrivate('sendIssueNotifications')
@@ -5838,52 +5843,54 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         for valid, name_and_email in checked:
             add = ''
-            if valid:
-                _name = name_and_email[0]
-                _email = name_and_email[1]
-                if emailtoskip is not None and ss(_email) == ss(emailtoskip):
+            if not valid:
+                continue
+            
+            _name = name_and_email[0]
+            _email = name_and_email[1]
+            if emailtoskip is not None and ss(_email) == ss(emailtoskip):
+                continue # skip!
+            
+            if requireemail and not self.ValidEmailAddress(_email):
+                continue # skip!
+            
+            if format == 'email':
+                add = _email or _name
+                if add in all:
                     continue # skip!
-                
-                if requireemail and not self.ValidEmailAddress(_email):
+            elif format == 'name':
+                add = _name or _email
+                if add in all:
                     continue # skip!
-                
-                if format == 'email':
-                    add = _email or _name
-                    if add in all:
-                        continue # skip!
-                elif format == 'name':
-                    add = _name or _email
-                    if add in all:
-                        continue # skip!
-                else:
-                    if _name and _email:
-                        if format == 'both':
-                            if _email.lower() in appended_email_addresses:
-                                continue # skip!
-                            else:
-                                add = "%s <%s>"%(_name, _email)
-                                appended_email_addresses.append(_email.lower())
-                                
-                        else:
-                            if _email.lower() in appended_email_addresses:
-                                continue # skip!
-                            else:
-                                add = self.ShowNameEmail(_name, _email, highlight=0)
-                                appended_email_addresses.append(_email.lower())
-                    elif _name:
-                        if format == 'both':
-                            add = _name
-                        else:
-                            add = _name
-                    elif _email:
+            else:
+                if _name and _email:
+                    if format == 'both':
                         if _email.lower() in appended_email_addresses:
                             continue # skip!
                         else:
-                            if format == 'both':
-                                add = _email
-                            else:
-                                add = self.ShowNameEmail(_name, _email, highlight=0)
+                            add = "%s <%s>"%(_name, _email)
                             appended_email_addresses.append(_email.lower())
+                            
+                    else:
+                        if _email.lower() in appended_email_addresses:
+                            continue # skip!
+                        else:
+                            add = self.ShowNameEmail(_name, _email, highlight=0)
+                            appended_email_addresses.append(_email.lower())
+                elif _name:
+                    if format == 'both':
+                        add = _name
+                    else:
+                        add = _name
+                elif _email:
+                    if _email.lower() in appended_email_addresses:
+                        continue # skip!
+                    else:
+                        if format == 'both':
+                            add = _email
+                        else:
+                            add = self.ShowNameEmail(_name, _email, highlight=0)
+                        appended_email_addresses.append(_email.lower())
 
             if add and add not in all:
                 all.append(add)
@@ -6954,10 +6961,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if DEBUG:
             # print the email instead of sending it
             out = sys.stdout
-            print >>out, "To: %s\n" % to
-            print >>out, "From: %s\n" % fr
-            print >>out, "Subject: %s\n" % subject
-            print >>out, "\n"
+            print >>out, "To: %s" % to
+            print >>out, "From: %s" % fr
+            print >>out, "Subject: %s" % subject
+            print >>out, ""
             if isinstance(msg, unicode):
                 print >>out, msg.encode('ascii','replace')
             else:
