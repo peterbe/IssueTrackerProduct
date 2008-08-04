@@ -1,4 +1,6 @@
 -
+    New feature: Assignee is including in the CSV export from List
+    Issues. (Real#0764)
 
     Bug fixed: Always notify could accidentally send emails to people
     not necessarily in the always notify list but with the same first

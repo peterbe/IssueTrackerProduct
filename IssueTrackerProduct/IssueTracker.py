@@ -4345,6 +4345,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                    issue.getStatus(), 
                    issue.getFromname().encode(UNICODE_ENCODING),
                    issue.getEmail()]
+                   
+            if self.UseIssueAssignment():
+                assignments = issue.getAssignments()
+                if assignments:
+                    assignment = assignments[-1]
+                    assignment.getAssigneeFullname()
+                    row.insert(2, assignment.getAssigneeFullname())
+                else:
+                    row.insert(2, u'')
+                   
             if default_sortorder == 'issuedate':
                 row.append(issue.getIssueDate())
             else:
@@ -4381,6 +4391,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         row = ['Issue ID','Subject', 'Status', 'Fromname','Email',
                self.translateSortorderOption(self.getDefaultSortorder()),
                'Sections', 'Urgency', 'Type']
+               
+        if self.UseIssueAssignment():
+            row.insert(2, 'Assigned to')
                
         for field in self.getCustomFieldObjects():
             row.append(field.getTitle())
