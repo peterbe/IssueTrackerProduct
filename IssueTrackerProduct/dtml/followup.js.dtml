@@ -67,11 +67,14 @@ function clairvoyant_followups() {
    $.get(url, {'only_fromname':1}, function(resp) {
       try {
       if (resp && resp != previous_clairvoyant_note) {
+         var previous_title = document.title;
          $('#recent-draftthread-author').text(resp).show();
+         document.title = resp + ' - ' + document.title;
          previous_clairvoyant_note = resp;
          setTimeout(function() {
             $('#recent-draftthread-author').fadeOut(500);
-         }, 20*1000);
+            document.title = previous_title;
+         }, 15*1000);
 	 clairvoyantinterval = orig_clairvoyantinterval;
       }
       } catch(ex) {alert(ex);}

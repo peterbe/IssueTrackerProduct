@@ -1,4 +1,7 @@
 -
+    New feature: Document title is changing when a clarvoyant message
+    appears on followups.
+    
     New feature: Assignee is including in the CSV export from List
     Issues. (Real#0764)
 
