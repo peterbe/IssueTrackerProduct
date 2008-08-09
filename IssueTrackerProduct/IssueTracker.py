@@ -10069,7 +10069,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if isinstance(since, basestring):
             since = DateTime(since)
         elif self.REQUEST.has_key('count_status_since'):
-            since = DateTime()-int(self.REQUEST['count_status_since'])
+            try:
+                since = DateTime()-int(self.REQUEST['count_status_since'])
+            except ValueError:
+                since = None
             
         if since is not None:
             search['modifydate'] = {'query':since, 'range':'min'}
