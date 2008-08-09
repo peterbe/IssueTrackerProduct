@@ -365,6 +365,64 @@ class EmailInTestCase(TestBase):
         # XXX I'm not sure what this test is meant to test.
         # Perhaps the functionality of emailing in HTML emails should
         # change to show HTML safely.
+
+        
+    def test_emailIn6(self):
+        """ Test emails with type and urgency in the subject line """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-4.email' sends to peter@example.com but is CCed to
+        # mail@example.com
+        FakePOP3.files = [abs_path('email-in-6.email'),]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
+
+        # this should have created an issue 
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+        
+        issue = tracker.getIssueObjects()[0]
+        self.assertEqual(issue.getUrgency(), 'critical')
+        self.assertEqual(issue.getType(), 'bug report')
+        self.assertEqual(issue.getSections(), ['Homepage'])
+        self.assertEqual(issue.getTitle(), u'Subject line')
+        self.assertTrue(isinstance(issue.getTitle(), unicode))
+        
+        
+    def test_emailIn7(self):
+        """ Test emails with 'Re:' in the subject line """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-4.email' sends to peter@example.com but is CCed to
+        # mail@example.com
+        FakePOP3.files = [abs_path('email-in-7.email'),]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
+
+        issue = tracker.getIssueObjects()[0]
+        self.assertEqual(issue.getTitle(), u'Re: Hello')
+
         
     def test_emailIn_none(self):
         """ Test emails in multipart """
@@ -394,6 +452,7 @@ class EmailInTestCase(TestBase):
         self.assertTrue('THIS IS THE PLAIN PART' in description)
         display_format = issue.display_format
         self.assertEqual(display_format, 'plaintext')
+
         
     def _send_in_emails(self, email_filenames, accepting_email='mail@example.com'):
         tracker = self.folder.tracker
@@ -415,6 +474,7 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3        
 
+        
     def test_jp_regression_tests(self):
         """ these tests come from a bug report by Jesse.
         """
