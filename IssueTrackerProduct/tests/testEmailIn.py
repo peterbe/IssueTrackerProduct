@@ -496,6 +496,43 @@ class EmailInTestCase(TestBase):
         
         result = tracker.check4MailIssues(verbose=True)
         self.assertTrue(result.find('Created 2 issues') > -1)
+        
+        
+    def test__appendEmailIssueData(self):
+        """ test the private method _appendEmailIssueData() """
+        tracker = self.folder.tracker
+        
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'helpdesktest@example3.org'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        
+        email = {'subject':'Re: Fwd: Foo, High, Bug Report: Subject line',
+                 'to':'helpdesktest@example3.org',
+                 'from':'test@peterbe.com'
+                }
+                
+        email = tracker._appendEmailIssueData([email], account)[0]
+        
+        # expect certain things from this email.
+        
+        # Since none of the sections in this tracker was in the  subject line 
+        # expect the sections to be the default
+        self.assertEqual(email['sections'], tracker.getDefaultSections())
+        
+        # The subject line contained some junk ('Fwd: Re:') followed by some
+        # sensible parsable stuff where one word is neither section, type 
+        # or urgency. Therefor the issue subject must be 'Foo: Subject line'
+        self.assertEqual(email['title'], u'Foo: Subject line')
+        self.assertTrue(isinstance(email['title'], unicode))
+        
+        # The urgency is 'High' in the parsable subject line
+        self.assertEqual(email['urgency'], u'high')
+        
+        # And the type is Bug report
+        self.assertEqual(email['type'], u'bug report')
+        
     
         
 def test_suite():

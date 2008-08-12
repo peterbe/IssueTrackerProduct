@@ -9414,6 +9414,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if not combos.has_key(thread_email.lower()):
                     combos[thread_email.lower()] = thread.getFromname()
         return combos
+
     
     def _appendEmailIssueData(self, emails, account):
         """ inspect message for certain issue data. """
@@ -9438,9 +9439,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         correct_caser = self._getCorrectCase
         nemails = []
         for email in emails:
-            s = email.get('subject','').strip()
-            if s == '':
-                m = "Subject line can not be empty"
+            s = unicodify(email.get('subject','').strip())
+            if s == u'':
+                m = u"Subject line can not be empty"
                 self.sendReturnErrorEmail(email, m)
                 continue
             
@@ -9454,7 +9455,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     sections.append(correct_caser(eachpart, allsections))
                     #parsable.remove(eachpart) # Real0265
                     ss_remove(parsable, eachpart)
-                    
             
             if sections:
                 email['sections'] = sections
@@ -9465,7 +9465,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 types.extend(reg_types.findall(eachpart))
             if types:
                 email['type'] = correct_caser(types[0], alltypes)
-                parsable.remove(types[0])
+                try:
+                    parsable.remove(types[0])
+                except ValueError:
+                    raise ValueError, "Unable to remove %r from %s" % (types[0], str(parsable))
                 
             # Urgency
             urgencies = []
@@ -9525,6 +9528,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             nemails.append(email)
             
         return nemails
+
     
     def sendReturnErrorEmail(self, email, msg):
         """ Send a simple email when there is an error """
@@ -9558,7 +9562,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             parsable = subject[1:subject.find(']')].strip()
             textual = subject[subject.find(']')+1:].strip()
             delimiter = '['
-        elif subject.find(':')>0:
+        elif subject.count(':') > 1:
+            # perhaps like this 'Fwd: Critical, Bug report: Something wrong!'
+            textual = [x.strip() for x in subject.split(':')][-1]
+            parsable = [x.strip() for x in subject.split(':')][-2]
+            delimiter = ':'
+        elif subject.count(':'):
             # Used like this -  Bug, Help: Bla bla bla
             parsable = subject[:subject.find(':')].strip()
             textual = subject[subject.find(':')+1:].strip()
