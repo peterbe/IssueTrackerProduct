@@ -109,7 +109,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
   
   		<td valign="top"><br /><br /><br /><br /><b>Description:</b><br />
   		<td>
-		<textarea tabindex="4" name="description:text" rows="10" cols="60" id="description_text" class="autoexpanding"
+		<textarea tabindex="4" name="description:text" rows="10" cols="70" id="description_text" class="autoexpanding"
 		tal:content="python:request.get('description','')" 
                 tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                                 onblur python:test(use_autosave, 'stopautosave()');

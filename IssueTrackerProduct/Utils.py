@@ -942,9 +942,9 @@ def ShowDescription(text, display_format='',
     
     if urllinkfunction is None:
         # add one that is able to truncate really long URLs
-        def urllinkfunction(url, maxlength=80):
+        def urllinkfunction(url, maxlength=70):
             if len(url) > maxlength:
-                title = url[:47] + '...' + url[-30:]
+                title = url[:42] + '...' + url[-25:]
                 tooltip = 'Right click to copy the whole URL'
                 return '<a href="%s" title="%s">%s</a>' % \
                 (improveURL(url), tooltip, title)
