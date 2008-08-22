@@ -1,4 +1,7 @@
 -
+    New feature: Search smarter by not doing a wildcard search on
+    titles unless not found exactly anywhere else.
+    
     Bug fixed: Static file's from misc_ set an incorrect header called
     Cache-Length.
     

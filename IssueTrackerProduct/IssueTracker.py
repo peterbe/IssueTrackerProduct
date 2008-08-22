@@ -7363,7 +7363,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return checked
     
     
-    def _searchCatalog(self, q, search_only_on=None):
+    def _searchCatalog(self, q, search_only_on=[]):
         """ return a sequence of issue objects by searching and possibly
         searching inside the threads. """
         request = self.REQUEST
@@ -7382,20 +7382,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if isinstance(search_only_on, basestring):
                 search_only_on = [search_only_on]
             search_only_on = [ss(s) for s in search_only_on]
-        else:
-            search_only_on = None
 
         # all the different searches
-        catalogs = []
+        brains = []
         
         if not search_only_on or 'title' in search_only_on:
             _exact_title_search = catalog.searchResults(title=q)
-            catalogs += _exact_title_search
-        
-            if not _exact_title_search:
-                _title_search = catalog.searchResults(title=titleq)
-                catalogs += _title_search
-                
+            brains += _exact_title_search
+                        
         ss_q = ss(q)
         
         if ss_q in [ss(x) for x in self.statuses]:
@@ -7427,30 +7421,36 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     break
                 
         
-        if len(catalogs) < self.default_batch_size:
+        if len(brains) < self.default_batch_size:
             _description_search = catalog.searchResults(description=q)
-            catalogs += _description_search
+            brains += _description_search
             
             # there now?
-            if len(catalogs) < self.default_batch_size:
+            if len(brains) < self.default_batch_size:
                 # dig deeper
                 _author_search = []
                 if not search_only_on or 'fromname' in search_only_on:
                     _author_search.extend(catalog.searchResults(fromname=q))
                 if not search_only_on or 'email' in search_only_on:
                     _author_search.extend(catalog.searchResults(email=q))
-                catalogs += _author_search
+                brains += _author_search
                 if len(_author_search) > 0:
                     # advise people to use the filter
                     msg = self._setSearchFilterWarning(author=q)
 
         # Now, also search on comment
-        catalogs_threads = []
+        brains_threads = []
         if not search_only_on or 'comment' in search_only_on:
-            catalogs_threads = catalog.searchResults(comment=q)
-                            
+            brains_threads = catalog.searchResults(comment=q)
+            
+            
+        if len(brains)+len(brains_threads)==0:
+            # now we're getting desperate, do a very wild search on the title
+            # of issues with wildcard
+            _title_search = catalog.searchResults(title=titleq)
+            brains += _title_search
 
-        if len(catalogs)+len(catalogs_threads)==0:
+        if len(brains)+len(brains_threads)==0:
             # nothing found, maybe user typed in an id
             _issue_objectids = self.getIssueIds()
             if q in _issue_objectids:
@@ -7468,7 +7468,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         _has_logged_about_Issue_metatype = 0
         
         # Convert our search result to a list of unique issue objects
-        for brain in catalogs:
+        for brain in brains:
             object = brain.getObject()
             if getattr(object, 'meta_type','') != ISSUE_METATYPE:
                 if not _has_logged_about_Issue_metatype:
@@ -7503,7 +7503,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     
         first_thread_id = None
         
-        for threadbrain in catalogs_threads:
+        for threadbrain in brains_threads:
             threadobject = threadbrain.getObject()
             if threadobject is None:
                 if not _has_logged_about_NoneType:
