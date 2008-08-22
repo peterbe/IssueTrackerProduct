@@ -19,7 +19,7 @@ tal:define="todaysdate python:here.ZopeTime()"
 			<td colspan="5">Found in comment...</td>
 		</tr>
 		<tr> 
-			<td tal:define="creationdate python:issue.issuedate; difference python:here.timeSince(creationdate, todaysdate, afterword='old');
+			<td tal:define="creationdate python:issue.issuedate; difference python:here.timeSince(creationdate, todaysdate, afterword='old', max_no_sections=2);
 			                ainfo python:issue.showAdditionalInformation(usebrackets=1, timedifference=difference)">
 				<span tal:condition="here/ShowIdWithTitle" tal:content="structure string:#${issue/getId} " class="id">
 				</span>
