@@ -259,7 +259,7 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
         RESPONSE.setHeader('Content-Type', self.content_type)
         RESPONSE.setHeader('Last-Modified', self.lmh)
         RESPONSE.setHeader('Cache-Control', self.cch)
-        RESPONSE.setHeader('Cache-Length', self.content_size)
+        RESPONSE.setHeader('Content-Length', self.content_size)
         if self.set_expiry_header:
             RESPONSE.setHeader('Expires', self._expires())
             
@@ -288,7 +288,15 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
             return filestream_iterator(self.path, 'rb')
         else:
             return open(self.path,'rb').read()
-        
+
+    HEAD__roles__=None
+    def HEAD(self, REQUEST, RESPONSE):
+        """ """
+        RESPONSE.setHeader('Content-Type', self.content_type)
+        RESPONSE.setHeader('Last-Modified', self.lmh)
+        RESPONSE.setHeader('Content-Length', self.content_size)
+            
+        return ''    
 
     def _expires(self):
         return rfc1123_date(time()+self.max_age)

@@ -1,4 +1,7 @@
 -
+    Bug fixed: Static file's from misc_ set an incorrect header called
+    Cache-Length.
+    
     New feature: Assignee name shown in rich list on List Issues.
     (Real#0757)
     
