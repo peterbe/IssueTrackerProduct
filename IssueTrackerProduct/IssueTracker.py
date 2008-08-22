@@ -256,10 +256,12 @@ class IssueTrackerFolderBase(Folder.Folder, Persistent):
         """ what Utils script """
         return Utils.ordinalth(daynr, html=html)
     
-    def timeSince(self, date1, date2, afterword=None, minute_granularity=False):
+    def timeSince(self, date1, date2, afterword=None, minute_granularity=False,
+                max_no_sections=3):
         """ wrap Utils.timeSince() """
         return Utils.timeSince(date1, date2, afterword=afterword,
-                               minute_granularity=minute_granularity)
+                               minute_granularity=minute_granularity,
+                               max_no_sections=max_no_sections)
 
     def ShowFilesize(self, bytes):
         """ pass on to utilities module """
@@ -5991,10 +5993,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # out StandardHeader
         zodb_id = 'StandardHeader.zpt'
         template = getattr(self, zodb_id, self.StandardHeader)
+        if self.isMobileVersion():
+            zodb_id = 'MobileHeader.zpt'
+            template = getattr(self, zodb_id, self.MobileHeader)
         return template.macros['standard']
     
-    # backwards compatability
-#    StandardLook = StandardHeader
+    def isMobileVersion(self):
+        """ return true if the user should have the mobile version """
+        # XXX: There should be a mobile version here and it should be 
+        # optional since here there'd need to be a MUA test (mobile user agent).
+        
+        # This is a stub at the moment
+        return False
+    
 
     def ManagerLink(self, shortlink=False, absolute_url=False):
         """ For the little hyperlink where you can login with """
@@ -7908,6 +7919,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # should have been called 'sortorder=fromname'
             _translations = {'from':'fromname',
                              'changedate':'modifydate', # legacy
+                             'submittedby':'fromname',
                               }
             
             issues = self._dosort(issues, 

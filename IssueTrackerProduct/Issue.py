@@ -2087,9 +2087,20 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if assignments:
             try:
                 if assignments[-1].getState() == 1:
-                    info.append('assigned')
+                    _name = assignments[-1].getAssigneeFullname()
+                    _email = assignments[-1].getAssigneeEmail()
+                    if _name or _email:
+                        info.append('assigned to %s' % self.ShowNameEmail(_name, _email, highlight=False))
+                    else:
+                        info.append('assigned')
+                    
                 elif assignments[-1].getState() == 0:
-                    info.append('reassigned')                    
+                    _name = assignments[-1].getAssigneeFullname()
+                    _email = assignments[-1].getAssigneeEmail()
+                    if _name or _email:
+                        info.append('reassigned to %s' % self.ShowNameEmail(_name, _email, highlight=False))
+                    else:
+                        info.append('reassigned')                    
             except AttributeError:
                 pass
 

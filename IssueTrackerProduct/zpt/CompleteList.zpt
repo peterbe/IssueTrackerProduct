@@ -32,7 +32,7 @@ tal:define="todaysdate python:here.ZopeTime()"
 	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
 		<td width="25%"><span tal:replace="structure python:here.HeadingLinks(here.translateSortorderOption(here.getDefaultSortorder()), here.getDefaultSortorder(), default=1, inverted=1, sortinfo=sortinfo)">Date</span></td>
 		<td width="25%"><span tal:replace="structure python:here.HeadingLinks('Sections','sections', sortinfo=sortinfo)">Sections</span></td>
-		<td><span tal:replace="structure python:here.HeadingLinks('From','from', sortinfo=sortinfo)">From</span></td>
+		<td><span tal:replace="structure python:here.HeadingLinks('Submitted by','submittedby', sortinfo=sortinfo)">Submitted by</span></td>
 		<td width="100"><span tal:replace="structure python:here.HeadingLinks('Urgency','urgency', sortinfo=sortinfo)">Urgency</span></td>
 		<td width="100"><span tal:replace="structure python:here.HeadingLinks('Type','type', sortinfo=sortinfo)">Type</span></td>
 

@@ -5,7 +5,7 @@ tal:define="todaysdate python:here.ZopeTime()"
 	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
 		<td><span tal:replace="structure python:here.HeadingLinks(here.translateSortorderOption(here.getDefaultSortorder()), here.getDefaultSortorder(), default=1, inverted=1, sortinfo=sortinfo)">Date</span></td>
 		<td><span tal:replace="structure python:here.HeadingLinks('Sections','sections', sortinfo=sortinfo)">Sections</span></td>
-		<td><span tal:replace="structure python:here.HeadingLinks('From','from', sortinfo=sortinfo)">From</span></td>
+		<td><span tal:replace="structure python:here.HeadingLinks('Submitted by','submittedby', sortinfo=sortinfo)">Submitted by</span></td>                
 		<td><span tal:replace="structure python:here.HeadingLinks('Urgency','urgency', sortinfo=sortinfo)">Urgency</span></td>
 		<td><span tal:replace="structure python:here.HeadingLinks('Type','type', sortinfo=sortinfo)">Type</span></td>
 
@@ -36,7 +36,7 @@ tal:define="todaysdate python:here.ZopeTime()"
                                  </tal:test>
 				 - <acronym class="status" tal:content="python:issue.status.capitalize()"
 				    tal:attributes="title issue/StatusByWhom">Status</acronym>&nbsp;
-				<span tal:condition="ainfo" tal:content="ainfo" class="bd">
+				<span tal:condition="ainfo" tal:content="structure ainfo" class="bd">
 				</span>
 			</td>
 			<td tal:define="sections python:', '.join(issue.getSections())">

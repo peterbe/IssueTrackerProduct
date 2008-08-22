@@ -1,4 +1,7 @@
 -
+    New feature: Assignee name shown in rich list on List Issues.
+    (Real#0757)
+    
     New feature: Document title is changing when a clarvoyant message
     appears on followups.
     
