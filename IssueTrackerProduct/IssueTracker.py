@@ -7446,9 +7446,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         if len(brains)+len(brains_threads)==0:
             # now we're getting desperate, do a very wild search on the title
-            # of issues with wildcard
-            _title_search = catalog.searchResults(title=titleq)
-            brains += _title_search
+            # of issues with wildcard.
+            
+            # first try it with 'foo*'
+            _title_search = catalog.searchResults(title=q+'*')
+            if _title_search:
+                brains += _title_search
+            else:
+                # even more desperate
+                _title_search = catalog.searchResults(title='*'+q+'*')
+                brains += _title_search
+                
 
         if len(brains)+len(brains_threads)==0:
             # nothing found, maybe user typed in an id
