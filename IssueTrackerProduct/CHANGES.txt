@@ -1,4 +1,8 @@
 -
+    New feature: If you upload a file whose exact name is a method or
+    a template the IssueTrackerProduct itself the files get
+    automatically renamed.
+    
     New feature: Search smarter by not doing a wildcard search on
     titles unless not found exactly anywhere else.
     

@@ -4014,6 +4014,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if id.startswith('_'):
                     id=id[1:]
                 id = Utils.badIdFilter(id)
+                if safe_hasattr(destination, id) or (id.endswith('.zpt') and safe_hasattr(destination, id[:-4])):
+                    # can cause problems with CheckoutableTemplates
+                    id = 'renamed__' + id
+                
                 try:
                     destination.manage_addFile(id, file)
                     ids.append(id)
