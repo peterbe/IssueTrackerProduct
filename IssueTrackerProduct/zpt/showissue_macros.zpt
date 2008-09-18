@@ -4,7 +4,8 @@
   tal:define="allowed2change here/isAllowedToChangeIssues;
               change python:allowed2change and not show_many and request.get('change')=='Details';
               errors python:options.get('SubmitError',{})"
-  tal:attributes="method python:test(change, 'post','get')"
+  tal:attributes="method python:test(change, 'post','get');
+                  action python:test(change, 'editIssueDetails', '#i')"
   >
   
   <span tal:condition="python:options.get('SubmitError')"
@@ -127,18 +128,78 @@
       </td>
     </tr>
     </tal:block>    
-    <tr>
+    <tr tal:condition="python:allowed2change and not show_many">
       <td>&nbsp;</td>
       <td tal:condition="change">
-        <input type="submit" name="editIssueDetails:method" value="Save changes" />
+        <input type="submit" value="Save changes" />
       </td>
       <td tal:condition="not:change">
         <input type="hidden" name="change" value="Details" />
-        <input type="submit"  value="change details" class="smallbutton"
-         tal:condition="python:allowed2change and not show_many"/>
+        <input type="submit" value="change details" class="smallbutton"
+         />
+
+        <tal:block tal:condition="python:len(here.getDetailChanges())">
+        <br />
+        <a class="detailslink" tal:condition="not:request/show-detailchanges|nothing"
+           tal:attributes="href string:${here/absolute_url}?show-detailchanges=1#i">show changed details</a>
+        </tal:block>
+         
       </td>      
     </tr>
   </table>
+ 
+  <div id="detailschanged-outer">
+      
+    <table metal:use-macro="here/showissue_macros/macros/detailchanges"></table>
+    
+  </div>
+
   </form>
   
+</metal:block>
+
+
+<metal:block define-macro="detailchanges">
+  <div id="detailschanges-inner" tal:condition="request/show-detailchanges|nothing">
+  <p><strong>Details change log</strong>
+  &nbsp;&nbsp;<a class="detailslink" tal:attributes="href string:${here/absolute_url}#i">hide</a>
+  
+  </p>
+  <table tal:define="changes here/getDetailChanges">
+    <tbody tal:repeat="change changes">
+      <tr>
+        <td colspan="3"><strong tal:content="structure python:here.showDate(change['change_date'])"></strong>
+          <tal:block condition="change/acl_adder|nothing">
+          by
+          
+          <tal:block define="user_details python:here.getUserDetailsByACLAdder(change['acl_adder'])">
+
+          <strong tal:condition="python:user_details.get('fromname') or user_details.get('email')"
+                  tal:content="structure python:here.ShowNameEmail(user_details.get('fromname'), user_details.get('email'))"></strong>
+                  
+          <strong tal:condition="python:not (user_details.get('fromname') or user_details.get('email')) and (change.get('fromname') or change.get('email'))"
+                  tal:content="structure python:here.ShowNameEmail(change.get('fromname'), change.get('email'))"></strong>
+          
+          <em tal:condition="not:python:user_details.get('fromname') or user_details.get('email') or change.get('fromname') or change.get('email')"
+          >name not available</em>
+                  
+          </tal:block>
+          </tal:block>
+        </td>
+      </tr>
+      <tr tal:repeat="change python:[(k,v) for (k,v) in change.items() if k not in ['change_date','acl_adder','fromname','email']]">
+         <td style="padding-left:15px">
+            <br tal:replace="python:here.showChangeKey(change[0])" />:
+         </td>
+         <td>
+           <strike tal:content="structure python:here.showChangedDetail(change[0], change[1]['old'])"></strike>
+         </td>
+         <td>
+           <strike tal:replace="structure python:here.showChangedDetail(change[0], change[1]['new'])"></strike>
+         </td>         
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
 </metal:block>

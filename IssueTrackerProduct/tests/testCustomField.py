@@ -433,13 +433,13 @@ class CustomFieldTestCase(TestBase):
         obj.attributes['multiple'] = 'multiple'
                                       
         html = obj.render()
-        expect = '<select id="id_locations" multiple="multiple" '\
+        expect = u'<select id="id_locations" multiple="multiple" '\
                  'name="locations:utf-8:ulines" title="Locations">\n'\
                  '<option value="">Select company first</option>\n'\
                  '</select>'
                  
         # the output can be padded with debugging stuff
-        self.assertTrue(html.find(expect) > 1)
+        self.assertTrue(html.find(expect) > -1)
         
         # that was easy, but what could happen is that an AJAX script writes
         # options into select and those are saved.

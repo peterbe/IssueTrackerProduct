@@ -24,9 +24,11 @@ from webdav.WriteLockInterface import WriteLockInterface
 
 try:
     from persistent.mapping import PersistentMapping
+    from persistent.list import PersistentList
 except ImportError:
     # for old versions of Zope
     PersistentMapping = dict
+    PersistentList = list
 
 
 # Is CMF installed?
@@ -94,6 +96,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     # backward compatability
     acl_adder = '' 
     submission_type = ''
+    detail_changes = []
 
     def __init__(self, id, title, status, issuetype, urgency, sections,
                  fromname, email, url2issue, confidential, hide_me,
@@ -135,6 +138,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         self.acl_adder = acl_adder
         
         self.custom_fields_data = PersistentMapping()
+        
+        self.detail_changes = PersistentList()
 
 
     def getId(self):
@@ -260,7 +265,23 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """ set acl_adder """
         self.acl_adder = acl_adder
 
+    def getDetailChanges(self):
+        return self.detail_changes
         
+    def _addDetailChange(self, change):
+        try:
+            if isinstance(self.detail_changes, list):
+                changes = self.detail_changes
+                changes.append(change)
+                self.detail_changes = changes
+            else:
+                self.detail_changes.append(change)
+            
+        except AttributeError:
+            changes = PersistentList()
+            changes.append(change)
+            self.detail_changes = changes
+            
     def isRecentlyAdded(self):
         """ return true if the issue was recently added.
         This will be true just after you press save on the Add Issue page.
@@ -1297,6 +1318,63 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         here = self
         return self.AllowIssueAttributeChange() and user.has_permission(ChangeIssuePermission, here)
     
+    def showChangeKey(self, key):
+        if key == 'url2issue':
+            return _(u"URL")
+        elif key == 'estimated_time_hours':
+            return _(u"Estimated time")
+        elif key == 'actual_time_hours':
+            return _(u"Actual time")
+        
+        return key.capitalize()
+    
+    def showChangedDetail(self, key, value):
+        if isinstance(value, (tuple, list)):
+            return ', '.join(value)
+        
+        if value:
+            if key in ('estimated_time_hours', 'actual_time_hours'):
+                return self.showTimeHours(value, show_unit=True)
+            elif key == 'url2issue':
+                href = '<a href="%s">%s</a>' % (self.showURL2Issue(value, href=True),
+                                                self.showURL2Issue(value))
+                return href
+        else:
+            if key in ('estimated_time_hours', 'actual_time_hours'):
+                return _(u"n/a")
+        
+        if value:
+            return Utils.html_quote(value)
+        return u''
+    
+    
+    def getUserDetailsByACLAdder(self, acl_adder):
+        """ return (name, email) of the user that is this acl user """
+        ufpath, name = acl_adder.split(',')
+        try:
+            uf = self.unrestrictedTraverse(ufpath)
+        except KeyError:
+            try:
+                uf = self.unrestrictedTraverse(ufpath.split('/')[-1])
+            except KeyError:
+                # the userfolder (as it was saved) no longer exists
+                return {}
+
+        if uf.meta_type == ISSUEUSERFOLDER_METATYPE:
+            if uf.data.has_key(name):
+                issueuserobj = uf.data[name]            
+                return dict(fromname=issueuserobj.getFullname() or self.fromname,
+                            email=issueuserobj.getEmail() or self.email)
+                        
+        elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
+            mtool = CMF_getToolByName(self, 'portal_membership')
+            member = mtool.getMemberById(name)
+            if member.getProperty('fullname'):
+                return dict(fromname=member.getProperty('fullname'),
+                            email=member.getProperty('email'))
+                            
+        return {}
+    
 
     security.declareProtected(ChangeIssuePermission, 'editIssueDetails')
     def editIssueDetails(self, sections=None, type=None, urgency=None,
@@ -1306,6 +1384,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                          REQUEST=None):
         """ used post submission to change some of the smaller details. """
         assert self.AllowIssueAttributeChange(), "Issue attribute change not enabled"
+
+        change = {}
         
         if REQUEST is not None:
             SubmitError = {}
@@ -1356,6 +1436,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 for section in sections:
                     assert section in _options
             # set it
+            if self.sections != sections:
+                change['sections'] = dict(old=self.sections, new=sections)
             self.sections = sections
             
         # Type must be recognized
@@ -1363,6 +1445,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             assert type in self.getTypeOptions(), "Unrecognized issue type"
             
             # set it 
+            if self.type != type:
+                change['type'] = dict(old=self.type, new=type)
             self.type = type
             
         # urgency must be recognized
@@ -1370,6 +1454,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             assert urgency in self.getUrgencyOptions(), "Unrecognized issue urgency"
             
             # set it 
+            if self.urgency != urgency:
+                change['urgency'] = dict(old=self.urgency, new=urgency)
             self.urgency = urgency
             
         # because of the way forms work, the confidential boolean is never 
@@ -1377,27 +1463,83 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         # That means that an issue being confidential is always set in
         # this method.
         # niceboolean() asserts we're returning a True or False
-        self.confidential = Utils.niceboolean(confidential)
+        confidential = Utils.niceboolean(confidential)
+        if confidential != self.confidential:
+            change['confidential'] = dict(old=self.confidential, new=confidential)
+        self.confidential = confidential
         
         if url2issue is not None:
-            self.url2issue = url2issue.strip()
+            url2issue = url2issue.strip()
+            if self.url2issue != url2issue:
+                change['url2issue'] = dict(old=self.url2issue, new=url2issue)
+            self.url2issue = url2issue
             
         if self.UseEstimatedTime() and estimated_time_hours is not None:
             hours = self._parseTimeHours(estimated_time_hours)
             assert isinstance(hours, float)
-            self.estimated_time_hours = hours
+
+            # initially self.estimated_time_hours will be None. And if the 
+            # input estimated_time_hours is left blank then there is no change.
+            # However if this is the second time
+            if hours != self.estimated_time_hours and estimated_time_hours:
+                change['estimated_time_hours'] = dict(old=self.estimated_time_hours,
+                                                      new=hours)
+            if estimated_time_hours:
+                self.estimated_time_hours = hours
+            elif self.estimated_time_hours is not None: 
+                # if it was something before and this time the user has wiped 
+                # it then this needs to be set back to None 
+                self.estimated_time_hours = None
             
         if self.UseActualTime() and actual_time_hours is not None:
             hours = self._parseTimeHours(actual_time_hours)
             assert isinstance(hours, float)
-            self.actual_time_hours = hours
+            
+            if hours != self.actual_time_hours and actual_time_hours:
+                change['actual_time_hours'] = dict(old=self.actual_time_hours,
+                                                   new=hours)
+            if actual_time_hours:
+                self.actual_time_hours = hours
+            elif self.actual_time_hours is not None:
+                self.actual_time_hours = None
             
             
         if REQUEST is not None:
             # we can save custom fields
             for field in self.getCustomFieldObjects():
                 self.setCustomFieldData(field, field.getId(), REQUEST.get(field.getId()))
+                # XXX need to integrate this with the change variable!
             
+        if change:
+            # something has changed in the issue!
+            change['change_date'] = DateTime()
+            issueuser = self.getIssueUser()
+            cmfuser = self.getCMFUser()
+            zopeuser = self.getZopeUser()
+            email = fromname = None
+            
+            if self.has_cookie(self.getCookiekey('email')):
+                email = self.get_cookie(self.getCookiekey('email'))
+            if self.has_cookie(self.getCookiekey('name')):
+                fromname = self.get_cookie(self.getCookiekey('name'))
+                    
+            if issueuser:
+                change['acl_adder'] = ','.join(issueuser.getIssueUserIdentifier())
+                fromname = issueuser.getFullname()
+                email = issueuser.getEmail()
+                
+            elif zopeuser:
+                path = '/'.join(zopeuser.getPhysicalPath())
+                name = zopeuser.getUserName()
+                change['acl_adder'] = ','.join([path, name])
+                
+            
+            if email:
+                change['email'] = email
+            if fromname:
+                change['fromname'] = fromname
+                    
+            self._addDetailChange(change)
             
         self._updateModifyDate()
         # things have changed, so update its index

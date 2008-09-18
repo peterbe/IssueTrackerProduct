@@ -32,6 +32,9 @@ table.announcement {
   margin-bottom:15px;
 }
 
+a.detailslink { font-size:10px; }
+#detailschanged-outer { margin-left:18px; }
+#detailschanged-outer td, #detailschanged-outer p { font-size:90%; }
 
 </style>
 

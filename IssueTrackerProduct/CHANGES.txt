@@ -1,4 +1,7 @@
 -
+    New feature: Detail changes to issues are recorded and shown on
+    the issue page.
+
     New feature: If you upload a file whose exact name is a method or
     a template the IssueTrackerProduct itself the files get
     automatically renamed.

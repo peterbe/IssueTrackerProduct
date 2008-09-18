@@ -186,7 +186,7 @@ class TestFunctionalBase(ZopeTestCase.FunctionalTestCase):
         request = self.app.REQUEST
         sdm = self.app.session_data_manager
         request.set('SESSION', sdm.getSessionData())
-            
+        
     
 class IssueTrackerTestCase(TestBase):
     
@@ -1219,7 +1219,78 @@ class IssueTrackerTestCase(TestBase):
         for status, verb in tracker.getStatusesMerged(aslist=True):
             self.assertTrue(isinstance(status, unicode))
             self.assertTrue(isinstance(verb, unicode))
-    
+
+            
+    def test_changeIssueDetails(self):
+        """ when you change issuedetails the changes are record as
+        an attribute in the issue. """
+        
+        tracker = self.folder.tracker
+        tracker.dispatch_on_submit = False # no annoying emails on stdout
+        tracker.can_add_new_sections = True
+
+        request = self.app.REQUEST
+        request.set('title', u'A TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        tracker.SubmitIssue(request)
+        
+        issue = tracker.getIssueObjects()[0]
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 0)
+        
+        # pretend to change sections but actually not
+        issue.editIssueDetails(sections=issue.getSections(),
+                               type=issue.getType(),
+                               urgency=issue.getUrgency())
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 0)
+        
+        # now actually change something (sections)
+        sections_before = issue.getSections()
+        issue.editIssueDetails(sections=['Foo'])
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 1)
+        change = changes[-1]
+        self.assertEqual(change['sections']['old'], sections_before)
+        self.assertEqual(change['sections']['new'], ['Foo'])
+        self.assertTrue('change_date' in change)
+        self.assertTrue(hasattr(change['change_date'], 'strftime'))
+
+        # now actually change something (type)
+        type_before = issue.getType()
+        issue.editIssueDetails(type='feature request')
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 2)
+        change = changes[-1]
+        self.assertEqual(change['type']['old'], type_before)
+        self.assertEqual(change['type']['new'], 'feature request')
+        
+        
+        # change several things
+        urgency_before = issue.getUrgency()
+        confidential_before = issue.isConfidential()
+        url2issue_before = issue.getURL2Issue()
+        tracker.use_estimated_time = True
+        tracker.use_actual_time = True
+        estimated_time_hours_before = issue.getEstimatedTimeHours()
+        actual_time_hours_before = issue.getActualTimeHours()
+        
+        issue.editIssueDetails(urgency='low', 
+                               confidential=not confidential_before,
+                               url2issue='http://www.issuetrackerproduct.com',
+                               estimated_time_hours=1,
+                               actual_time_hours=2
+                               )
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 3)
+        
+        change = changes[-1]
+        self.assertEqual(change['acl_adder'], '/test_folder_1_/acl_users,test_user_1_')
         
         
         
@@ -1227,6 +1298,7 @@ def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
     suite.addTest(makeSuite(IssueTrackerTestCase))
+    suite.addTest(makeSuite(TestFunctionalBase))
     return suite
 
 
