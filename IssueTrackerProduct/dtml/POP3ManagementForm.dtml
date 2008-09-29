@@ -580,12 +580,6 @@ one, this order is respected.</p></li>
 
 <p>If you're uncertain about how to set up a cron job, 
 then try <a href="http://www.issuetrackerproduct.com/Documentation/How-Tos/cronjob-email-check">this mini-howto</a> for how to setup crontab on Linux.<br />
-
-Alternatively you can <a href="http://dev.legco.biz/products/ZopeScheduler">download and install ZopeScheduler</a> but for that to work 
-you need to have a persistent ZODB object that the ZopeScheduler can trigger. To do that, simply 
-<a href="manage_addProduct/PythonScripts/manage_addPythonScript?id=TriggerInbounceEmailCheck&amp;submit=+Add+and+Edit+">create a Python Script</a> that can contain this code:
-<pre>
-context.check4MailIssues(verbose=True)</pre>
 </p>
 
 <br>&nbsp;
