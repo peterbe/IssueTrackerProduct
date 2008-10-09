@@ -1,4 +1,8 @@
 -
+    Bug fixed: Sometimes followup objects weren't index properly by
+    path. This was not a problem when the catalog was only used for
+    searching but now it's used to count issues too.
+    
     New feature: Detail changes to issues are recorded and shown on
     the issue page.
 

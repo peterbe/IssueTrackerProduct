@@ -18,6 +18,10 @@ class AssigneeNotFoundError(Exception):
 class UnmatchableError(Exception):
     pass
 
+class ConfigurationError(Exception):
+    """ something is configured wrongly or insufficiently """
+    pass
+
 class DataSubmitError(Exception):
     """happens when the data to a functional view is passed
     invalid data and it's not via the web """

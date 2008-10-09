@@ -29,6 +29,7 @@ from Utils import unicodify, asciify
 from Constants import *
 from Permissions import VMS
 from I18N import _
+from Errors import ConfigurationError
 
 #----------------------------------------------------------------------------
 
@@ -251,29 +252,38 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             REQUEST.RESPONSE.setHeader('Content-Type','text/plain')
         return self.original_email
     
-    def index_object(self, idxs=['comment','meta_type','fromname','email','path', 'modifydate']):
+    def index_object(self, idxs=None):
         """A common method to allow Findables to index themselves."""
         path = '/'.join(self.getPhysicalPath())
         catalog = self.getCatalog()
         
-        # because the ZCatalog might not yet have the 
-        # 'filenames' KeywordIndex we can't catalog this object
-        # with that index.
-        # Performing the following check every time takes
-        # time so by 2007 this whole if statement below can probably
-        # be removed because by then, must people will have updated
-        # their issuetrackers to enable the new 'filenames' 
-        # KeywordIndex 
+        if idxs is None:
+            # because I don't want to put mutable defaults in 
+            # the keyword arguments
+            idxs = ['comment','meta_type','fromname','email','path', 'modifydate']
+        else:
+            # No matter what, when indexing you must always include 'path'
+            # otherwise you might update indexes without putting the object
+            # brain in the catalog. If that happens the object won't be 
+            # findable in the searchResults(path='/some/path') even if it's
+            # findable on other indexes such as comment.
+            if 'path' not in idxs:
+                idxs.append('path')
+        
         indexes = catalog._catalog.indexes
         if 'filenames' not in idxs and indexes.has_key('filenames'):
             idxs.append('filenames')
             
+        # This test should not be needed in 2009 when hopefully 
+        # everyone has updated the catalogs to contain the new index
         if 'path' in idxs and not indexes.has_key('path'):
-            idxs.remove('path')
+            raise ConfigurationError(
+              "Catalog is missing 'path' index. Update Everything"
+              )
             
         if 'modifydate' in idxs and not indexes.has_key('modifydate'):
             idxs.remove('modifydate')
-            
+    
         catalog.catalog_object(self, path, idxs=idxs)
         
     def getFromname_idx(self):

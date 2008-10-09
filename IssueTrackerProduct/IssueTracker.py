@@ -5407,7 +5407,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         zcatalog = self.getCatalog()
         indexes = zcatalog._catalog.indexes
         
-        
+        if 'meta_type' not in zcatalog.schema():
+            zcatalog.addColumn('meta_type')
+            
         if not hasattr(zcatalog, 'Lexicon'):
             # This default lexicon sucks because it doesn't support unicode.
             # Consider creating a http://www.zope.org/Members/shh/UnicodeLexicon

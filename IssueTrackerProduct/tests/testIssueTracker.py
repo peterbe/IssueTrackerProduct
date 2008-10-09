@@ -1292,7 +1292,51 @@ class IssueTrackerTestCase(TestBase):
         change = changes[-1]
         self.assertEqual(change['acl_adder'], '/test_folder_1_/acl_users,test_user_1_')
         
+    def test_cataloging_issues(self):
+        """ adding an issue and threads to that should be indexed in the 
+        ICatalog correctly.
+        If you do an UpdateEverything they should still be there.
+        """
+        tracker = self.folder.tracker
+        tracker.dispatch_on_submit = False # no annoying emails on stdout
+        tracker.can_add_new_sections = True
+
+        request = self.app.REQUEST
+        request.set('title', u'A TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
         
+        tracker.SubmitIssue(request)
+        
+        issue = tracker.getIssueObjects()[0]
+        
+        request.set('comment', u'COMMENT')
+        issue.ModifyIssue(request)
+        
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+        self.assertEqual(len(issue.getThreadObjects()), 1)
+        
+        # lets check what's in the catalog
+        catalog = tracker.getCatalog()
+        # seaching inside it for path '/' should find two brains
+        brains = catalog.searchResults(path='/')
+        self.assertEqual(len(brains), 2)
+        meta_types = [x.meta_type for x in brains]
+        self.assertTrue('Issue Tracker Issue Thread' in meta_types)
+        self.assertTrue('Issue Tracker Issue' in meta_types)
+        
+        # If we run UpdateEverything, the same content is expected in the 
+        # catalog
+        tracker.UpdateEverything()
+        brains = catalog.searchResults(path='/')
+        self.assertEqual(len(brains), 2)
+        meta_types = [x.meta_type for x in brains]
+        self.assertTrue('Issue Tracker Issue Thread' in meta_types)
+        self.assertTrue('Issue Tracker Issue' in meta_types)
+
         
 def test_suite():
     from unittest import TestSuite, makeSuite
