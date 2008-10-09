@@ -920,8 +920,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             while comment.startswith('<p>&nbsp;</p>'):
                 comment = comment[len('<p>&nbsp;</p>'):].strip()
             
-        
-
         if not request.has_key('display_format'):
             saved_display_format = self.getSavedTextFormat()
             if saved_display_format:
@@ -1125,6 +1123,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # upload new file attachments
             if request.get('fileattachment', []):
                 self._uploadFileattachments(followupobject, request.get('fileattachment'))
+                followupobject.index_object(idxs=['filenames'])
             
             self.nullifyTempfolderREQUEST()
             
@@ -2304,13 +2303,15 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # because I don't want to put mutable defaults in 
             # the keyword arguments
             idxs = ['id','title','description', 'fromname','email','url2issue',
-                    'meta_type','status','path','modifydate']
+                    'meta_type','status','path','modifydate',
+                    'filenames']
         else:
             # No matter what, when indexing you must always include 'path'
             # otherwise you might update indexes without putting the object
             # brain in the catalog. If that happens the object won't be 
             # findable in the searchResults(path='/some/path') even if it's
             # findable on other indexes such as comment.
+            
             if 'path' not in idxs:
                 idxs.append('path')
         

@@ -260,7 +260,8 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         if idxs is None:
             # because I don't want to put mutable defaults in 
             # the keyword arguments
-            idxs = ['comment','meta_type','fromname','email','path', 'modifydate']
+            idxs = ['comment','meta_type','fromname','email','path', 
+                    'modifydate', 'filenames']
         else:
             # No matter what, when indexing you must always include 'path'
             # otherwise you might update indexes without putting the object
@@ -269,6 +270,8 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             # findable on other indexes such as comment.
             if 'path' not in idxs:
                 idxs.append('path')
+                
+        
         
         indexes = catalog._catalog.indexes
         if 'filenames' not in idxs and indexes.has_key('filenames'):
@@ -373,6 +376,15 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         files = []
         container = self.getFileattachmentContainer(only_temporary=only_temporary)
         return self.showFileattachments(container)
+    
+    def filenames(self):
+        """ return all the filenames of this issue splitted """
+        files = self.objectValues('File')
+        all = []
+        for file in files:
+            all.extend(Utils.filenameSplitter(file.getId()))
+        
+        return Utils.uniqify([x.lower() for x in all])    
     
 
 

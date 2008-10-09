@@ -801,7 +801,50 @@ class IssueTrackerTestCase(TestBase):
         # or without the extension
         name = os.path.splitext(os.path.basename(__file__))[0]
         self.assertEqual(issue, tracker._searchByFilename(name)[0])
-
+        
+        # Post a followup and expect to be able to search and find it
+        request.set('comment', u'COMMENT')
+        this_file = os.path.abspath(__file__)
+        a_file = os.listdir(os.path.dirname(this_file))[-1]
+        a_file = os.path.join(os.path.dirname(this_file), a_file)
+        request.set('fileattachment', NewFileUpload(a_file))
+        issue.ModifyIssue(request)
+        
+        thread = issue.getThreadObjects()[0]
+        
+        # search for the comment
+        q = 'COMmenT'
+        # and expect to find it's parent object which is the issue
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
+        # when finding things by threads it puts this into REQUEST
+        self.assertEqual(request.get('FirstThreadResultId'), issue.getId())
+        
+        # search for a threads file
+        q = os.path.basename(a_file)
+        # and expect to find it's parent object which is the issue
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
+        # and a variation of that
+        q = os.path.splitext(q)[0]
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
+        
+        # If you run the UpdateEverything() we can expect the same 
+        # content in the catalog
+        tracker.manage_delObjects(['ICatalog'])
+        tracker.UpdateEverything()
+        
+        # search for the comment
+        q = 'COMmenT'
+        # and expect to find it's parent object which is the issue
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
+        # when finding things by threads it puts this into REQUEST
+        self.assertEqual(request.get('FirstThreadResultId'), issue.getId())
+        # search for a threads file
+        q = os.path.basename(a_file)
+        # and expect to find it's parent object which is the issue
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
+        # and a variation of that
+        q = os.path.splitext(q)[0]
+        self.assertEqual(issue, tracker._searchCatalog(q)[0])
         
         
     def test_filterIssues(self):
