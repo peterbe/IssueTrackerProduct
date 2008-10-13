@@ -77,7 +77,7 @@ tal:attributes="action action">
 
 
 <div tal:condition="request/ShowFilterOptions|nothing" id="filteroptions">
-<tal:block tal:define="dummy  here/getAndSetContentType" tal:replace="nothing">
+<tal:block tal:define="dummy here/getAndSetContentType; dummy here/StopCache" tal:replace="nothing">
   If this template is called on its own from AJAX, we have to make sure the content-type is set.
 </tal:block>
 <tal:block condition="request/force_filtervaluer_update|nothing">

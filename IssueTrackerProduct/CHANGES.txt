@@ -1,4 +1,7 @@
 -
+    Bug fixed: Loaded filter options in AJAX now with stopped client
+    cache. Real#0782, Thanks Jack.
+    
     Bug fixed: File attachments of followups weren't immediately
     indexed.
     
