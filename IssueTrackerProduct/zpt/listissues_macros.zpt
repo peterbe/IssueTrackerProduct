@@ -95,7 +95,7 @@
                       <b tal:content="string:${field/getTitle}:"></b>
                     </td>
                     <td>
-                       <tal:input replace="structure python:field.render(here.getFilterValue(field.getId(), filterlogic, nothing), skip_extra_css=False, name_prefix='f-')" />
+                       <tal:input replace="structure python:field.render(here.getFilterValue(field.getId(), filterlogic, nothing), skip_extra_css=False, name_prefix='f-', in_filter=True)" />
                     </td>
                   </tr>
                 </tbody>

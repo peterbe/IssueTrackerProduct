@@ -149,8 +149,23 @@ def flat_to_list(string):
     return items
             
     
-    
 
+def compare_custom_value(value1, value2, python_type):
+    if python_type == 'int':
+        try:
+            return int(value1) == int(value2)
+        except ValueError:
+            pass
+    elif python_type == 'float':
+        try:
+            return float(value1) == float(value2)
+        except ValueError:
+            pass
+    
+    # most basic comparison
+    return value1 == value2
+
+        
 #----------------------------------------------------------------------------
 
 
@@ -402,12 +417,19 @@ class CustomField(Folder):
         
         assert len(value) <= 1, "Can't pass more than one argument as value"
         
-        
         inner = []
         attributes = {}
         # notice the order of these update() calls! It matters
         
         name_prefix = extra_attributes.pop('name_prefix','')
+        
+        # It's an option to called render_tag() with in_filter=True which tells
+        # us that this tag is rendered as a filter, in the filter options.
+        # This is something that can be done on-the-fly and it means that 
+        # certain things should work differently. For example, a 'select' type
+        # input get's an added 'size' and 'multiple' attribute when used as a 
+        # filter. 
+        in_filter = extra_attributes.pop('in_filter', False)
         
         # core attributes
         dom_id = self.attributes.get('dom_id', 'id_%s' % self.getId())
@@ -421,6 +443,13 @@ class CustomField(Folder):
         
         # extra on rendering attributes
         attributes.update(extra_attributes)
+        
+        # Now, "hack" the attributes if this is used in a filter
+        if in_filter:
+            if self.input_type == 'select':
+                attributes['multiple'] = 'multiple'
+                if 'size' not in attributes:
+                    attributes['size'] = min(5, len(list(self.getOptionsIterable())))
 
         # filler is a dict that we will use to render the template
         filler = {}
@@ -452,7 +481,6 @@ class CustomField(Folder):
                 
             elif 'value' in attributes:
                 v = attributes.pop('value')
-            
                 
             if not isinstance(v, (tuple, list)):
                 v = [v]
@@ -466,6 +494,17 @@ class CustomField(Folder):
                     value, label = option
                 else:
                     value, label = option, option
+                
+                if self.getPythonType() == 'int':
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        pass
+                elif self.getPythonType() == 'float':
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
                     
                 if value in v:
                     tmpl = u'<option value="%s" selected="selected">%s</option>'
@@ -474,7 +513,7 @@ class CustomField(Folder):
                     tmpl = u'<option value="%s">%s</option>'
                     
                 all_options.append(tmpl % (value, label))
-
+            
             if Set(v) - Set(_values_selected):
                 # there were values that weren't in the list of options!
                 _values_not_in_options = list(Set(v) - Set(_values_selected))
@@ -1042,6 +1081,7 @@ class CustomField(Folder):
     
     def showValue(self, value):
         """ return an HTML representation of a field for this value. """
+        
         if self.input_type in ('radio','checkbox'):
             for option in self.getOptions():
                 if isinstance(option, (tuple, list)):
@@ -1049,7 +1089,7 @@ class CustomField(Folder):
                 else:
                     save_value, show_value = option, option
                     
-                if save_value == value:
+                if compare_custom_value(save_value, value, self.python_type):
                     return show_value
             
         if self.python_type in ('lines','ulines') and isinstance(value, (tuple, list)):
@@ -1060,7 +1100,20 @@ class CustomField(Folder):
             return '<a href="%s">%s</a>' % (value, value.split('/')[-1])
             #as_obj = self.restrictedTraverse(value)
             return '<a href="%s">%s</a>' % (as_obj.absolute_url_path(), as_obj.getId())
+        elif self.input_type == 'select' and self.getOptionsIterable():
+            # try to show the label instead of the value 
+            # if the list of options are tuples
+            for option in self.getOptionsIterable():
+                if isinstance(option, (tuple, list)):
+                    value_, label = option
+                else:
+                    value_, label = option, option
+                    
+                if compare_custom_value(value_, value, self.python_type):
+                    return label
                 
+            # default
+            return value
         else:
             return value
             

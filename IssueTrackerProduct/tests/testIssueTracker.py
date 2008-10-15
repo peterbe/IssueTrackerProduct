@@ -1308,7 +1308,7 @@ class IssueTrackerTestCase(TestBase):
         type_before = issue.getType()
         issue.editIssueDetails(type='feature request')
         changes = issue.getDetailChanges()
-        self.assertEqual(len(changes), 2)
+        self.assertEqual(len(changes), 1) # merged with the previous one
         change = changes[-1]
         self.assertEqual(change['type']['old'], type_before)
         self.assertEqual(change['type']['new'], 'feature request')
@@ -1330,10 +1330,97 @@ class IssueTrackerTestCase(TestBase):
                                actual_time_hours=2
                                )
         changes = issue.getDetailChanges()
-        self.assertEqual(len(changes), 3)
+        self.assertEqual(len(changes), 1) # merged with the previous two
         
         change = changes[-1]
-        self.assertEqual(change['acl_adder'], '/test_folder_1_/acl_users,test_user_1_')
+        self.assertEqual(change['acl_adder'], '/test_folder_1_/acl_users,test_user_1_')\
+        
+        
+    def test_changeIssueDetails_twice_merged(self):
+        """ if you change details of an issue twice within the same minute, 
+        merge the changes into one change to prevent the interface from looking
+        like this:
+            Today 12:16 by Peter
+               Size: 5 6
+            Today 12:16 by Peter
+               Age: 28 29
+        """
+        tracker = self.folder.tracker
+        tracker.dispatch_on_submit = False # no annoying emails on stdout
+        tracker.can_add_new_sections = True
+
+        request = self.app.REQUEST
+        request.set('title', u'A TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        tracker.SubmitIssue(request)
+        
+        issue = tracker.getIssueObjects()[0]
+       
+        # now actually change something (sections)
+        sections_before = issue.getSections()
+        issue.editIssueDetails(sections=['Foo'])
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 1)
+        change = changes[-1]
+        self.assertEqual(change['sections']['old'], sections_before)
+        self.assertEqual(change['sections']['new'], ['Foo'])
+        self.assertTrue('change_date' in change)
+        self.assertTrue(hasattr(change['change_date'], 'strftime'))
+        
+        # change the urgency too as a separate request
+        issue.editIssueDetails(urgency='high')
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 1)
+        
+    def test_changeIssueDetails_twice_void(self):
+        """ if you change details of an issue twice within the same minute, 
+        merge the changes into one change to prevent the interface from looking
+        like this:
+            Today 12:16 by Peter
+               Size: 5 6
+            Today 12:16 by Peter
+               Age: 6 5
+               
+        But if the change, within one minute, goes back to the same value 
+        as before, drop the change altogether. 
+        """
+        tracker = self.folder.tracker
+        tracker.dispatch_on_submit = False # no annoying emails on stdout
+        tracker.can_add_new_sections = True
+
+        request = self.app.REQUEST
+        request.set('title', u'A TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        tracker.SubmitIssue(request)
+        
+        issue = tracker.getIssueObjects()[0]
+       
+        # now actually change something (sections)
+        sections_before = issue.getSections()
+        issue.editIssueDetails(sections=['Foo'])
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 1)
+        change = changes[-1]
+        self.assertEqual(change['sections']['old'], sections_before)
+        self.assertEqual(change['sections']['new'], ['Foo'])
+        self.assertTrue('change_date' in change)
+        self.assertTrue(hasattr(change['change_date'], 'strftime'))
+        
+        # change the urgency too as a separate request
+        issue.editIssueDetails(sections=sections_before)
+        changes = issue.getDetailChanges()
+        self.assertEqual(len(changes), 0)
+        
         
     def test_cataloging_issues(self):
         """ adding an issue and threads to that should be indexed in the 

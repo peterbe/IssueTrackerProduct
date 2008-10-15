@@ -1,4 +1,8 @@
 -
+    
+    New feature: Select custom fields become multiple-selects when used
+    as a filter. Real#0784, Real#0762
+
     Bug fixed: Loaded filter options in AJAX now with stopped client
     cache. Real#0782, Thanks Jack.
     

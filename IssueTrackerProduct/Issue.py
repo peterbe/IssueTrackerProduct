@@ -42,12 +42,12 @@ except ImportError:
 from IssueTracker import IssueTracker, debug, safe_hasattr
 from TemplateAdder import addTemplates2Class
 import Utils
-from Utils import unicodify, asciify
+from Utils import unicodify, asciify, merge_changes
 from Constants import *
 from Errors import *
 from Permissions import VMS, ChangeIssuePermission
 from I18N import _
-from CustomField import CustomFieldsIssueBase
+from CustomField import CustomFieldsIssueBase, compare_custom_value
 
 #----------------------------------------------------------------------------
 
@@ -272,15 +272,42 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         try:
             if isinstance(self.detail_changes, list):
                 changes = self.detail_changes
+                
                 changes.append(change)
                 self.detail_changes = changes
             else:
-                self.detail_changes.append(change)
+                _merged_change = False
+                try:
+                    last_change = self.detail_changes[-1]
+                    one_minute = 1.0 / 24 / 60
+                    if (change['change_date'] - last_change['change_date']) <= one_minute:
+                        if last_change.get('acl_adder') == change.get('acl_adder'):
+                            # same user very close together
+                            self.detail_changes[-1] = merge_changes(last_change, change)
+                            
+                            # if someone changed say urgency low->high then immediately after
+                            # back to urgency high->low there are no actual changes here.
+                            # Then we can pop the last item
+                            _actual_changes = [k for (k,v) in self.detail_changes[-1].items()
+                                               if isinstance(v, dict) and 'new' in v and 'old' in v]
+                            if not _actual_changes:
+                                self.detail_changes.pop()
+                            _merged_change = True
+                    
+                except IndexError:
+                    # there was no last change
+                    pass
+            
+                if not _merged_change:
+                    self.detail_changes.append(change)
+                    
             
         except AttributeError:
             changes = PersistentList()
             changes.append(change)
             self.detail_changes = changes
+            
+        
             
     def isRecentlyAdded(self):
         """ return true if the issue was recently added.
@@ -1506,8 +1533,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if REQUEST is not None:
             # we can save custom fields
             for field in self.getCustomFieldObjects():
+                old_data = self.getCustomFieldData(field.getId())
                 self.setCustomFieldData(field, field.getId(), REQUEST.get(field.getId()))
-                # XXX need to integrate this with the change variable!
+                new_data = REQUEST.get(field.getId())
+                if new_data is not None and not \
+                  compare_custom_value(old_data, new_data, field.getPythonType()):
+                    change[field.getId()] = dict(old=field.showValue(old_data),
+                                                 new=field.showValue(new_data))
             
         if change:
             # something has changed in the issue!
@@ -1531,7 +1563,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 path = '/'.join(zopeuser.getPhysicalPath())
                 name = zopeuser.getUserName()
                 change['acl_adder'] = ','.join([path, name])
-                
             
             if email:
                 change['email'] = email

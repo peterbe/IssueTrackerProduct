@@ -393,7 +393,34 @@ class UnicodifyAsciifyStrings(unittest.TestCase):
         self.assertEqual(func(s, 'ignore'), '')
         self.assertTrue(isinstance(func(s), str))
         
+
+class MiscTestCase(unittest.TestCase):
     
+    def test_merge_changes(self):
+        """ _mergeChanges(old_change, new_change) is part of the detail changing
+        code that takes two changes and finds a best merge between them.
+        """
+        old_change = {'urgency': {'old':'low', 'new':'medium'},
+                      'type': {'old':'bug', 'new':'feature'},
+                      'age': {'old':10, 'new': 12},
+                      }
+                      
+        new_change = {'urgency': {'old':'medium', 'new':'high'},
+                      'sections': {'old':['Foo'], 'new':['Bar']},
+                      'age': {'old':12, 'new':10},
+                      }
+                      
+        expected_result =\
+            {'urgency': {'old':'low', 'new':'high'},
+             'type': {'old':'bug', 'new':'feature'},
+             'sections': {'old':['Foo'], 'new':['Bar']},
+            }
+                      
+        func = Utils.merge_changes
+        result = func(old_change, new_change)
+        self.assertEqual(result, expected_result)
+        
+
         
 def test_suite():
     from unittest import TestSuite, makeSuite
@@ -405,6 +432,7 @@ def test_suite():
     suite.addTest(makeSuite(StandaloneWordRegex))
     suite.addTest(makeSuite(ValidEmailAddressTestCase))
     suite.addTest(makeSuite(UnicodifyAsciifyStrings))
+    suite.addTest(makeSuite(MiscTestCase))
     
     return suite
     

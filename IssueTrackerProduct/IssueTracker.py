@@ -6285,7 +6285,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         fvval = [x.strip() for x in fvval if x.strip()]
                         name +=  "%s: %s " % (field.getTitle(), ', '.join(fvval))
                     else:
-                        name +=  "%s: %s " % (field.getTitle(), fvval)
+                        name +=  "%s: %s " % (field.getTitle(), field.showValue(fvval))
 
             if name:
                 return start + name.strip()
@@ -7752,7 +7752,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     
                 if fvval:
                     custom_filters[field.getId()] = fvval
-        
+                    
         if _do_save_filter:
             self.saveFilterOption()
 
@@ -7827,7 +7827,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                             # there IS something in issue_value that is NOT in value
                             custom_filter_match = True
                             break
-                        
+                    elif is_list(value) and not is_list(issue_value):
+                        if issue_value not in value:
+                            custom_filter_match = True
+                            break
                     else:
                         if value != issue_value:
                             custom_filter_match = True
@@ -7873,7 +7876,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 custom_filter_match = False
                 for field_id, value in custom_filters.items():
                     issue_value = issue.getCustomFieldData(field_id)
-                    if issue_value == value:
+                    if is_list(value) and not is_list(issue_value):
+                        if issue_value in value:
+                            custom_filter_match = True
+                    elif issue_value == value:
                         custom_filter_match = True
                 
                 if custom_filter_match:

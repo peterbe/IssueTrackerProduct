@@ -77,6 +77,45 @@ def asciify(s, errors='xmlcharrefreplace'):
     """ turns a str or unicode into ascii str """
     return unicodify(s).encode('ascii', errors)
 
+
+def merge_changes(old_change, new_change):
+    """ merge two dictionaries and return a new dictionary.
+    This example should explain how it works:
+        old_change = {'urgency': {'old':'low', 'new':'medium'},
+                      'type': {'old':'bug', 'new':'feature'},
+                      'age': {'old':10, 'new': 12},
+                      }
+                      
+        new_change = {'urgency': {'old':'medium', 'new':'high'},
+                      'sections': {'old':['Foo'], 'new':['Bar']},
+                      'age': {'old':12, 'new':10},
+                      }
+                      
+        return:
+           {'urgency': {'old':'low', 'new':'high'},
+            'type': {'old':'bug', 'new':'feature'},
+            'sections': {'old':['Foo'], 'new':['Bar']},
+            }
+            
+    Note how the change changed it's mind on the key 'age'. 
+    Between the two no change was actually ever made.
+    """
+    for key, value in new_change.items():
+        if not (isinstance(value, dict) and 'old' in value and 'new' in value):
+            continue
+        if key in old_change:
+            # merge! 
+            old = old_change[key]['old']
+            new = value['new']
+            if old == new:
+                old_change.pop(key)
+            else:
+                old_change[key] = dict(old=old, new=new)
+            
+        else:
+            old_change[key] = value
+    return old_change
+
 def flatten_lines(nested_list):
     all = []
     for item in nested_list:

@@ -114,7 +114,6 @@ tal:attributes="action action">
  tal:attributes="value request/report"/>
 
 
-
 <table metal:use-macro="here/listissues_macros/macros/filteroptionstable"></table>
  
 
