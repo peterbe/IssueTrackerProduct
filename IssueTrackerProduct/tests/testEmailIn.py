@@ -83,6 +83,17 @@ if 'Security' in issue.getSections():
 
 #------------------------------------------------------------------------------
 
+snatched_emails = []
+def fake_sendEmail(msg, to, fr, subject, **kw):
+    snatched_emails.append(
+       dict(msg=msg,
+            to=to,
+            fr=fr,
+            subject=subject,
+        )
+    )
+                          
+
 class TestBase(ZopeTestCase.ZopeTestCase):
 
     def dummy_redirect(self, *a, **kw):
@@ -111,6 +122,10 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         request.set('SESSION', sdm.getSessionData())
         
         #self.has_redirected = False
+        
+    def _mockMailHost(self):
+        context = self.folder.tracker
+        context.sendEmail = fake_sendEmail
         
 #    def tearDown(self):
 #        pass
@@ -422,6 +437,50 @@ class EmailInTestCase(TestBase):
 
         issue = tracker.getIssueObjects()[0]
         self.assertEqual(issue.getTitle(), u'Re: Hello')
+        
+        
+    def test_emailIn8(self):
+        """ Test what the email in receipt says when emailing in """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        ae.send_confirm = True
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-4.email' sends to peter@example.com but is CCed to
+        # mail@example.com
+        FakePOP3.files = [abs_path('email-in-8.email'),]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        self._mockMailHost()
+        
+        result = tracker.check4MailIssues(verbose=True)
+        
+        receipt = snatched_emails[0]
+        
+        self.assertEqual(receipt['to'], 'Mr Exception <special@peterbe.com>')
+        self.assertTrue(receipt['subject'].count(tracker.getTitle()))
+        # expect the issue id to be mentioned in the email msg
+        issue = tracker.getIssueObjects()[0]
+        self.assertTrue(receipt['msg'].count(issue.getId()))
+        
+        # do it again and this time configure the receipt to 
+        # reveal the issue URL
+        ae.reveal_issue_url = True
+        
+        FakePOP3.files = [abs_path('email-in-8b.email'),]
+        result = tracker.check4MailIssues(verbose=False)
+        
+        assert len(tracker.getIssueObjects()) == 2
+        issue2 = tracker.getIssueObjects()[1]
+        receipt = snatched_emails[1]
+        self.assertTrue(receipt['msg'].count(issue2.absolute_url()))
 
         
     def test_emailIn_none(self):

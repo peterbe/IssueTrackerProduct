@@ -7174,9 +7174,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         if q is None and request.get('q','').strip():
             q = q_orig = request.get('q').strip()
-            transtab = string.maketrans('/ ','_ ')
-            q = string.translate(q, transtab, '?&!;<=>*#[]{}')
+            #transtab = string.maketrans('/ ','_ ')
+            #q = string.translate(q, transtab, '?&!;<=>*#[]{}')
+            for char in '?&!;<=>*#[]{}':
+                q = q.replace(char, '')
+            
             ##q=q.replace('%','*') # allow both wildcards # needs thought
+            
+            
+        if isinstance(q, str):
+            q = unicodify(q)
             
         i = None
         if request.has_key('i'):
@@ -7236,12 +7243,36 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             except ParseError, msg:
                 request.set('SearchError', msg)
                 seq = []
+            except UnicodeEncodeError, msg:
+                # if this was because q was Unicode and the stupid ZCatalog is using a 
+                # globber that is not ready for Unicode we're going to try again but
+                # with a byte string.
+                if isinstance(q, unicode):
+                    q = q.encode(UNICODE_ENCODING)
+                    try:
+                        seq = self._searchCatalog(q, search_only_on=request.get('search_only_on'))
+                    except UnicodeEncodeError, __:
+                        # didn't work either as unicode or byte string. 
+                        try:
+                            err_log = self.error_log
+                            err_log.raising(sys.exc_info())
+                        except:
+                            pass
+                        seq = []
+                    
+                else:
+                    try:
+                        err_log = self.error_log
+                        err_log.raising(sys.exc_info())
+                    except:
+                        pass
+                    seq = []
             except:
                 try:
                     err_log = self.error_log
                     err_log.raising(sys.exc_info())
                 except:
-                    pass                                
+                    pass
                 seq = []
 
             # searched and found one?
@@ -7375,7 +7406,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         request = self.REQUEST
         catalog = self.getCatalog()
         seq = []
-        titleq = '*'+q+'*'
+        
+        if isinstance(q, str):
+            # because of the search input we prefer the simpler
+            # <input name="q"> rather than <input name="q:UTF-8:ustring">
+            q = unicodify(q)
+            request.set('q', q)
+            
+        titleq = u'*'+q+'*'
 
         # prepare the search result variables
         _exact_title_search = []
@@ -7395,9 +7433,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if not search_only_on or 'title' in search_only_on:
             _exact_title_search = catalog.searchResults(title=q)
             brains += _exact_title_search
-                        
+                    
         ss_q = ss(q)
-        
+    
         if ss_q in [ss(x) for x in self.statuses]:
             # find the correct case
             for each in self.statuses:
@@ -7426,7 +7464,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     self._setSearchFilterWarning(type_=each)
                     break
                 
-        
         if len(brains) < self.default_batch_size:
             _description_search = catalog.searchResults(description=q)
             brains += _description_search
