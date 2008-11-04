@@ -13,6 +13,7 @@ __version__='0.0.7'
 from AccessControl import User
 from Globals import DTMLFile, MessageDialog, Persistent
 from AccessControl import ClassSecurityInfo
+from AccessControl.Role import DEFAULTMAXLISTUSERS
 
 # Product
 import Utils
@@ -196,13 +197,34 @@ class IssueUserFolder(User.UserFolder):
     _editUser = DTMLFile('dtml/editIssueUser', globals())
     _passwordReminder = DTMLFile('dtml/passwordReminder', globals())
     
+    _userFolderProperties = DTMLFile('dtml/userFolderProps', globals())
+    
+    
     security = ClassSecurityInfo()
 
     def __init__(self, webmaster_email=''):
         """ Same as inherited but a possible webmaster_email attribute """
         self.webmaster_email = webmaster_email
         apply(User.UserFolder.__init__, (self,), {})
+        
 
+    def manage_setUserFolderProperties(self, encrypt_passwords=0,
+                                       update_passwords=0,
+                                       maxlistusers=DEFAULTMAXLISTUSERS,
+                                       webmaster_email=None,
+                                       REQUEST=None):
+        """ wrapper on manage_setUserFolderProperties() from base class
+        that also sets webmaster_email """
+        
+        if webmaster_email is not None:
+            self.webmaster_email = webmaster_email.strip()
+        return User.UserFolder.manage_setUserFolderProperties(self,
+                                               encrypt_passwords=encrypt_passwords,
+                                               update_passwords=update_passwords,
+                                               maxlistusers=maxlistusers,
+                                               REQUEST=REQUEST)
+        
+        
     def _addUser(self, name, password, confirm, roles, domains, REQUEST=None):
         if not name:
             return MessageDialog(
@@ -475,7 +497,7 @@ class IssueUserFolder(User.UserFolder):
                             action ='manage_main')
                             
         issuetrackerroot = self.getIssueTrackerRoot()
-                            
+        
         if self.webmaster_email:
             from_field = self.webmaster_email
         elif issuetrackerroot:
