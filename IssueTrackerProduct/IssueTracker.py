@@ -9442,6 +9442,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             mfrom = self.sitemaster_email
         
         subject = "%s: Your issue has been added" % self.getRoot().getTitle()
+        if self.ShowIdWithTitle():
+            subject += ' (#%s)' % issueobject.getId()
         
         msg = "Thank you for submitting this issue via email.%s%s" % (br, br)
         if reveal_issue_url:

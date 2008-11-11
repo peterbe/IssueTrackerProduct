@@ -1,5 +1,8 @@
 -
-    
+
+    New feature: Issue ID is included in the subject line of email-in
+    receipts if set up to show ID with the title. Real#0797
+
     New feature: Select custom fields become multiple-selects when used
     as a filter. Real#0784, Real#0762
 
