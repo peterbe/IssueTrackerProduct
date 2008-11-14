@@ -223,7 +223,7 @@ ICON_ASSOCIATIONS={'bat':'bat.gif',  'chm':'chm.gif',  'dll':'dll.gif',
                    'djv':'djvu.gif', 'ogg':'music.gif','wma':'music.gif',
                    'vsd':'vsd.gif',  'tex':'tex.png',  'sxc':'sxc.png',
                    'sxi':'sxi.png',  'sxw':'sxw.png',  'rar':'rar.png',
-                   'dev':'deb.png',  'rpm':'deb.png',  'ods':'sxc.png',
+                   'deb':'deb.png',  'rpm':'package.png','ods':'sxc.png',
                    'odt':'sxw.png',  'zcml':'xml.gif',
                    }
 
