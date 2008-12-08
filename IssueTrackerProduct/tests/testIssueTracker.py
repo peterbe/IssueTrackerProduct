@@ -1466,7 +1466,99 @@ class IssueTrackerTestCase(TestBase):
         meta_types = [x.meta_type for x in brains]
         self.assertTrue('Issue Tracker Issue Thread' in meta_types)
         self.assertTrue('Issue Tracker Issue' in meta_types)
+        
+    def test_assign_on_submit_email(self):
+        """ Make sure the issue title is in the subjectline when you assign an issue to
+        someone """
+        tracker = self.folder.tracker
+        # set a valid sitemaster email address
+        tracker.sitemaster_email = 'peter@test.com'
+        # switch on assignment
+        tracker.use_issue_assignment = True
+        # add a user to assign stuff to
+        tracker._addRole(IssueTrackerUserRole)
+        tracker._addRole(IssueTrackerManagerRole)
+        tracker.manage_addProduct['IssueTrackerProduct']\
+          .manage_addIssueUserFolder(keep_usernames=True)
+        tracker.acl_users.userFolderAddUser("user", "secret", [IssueTrackerUserRole], [],
+                                            email="user@test.com",
+                                            fullname="User Name")
+        user = tracker.getAllIssueUsers()[0]
+        
+        request = self.app.REQUEST
+        request.set('title', u'A TITLE')
+        request.set('fromname', u'From name')
+        request.set('email', u'email@address.com')
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('assignee', user['identifier'])
+        request.form['notify-assignee'] = '1'
+        
+        no_trapped_emails = len(__trapped_emails__)
+        tracker.SubmitIssue(request)
+        
+        # There should now be one issue...
+        issues = tracker.getIssueObjects()
+        self.assertEqual(len(issues), 1)
+        issue = issues[0]
+        # and it should have an assignment
+        assignments = issue.getAssignments()
+        self.assertEqual(len(assignments), 1)
+        assignment = assignments[0]
+        
+        self.assertEqual(assignment.getFromname(), request.get('fromname'))
+        self.assertEqual(assignment.getEmail(), request.get('email'))
+        
+        self.assertEqual(assignment.getAssigneeFullname(), u"User Name")
+        self.assertEqual(assignment.getAssigneeEmail(), "user@test.com")
+        
+        # Look at the notifications inside the issue
+        notifications = issue.getCreatedNotifications()
+        self.assertEqual(len(notifications), 1)
+        notification = notifications[0]
+        
+        assert len(__trapped_emails__) == no_trapped_emails + 1
+        
+        # check that the
+        assert notification.dispatched
+        
+        latest_email = __trapped_emails__[-1]
+        
+        self.assertTrue(latest_email['subject'].count(request.get('title')))
+        
+        # then, later change the assignment and that should trigger another 
+        # email notifications
+        tracker.acl_users.userFolderAddUser("user2", "secret", [IssueTrackerUserRole], [],
+                                            email="user2@test.com",
+                                            fullname="Second Name")
+        users = tracker.getAllIssueUsers()
+        user2 = [x for x in users if x['identifier'].endswith('user2')][0]
 
+        uf = tracker.acl_users
+        user = uf.getUserById('user')
+        user = user.__of__(uf)
+        newSecurityManager(None, user)
+
+        assert getSecurityManager().getUser().getUserName() == 'user'
+        
+        issue.changeAssignment(user2['identifier'], send_email=True)
+        
+        assert len(__trapped_emails__) == no_trapped_emails + 2
+        
+        assignments = issue.getAssignments()
+        self.assertEqual(len(assignments), 2)
+        
+        # Look at the notifications inside the issue
+        notifications = issue.getCreatedNotifications()
+        self.assertEqual(len(notifications), 2)
+        notification = notifications[-1]
+        assert notification.dispatched
+        
+        latest_email = __trapped_emails__[-1]
+        
+        self.assertTrue(latest_email['subject'].count(request.get('title')))
+        self.assertTrue(latest_email['mto'], 'user2@test.com')
         
 def test_suite():
     from unittest import TestSuite, makeSuite
@@ -1498,7 +1590,7 @@ MailBase._send = _monkeypatch_send
 
 if DEBUG:
     def _monkeypatch_sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
-        __trapped_emails__.append(dict(mfrom=fr, mto=to, messageText=msg))
+        __trapped_emails__.append(dict(mfrom=fr, mto=to, messageText=msg, subject=subject))
         
     from Products.IssueTrackerProduct.IssueTracker import IssueTracker
     IssueTracker.sendEmail = _monkeypatch_sendEmail
