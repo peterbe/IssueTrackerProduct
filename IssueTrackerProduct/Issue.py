@@ -226,7 +226,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
                 mtool = CMF_getToolByName(self, 'portal_membership')
                 member = mtool.getMemberById(name)
-                if member.getProperty('fullname'):
+                if member and member.getProperty('fullname'):
                     return member.getProperty('fullname')
             
         return self.fromname
@@ -252,7 +252,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
                 mtool = CMF_getToolByName(self, 'portal_membership')
                 member = mtool.getMemberById(name)
-                if member.getProperty('email'):
+                if member and member.getProperty('email'):
                     return member.getProperty('email')
                 
         return self.email
