@@ -1,4 +1,5 @@
 -
+    Bug fixed: CMF member can be None without breaking. (Real#0811)
 
     New feature: Issue ID is included in the subject line of email-in
     receipts if set up to show ID with the title. Real#0797
