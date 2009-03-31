@@ -1,4 +1,7 @@
 -
+    Bug fixed: Fixed dispatcher() so that it doesn't break on deleted
+    issues.
+    
     Bug fixed: CMF member can be None without breaking. (Real#0811)
 
     New feature: Issue ID is included in the subject line of email-in

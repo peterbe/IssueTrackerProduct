@@ -1560,6 +1560,7 @@ class IssueTrackerTestCase(TestBase):
         self.assertTrue(latest_email['subject'].count(request.get('title')))
         self.assertTrue(latest_email['mto'], 'user2@test.com')
         
+        
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()

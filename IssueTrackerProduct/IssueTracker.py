@@ -5647,7 +5647,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
             issueID = notification.issueID
             #issue_url = self.issueURLbyID(issueID)
-            issue = self.getIssueObject(issueID)
+            try:
+                issue = self.getIssueObject(issueID)
+            except AttributeError:
+                logger.warn("The issue %r does not exist in %s (notification=%s)" %\
+                            (issueID, self.absolute_url_path(), notification.absolute_url_path())
+                           )
+                continue
+            
             issueid_header = issue.getGlobalIssueId()
             issue_url = issue.absolute_url()
             
