@@ -1,4 +1,5 @@
--
+- 0.10.3
+
     Bug fixed: Fixed dispatcher() so that it doesn't break on deleted
     issues.
     
