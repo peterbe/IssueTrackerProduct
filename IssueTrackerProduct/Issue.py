@@ -103,6 +103,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                  description, display_format, issuedate='', 
                  acl_adder='', submission_type='',
                  subscribers=None, # keep this parameter (not used) for legacy (remove in a year)
+                 due_date=None,
                  ):
         """ init an Issue object """
         self.id = str(id)
@@ -122,6 +123,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         self.url2issue = url2issue
         self.confidential = confidential
         self.hide_me = hide_me
+        self.due_date = due_date
         self.description = unicodify(description)
         if display_format:
             self.display_format = display_format
@@ -162,7 +164,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     def relative_url_path(self):
         """ return the url to this issue based on where you are at the moment """
         return self.absolute_url().replace(self.REQUEST.URL1+'/','')
-        
 
     def getTitle(self):
         """ return title """
@@ -204,6 +205,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     def getIssueDate(self):
         """ return issuedate """
         return self.issuedate
+    
+    def getDueDate(self):
+        return getattr(self, 'due_date', None)
 
     def getFromname(self, issueusercheck=True):
         """ return fromname """
@@ -1351,7 +1355,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             return _(u"Estimated time")
         elif key == 'actual_time_hours':
             return _(u"Actual time")
-        
+        elif key == 'due_date':
+            return _(u"Due date")
+
         return key.capitalize()
     
     def showChangedDetail(self, key, value):
@@ -1407,6 +1413,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                          confidential=False, url2issue=None, 
                          estimated_time_hours=None,
                          actual_time_hours=None,
+                         due_date=None,
                          REQUEST=None):
         """ used post submission to change some of the smaller details. """
         assert self.AllowIssueAttributeChange(), "Issue attribute change not enabled"
@@ -1443,7 +1450,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         if not message:
                             message = '*failed the validation test*'
                         SubmitError[field.getId()] = message
-            
+                        
+            if self.EnableDueDate():
+                if due_date:
+                    if not self.parseDueDate(due_date):
+                        SubmitError['due_date'] = _("Invalid date")
+    
             # this perhaps needs to be improved
             if SubmitError:
                 page = self.ShowIssue
@@ -1483,6 +1495,20 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if self.urgency != urgency:
                 change['urgency'] = dict(old=self.urgency, new=urgency)
             self.urgency = urgency
+            
+        # due_date must be a valid date
+        if self.EnableDueDate():
+            if due_date or self.getDueDate():
+                if due_date:
+                    due_date = self.parseDueDate(due_date)
+                    assert due_date is not None, "Invalid due date"
+                else:
+                    due_date = None
+                    
+                if due_date != self.getDueDate():
+                    change['due_date'] = dict(old=self.getDueDate(), new=due_date)
+                assert due_date is None or hasattr(due_date, 'strftime'), repr(due_date)
+                self.due_date = due_date
             
         # because of the way forms work, the confidential boolean is never 
         # present as False, so we have to assume that it is default.
@@ -1542,6 +1568,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                                  new=field.showValue(new_data))
             
         if change:
+            
             # something has changed in the issue!
             change['change_date'] = DateTime()
             issueuser = self.getIssueUser()
@@ -1570,7 +1597,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 change['fromname'] = fromname
                     
             self._addDetailChange(change)
-            
+
         self._updateModifyDate()
         # things have changed, so update its index
         self.reindex_object()
@@ -3032,6 +3059,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                  issuetype=None, urgency=None, sections=None,
                  fromname=None, email=None, url2issue=None,
                  confidential=None, hide_me=None,
+                 due_date=None,
                  description=None, display_format=None,
                  acl_adder=None, assignee_identifier=None,
                  is_autosave=False,
@@ -3051,6 +3079,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         self.url2issue = url2issue
         self.confidential = confidential
         self.hide_me = hide_me
+        self.due_date = due_date
         self.description = unicodify(description)
         self.display_format = display_format
         self.acl_adder = acl_adder
@@ -3145,6 +3174,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                     url2issue=None,
                     confidential=None,
                     hide_me=None,
+                    due_date=None,
                     display_format=None,
                     acl_adder=None,
                     assignee_identifier=None,
@@ -3192,6 +3222,10 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         if hide_me is not None:
             self.hide_me = hide_me
 
+        if due_date is not None:
+            if self.parseDueDate(due_date):
+                self.due_date = self.parseDueDate(due_date)
+
         if display_format is not None and display_format in self.display_formats:
             self.display_format = display_format
 
@@ -3218,6 +3252,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                 'sections', 'fromname', 'email', 'url2issue',
                 'confidential', 'hide_me', 'display_format',
                 'acl_adder', 'assignee_identifier', 'is_autosave',
+                'due_date',
                 'Tempfolder_fileattachments')
 
     def get__dict__nicely(self):

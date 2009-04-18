@@ -45,6 +45,7 @@ def initialize(context):
     """ Initialize IssueTracker product """
     from Globals import DevelopmentMode
     
+    import UnicodeSplitter
     
     try:
 

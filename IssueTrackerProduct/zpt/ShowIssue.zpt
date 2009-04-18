@@ -165,9 +165,6 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 </span>
 
 
-
-
-
 <div align="center" tal:condition="not:request/compareTo|nothing">
 
   <span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span>
@@ -193,6 +190,7 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
   
 
 </div>
+
 
 
 <div 

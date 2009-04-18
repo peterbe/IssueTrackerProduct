@@ -68,6 +68,15 @@
            tal:content="request/urgency|nothing"
            tal:attributes="class python:here.getUrgencyCSSSelector(request.get('urgency'))">critical</span></td>
     </tr>
+    <tr tal:condition="here/EnableDueDate">
+      <td class="ilabel">Due date:</td>
+      <td><span tal:condition="python:request.get('due_date') and here.parseDueDate(request.get('due_date'))"
+           tal:content="structure python:here.showDate(here.parseDueDate(request['due_date']), include_hour=False)"
+           tal:attributes="class python:here.getDueDateCSSSelector(request.get('due_date'))">due!</span>
+           <em class="submiterror"
+              tal:condition="python:request.get('due_date') and not here.parseDueDate(request.get('due_date'))">invalid due date</em>
+       </td>
+    </tr>    
     <tr tal:define="url2issue request/url2issue|nothing"
         tal:condition="url2issue">
       <td class="ilabel">URL:</td>

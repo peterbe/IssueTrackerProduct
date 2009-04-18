@@ -1,7 +1,8 @@
 <form method="get" metal:define-macro="search_form"
    tal:define="qvalue string:; qvalue request/q | qvalue; page python:test(here.thisInURL('CompleteList'),'CompleteList','ListIssues');actionurl string:${here/getRootRelativeURL}/${page}"
    tal:attributes="action python:here.aurl(actionurl, {'sortorder':'search'})">
-<input name="q" id="q" value="" tal:attributes="value qvalue" maxlength="30" />  
+<input name="q" id="q" maxlength="30"
+       tal:attributes="value python:here.unicodify(qvalue)"/>
 <input type="submit" value="Search" />
 <div tal:condition="python:here.hasFilter() or here.getCurrentlyUsedSavedFilter(request_only=0)">
 <input type="checkbox" name="filter_in_search" value="1" 

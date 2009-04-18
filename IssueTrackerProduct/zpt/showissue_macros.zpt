@@ -94,6 +94,22 @@
 	</select>
       </td>
     </tr>
+    <tr tal:condition="python:here.EnableDueDate()">
+      <td tal:condition="python:change or here.getDueDate()"
+          class="ilabel">Due date:</td>
+      <td tal:condition="python:not change and here.getDueDate()">
+      <span tal:content="structure python:here.showDate(here.parseDueDate(here.getDueDate()), include_hour=False)"
+           tal:attributes="class python:here.getDueDateCSSSelector(here.getDueDate())">due!</span>
+       </td>
+      <td tal:condition="change">
+        <input name="due_date" tabindex="40" size="12"
+               tal:attributes="value python:request.get('due_date', here.getDueDate() and here.getDueDate().strftime('%Y/%m/%d') or '')" />
+        <noscript tal:content="python:here.showStrftimeFriendly(here.display_date, strip_hour_part=True)"></noscript>
+            <span class="submiterror" tal:condition="options/SubmitError|nothing" 
+                  tal:content="python:here.ShowSubmitError(options, 'due_date')"></span>
+       </td>       
+    </tr>    
+
     <tr tal:condition="python:here.url2issue and not change">
       <td class="ilabel">URL:</td>
       <td><a tal:attributes="href python:here.showURL2Issue(here.url2issue, href=1)"

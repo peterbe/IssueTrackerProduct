@@ -98,6 +98,8 @@ from Products.ZCatalog.CatalogAwareness import CatalogAware
 from Acquisition import aq_inner, aq_parent, aq_base
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
+from DateTime.DateTime import SyntaxError as DateTimeSyntaxError
+from DateTime.DateTime import DateError
 from App.ImageFile import ImageFile
 from ZPublisher.HTTPRequest import record
 from zExceptions import NotFound, Unauthorized
@@ -217,6 +219,46 @@ def manage_addIssueTracker(dispatcher, id, title='', REQUEST=None):
 
 class IssueTrackerFolderBase(Folder.Folder, Persistent):
     """ A base class for the IssueTracker class """
+    
+    def showStrftimeFriendly(self, strftime, strip_hour_part=False):
+        """return the strftime translated into more human readable format
+        that you don't have to be a python programmer to understand. 
+        For example %Y/%m/%d means in English YYYY/MM/DD
+        """
+        if strip_hour_part:
+            strftime = strftime.replace('%H:%M:%S', '')
+            strftime = strftime.replace('%H:%M', '')
+            strftime = strftime.replace('%H', '')
+            strftime = strftime.replace('%M', '')
+        else:
+            strftime = strftime.replace('%H', 'hh')
+            strftime = strftime.replace('%M', 'mm')
+            
+        strftime = strftime.replace('%d', 'DD')
+        strftime = strftime.replace('%m', 'MM')
+        strftime = strftime.replace('%Y', 'YYYY')
+        strftime = strftime.replace('%B', 'month')
+        strftime = strftime.replace('%b', 'mon')
+        return strftime.strip()
+    
+    def unicodify(self, s):
+        """return a Unicode object of this string.
+        It will only do this if the object (the string object) is a byte 
+        string.
+        
+        The reason for making this method into a publically available method
+        is so that it can be used from the templates. This is necessary in 
+        the case of for example inserting unicode strings into templates
+        from things like the request so that the ZPT doesn't have to guess
+        the encoding. If you do something like this in the template::
+          
+          REQUEST.set('myvar', '\xe3')
+          or url?myvar=\xa3
+          ---
+          <input tal:attributes="value request/myvar"/>
+        Then ZPT will have to guess and it will most likely get it wrong.
+        """
+        return unicodify(s)
 
     def doDebug(self):
         """ return True if we're in debug mode """
@@ -499,6 +541,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.include_description_in_notifications = DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS
         self.spam_keywords = DEFAULT_SPAM_KEYWORDS
         self.show_spambot_prevention = DEFAULT_SHOW_SPAMBOT_PREVENTION
+        self.enable_due_date = DEFAULT_ENABLE_DUE_DATE
 
         self.acl_cookienames = {}
         self.acl_cookieemails = {}
@@ -752,6 +795,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         default = DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS
         return getattr(self, 'include_description_in_notifications', default)
     
+    def EnableDueDate(self):
+        return getattr(self, 'enable_due_date', DEFAULT_ENABLE_DUE_DATE)
+    
     def getSpamKeywords(self):
         """ return spam_keywords if possible """
         return getattr(self, 'spam_keywords', DEFAULT_SPAM_KEYWORDS)
@@ -966,9 +1012,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         return text
     
-    def showDate(self, date, today=None):
+    def showDate(self, date, today=None, include_hour=True, not_clever=False):
         """ return the date formatted nicely """
-        if self.ShowDatesCleverly():
+        if self.ShowDatesCleverly() and not not_clever:
             # The whole reason why today is a parameter is because 
             # if this function is called 20 times in one page 
             # eg. richList.zpt then it'd be a shame to create a new
@@ -983,25 +1029,49 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if today is None:
                 today = DateTime()
                 
-            if date.strftime('%Y%m%d') == today.strftime('%Y%m%d'):
-                return abbr(_("Today"), date) + date.strftime(" %H:%M")
-            elif (date+1).strftime('%Y%m%d') == today.strftime('%Y%m%d'):
-                return abbr(_("Yesterday"), date) + date.strftime(" %H:%M")
-            elif date.strftime('%Y%W') == today.strftime('%Y%W'):
-                return abbr(date.strftime('%A'), date) + date.strftime(' %H:%M')
-            elif (date+7).strftime('%Y%W') == today.strftime('%Y%W'):
-                return abbr(_("Last week") + date.strftime(' %A'), date) + date.strftime(' %H:%M')
-            #elif date.strftime('%Y%m') == today.strftime('%Y%m'):
-            #    return date.strftime(default_fmt)
-            else:
+            # prepare to save some nanoseconds
+            today_Ymd = today.strftime('%Y%m%d')
+            today_YW = today.strftime('%Y%W')
                 
+            if date.strftime('%Y%m%d') == today_Ymd:
+                if include_hour:
+                    return abbr(_("Today"), date) + date.strftime(" %H:%M")
+                else:
+                    return abbr(_("Today"), date)
+            elif (date+1).strftime('%Y%m%d') == today_Ymd:
+                if include_hour:
+                    return abbr(_("Yesterday"), date) + date.strftime(" %H:%M")
+                else:
+                    return abbr(_("Yesterday"), date)
+            elif date.strftime('%Y%W') == today_YW:
+                if date.strftime('%Y%m%d') == (today+1).strftime('%Y%m%d'):
+                    if include_hour:
+                        return abbr(_("Tomorrow"), date) + date.strftime(' %H:%M')
+                    else:
+                        return abbr(_("Tomorrow"), date)
+                else:
+                    # this week
+                    if include_hour:
+                        return abbr(date.strftime('%A'), date) + date.strftime(' %H:%M')
+                    else:
+                        return abbr(date.strftime('%A'), date)
+            elif (date+7).strftime('%Y%W') == today_YW:
+                if include_hour:
+                    return abbr(_("Last week") + date.strftime(' %A'), date) + \
+                      date.strftime(' %H:%M')
+                else:
+                    return abbr(_("Last week") + date.strftime(' %A'), date)
+            else:
                 # skip the hour part
                 fmt = default_fmt.replace('%H:%M','').strip()
                 return date.strftime(fmt)
             
-        
         # default thing
-        return date.strftime(self.display_date)
+        fmt = self.display_date
+        if not include_hour:
+            fmt = fmt.replace('%H:%M','').strip()
+        return date.strftime(fmt)
+            
     
     def getDefaultSortorder(self):
         """ return the default sort order """
@@ -1304,6 +1374,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'use_estimated_time',
                     'use_actual_time',
                     'include_description_in_notifications',
+                    'enable_due_date',
                     'show_dates_cleverly',
                     'show_spambot_prevention',
                     ]
@@ -3385,14 +3456,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             request['fromname'] = get_cookie(name_cookiekey)
         elif not request.get('fromname','') and self.getSavedUser('fromname'):
             request['fromname'] = self.getSavedUser('fromname')
-        
             
         # this prevents dodgy XSS attempts
         if _invalid_name_chars.findall(request['fromname']):
             SubmitError['fromname'] = u'Contains characters not allowed'
         if _invalid_name_chars.findall(request['email']):
             SubmitError['email'] = u'Contains characters not allowed'
-        
             
         if not request.get('display_format','').strip():
             request['display_format'] = self.getSavedTextFormat()
@@ -3447,7 +3516,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 SubmitError['assignee'] = _("Invalid assignee")
             elif request.get('assignee') in ok_assignees:
                 assignee = request.get('assignee')
-
+                
+        # check the due_date
+        if self.EnableDueDate():
+            due_date = request.get('due_date')
+            if due_date:
+                if not self.parseDueDate(due_date):
+                    SubmitError['due_date'] = _("Invalid date")
+                else:
+                    due_date = self.parseDueDate(due_date)
+        else:
+            due_date = None
 
         # Check that all attempts of file attachments really are files
         if request.get('fileattachment', []):
@@ -3533,7 +3612,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 page = self.AddIssue
             return page(REQUEST, SubmitError=SubmitError)
 
-        
+
         #
         # Let's submit the issue!
         #
@@ -3599,7 +3678,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # accidently press the Save Issue button twice.
         #
         _existing_issue = self._check4Duplicate(title, description,
-                                      sections, type_, urgency)
+                                                sections, type_, urgency)
         
         if _existing_issue:
             url = _existing_issue.absolute_url()
@@ -3621,7 +3700,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         issue = cIO(genid, request.title, status, type_, urgency,
                     sections, fromname, email, url2issue,
                     confidential, hide_me, description,
-                    display_format, acl_adder=acl_adder)
+                    display_format, acl_adder=acl_adder,
+                    due_date=due_date)
                     
                     
         for field in self.getCustomFieldObjects():
@@ -3633,9 +3713,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 issue.setCustomFieldData(field, field.getId(), value)
         
         # remember it
-        #self.RememberAddedIssue(genid)
         self.RememberRecentIssue(genid, 'added')
-
         
         if _rfg('draft_issue_id'):
             self._dropDraftIssue(_rfg('draft_issue_id'))
@@ -3727,7 +3805,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                           description, display_format, issuedate=None, index=0,
                           acl_adder=None,
                           submission_type='',
-                          email_message_id=None):
+                          email_message_id=None,
+                          due_date=None):
         """ wrap the the self._createIssueObject() method """
         if id is None or id=='':
             # create id
@@ -3768,6 +3847,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         if email is None:
             email = ""
+            
+        if due_date and not hasattr(due_date, 'strftime'):
+            raise ValueError("due_date not a datetime object %r" % due_date)
+        elif not due_date:
+            # None rather than ''
+            due_date = None
 
         if acl_adder:
             userfolderpath, name = acl_adder.split(',')
@@ -3785,20 +3870,23 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                              display_format, issuedate, index=index,
                              acl_adder=acl_adder,
                              submission_type=submission_type,
-                             email_message_id=email_message_id)
+                             email_message_id=email_message_id,
+                             due_date=due_date)
                              
     def _createIssueObject(self, id, title, status, type, urgency, sections,
                            fromname, email, url2issue, confidential, hide_me,
                            description, display_format, issuedate, index=0,
                            acl_adder=None, submission_type='',
-                           email_message_id=None):
+                           email_message_id=None,
+                           due_date=None):
         """ crudely create issue object. No checking """
         issueinst = IssueTrackerIssue(id, title, status, type, urgency,
                                       sections, fromname, email, url2issue,
                                       confidential, hide_me, description,
                                       display_format, issuedate=issuedate,
                                       acl_adder=acl_adder,
-                                      submission_type=submission_type)
+                                      submission_type=submission_type,
+                                      due_date=due_date)
 
         # not here
         where = self._getIssueContainer()
@@ -4242,6 +4330,48 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
 
     ## Misc methods
+    
+    def parseDueDate(self, datestring):
+        """return a DateTime object from a datestring or return None if not
+        parsable."""
+        if not datestring:
+            return None
+        
+        if isinstance(datestring, basestring):
+            if datestring.lower() == 'today':
+                return DateTime(DateTime().strftime('%Y/%m/%d'))
+            elif datestring.lower() == 'tomorrow':
+                return DateTime((DateTime()+1).strftime('%Y/%m/%d'))
+            
+        try:
+            return DateTime(datestring)
+        except DateTimeSyntaxError:
+            return None
+        except DateError:
+            return None
+    
+    def getDueDateCSSSelector(self, due_date=None):
+        """return a suitable CSS selector depending on the due_date"""
+        if due_date is None:
+            due_date = self.due_date
+        
+        if isinstance(due_date, basestring):
+            due_date = self.parseDueDate(due_date)
+            if not due_date:
+                return ''
+            
+        if due_date and hasattr(due_date, 'strftime'):
+            today = DateTime(DateTime().strftime('%Y/%m/%d'))
+            if due_date < today:
+                return 'dd-past'
+            elif due_date == today:
+                return 'dd-today'
+            elif due_date == (today + 1):
+                return 'dd-tomorrow'
+            else:
+                return 'dd-future'
+        else:
+            return ''
 
     def getUrgencyCSSSelector(self, urgency=None):
         """ compare this with the parents option to return a CSS selector
@@ -5418,11 +5548,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
             wordsplitter = Empty()
             wordsplitter.group = 'Word Splitter'
-            wordsplitter.name = 'Whitespace splitter'
+            #wordsplitter.name = 'Whitespace splitter'
+            wordsplitter.name = 'Unicode Whitespace splitter'
             
             casenormalizer = Empty()
             casenormalizer.group = 'Case Normalizer'
-            casenormalizer.name = 'Case Normalizer'
+            #casenormalizer.name = 'Case Normalizer'
+            casenormalizer.name = 'Unicode Case Normalizer'
             
             stopwords = Empty()
             stopwords.group = 'Stop Words'
@@ -6715,12 +6847,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ Highlight a piece of a text from q """
         _checker = lambda p: p.find('ListIssues') + p.find('CompleteList') > -2
         
+        
         if highlight_html is None:
             highlight_html = '<span class="q_highlight">%s</span>'
             
         if q is None:
             # then look for it in REQUEST
-            q = self.REQUEST.get('q',None)
+            q = self.REQUEST.get('q')
+            
             current_page = self.REQUEST.URL
             list_or_complete = _checker(current_page)
             if q is None and not list_or_complete:
@@ -6739,13 +6873,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     except IndexError:
                         pass
                        
-                        
         if q is None:
             return text
         else:
+            q = unicodify(q)
             
-            transtab = string.maketrans('/ ','_ ')
-            q=string.translate(q, transtab, '?&!;<=>*#[]{}')
+            for char in '?&!;<=>*#[]{}':
+                q = q.replace(char, '')
+            #transtab = string.maketrans('/ ','_ ')
+            #q=string.translate(q, transtab, '?&!;<=>*#[]{}')
             
             highlightfunction = lambda x: highlight_html % x
             
@@ -7148,11 +7284,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             q = request.get('q')
         
         if q:
-            if str(q).lower().find(' or ') == -1:
-                terms_list = Utils.splitTerms(q)
-                if len(terms_list) > 1:
-                    return " or ".join(terms_list)
-        
+            if isinstance(q, unicode):
+                if re.findall(r'\bor\b', q.lower()):
+                    terms_list = Utils.splitTerms(q)
+                    if len(terms_list) > 1:
+                        return " or ".join(terms_list)
+            else:
+                if str(q).lower().find(' or ') == -1:
+                    terms_list = Utils.splitTerms(q)
+                    if len(terms_list) > 1:
+                        return " or ".join(terms_list)
+            
         return False
         
 
@@ -7294,7 +7436,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # they used or if we're just going to go there. 
                 # We'll just go there if the searchterm was a issuenumber but if it
                 # wasn't then include the search term in the redirect
-                if not str(q).replace('#','').replace(self.issueprefix,'').isdigit():
+                if not q.replace('#','').replace(self.issueprefix,'').isdigit():
                     params = {'q':q}
                 url = Utils.AddParam2URL(url, params)
                 response.redirect(url, lock=1)
@@ -7482,12 +7624,20 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if not search_only_on or 'fromname' in search_only_on:
                     _author_search.extend(catalog.searchResults(fromname=q))
                 if not search_only_on or 'email' in search_only_on:
-                    _author_search.extend(catalog.searchResults(email=q))
+                    if isinstance(q, unicode):
+                        # TextIndex can not accept a parameter being a Unicode object
+                        # It has be a byte string
+                        found = catalog.searchResults(email=q.encode(UNICODE_ENCODING))
+                    else:
+                        found = catalog.searchResults(email=q)
+                    _author_search.extend(found)
+                    
                 brains += _author_search
                 if len(_author_search) > 0:
                     # advise people to use the filter
                     msg = self._setSearchFilterWarning(author=q)
 
+        
         # Now, also search on comment
         brains_threads = []
         if not search_only_on or 'comment' in search_only_on:
@@ -7518,7 +7668,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 object = getattr(self, string.zfill(q, self.randomid_length))
                 return [object]
             
-
         
         # these variables are used in the loop to avoid calling LOG()
         # for every bloody object that goes wrong
@@ -7588,12 +7737,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     first_thread_id = object.getId()
                     request.set('FirstThreadResultId', first_thread_id)
                 seq.append(object)
-                        
+
         if self.searchWithOR(q) and search_only_on is None:
             for issue in self._searchCatalog(self.searchWithOR(q)):
                 if issue not in seq:
                     seq.append(issue)
-        
+
         return seq
         
 
@@ -7974,9 +8123,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             do_reverse = sortorder_reverse
             
             # dates are naturally sorted in reverse
-            if sortorder in ('modifydate', 'issuedate'):
+            if sortorder in ('modifydate', 'issuedate', 'due_date'):
                 do_reverse = not do_reverse
-
+                
             # define a dictionary of the renaming of sortorder keys.
             # For example, in REQUEST you can find 'sortorder=from'
             # but the actual attribute is called 'fromname' so it
@@ -8115,111 +8264,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         return issues
     
+    
         
-    
-##    def _getFilter(self, request):
-##        """ Inspect 'request' for appropriate filter data and
-##        return a dictionary of filters. """
-##
-##        key = FILTEROPTIONS_KEY
-##
-##        # Convert data from session into request
-##        filteroptions = self.get_session(key, {})
-##        for each in ['ignorestatuses','ignoresections', 'ignoreurgencies', 
-##                     'ignoretypes','showfromname','showemail']:
-##            if filteroptions.has_key(each):
-##                request.set(each, filteroptions[each])
-##
-##        filter = {}
-##        
-##        # statuses
-##        if request.has_key('ignorestatuses'):
-##            filter['status'] = request.ignorestatuses
-##        elif request.has_key('status'):
-##            filter['status'] = self._pop_from_list(request['status'],
-##                                                   self.getStatuses())
-##        else:
-##            filter['status'] = []
-##            
-##        # sections
-##        if request.has_key('ignoresections'):
-##            filter['sections'] = request.ignoresections
-##        elif request.has_key('section'):
-##            filter['sections'] = [request.section.strip()]
-##        else:
-##            filter['sections'] = []
-##
-##        # urgencies
-##        if request.has_key('ignoreurgencies'):
-##            filter['urgency'] = request.ignoreurgencies
-##        elif request.has_key('urgency'):
-##            filter['urgency'] = [request.urgency.strip()]
-##        else:
-##            filter['urgency'] = []
-##            
-##        # types
-##        if request.has_key('ignoretypes'):
-##            filter['type'] = request.ignoretypes
-##        elif request.has_key('type'):
-##            filter['type'] = [request.type.strip()]
-##        else:
-##            filter['type'] = []
-##            
-##        ## fromname
-##        # Either a name to ignore or show only.
-##        # It does not make sense to have both showfromname and ignorefromname
-##        if request.has_key('showfromname') and \
-##           request.showfromname <> self.when_ignore_word:
-##                filter['showfromname'] = request.showfromname.strip()
-##        elif request.has_key('ignorefromname') and \
-##             request.ignorefromname <> self.when_ignore_word:
-##            filter['ignorefromname'] = request.fromname.strip()
-##
-##        # email
-##        if request.has_key('showemail') and \
-##           request.showemail <> self.when_ignore_word:
-##                filter['showemail'] = string.strip(request.showemail)
-##        elif request.has_key('ignoreemail') and \
-##           request.ignoreemail <> self.when_ignore_word:
-##            filter['ignoreemail'] = request.email
-##
-##
-##        # prepare for caseindependence
-##        filter = Utils.fixDictofLists(filter)
-##
-##        return filter
-    
-##    def _pop_from_list(self, item, olist):
-##        """ remove one item from a list """
-##        nlist = []
-##        for oitem in olist:
-##            if item!=oitem:
-##                nlist.append(oitem)
-##        return nlist
-    
-##    def _filter_fromnameemail(self, issue, filter):
-##        """ do the advanced filtering.
-##            If filter has ignorefromname then reject this issue.
-##            If filter has showfromname, then ignore this issue
-##            if not == showfromname
-##        """
-##        ss = lambda x: x.strip().lower()
-##        # if asked to be ingored return False
-##        if filter.get('ignorefromname','') and \
-##           ss(issue.fromname) == filter['ignorefromname']:
-##            return False
-##        elif filter.get('ignoreemail','') !='' and \
-##           ss(issue.email) == filter['ignoreemail']:
-##            return False
-##        elif filter.get('showfromname','') !='' and \
-##           ss(issue.fromname) != filter['showfromname']:
-##            return False
-##        elif filter.get('showemail','') !='' and \
-##           ss(issue.email) != filter['showemail']:
-##            return False
-##        else:
-##            # not trapped in anything
-##            return true
 
     def _dosort(self, seq, key):
         """ do the actual sort """
@@ -11747,6 +11793,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                  url2issue=rget('url2issue'),
                  confidential=rget('confidential'),
                  hide_me=rget('hide_me'),
+                 due_date=rget('due_date'),
                  is_autosave=is_autosave,
                  Tempfolder_fileattachments=rget('Tempfolder_fileattachments'),
                  )

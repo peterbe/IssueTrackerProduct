@@ -1,6 +1,6 @@
 <table border="0" cellpadding="3" cellspacing="0" width="98%" align="center"
-tal:define="todaysdate python:here.ZopeTime()"
- style="border:1px solid #ccc">
+       tal:define="todaysdate python:here.ZopeTime(); enable_due_date here/EnableDueDate"
+        style="border:1px solid #ccc">
    <thead>
 	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
 		<td><span tal:replace="structure python:here.HeadingLinks(here.translateSortorderOption(here.getDefaultSortorder()), here.getDefaultSortorder(), default=1, inverted=1, sortinfo=sortinfo)">Date</span></td>
@@ -8,6 +8,7 @@ tal:define="todaysdate python:here.ZopeTime()"
 		<td><span tal:replace="structure python:here.HeadingLinks('Submitted by','submittedby', sortinfo=sortinfo)">Submitted by</span></td>                
 		<td><span tal:replace="structure python:here.HeadingLinks('Urgency','urgency', sortinfo=sortinfo)">Urgency</span></td>
 		<td><span tal:replace="structure python:here.HeadingLinks('Type','type', sortinfo=sortinfo)">Type</span></td>
+		<td width="100" tal:condition="enable_due_date"><span tal:replace="structure python:here.HeadingLinks('Due date','due_date', sortinfo=sortinfo, inverted=True)">Due date</span></td>
 
 	</tr>
    </thead>
@@ -16,7 +17,8 @@ tal:define="todaysdate python:here.ZopeTime()"
 	                  ondblclick string:G('${issue/absolute_url_path}')">
 		<tr tal:condition="python:request.get('FirstThreadResultId')==issue.id and request.get('sortorder','')=='search'"
           class="l_commenthead">
-			<td colspan="5">Found in comment...</td>
+			<td colspan="x"
+                            tal:attributes="colspan python:enable_due_date and 6 or 5">Found in comment...</td>
 		</tr>
 		<tr> 
 			<td tal:define="creationdate python:issue.issuedate; difference python:here.timeSince(creationdate, todaysdate, afterword='old', max_no_sections=2);
@@ -52,6 +54,12 @@ tal:define="todaysdate python:here.ZopeTime()"
 			 <td tal:attributes="class string:${issue/getUrgencyCSSSelector}" tal:content="issue/urgency">
 			 </td>
 			 <td tal:content="issue/type">type</td>
+		         <td tal:condition="python:enable_due_date and issue.getDueDate()"
+                             tal:attributes="class python:here.getDueDateCSSSelector(issue.getDueDate())"
+                             tal:content="structure python:here.showDate(issue.getDueDate(), include_hour=False)">
+                         </td>
+		         <td tal:condition="python:enable_due_date and not issue.getDueDate()">&nbsp;</td>
+                   
 		</tr>
 
 	</tbody>

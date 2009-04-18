@@ -166,7 +166,6 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         
         self.app.REQUEST.cookies[key] = value
         
-    #def beforeTearDown(self):
     def afterClear(self):
         global __trapped_emails__
         __trapped_emails__ = []
@@ -1560,6 +1559,257 @@ class IssueTrackerTestCase(TestBase):
         self.assertTrue(latest_email['subject'].count(request.get('title')))
         self.assertTrue(latest_email['mto'], 'user2@test.com')
         
+    def test_unicode_search(self):
+        """you should be able to enter an issue in unicode, then search for any
+        of the words you wrote and find it"""
+        
+        title = u"Les opposants au r\xc3\xa9gime tha\xc3\xaflandais"
+        description = u"\xc3\xa0 l'occupation du si\xc3\xa8g\n\n"\
+                      u"Au Parlement, un air d'union sacr\xc3\xa9e face \xc3\xa0"
+        
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        request.set('title', title)
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        tracker.SubmitIssue(request)
+        
+        # it should be possible to display it
+        issue = tracker.getIssueObjects()[0]
+        html = issue.index_html(self.app.REQUEST)
+        self.assertTrue(isinstance(html, unicode))
+        self.assertTrue(u'r\xc3\xa9gime' in html)
+        
+        # now search for one of those words
+        q = u'R\xc3\xa9GIME'
+        search_results = tracker._searchCatalog(q)
+        self.assertEqual(len(search_results), 1)
+        self.assertEqual(search_results[0], issue)
+
+        highlit = re.compile('<span class="q_highlight">(.*?)</span>')
+
+        # if you view the issue with a q variable set,
+        # it should highlight the text
+        self.app.REQUEST.set('q', u'air')
+        html = issue.index_html(self.app.REQUEST)
+        self.assertEqual(highlit.findall(html), [u'air'])
+        
+        # and do the same with a search with non-ascii characters
+        self.app.REQUEST.set('q', u'R\xc3\xa9GIME')
+        html = issue.index_html(self.app.REQUEST)
+        self.assertEqual(highlit.findall(html), [u'r\xc3\xa9gime'])
+        
+        
+    def test_showStrftimeFriendly(self):
+        """test the base script showStrftimeFriendly()"""
+        tracker = self.folder.tracker
+        func = tracker.showStrftimeFriendly
+        
+        tests = [('%d/%m %Y', 'DD/MM YYYY'),
+                 ('%d/%m %Y %H:%M', 'DD/MM YYYY hh:mm'),
+                 ('%d %B %Y', 'DD month YYYY'),
+                 ('%d %B %Y %H:%M', 'DD month YYYY hh:mm'),
+                 ]
+        
+        for input_, output in tests:
+            self.assertEqual(func(input_), output)
+            
+        tests = [('%d/%m %Y', 'DD/MM YYYY'),
+                 ('%d/%m %Y %H:%M', 'DD/MM YYYY'),
+                 ('%d %B %Y', 'DD month YYYY'),
+                 ('%d %B %Y %H:%M', 'DD month YYYY'),
+                 ]
+        
+        for input_, output in tests:
+            self.assertEqual(func(input_, strip_hour_part=True),
+                             output)            
+            
+    def test_getDueDateCSSSelector(self):
+        """return some suitable CSS selectors based on the due date"""
+        tracker = self.folder.tracker
+        func = tracker.getDueDateCSSSelector
+        
+        # feed it a date in the past and it will return 'dd-past'
+        past = DateTime('2009/01/01')
+        self.assertEqual(func(past), 'dd-past')
+        # as a string
+        self.assertEqual(func('2009/01/01'), 'dd-past')
+        
+        today = DateTime(DateTime().strftime('%Y/%m/%d'))
+        self.assertEqual(func(today), 'dd-today')
+        # as a string
+        self.assertEqual(func(DateTime().strftime('%Y/%m/%d')), 'dd-today')
+
+        tomorrow = DateTime(DateTime().strftime('%Y/%m/%d')) + 1
+        self.assertEqual(func(tomorrow), 'dd-tomorrow')
+        # as a string
+        self.assertEqual(func((DateTime()+1).strftime('%Y/%m/%d')), 'dd-tomorrow')
+        
+        future = DateTime(DateTime().strftime('%Y/%m/%d')) + 100
+        self.assertEqual(func(future), 'dd-future')
+        # as a string
+        self.assertEqual(func((DateTime()+100).strftime('%Y/%m/%d')), 'dd-future')
+        
+        # junk
+        self.assertEqual(func('xajsd'), '')
+        self.assertEqual(func(1230), '')
+        
+        
+    def test_submitting_with_due_date(self):
+        """submit an issue with a due date"""
+        
+        title = u"Title"
+        description = u"Description"
+        
+        tracker = self.folder.tracker
+        request = self.app.REQUEST
+        request.set('title', title)
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('due_date', '2010/01/01')
+        
+        tracker.SubmitIssue(request)
+        
+        # it should be possible to display it
+        issue = tracker.getIssueObjects()[0]
+        # because due dates aren't enabled yet
+        self.assertEqual(issue.getDueDate(), None)
+        
+        tracker.enable_due_date = True
+
+        title = u"Somethjing"
+        description = u"Different"
+
+        request.set('title', title)
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('due_date', '2010/01/01')
+        
+        tracker.SubmitIssue(request)
+        #issue = [x for x in tracker.getIssueObjects() if x.title==title][0]
+        issue = tracker.getIssueObjects()[-1]
+        self.assertEqual(issue.getDueDate(), DateTime('2010/01/01'))
+        
+        # But just because you've enabled it doesn't necessarily mean
+        # you have to set it every time
+        title = u"Entirely"
+        description = u"Different"
+
+        request.set('title', title)
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('due_date', '')
+        
+        tracker.SubmitIssue(request)
+        issue = tracker.getIssueObjects()[-1]
+        self.assertEqual(issue.getDueDate(), None)
+        
+    def test_editing_due_date(self):
+        """test changing date"""
+        tracker = self.folder.tracker
+        tracker.enable_due_date = True
+        
+        title = u"Title"
+        description = u"Description"
+        
+        request = self.app.REQUEST
+        request.set('title', title)
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('due_date', '2010/01/01')
+        
+        tracker.SubmitIssue(request)
+        
+        # it should be possible to display it
+        issue = tracker.getIssueObjects()[0]
+        #pprint(list(issue.detail_changes))
+        assert not issue.detail_changes
+        self.assertEqual(issue.getDueDate(), DateTime('2010/01/01'))
+        
+        issue.editIssueDetails(due_date='2010/02/02')
+        # there should now be one item in the issue.detail_changes
+        assert len(issue.detail_changes) == 1
+        change = issue.detail_changes[0]
+        # it should have a key called 'due_date'
+        assert change['due_date']
+        self.assertEqual(change['due_date']['old'], DateTime('2010/01/01'))
+        self.assertEqual(change['due_date']['new'], DateTime('2010/02/02'))
+        
+        self.assertEqual(issue.getDueDate(), DateTime('2010/02/02'))
+        
+        issue.editIssueDetails(due_date='')
+        self.assertEqual(issue.getDueDate(), None)
+        
+        issue.editIssueDetails(due_date='2010/03/03')
+        self.assertEqual(issue.getDueDate(), DateTime('2010/03/03'))
+        
+        
+    def test_submitting_bad_due_dates(self):
+        """test setting faux due dates"""
+        tracker = self.folder.tracker
+        
+        title = u"Title"
+        description = u"Description"
+        
+        tracker.enable_due_date = True
+        
+        request = self.app.REQUEST
+        request.set('title', title)
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('due_date', 'xxx')
+        
+        html = tracker.SubmitIssue(request)
+        self.assertTrue(html.count('<span class="submiterror">Invalid date</span>'))
+        
+        # only 28 days in feb
+        request.set('due_date', '2009/02/29')
+        html = tracker.SubmitIssue(request)
+        self.assertTrue(html.count('<span class="submiterror">Invalid date</span>'))        
+        
+        assert not list(tracker.getIssueObjects())
+        
+    def test_parseDueDate(self):
+        """parseDueDate() takes a date string and returns a date object or None"""
+        
+        tracker = self.folder.tracker
+        func = tracker.parseDueDate
+        
+        self.assertEqual(func('2009/01/01'), DateTime('2009/01/01'))
+        self.assertEqual(func('13 april 2009'), DateTime('13 april 2009'))
+        self.assertEqual(func('today'), 
+                         DateTime(DateTime().strftime('%Y/%m/%d')))
+        self.assertEqual(func('tomorrow'),
+                         DateTime((DateTime()+1).strftime('%Y/%m/%d')))
+        
+        self.assertEqual(func('junk'), None)
+        self.assertEqual(func('2009/02/29'), None)
+        # but 2008 was a leap year
+        self.assertEqual(func('2008/02/29'), DateTime('2008/02/29'))
+        
+        
+
+        
+            
         
 def test_suite():
     from unittest import TestSuite, makeSuite

@@ -178,6 +178,17 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
 	</td>
     </tr>
     
+    <tr tal:condition="here/EnableDueDate">
+      <td><b>Due date:</b></td>
+      <td>
+        <input name="due_date" tabindex="40" size="12"
+               tal:attributes="value request/due_date|nothing" />
+        <noscript tal:content="python:here.showStrftimeFriendly(here.display_date, strip_hour_part=True)"></noscript>
+            <span class="submiterror" tal:condition="options/SubmitError|nothing" 
+                  tal:content="python:here.ShowSubmitError(options, 'due_date')"></span>        
+               
+      </td>
+    </tr>
     
     <tr class="fileattachment-error"
         tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
@@ -252,17 +263,17 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
       <td align="right" tal:define="previewissue python:request.get('previewissue')">
     <input type="hidden" name="previewissue" value="1" />
 	<input type="submit" name="AddIssue:method" value=" Preview again "
-	   tabindex="40"
+	   tabindex="50"
            class="submitbutton" tal:condition="previewissue" />
 	
 	<input type="submit" name="AddIssue:method" value=" Preview first "
-	  tabindex="41"
+	  tabindex="51"
            class="submitbutton" tal:condition="not:previewissue" />
 
-<input type="submit" name="SubmitIssue:method" value=" Save Issue " class="submitbutton" tabindex="42"
+<input type="submit" name="SubmitIssue:method" value=" Save Issue " class="submitbutton" tabindex="52"
  onclick="javascript:this.value='Saving Issue...'" onkeypress="javascript:this.value='Saving Issue...'" />
 
-<input type="submit" name="SaveDraftIssue:method" value=" Save draft " tabindex="43"
+<input type="submit" name="SaveDraftIssue:method" value=" Save draft " tabindex="53"
  tal:condition="here/SaveDrafts"
  onclick="javascript:this.value='Saving draft...'" />
 

@@ -543,6 +543,27 @@ issue towards the top of List Issues.
   </p>
   </td> 
 </tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-signature_text">Enable due date</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+    <div class="form-element">
+	<input type="checkbox" name="enable_due_date:boolean" <dtml-if "EnableDueDate()">checked="checked"</dtml-if> />
+      
+    </div>
+  </td>
+  <td align="left" valign="top">
+  <p>
+    Adds a date field so that you can set when issues are due to be completed. 
+    It's entirely superficial and up to you but the attribute might help you and your team.
+    <a href="manage_datepicker_options">Click here to configure the date picker</a>
+  </p>
+  </td> 
+</tr>
 </table>
 
 <div class="submitarea" align="center">

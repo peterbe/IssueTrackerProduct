@@ -1,6 +1,6 @@
 <table border="0" cellpadding="5" cellspacing="0" width="98%" align="center"
-tal:define="todaysdate python:here.ZopeTime()"
- style="border:1px solid #ccc">
+       tal:define="todaysdate python:here.ZopeTime(); enable_due_date here/EnableDueDate"
+        style="border:1px solid #ccc">
    <thead>
 	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
 		<td width="25%"><span tal:replace="structure python:here.HeadingLinks(here.translateSortorderOption(here.getDefaultSortorder()), here.getDefaultSortorder(), default=1, inverted=1, sortinfo=sortinfo)">Date</span></td>
@@ -8,13 +8,15 @@ tal:define="todaysdate python:here.ZopeTime()"
 		<td><span tal:replace="structure python:here.HeadingLinks('Submitted by','submittedby', sortinfo=sortinfo)">Submitted by</span></td>
 		<td width="100"><span tal:replace="structure python:here.HeadingLinks('Urgency','urgency', sortinfo=sortinfo)">Urgency</span></td>
 		<td width="100"><span tal:replace="structure python:here.HeadingLinks('Type','type', sortinfo=sortinfo)">Type</span></td>
+		<td width="100" tal:condition="enable_due_date"><span tal:replace="structure python:here.HeadingLinks('Due date','due_date', sortinfo=sortinfo, inverted=True)">Due date</span></td>
 
 	</tr>
    </thead>
    <tbody tal:repeat="issue options/batch" tal:attributes="class python:test(path('repeat/issue/odd'), 'lodd','leven');ondblclick string:G('${issue/absolute_url_path}')">
 		<tr tal:condition="python:request.get('FirstThreadResultId')==issue.id and request.get('sortorder','')=='search'"
           class="l_commenthead">
-			<td colspan="5">Found in comment...</td>
+			<td colspan="x"
+                            tal:attributes="colspan python:enable_due_date and 6 or 5">Found in comment...</td>
 		</tr>
 		<tr> 
 			<td colspan="2">
@@ -32,7 +34,9 @@ tal:define="todaysdate python:here.ZopeTime()"
                                  </tal:test>
 				 - <b class="status" tal:content="python:issue.status.capitalize()">Status</b>
 			</td>
-            <td colspan="3" class="bd" tal:content="structure python:issue.getBriefedDescription(length=70)">
+            <td colspan="x" class="bd"
+                tal:attributes="colspan python:enable_due_date and 4 or 3"
+                tal:content="structure python:issue.getBriefedDescription(length=70)">
             </td>
 		</tr>
 		<tr>
@@ -44,17 +48,25 @@ tal:define="todaysdate python:here.ZopeTime()"
                 tal:content="structure python:here.ShowNameEmail(fromname, email, hide_me)">
 		       	Name and Email
      		</td>
-            <td tal:attributes="class string:${issue/getUrgencyCSSSelector}" tal:content="issue/urgency"></td>
-			<td tal:content="issue/type">type</td>
+                   <td tal:attributes="class string:${issue/getUrgencyCSSSelector}" tal:content="issue/urgency"></td>
+		   <td tal:content="issue/type">type</td>
+                   
+		   <td tal:condition="python:enable_due_date and issue.getDueDate()"
+                       tal:attributes="class python:here.getDueDateCSSSelector(issue.getDueDate())"
+                       tal:content="structure python:here.showDate(issue.getDueDate(), include_hour=False)">
+                   </td>
+		   <td tal:condition="python:enable_due_date and not issue.getDueDate()">&nbsp;</td>
+                   
 		</tr>
 		<tr>
-			<td valign="top" colspan="2"
+		   <td valign="top" colspan="2"
                 tal:define="creationdate python:issue.issuedate; difference python:here.timeSince(creationdate, todaysdate, afterword='old', max_no_sections=2)">
                 
 				<span tal:replace="structure python:here.showDate(issue.getIssueDate(), today=todaysdate)">date</span>
 				&nbsp;&nbsp;
 				<span tal:condition="difference" tal:replace="string:(${difference})">difference</span></td>
-			<td colspan="3" align="right">
+		   <td colspan="x" align="right"
+                       tal:attributes="colspan python:enable_due_date and 4 or 3">
             <span tal:define="threads python:issue.ListThreads()" tal:condition="threads" tal:omit-tag="">
             <span tal:define="lastthread issue/getLastThread;anchor python:len(threads)" tal:omit-tag="">
                 <a tal:define="url python:issue.absolute_url_path()"

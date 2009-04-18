@@ -148,6 +148,7 @@ DEFAULT_SPAM_KEYWORDS = ['poker-stadium.com',
                          'diet-pills.com',
                          'buyvalium.html',
                          ]
+DEFAULT_ENABLE_DUE_DATE = False
 
 NATIVE_PROPERTIES = ('title', 'types', 'urgencies', 'sections_options',
                      'defaultsections', 'when_ignore_word', 'display_date',
