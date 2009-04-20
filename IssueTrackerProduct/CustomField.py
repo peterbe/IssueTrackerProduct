@@ -128,9 +128,11 @@ try:
     sorted
 except NameError:
     # python2.3
-    def sorted(iterable, cmp=None, key=None, reverse=False):
+    # This hack is limited as it doesn't support the same
+    # parameters as builtin sorted()
+    def sorted(iterable):
         copy = iterable[:]
-        copy.sort(cmp, key, reverse)
+        copy.sort()
         return copy
         
     
