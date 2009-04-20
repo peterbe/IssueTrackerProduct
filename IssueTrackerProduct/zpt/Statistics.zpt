@@ -76,7 +76,6 @@
 		<td width="85" align="center">Total</td>
 	</tr>
   </thead>
-  <tbody  tal:replace="python:sectionslist"></tbody>
   <tbody tal:repeat="sectioncount sectionslist" 
          tal:attributes="class python:test(path('repeat/sectioncount/odd'), 'lodd','leven')">
       <tr>
@@ -84,9 +83,9 @@
                                    section_url_quoted python:here.ascii_url_quote_plus(section)"
 		tal:attributes="href python:here.getSection2ListLink(section)" tal:content="section">Something</a></td>
 		<td tal:repeat="status here/getStatuses" align="center">
-                  <!--<span tal:condition="not:python:status in sectioncount[1]">0</span>-->
-                  <br tal:replace="python:'%r'%status"/>
-                  <span tal:replace="python:here.unsafe_unicode_dict_getitem(sectioncount[1], status)"></span>
+                  <span tal:condition="not:python:status in sectioncount[1]">0</span>
+                  <span tal:condition="python:status in sectioncount[1]"
+                        tal:replace="python:here.unsafe_unicode_dict_getitem(sectioncount[1], status)"></span>
 		</td>
 		<td align="center" class="strong" tal:content="python:here.totalCountSections(sectioncount[1])"></td>
       </tr>
