@@ -130,7 +130,7 @@ except NameError:
     # python2.3
     def sorted(iterable, cmp=None, key=None, reverse=False):
         copy = iterable[:]
-        copy.sort(cmp=cmp, key=key, reverse=reverse)
+        copy.sort(cmp, key, reverse)
         return copy
         
     
