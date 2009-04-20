@@ -124,7 +124,15 @@ def manage_addCustomField(self, oid, title=u'', input_type='text', python_type='
     else:
         return object
     
-
+try:
+    sorted
+except NameError:
+    # python2.3
+    def sorted(iterable, cmp=None, key=None, reverse=False):
+        copy = iterable[:]
+        copy.sort(cmp=cmp, key=key, reverse=reverse)
+        return copy
+        
     
 def list_to_flat(sequence):
     items = []
