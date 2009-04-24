@@ -1860,7 +1860,9 @@ class IssueTrackerTestCase(TestBase):
         seq = tracker.ListIssuesFiltered()
         self.assertEqual(len(seq), 5)
         
+        
         request.set('Filterlogic', 'block')
+        request.set('filteroptions', 1)
         
         request.set('f-due', '')
         seq = tracker.ListIssuesFiltered()
@@ -1904,6 +1906,7 @@ class IssueTrackerTestCase(TestBase):
         self.assertEqual(len(seq), 3)
         self.assertTrue(title_future not in [x.title for x in seq])
         self.assertTrue(title_yesterday not in [x.title for x in seq])
+        
         
         # Change the filter logic
         request.set('Filterlogic', 'show')
