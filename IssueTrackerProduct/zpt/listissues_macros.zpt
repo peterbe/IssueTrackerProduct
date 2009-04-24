@@ -17,7 +17,9 @@
              onclick="swapFilterLogic();return false;" onkeypress="swapFilterLogic();return false;">Do not show</a>)
             </span>
 		</td>
-		<td align="right" colspan="2" tal:attributes="colspan python:test(saved_filters, 3, 2)">
+		<td align="right" colspan="x"
+                    tal:define="colspan python:test(here.EnableDueDate(), 3, 2)"
+                    tal:attributes="colspan python:test(saved_filters, colspan+1, colspan)">
 
 		<select name="saved_filter" 
 		 tal:condition="saved_filters"
@@ -64,6 +66,20 @@
             </select>
 					
 		</td>
+                
+		<td valign="top" tal:condition="here/EnableDueDate">
+            <div class="ftitle">Due date</div>
+            <select name="f-due" multiple="multiple"
+                    tal:define="options python:['Overdue','Today','Tomorrow','Future'];
+                                preval python:here.getFilterValue('due', filterlogic, default=[])"
+              tal:attributes="size python:min(4, len(options))">
+              <option tal:repeat="option options"
+                      tal:attributes="value option; selected python:option in preval" 
+                      tal:content="option">option</option>
+            </select>
+					
+		</td>                
+                
 		<td valign="top">
             <div class="ftitle">From</div>
             
@@ -104,7 +120,8 @@
         </tr>
 	<tr>
 
-		<td colspan="4" align="center">
+		<td colspan="x" align="center"
+                    tal:attributes="colspan python:test(here.EnableDueDate(), 5, 4)">
 			<input type="hidden" name="filteroptions" value="1" />
 			<input type="submit" value="Apply filter settings"
 			tal:attributes="name string:${page}:method" />

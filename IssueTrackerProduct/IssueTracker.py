@@ -1011,7 +1011,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             text = re.sub(patterns['sitemaster email'], _v, text)
 
         return text
-    
+
+    def showDueDate(self, date, today=None):
+        """return a nice string for the due date"""
+        # if a date is the same week as the one we're in
+        # (e.g. today is Thursday and date is Tuesday) it will show the weekday
+        # but that's ambgious for due dates because they can be in the future.
+        # If that is the case prefix it with "On "
+        if today is None:
+            today = DateTime()
+        if date > today:
+            return "On %s" % self.showDate(date, today=today, include_hour=False)
+        return self.showDate(date, today=today, include_hour=False)
+
     def showDate(self, date, today=None, include_hour=True, not_clever=False):
         """ return the date formatted nicely """
         if self.ShowDatesCleverly() and not not_clever:
@@ -1448,6 +1460,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         # another special one
         self._savePluginPaths(get('plugin_paths',[]))
+        
+        # If you have now enabled due dates, make sure the due_date 
+        # indexes are installed
+        if self.EnableDueDate():
+            indexes = self.getCatalog()._catalog.indexes
+            if not indexes.has_key('due_date'):
+                self.InitZCatalog()
 
         # for the custom properties
         if REQUEST is not None:
@@ -2200,7 +2219,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         if initzcatalog:
             t = self.InitZCatalog(t=t)
-            
+
         # create folders
         root = self.getRoot()
         #for f in ['notifyables', 'www', 'tinymce']:
@@ -5318,7 +5337,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         params = {key:newtype}
         
         for e in ('q','i','f-statuses','f-fromname','f-email','f-sections',
-                  'f-urgencies','f-types','report'):
+                  'f-urgencies','f-types','report','f-due'):
             if request.get(e):
                 params[e] = request.get(e)
             
@@ -5585,7 +5604,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if not indexes.has_key(idx):
                 zcatalog.addIndex(idx, 'TextIndex')
                 
-        dateindexes = ['modifydate',]
+        dateindexes = ['modifydate']
+        if self.EnableDueDate():
+            dateindexes = ['due_date']
         for idx in dateindexes:
             if not indexes.has_key(idx):
                 #extra = record()
@@ -6333,10 +6354,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # Someone has chosen to show filter options
             return True
         
+        keys = ['statuses','sections','urgencies','types','fromname','email']
+        if self.EnableDueDate():
+            keys.append('due')
         field_ids = [x.getId() for x in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions())]
+        keys += field_ids
 
-        for key in ['statuses','sections','urgencies','types',
-                    'fromname','email']+field_ids:
+        for key in keys:
             if checkrequest and request.get('f-%s'%key):
                 return True
             elif self.get_session('f-%s-show'%key) or self.get_session('f-%s-block'%key):
@@ -6362,6 +6386,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
             # get filter setup
             filterlogic = self.getFilterlogic()
+            
+            def name_due_filter(due_options):
+                assert isinstance(due_options, (list, tuple))
+                due_options = [x.lower() for x in due_options]
+                if due_options == ['overdue']:
+                    return "overdue"
+                elif due_options == ['future']:
+                    return "due in the future"
+                elif 'overdue' in due_options:
+                    # e.g. ['Overdue', 'Tomorrow']
+                    return "overdue, due " + ', '.join([x for x in due_options if not x=='overdue'])
+
+                return "due " + ', '.join(due_options)
 
             def getFVal(key, zope=self, filterlogic=filterlogic):
                 return zope.getFilterValue(key, filterlogic,
@@ -6373,7 +6410,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             f_types = getFVal('types')
             f_fromname = getFVal('fromname')
             f_email = getFVal('email')
-            
+            f_due = None
+            if self.EnableDueDate():
+                f_due = getFVal('due')
             
             main_option = self.getFilterlogic()
             
@@ -6391,6 +6430,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 name += _("that are") + " " + ", ".join(f_urgencies) + " "
             if f_types:
                 name += _("of type") + " " + ", ".join(f_types) + " "
+            if f_due:
+                if isinstance(f_due, basestring):
+                    f_due = [f_due]
+                name += _("that are") + " " + name_due_filter(f_due) + " "
                 
             if f_fromname and f_email:
                 L = [f_fromname.strip(), f_email.strip()]
@@ -6399,6 +6442,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 name += _("by") + " " + f_fromname.strip() + " "
             elif f_email:
                 name += _("by") + " " + f_email.strip() + " "
+            
                 
             _start_where = False
             for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
@@ -6470,6 +6514,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         f_types = getFVal('types')
         f_fromname = getFVal('fromname')
         f_email = getFVal('email')
+        f_due = None
+        if self.EnableDueDate():
+            f_due = getFVal('due')
 
         custom_filters = {}
         for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
@@ -6579,6 +6626,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         valuer.set('types', f_types)
         valuer.set('fromname', f_fromname)
         valuer.set('email', f_email)
+        if f_due is not None:
+            valuer.set('due', f_due)
 
         if custom_filters:
             valuer.set_custom_fields_filter(custom_filters)
@@ -7873,7 +7922,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # o 'f-sections' is from the More statistics page
         #
         if request.get('filteroptions') or request.get('f-statuses') or \
-          request.get('f-sections'):
+          request.get('f-sections') or request.get('f-due'):
             # they have applied some filter options
             
             # by default we want to save the filter for later
@@ -7930,6 +7979,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         f_types = getFVal('types')
         f_fromname = getFVal('fromname')
         f_email = getFVal('email')
+        f_due = None
+        if self.EnableDueDate():
+            f_due = getFVal('due')
         
         custom_filters = {}
         for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
@@ -7956,21 +8008,46 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                f_statuses is None and f_sections is None and \
                f_urgencies is None and f_types is None and \
                f_fromname is None and f_email is None and \
+               f_due is None and \
                not custom_filters:
             # Filter logic is to show only selected items but
             # nothing has been set so just return everything
-            for issue in issues:
-                if not issue.isConfidential() or has_managerrole or issue.isYourIssue():
-                    checked.append(issue)
-
-            return checked
-    
+            return [issue for issue in issues
+                    if not issue.isConfidential() or has_managerrole or issue.isYourIssue()]
         
         if f_fromname:
             _maker = Utils.createStandaloneWordRegex
             f_fromname_regex = _maker(f_fromname)
             
         is_list = lambda x: isinstance(x, (tuple, list))
+        
+        if self.EnableDueDate() and f_due:
+            today = DateTime(DateTime().strftime('%Y/%m/%d'))
+            tomorrow = DateTime((DateTime() + 1).strftime('%Y/%m/%d'))
+            
+            def in_due_date_filter(due_date, f_due):
+                """Is the DateTime object 'due_date' in any of the string that
+                are in f_due. f_due 
+                """
+                assert hasattr(due_date, 'strftime')
+                if isinstance(f_due, basestring):
+                    f_due_lower = [f_due.lower()]
+                else:
+                    f_due_lower = [x.lower() for x in f_due]
+                    
+                if due_date == today:
+                    return 'today' in f_due_lower
+                elif due_date == tomorrow:
+                    return 'tomorrow' in f_due_lower
+                
+                if 'overdue' in f_due_lower and due_date < today:
+                    return True
+                
+                if 'future' in f_due_lower and due_date > tomorrow:
+                    return True
+                
+                return False
+
         
         for issue in issues:
             if not issue.canViewIssue():
@@ -8000,6 +8077,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     
                 if f_types is not None:
                     if issue.type not in f_types:
+                        continue
+                    
+                if f_due:
+                    dd = issue.getDueDate()
+                    if not dd:
+                        # we're only interested in issues that match the due 
+                        # date in the filter. If the issue doesn't have a due
+                        # date we have to skip it.
+                        continue
+                    elif not in_due_date_filter(dd, f_due):
                         continue
 
                 if f_fromname is not None:
@@ -8056,6 +8143,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     
                 if f_types is not None:
                     if issue.type in f_types:
+                        continue
+                    
+                if f_due:
+                    dd = issue.getDueDate()
+                    if dd is None:
+                        # we're trying to block out issues that match but if the
+                        # issue doesn't have a due date how can be block it
+                        pass
+                    elif in_due_date_filter(dd, f_due):
                         continue
 
                 if f_fromname: # conditional covers both None and ""
@@ -8119,11 +8215,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             issues = self._sortByStatus(issues, sortorder_reverse)
         elif sortorder == 'type':
             issues = self._sortByType(issues, sortorder_reverse)
+        elif sortorder == 'due_date':
+            self._sortByDueDate(issues, sortorder_reverse)
         else:
             do_reverse = sortorder_reverse
             
             # dates are naturally sorted in reverse
-            if sortorder in ('modifydate', 'issuedate', 'due_date'):
+            if sortorder in ('modifydate', 'issuedate'):
                 do_reverse = not do_reverse
                 
             # define a dictionary of the renaming of sortorder keys.
@@ -8209,6 +8307,40 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 issues += these
 
         return issues
+    
+    def _sortByDueDate(self, issues, reverse=False):
+        """If reverse is False, (which is default) sort such that those with 
+        due date are ordered before those without and that those with the oldest
+        due date come first.
+        """
+        default = 'issuedate'
+    
+        def sorter(x, y):
+            if x.getDueDate() and y.getDueDate():
+                c = cmp(x.getDueDate(), y.getDueDate())
+                if c:
+                    return c
+                return cmp(getattr(y, default), getattr(x, default))
+            elif x.getDueDate():
+                # if reverse, make these loose
+                if reverse:
+                    return 1
+                return -1
+            elif y.getDueDate():
+                if reverse:
+                    return -1
+                return 1
+            else:
+                return cmp(getattr(y, default), getattr(x, default))
+    
+
+        if reverse:
+            def sorter_wrapper(x,y):
+                return sorter(y, x)
+            issues.sort(sorter_wrapper)
+        else:
+            issues.sort(sorter)
+        
 
 
     def _sortByType(self, issues, reverse=0):
@@ -8238,9 +8370,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         return issues
     
-        
     def _sortByUrgency(self, issues, reverse=0):
-        """ Use self.urgencies to sort the issues """
         urgencies = {}
         for issue in issues:
             if urgencies.has_key(issue.urgency):
@@ -8251,7 +8381,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # recreate the list
         issues = []
                         
-        default = 'modifydate'
+        default = 'issuedate'
         all_urgencies = self.urgencies[:]
         if reverse:
             all_urgencies.reverse()
@@ -10138,6 +10268,47 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 
 
     ## Statistics
+    
+    def CountDueDates(self):
+        sR = self.getCatalog().searchResults
+        tres = []
+        search = {'meta_type':ISSUE_METATYPE}
+
+        options = ('Overdue', 'Today', 'Tomorrow', 'Future')
+        count_all_issues = len(sR(**search))
+        
+        for option in options:
+            if option == 'Overdue':
+                yesterday = DateTime((DateTime()-1).strftime('%Y/%m/%d'))
+                search['due_date'] = {'query':yesterday, 'range':'max'}
+            elif option == 'Today':
+                today = DateTime(DateTime().strftime('%Y/%m/%d'))
+                search['due_date'] = {'query':today, 'range':'min:max'}
+            elif option == 'Tomorrow':
+                tomorrow = DateTime((DateTime() + 1).strftime('%Y/%m/%d'))
+                search['due_date'] = {'query':tomorrow, 'range':'min:max'}
+            elif option == 'Future':
+                after_tomorrow = DateTime((DateTime() + 2).strftime('%Y/%m/%d'))
+                search['due_date'] = {'query':after_tomorrow, 'range':'min'}
+            else:
+                raise ValueError("unrecognized option")
+            
+            tres.append([option, len(sR(**search))])
+
+        
+        tres.append(['No due date', 
+                     count_all_issues - sum([x[1] for x in tres])])
+            
+        return tres
+    
+    def getDueDate2ListLink(self, due_date):
+        """ return a URL that can be used to filter """
+        url = self.relative_url()+'/'+self.whichList()
+        params = {'f-due':due_date,
+                 }
+        params['Filterlogic'] = 'show'
+        url = Utils.AddParam2URL(url, params)
+        return url
 
     def getStatus2ListLink(self, status):
         """ return the URL to ListIssues or CompleteList with this status
@@ -13187,6 +13358,7 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
                    {'id':'sections',      'type':'ulines',  'mode': 'w'},
                    {'id':'urgencies',     'type':'ulines',  'mode': 'w'},
                    {'id':'types',         'type':'ulines',  'mode': 'w'},
+                   {'id':'due',           'type':'ulines',  'mode': 'w'},
                    {'id':'fromname',      'type':'ustring', 'mode': 'w'},
                    {'id':'email',         'type':'string', 'mode': 'w'},
                    )
@@ -13241,6 +13413,8 @@ class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
         rset('f-types', self.types)
         rset('f-fromname', self.fromname)
         rset('f-email', self.email)
+        if getattr(self, 'due', None):
+            rset('f-due', self.due)
         
         for field_id, value in getattr(self, 'custom_filters', {}).items():
             rset('f-%s' % field_id, value)

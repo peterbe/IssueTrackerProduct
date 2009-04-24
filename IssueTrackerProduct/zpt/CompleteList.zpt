@@ -35,6 +35,7 @@ tal:define="todaysdate python:here.ZopeTime()"
 		<td><span tal:replace="structure python:here.HeadingLinks('Submitted by','submittedby', sortinfo=sortinfo)">Submitted by</span></td>
 		<td width="100"><span tal:replace="structure python:here.HeadingLinks('Urgency','urgency', sortinfo=sortinfo)">Urgency</span></td>
 		<td width="100"><span tal:replace="structure python:here.HeadingLinks('Type','type', sortinfo=sortinfo)">Type</span></td>
+		<td width="100" tal:condition="here/EnableDueDate"><span tal:replace="structure python:here.HeadingLinks('Due date','due_date', sortinfo=sortinfo, inverted=True)">Due date</span></td>
 
 	</tr> 
 </table>
@@ -44,13 +45,9 @@ tal:define="todaysdate python:here.ZopeTime()"
 
 <div tal:repeat="issue batch" align="center" tal:define="show_threads here/doShowThreads">
 	
-<!-- Show Issue Data -->
 <br tal:replace="structure issue/ShowIssueData" />
-<!-- /Show Issue Data -->
 		
-<!-- Show Issue Threads -->
 <br tal:condition="show_threads" tal:replace="structure issue/ShowIssueThreads" />  
-<!-- /Show Issue Threads -->
 
 <p>&nbsp;</p>
 </div>

@@ -1,5 +1,4 @@
 <dtml-call "doCache(hours=30)"><dtml-call "RESPONSE.setHeader('Content-type','text/css')">
-
 html, body {
   margin:0; 
   padding:0;
@@ -475,6 +474,13 @@ a.assignment {
 .ur-2 {font-weight:bold; }
 .ur-3 {font-weight:bold; color:red; }
 .ur-4 {font-weight:bolder; color:red; }
+
+/* Due dates */
+.dd-past { font-weight:bold; color:red;}
+.dd-today { color:red; }
+.dd-tomorrow {color:red;}
+.dd-future {}
+
 
 div.note {
   font-size:80%;

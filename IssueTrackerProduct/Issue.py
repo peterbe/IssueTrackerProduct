@@ -2380,6 +2380,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             
         if 'modifydate' in idxs and not indexes.has_key('modifydate'):
             idxs.remove('modifydate')
+            
+        if self.EnableDueDate() and indexes.has_key('due_date'):
+            idxs.append('due_date')
 
         catalog.catalog_object(self, path, idxs=idxs)
  

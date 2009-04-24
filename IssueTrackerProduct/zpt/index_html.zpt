@@ -12,7 +12,7 @@
 <div id="rest">
 
 
-    <table tal:define="statuslist here/CountStatuses" tal:condition="python:len(statuslist)>0"
+    <table tal:define="statuslist here/CountStatuses" tal:condition="python:len(statuslist)"
      summary="List of counts per different statuses"
      border="0" cellspacing="0" cellpadding="2">
 
@@ -35,7 +35,8 @@
 
         </td>
       </tr>
-     </table>
+    </table>
+     
 
   <br />
   <ul class="further">
@@ -57,9 +58,42 @@
          tal:content="plugin/getTitle|plugin/title_or_id"></a>
     </li>
   </ul>
-
-
+  
   <div id="issuedraftsouter" tal:content="structure here/show_drafts"></div>
+  
+
+    <tal:block condition="here/EnableDueDate">
+    <br/><br/>
+    <table width="250"
+           tal:define="duelist here/CountDueDates" 
+           tal:condition="python:duelist"
+     summary="List of issues by due date"
+     border="0" cellspacing="0" cellpadding="2">
+
+      <thead>
+        <tr class="lhead">
+          <th align="left" colspan="2">Due dates</th>
+        </tr>
+      </thead>
+      
+      <tbody tal:repeat="each duelist" 
+             tal:attributes="class python:test(path('repeat/each/odd'), 'lodd','leven')">
+        <tr>
+          <td tal:define="option python:each[0]">
+              <a tal:condition="not:python:option=='No due date'"
+                 tal:attributes="href python:here.getDueDate2ListLink(option)" 
+                 tal:content="python:option">option</a>
+              <span tal:condition="python:option=='No due date'"
+                    >No due date</span>
+          </td>
+          <td align="right">
+           <br tal:replace="python:each[1]"/>&nbsp;</td> 
+        </tr>
+      </tbody>
+    </table>     
+    </tal:block>
+
+
   
   <div id="nextactionsouter"
    tal:condition="here/showNextActionIssues"

@@ -98,7 +98,7 @@
       <td tal:condition="python:change or here.getDueDate()"
           class="ilabel">Due date:</td>
       <td tal:condition="python:not change and here.getDueDate()">
-      <span tal:content="structure python:here.showDate(here.parseDueDate(here.getDueDate()), include_hour=False)"
+      <span tal:content="structure python:here.showDueDate(here.parseDueDate(here.getDueDate()))"
            tal:attributes="class python:here.getDueDateCSSSelector(here.getDueDate())">due!</span>
        </td>
       <td tal:condition="change">

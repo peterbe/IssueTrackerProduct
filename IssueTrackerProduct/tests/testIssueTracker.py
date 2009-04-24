@@ -1807,7 +1807,149 @@ class IssueTrackerTestCase(TestBase):
         self.assertEqual(func('2008/02/29'), DateTime('2008/02/29'))
         
         
+    def test_filter_by_due_date(self):
+        """test to list issues with a filter"""
+        tracker = self.folder.tracker
+        
+        title = u"Title"
+        description = u"Description"
+        
+        tracker.enable_due_date = True
+        def hourless(d):
+            return DateTime(d.strftime('%Y/%m/%d'))
+        
+        today = hourless(DateTime())
+        yesterday = hourless(DateTime()-1)
+        tomorrow = hourless(DateTime()+1)
+        future = hourless(DateTime()+7)
+        
+        title_no_due_date = 'NO DUE DATE'
+        title_today = 'TODAY'
+        title_yesterday = 'YESTERDAY'
+        title_tomorrow = 'TOMORROW'
+        title_future = 'FUTURE'
+        
+        request = self.app.REQUEST
+        
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        request.set('title', title_no_due_date)
+        request.set('due_date', '')
+        html = tracker.SubmitIssue(request)
 
+        request.set('title', title_today)
+        request.set('due_date', today)
+        html = tracker.SubmitIssue(request)
+
+        request.set('title', title_yesterday)
+        request.set('due_date', yesterday)
+        html = tracker.SubmitIssue(request)
+
+        request.set('title', title_tomorrow)
+        request.set('due_date', tomorrow)
+        html = tracker.SubmitIssue(request)
+
+        request.set('title', title_future)
+        request.set('due_date', future)
+        html = tracker.SubmitIssue(request)
+        
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 5)
+        
+        request.set('Filterlogic', 'block')
+        
+        request.set('f-due', '')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 5)
+        
+        request.set('f-due', 'FutUrE') # case insensitive
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 4)
+        self.assertTrue(title_future not in [x.title for x in seq])
+        
+        request.set('f-due', 'Overdue')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 4)
+        self.assertTrue(title_yesterday not in [x.title for x in seq])
+        
+        request.set('f-due', 'Today')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 4)
+        self.assertTrue(title_today not in [x.title for x in seq])
+        
+        request.set('f-due', 'TomorroW')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 4)
+        self.assertTrue(title_tomorrow not in [x.title for x in seq])
+        
+        # combos
+        request.set('f-due', ['FutUrE','Today']) 
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 3)
+        self.assertTrue(title_future not in [x.title for x in seq])
+        self.assertTrue(title_today not in [x.title for x in seq])
+        
+        request.set('f-due', ['Overdue','Today']) 
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 3)
+        self.assertTrue(title_yesterday not in [x.title for x in seq])
+        self.assertTrue(title_today not in [x.title for x in seq])        
+        
+        request.set('f-due', ['FutUrE','OverDUE']) 
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 3)
+        self.assertTrue(title_future not in [x.title for x in seq])
+        self.assertTrue(title_yesterday not in [x.title for x in seq])
+        
+        # Change the filter logic
+        request.set('Filterlogic', 'show')
+        
+        request.set('f-due', '')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 5)
+        
+        request.set('f-due', 'TODAy')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 1)
+        self.assertTrue(title_today in [x.title for x in seq])
+        
+        request.set('f-due', 'OVERdue')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 1)
+        self.assertTrue(title_yesterday in [x.title for x in seq])        
+        
+        request.set('f-due', 'tomorrow')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 1)
+        self.assertTrue(title_tomorrow in [x.title for x in seq])
+        
+        request.set('f-due', 'futurE')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 1)
+        self.assertTrue(title_future in [x.title for x in seq])
+        
+        # combos
+        request.set('f-due', ['tomorrow','future'])
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 2)
+        self.assertTrue(title_tomorrow in [x.title for x in seq])
+        self.assertTrue(title_future in [x.title for x in seq])
+        
+        request.set('f-due', ['overdue','future'])
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 2)
+        self.assertTrue(title_yesterday in [x.title for x in seq])
+        self.assertTrue(title_future in [x.title for x in seq])
+        
+        request.set('f-due', ['overdue','today'])
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 2)
+        self.assertTrue(title_yesterday in [x.title for x in seq])
+        self.assertTrue(title_today in [x.title for x in seq])        
         
             
         

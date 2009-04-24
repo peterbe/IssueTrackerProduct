@@ -56,7 +56,7 @@
 			 <td tal:content="issue/type">type</td>
 		         <td tal:condition="python:enable_due_date and issue.getDueDate()"
                              tal:attributes="class python:here.getDueDateCSSSelector(issue.getDueDate())"
-                             tal:content="structure python:here.showDate(issue.getDueDate(), include_hour=False)">
+                             tal:content="structure python:here.showDueDate(issue.getDueDate())">
                          </td>
 		         <td tal:condition="python:enable_due_date and not issue.getDueDate()">&nbsp;</td>
                    
