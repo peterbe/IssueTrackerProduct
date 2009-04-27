@@ -1,0 +1,26 @@
+<dtml-var manage_page_header> 
+<dtml-with "_(management_view='Properties')">
+<dtml-var manage_tabs>
+</dtml-with>
+
+<style type="text/css">
+</style>
+
+<p>Here you can amend the datepicker options which is used when you use the Due date feature.
+The content of this must be a valid Javascript array.<br/>
+For inspiration see the <a href="http://jqueryui.com/demos/datepicker/">jQuery UI documentation on Datepicker</a>.
+</p>
+
+<form action="manage_saveDatepickerOptions">
+<textarea name="datepicker_options" rows="10" cols="50"
+><dtml-var getDatepickerOptions></textarea><br/>
+<input type="submit" value="Save changes"/>
+</form>
+
+<p>For example, if your week starts on a Monday rather than Sunday then set:<br/>
+<code>firstDay: 1</code></p>
+<p>Remember, the Javascript array has to be correctly delimited with commas and the last item must not be preceeded with a comma.</p>
+
+
+
+<dtml-var manage_page_footer>
