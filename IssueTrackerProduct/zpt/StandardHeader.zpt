@@ -18,11 +18,9 @@
 </tal:block>
 <style metal:define-slot="extracss" tal:omit-tag=""></style>
 <link rel="Shortcut Icon" href="/favicon.ico" type="image/x-icon" tal:attributes="href string:${root_relative_url}/favicon.ico" />
-<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-latest.min.js"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-1.3.2.min.js"></script>
 
 <meta tal:replace="here/testAutoLogin" />
-
-
 
 </head>
 

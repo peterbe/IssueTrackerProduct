@@ -289,3 +289,11 @@ for title, data in MENUICONS_DATA.items():
         data['alt'] = title
     MENUICONS_DATA[title] = data
 
+
+DEFAULT_DATEPICKER_OPTIONS = """
+dateFormat: 'yy-mm-dd',
+minDate: -1,
+showButtonPanel: true,
+changeMonth: true,
+changeYear: true
+"""

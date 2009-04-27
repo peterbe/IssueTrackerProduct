@@ -102,8 +102,8 @@
            tal:attributes="class python:here.getDueDateCSSSelector(here.getDueDate())">due!</span>
        </td>
       <td tal:condition="change">
-        <input name="due_date" tabindex="40" size="12"
-               tal:attributes="value python:request.get('due_date', here.getDueDate() and here.getDueDate().strftime('%Y/%m/%d') or '')" />
+        <input name="due_date" id="id_due_date" tabindex="40" size="12" 
+               tal:attributes="value python:request.get('due_date', here.getDueDate() and here.getDueDate().strftime('%Y-%m-%d') or '')" />
         <noscript tal:content="python:here.showStrftimeFriendly(here.display_date, strip_hour_part=True)"></noscript>
             <span class="submiterror" tal:condition="options/SubmitError|nothing" 
                   tal:content="python:here.ShowSubmitError(options, 'due_date')"></span>

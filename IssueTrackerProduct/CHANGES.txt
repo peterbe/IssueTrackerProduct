@@ -1,5 +1,7 @@
 - 
 
+    New feature: Upgraded to latest version of jQuery 1.3.2.
+
     New feature: Added UnicodeSplitter to be able to properly index
     and search Unicode text. 
     

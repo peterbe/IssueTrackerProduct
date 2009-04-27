@@ -560,7 +560,7 @@ issue towards the top of List Issues.
   <p>
     Adds a date field so that you can set when issues are due to be completed. 
     It's entirely superficial and up to you but the attribute might help you and your team.
-    <a href="manage_datepicker_options">Click here to configure the date picker</a>
+    <a href="manage_DatepickerManagementForm">Click here to configure the date picker</a>
   </p>
   </td> 
 </tr>

@@ -154,9 +154,10 @@ def initialize(context):
         registerIcon('gradtablehead.png')
         registerIcon('customfieldfolder.png')
         registerJS('core.js')
-        registerJS('jquery-latest.min.js', slim_if_possible=False)
+        registerJS('jquery-1.3.2.min.js', slim_if_possible=False)
+        registerJS('jquery-ui-1.7.1.datepickeronly.min.js', slim_if_possible=False)
         registerJS('manage-customfield.js')
-        
+        registerCSS('jquery-ui-1.7.1.datepickeronly.css')
         
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())
         for icon in icons:
@@ -166,20 +167,11 @@ def initialize(context):
         for micon in menuicons:
             registerIcon(micon, epath='menuicons')
         
-#        tiny_mce_images = {'tinymce/themes/simple/images':
-#                           ('bold.gif','bullist.gif','cleanup.gif','italic.gif',
-#                            'numlist.gif','redo.gif','spacer.gif','strikethrough.gif',
-#                            'underline.gif','undo.gif'),
-#                           }
-#        for path, imagenames in tiny_mce_images.items():
-#            for imagename in imagenames:
-#                registerIcon(imagename, epath=path,
-#                             startpath='')
-        
-
-
-        ##context.registerHelp()
-        ##context.registerHelpTitle('IssueTrackerProduct Help')
+        ui_icons = os.listdir(os.path.join(package_home(globals()), 'www', 'ui_icons'))
+        ui_icons = [x for x in ui_icons if x.endswith('.png') or x.endswith('.gif')]
+        for ui_icon in ui_icons:
+            registerIcon(ui_icon, epath='ui_icons')
+            
     except:
         if DevelopmentMode:
             raise
@@ -301,7 +293,6 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
 
     def _expires(self):
         return rfc1123_date(time()+self.max_age)
-    
     
     
 def my_guess_content_type(path, data):

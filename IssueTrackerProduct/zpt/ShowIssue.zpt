@@ -17,6 +17,15 @@ $(function() {if($('#textarea').size()) $('#textarea')[0].focus();disableKS();})
  tal:condition="python:here.getSavedTextFormat()=='html' and conf"
  tal:replace="structure conf"></script>
  
+<tal:block condition="python:here.EnableDueDate() and request.get('change')">
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.min.js"
+        ></script>
+<script type="text/javascript"
+        tal:content="structure string:$(function() {$('#id_due_date').datepicker({${here/getDatepickerOptions}})})">
+</script>
+</tal:block>        
+ 
+ 
 </metal:script>
 
 <metal:style fill-slot="extracss">
@@ -47,6 +56,11 @@ a.detailslink { font-size:10px; }
   width:87%;
 }
 </style>
+
+  <link tal:condition="python:here.EnableDueDate() and request.get('change')"
+        rel="stylesheet" type="text/css" 
+        href="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.css" />
+
 </metal:style>
  
 <div metal:fill-slot="body" tal:omit-tag="" 

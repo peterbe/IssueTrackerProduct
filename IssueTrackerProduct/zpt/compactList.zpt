@@ -8,7 +8,7 @@
 		<td><span tal:replace="structure python:here.HeadingLinks('Submitted by','submittedby', sortinfo=sortinfo)">Submitted by</span></td>                
 		<td><span tal:replace="structure python:here.HeadingLinks('Urgency','urgency', sortinfo=sortinfo)">Urgency</span></td>
 		<td><span tal:replace="structure python:here.HeadingLinks('Type','type', sortinfo=sortinfo)">Type</span></td>
-		<td width="100" tal:condition="enable_due_date"><span tal:replace="structure python:here.HeadingLinks('Due date','due_date', sortinfo=sortinfo, inverted=True)">Due date</span></td>
+		<td tal:condition="enable_due_date"><span tal:replace="structure python:here.HeadingLinks('Due date','due_date', sortinfo=sortinfo, inverted=True)">Due date</span></td>
 
 	</tr>
    </thead>

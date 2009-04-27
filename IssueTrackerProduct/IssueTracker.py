@@ -141,6 +141,7 @@ from Utils import unicodify, asciify
 from bot_user_agents import is_bot_user_agent
 from Webservices import IssueTrackerWebservices
 from CustomField import CustomFieldsIssueTrackerBase
+from Datepicker import DatepickerBase
 from Permissions import *
 from Constants import *
 from Errors import *
@@ -453,6 +454,7 @@ class Empty:
 class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                    Notifyables.Notifyables, IssueTrackerWebservices,
                    CustomFieldsIssueTrackerBase,
+                   DatepickerBase,
                    ):
     """ IssueTracker class """
     
@@ -13237,6 +13239,7 @@ dtmls = ({'f':'dtml/screen.css', 'optimize':OPTIMIZE and 'css'},
          'dtml/management_tabs',
          ('dtml/ManagementForm','manage_ManagementForm'),
          ('dtml/POP3ManagementForm', 'manage_POP3ManagementForm'),
+         ('dtml/DatepickerManagementForm', 'manage_DatepickerManagementForm'),
          ('dtml/ManagementNotifyables','manage_ManagementNotifyables'),
          ('dtml/ManagementUsers','manage_ManagementUsers'),
          ('dtml/ManagementUpgrade','manage_ManagementUpgrade'),
@@ -13310,6 +13313,7 @@ security.declareProtected('View', 'rss.xml')
 security.declareProtected('View', 'rdf.xml')
 
 security.declareProtected(VMS, 'manage_POP3ManagementForm')
+security.declareProtected(VMS, 'manage_DatepickerManagementForm')
 security.declareProtected(VMS, 'manage_configureMenuForm')
 security.declareProtected(VMS, 'manage_ManagementNotifyables')
 security.declareProtected(VMS, 'manage_ManagementNotifyables')

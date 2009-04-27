@@ -5,6 +5,17 @@
 <script type="text/javascript"
  tal:attributes="src string:$ru/addissue.js"></script>
 
+
+<tal:block condition="here/EnableDueDate">
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.min.js"
+        ></script>
+<script type="text/javascript"
+        tal:content="structure string:$(function() {$('#id_due_date').datepicker({${here/getDatepickerOptions}})})">
+</script>
+</tal:block>        
+
+ 
+
 <tal:block define="useaccesskeys here/useAccessKeys" condition="not:request/previewissue|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
 $(function() {$('#title')[0].focus();});</script>
@@ -27,6 +38,12 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
              replace="structure custom_fields_css">
              
   </tal:block>
+  
+  <link tal:condition="here/EnableDueDate"
+        rel="stylesheet" type="text/css" 
+        href="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.css" />
+        
+  
 
 </metal:style>
  
@@ -181,7 +198,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
     <tr tal:condition="here/EnableDueDate">
       <td><b>Due date:</b></td>
       <td>
-        <input name="due_date" tabindex="40" size="12"
+        <input name="due_date" id="id_due_date" tabindex="40" size="12"
                tal:attributes="value request/due_date|nothing" />
         <noscript tal:content="python:here.showStrftimeFriendly(here.display_date, strip_hour_part=True)"></noscript>
             <span class="submiterror" tal:condition="options/SubmitError|nothing" 
