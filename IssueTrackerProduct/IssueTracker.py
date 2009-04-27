@@ -8205,9 +8205,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # If this is True, we remember the sortorder found this time
         # so that it can be used in the future.
         keep_sortorder = request.get('keep_sortorder', True)
-        
-        sortorder, sortorder_reverse = self.getSortOrder(request)
 
+        sortorder, sortorder_reverse = self.getSortOrder(request)
+        
         # use special methods for some sorting
         if sortorder == 'urgency':
             issues = self._sortByUrgency(issues, not sortorder_reverse)

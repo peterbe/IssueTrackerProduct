@@ -128,6 +128,8 @@ from Products.IssueTrackerProduct.IssueTracker import FilterValuer
 #------------------------------------------------------------------------------    
 
 class TestBase(ZopeTestCase.ZopeTestCase):
+    
+    
 
     def dummy_redirect(self, *a, **kw):
         self.has_redirected = a[0]
@@ -170,24 +172,58 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         global __trapped_emails__
         __trapped_emails__ = []
         
-class TestFunctionalBase(ZopeTestCase.FunctionalTestCase):
-
-    def afterSetUp(self):
-        # install an issue tracker
-        dispatcher = self.folder.manage_addProduct['IssueTrackerProduct']
-        dispatcher.manage_addIssueTracker('tracker', 'Issue Tracker')
-
-        # install a MailHost
-        if not DEBUG:
-            dispatcher = self.folder.manage_addProduct['MailHost']
-            dispatcher.manage_addMailHost('MailHost')
-
-        request = self.app.REQUEST
-        sdm = self.app.session_data_manager
-        request.set('SESSION', sdm.getSessionData())
         
+try:
+    from zope import traversing, component, interface
+except ImportError:
+    traversing = None
+    TestFunctionalBase = None
+        
+if traversing:
+    
+    from zope.traversing.adapters import DefaultTraversable
+    from zope.traversing.interfaces import ITraversable
+    from zope.component import provideAdapter
+    from zope import interface
+    from zope.interface import implements
+    
+    class TestFunctionalBase(ZopeTestCase.FunctionalTestCase, TestBase):
+    
+        def afterSetUp(self):
+            # install an issue tracker
+            dispatcher = self.folder.manage_addProduct['IssueTrackerProduct']
+            dispatcher.manage_addIssueTracker('tracker', 'Issue Tracker')
+    
+            # install a MailHost
+            if not DEBUG:
+                dispatcher = self.folder.manage_addProduct['MailHost']
+                dispatcher.manage_addMailHost('MailHost')
+    
+            request = self.app.REQUEST
+            sdm = self.app.session_data_manager
+            request.set('SESSION', sdm.getSessionData())
+            
+        def beforeSetUp(self):
+            super(ZopeTestCase.FunctionalTestCase, self).beforeSetUp()
+            component.provideAdapter( \
+                        traversing.adapters.DefaultTraversable, (interface.Interface,),ITraversable)
+
+            
     
 class IssueTrackerTestCase(TestBase):
+    
+    try:
+        # For zope 2.10+ to make it shut up about 
+        from zope.interface import implements
+        from zope.traversing.interfaces import ITraversable
+        from zope.traversing.adapters import DefaultTraversable
+        from zope import interface
+        from zope.component import provideAdapter
+        implements(ITraversable)
+        provideAdapter(DefaultTraversable,
+                       (interface.Interface,),ITraversable)
+    except ImportError:
+        pass
     
     def test_addingIssue(self):
         """ test something """
@@ -1952,7 +1988,80 @@ class IssueTrackerTestCase(TestBase):
         seq = tracker.ListIssuesFiltered()
         self.assertEqual(len(seq), 2)
         self.assertTrue(title_yesterday in [x.title for x in seq])
-        self.assertTrue(title_today in [x.title for x in seq])        
+        self.assertTrue(title_today in [x.title for x in seq])
+        
+        
+    def test_sort_by_due_date(self):
+        """test to sort issues by due date"""
+        tracker = self.folder.tracker
+        
+        title = u"Title"
+        description = u"Description"
+        
+        tracker.enable_due_date = True
+        def hourless(d):
+            return DateTime(d.strftime('%Y/%m/%d'))
+        
+        today = hourless(DateTime())
+        yesterday = hourless(DateTime()-1)
+        tomorrow = hourless(DateTime()+1)
+        future = hourless(DateTime()+7)
+        
+        title_no_due_date = 'NO DUE DATE'
+        title_today = 'TODAY'
+        title_yesterday = 'YESTERDAY'
+        title_tomorrow = 'TOMORROW'
+        title_future = 'FUTURE'
+        
+        request = self.app.REQUEST
+        
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', description)
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        
+        request.set('title', title_no_due_date)
+        request.set('due_date', '')
+        html = tracker.SubmitIssue(request)
+
+        request.set('title', title_today)
+        request.set('due_date', today)
+        html = tracker.SubmitIssue(request)
+
+        request.set('title', title_yesterday)
+        request.set('due_date', yesterday)
+        html = tracker.SubmitIssue(request)
+
+        request.set('title', title_tomorrow)
+        request.set('due_date', tomorrow)
+        html = tracker.SubmitIssue(request)
+
+        request.set('title', title_future)
+        request.set('due_date', future)
+        html = tracker.SubmitIssue(request)
+        
+        request.set('sortorder', 'due_date')
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 5)
+        
+        # If you sort by due date, the most pressing one should come first.
+        # The most pressing one is the one that was due longest ago.
+        # Last should be any issues that don't have a due date.
+        
+        self.assertEqual([x.getDueDate() for x in seq],
+                         [yesterday, today, tomorrow, future, None])
+
+        request.set('reverse', 'true')
+        
+        seq = tracker.ListIssuesFiltered()
+        self.assertEqual(len(seq), 5)
+        
+        self.assertEqual([x.getDueDate() for x in seq],
+                         [future, tomorrow, today, yesterday, None])
+        
+        
+        
         
             
         
@@ -1960,7 +2069,8 @@ def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
     suite.addTest(makeSuite(IssueTrackerTestCase))
-    suite.addTest(makeSuite(TestFunctionalBase))
+    if traversing:
+        suite.addTest(makeSuite(TestFunctionalBase))
     return suite
 
 
