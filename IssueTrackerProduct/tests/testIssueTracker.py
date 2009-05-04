@@ -21,12 +21,13 @@ from DateTime import DateTime
 
 import Acquisition
 
-ZopeTestCase.installProduct('MailHost')
-ZopeTestCase.installProduct('ZCatalog')
-ZopeTestCase.installProduct('ZCTextIndex')
-ZopeTestCase.installProduct('SiteErrorLog')
-ZopeTestCase.installProduct('PythonScripts')
-ZopeTestCase.installProduct('IssueTrackerProduct')
+from base import TestBase
+#ZopeTestCase.installProduct('MailHost')
+#ZopeTestCase.installProduct('ZCatalog')
+#ZopeTestCase.installProduct('ZCTextIndex')
+#ZopeTestCase.installProduct('SiteErrorLog')
+#ZopeTestCase.installProduct('PythonScripts')
+#ZopeTestCase.installProduct('IssueTrackerProduct')
 
 from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, IssueTrackerUserRole
 from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE, \
@@ -40,22 +41,6 @@ from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE, \
 
 #------------------------------------------------------------------------------
 
-# Open ZODB connection
-app = ZopeTestCase.app()
-        
-# Set up sessioning objects
-ZopeTestCase.utils.setupCoreSessions(app)
-
-ZopeTestCase.utils.setupSiteErrorLog(app)
-        
-# Set up example applications
-#if not hasattr(app, 'Examples'):
-#    ZopeTestCase.utils.importObjectFromFile(app, examples_path)
-        
-# Close ZODB connection
-ZopeTestCase.close(app)
-
-#------------------------------------------------------------------------------
 pre_submitissue_script_src = """
 ## Script (Python) "pre_SubmitIssue"
 ##parameters=
@@ -127,9 +112,7 @@ from Products.IssueTrackerProduct.IssueTracker import FilterValuer
         
 #------------------------------------------------------------------------------    
 
-class TestBase(ZopeTestCase.ZopeTestCase):
-    
-    
+class TestBasex(ZopeTestCase.ZopeTestCase):
 
     def dummy_redirect(self, *a, **kw):
         self.has_redirected = a[0]
@@ -168,9 +151,9 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         
         self.app.REQUEST.cookies[key] = value
         
-    def afterClear(self):
-        global __trapped_emails__
-        __trapped_emails__ = []
+    #def afterClear(self):
+    #    global __trapped_emails__
+    #    __trapped_emails__ = []
         
         
 try:
@@ -300,10 +283,10 @@ class IssueTrackerTestCase(TestBase):
             self.assertTrue(notification.isDispatched())
 
         # we should now expect an email to have been sent to email@address.com
-        assert __trapped_emails__, "not trapped emails"
-        latest_email = __trapped_emails__[0]
-        self.assertTrue(latest_email['mto'].find('email@address.com') > -1)
-        self.assertTrue(latest_email['mfrom'].find('something@valid.com') > -1)
+        assert self.snatched_emails, "not trapped emails"
+        latest_email = self.snatched_emails[-1]
+        self.assertTrue(latest_email['to'].find('email@address.com') > -1)
+        self.assertTrue(latest_email['fr'].find('something@valid.com') > -1)
         
             
     def test_debatingIssue_withSmartAvoidanceOfNotifications(self):
@@ -1530,7 +1513,7 @@ class IssueTrackerTestCase(TestBase):
         request.set('assignee', user['identifier'])
         request.form['notify-assignee'] = '1'
         
-        no_trapped_emails = len(__trapped_emails__)
+        no_trapped_emails = len(self.snatched_emails)
         tracker.SubmitIssue(request)
         
         # There should now be one issue...
@@ -1553,12 +1536,12 @@ class IssueTrackerTestCase(TestBase):
         self.assertEqual(len(notifications), 1)
         notification = notifications[0]
         
-        assert len(__trapped_emails__) == no_trapped_emails + 1
+        assert len(self.snatched_emails) == no_trapped_emails + 1
         
         # check that the
         assert notification.dispatched
         
-        latest_email = __trapped_emails__[-1]
+        latest_email = self.snatched_emails[-1]
         
         self.assertTrue(latest_email['subject'].count(request.get('title')))
         
@@ -1579,7 +1562,7 @@ class IssueTrackerTestCase(TestBase):
         
         issue.changeAssignment(user2['identifier'], send_email=True)
         
-        assert len(__trapped_emails__) == no_trapped_emails + 2
+        assert len(self.snatched_emails) == no_trapped_emails + 2
         
         assignments = issue.getAssignments()
         self.assertEqual(len(assignments), 2)
@@ -1590,54 +1573,10 @@ class IssueTrackerTestCase(TestBase):
         notification = notifications[-1]
         assert notification.dispatched
         
-        latest_email = __trapped_emails__[-1]
+        latest_email = self.snatched_emails[-1]
         
         self.assertTrue(latest_email['subject'].count(request.get('title')))
-        self.assertTrue(latest_email['mto'], 'user2@test.com')
-        
-    def test_unicode_search(self):
-        """you should be able to enter an issue in unicode, then search for any
-        of the words you wrote and find it"""
-        
-        title = u"Les opposants au r\xc3\xa9gime tha\xc3\xaflandais"
-        description = u"\xc3\xa0 l'occupation du si\xc3\xa8g\n\n"\
-                      u"Au Parlement, un air d'union sacr\xc3\xa9e face \xc3\xa0"
-        
-        tracker = self.folder.tracker
-        request = self.app.REQUEST
-        request.set('title', title)
-        request.set('fromname', u'B\xc3\xa9b')
-        request.set('email', u'email@address.com')
-        request.set('description', description)
-        request.set('type', tracker.getDefaultType())
-        request.set('urgency', tracker.getDefaultUrgency())
-        
-        tracker.SubmitIssue(request)
-        
-        # it should be possible to display it
-        issue = tracker.getIssueObjects()[0]
-        html = issue.index_html(self.app.REQUEST)
-        self.assertTrue(isinstance(html, unicode))
-        self.assertTrue(u'r\xc3\xa9gime' in html)
-        
-        # now search for one of those words
-        q = u'R\xc3\xa9GIME'
-        search_results = tracker._searchCatalog(q)
-        self.assertEqual(len(search_results), 1)
-        self.assertEqual(search_results[0], issue)
-
-        highlit = re.compile('<span class="q_highlight">(.*?)</span>')
-
-        # if you view the issue with a q variable set,
-        # it should highlight the text
-        self.app.REQUEST.set('q', u'air')
-        html = issue.index_html(self.app.REQUEST)
-        self.assertEqual(highlit.findall(html), [u'air'])
-        
-        # and do the same with a search with non-ascii characters
-        self.app.REQUEST.set('q', u'R\xc3\xa9GIME')
-        html = issue.index_html(self.app.REQUEST)
-        self.assertEqual(highlit.findall(html), [u'r\xc3\xa9gime'])
+        self.assertTrue(latest_email['to'], 'user2@test.com')
         
         
     def test_showStrftimeFriendly(self):
@@ -2072,37 +2011,6 @@ def test_suite():
     if traversing:
         suite.addTest(makeSuite(TestFunctionalBase))
     return suite
-
-
-from Products.MailHost.MailHost import MailBase
-def _monkeypatch_send(self, mfrom, mto, messageText):
-    if 0:
-        import inspect
-        print "_send(%r, %r, %r)" % (mfrom, mto, messageText[:40]+'...')
-        for i in range(2,6):
-            try:
-                #caller_module = inspect.stack()[i][1]
-                caller_method = inspect.stack()[i][3]
-                caller_method_line = inspect.stack()[i][2]
-            except IndexError:
-                break
-            print "\t%s:%s"%(caller_method, caller_method_line)
-        print ""
-    
-    __trapped_emails__.append(dict(mfrom=mfrom, mto=mto, messageText=messageText))
-    
-    #print >>sys.stderr, "from:%s To:%s" % (mfrom, mto)
-MailBase._send = _monkeypatch_send
-
-if DEBUG:
-    def _monkeypatch_sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
-        __trapped_emails__.append(dict(mfrom=fr, mto=to, messageText=msg, subject=subject))
-        
-    from Products.IssueTrackerProduct.IssueTracker import IssueTracker
-    IssueTracker.sendEmail = _monkeypatch_sendEmail
-
-__trapped_emails__ = []
-
 
     
 if __name__ == '__main__':
