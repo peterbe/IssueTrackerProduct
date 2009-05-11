@@ -1,4 +1,6 @@
 - 
+    Bug fixed: Emails in with a subject line containing the word
+    'General' without a section option called that failed.
 
     New feature: Upgraded to latest version of jQuery 1.3.2.
 

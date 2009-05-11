@@ -9722,11 +9722,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             for eachpart in parsable:
                 types.extend(reg_types.findall(eachpart))
             if types:
-                email['type'] = correct_caser(types[0], alltypes)
                 try:
                     parsable.remove(types[0])
                 except ValueError:
-                    raise ValueError, "Unable to remove %r from %s" % (types[0], str(parsable))
+                    pass
                 
             # Urgency
             urgencies = []

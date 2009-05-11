@@ -444,7 +444,7 @@ class EmailInTestCase(TestBase):
         
         result = tracker.check4MailIssues(verbose=True)
         self.assertTrue(result.find('Created 2 issues') > -1)
-        
+
         
     def test__appendEmailIssueData(self):
         """ test the private method _appendEmailIssueData() """
@@ -482,7 +482,36 @@ class EmailInTestCase(TestBase):
         self.assertEqual(email['type'], u'bug report')
         
     
+
+    def test_email_in_without_General_section(self):
+        """A stupidity test that checks that it's possible to email in an issue
+        into an issuetracker instance that doesn't have of the default sections.
+        """
+        tracker = self.folder.tracker
         
+        tracker.sections_options = [u'Other', u'One']
+        print tracker.sections_options
+        
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-5.email' is multipart/alternative and the HTML part of it
+        # is not quoted.
+        FakePOP3.files = [abs_path('no-general.email')]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 1 issue') > -1)
+
+
+
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
