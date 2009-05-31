@@ -66,7 +66,7 @@ label.fmt {
 </dtml-if>
 
 <form action="manage_PropertiesWizard" method="post" name="form1">
-<input type="hidden" name="stage:int" value="<dtml-var stage>" /
+<input type="hidden" name="stage:int" value="<dtml-var stage>" />
 <dtml-if firsttime>
   <input type="hidden" name="firsttime:int" value="<dtml-var firsttime>" />
 </dtml-if>
@@ -128,7 +128,7 @@ label.fmt {
 
   <dtml-var "ShowError(error, 'sections_options')">
 
-  <textarea name="sections_options:lines" rows="9" cols="35"><dtml-var "_.string.join(sections_options,'\n')" html_quote></textarea>
+  <textarea name="sections_options:<dtml-var UNICODE_ENCODING>:ulines" rows="9" cols="35"><dtml-var "_.string.join(sections_options,'\n')" html_quote></textarea>
 
   <br />
 
@@ -139,9 +139,9 @@ label.fmt {
   <br />
 
   <dtml-let this_sections_options="REQUEST.get('sections_options',sections_options)">
-          <select name="defaultsections:list" multiple size="<dtml-var "_.min(7, _.len(this_sections_options))">">
+          <select name="defaultsections:<dtml-var UNICODE_ENCODING>:ulist" multiple="multiple" size="<dtml-var "_.min(7, _.len(this_sections_options))">">
 	      <dtml-in this_sections_options>
-               <option <dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>
+               <option <dtml-if "_['sequence-item'] in defaultsections">selected="selected"</dtml-if>
                ><dtml-var sequence-item html_quote></option>
 	      </dtml-in>
           </select>
@@ -165,12 +165,12 @@ label.fmt {
     <tr>
       <td>
         
-        <textarea name="types:lines" rows="6" cols="35"
+        <textarea name="types:<dtml-var UNICODE_ENCODING>:ulines" rows="6" cols="35"
          ><dtml-var "_.string.join(types, '\n')" html_quote></textarea>
         <dtml-var "ShowError(error, 'types')">
       </td>
       <td>
-        <textarea name="urgencies:lines" rows="6" cols="35"
+        <textarea name="urgencies:<dtml-var UNICODE_ENCODING>:ulines" rows="6" cols="35"
          ><dtml-var "_.string.join(urgencies, '\n')" html_quote></textarea>
         <dtml-var "ShowError(error, 'urgencies')">
       </td>
@@ -197,7 +197,7 @@ label.fmt {
     <dtml-let this_types=types>
     	<dtml-in this_types>
           <input type="radio" id="type<dtml-var sequence-index>"
-           value="<dtml-var sequence-item>" name="default_type"
+           value="<dtml-var sequence-item>" name="default_type:<dtml-var UNICODE_ENCODING>:ustring"
            <dtml-if "_['sequence-item']==default_type">checked="checked"</dtml-if>
            <label for="type<dtml-var sequence-index>"
             class="<dtml-var "getUrgencyCSSSelector(_['sequence-item'])">"><dtml-var sequence-item html_quote></label>
@@ -210,7 +210,7 @@ label.fmt {
       <dtml-let this_urgencies=urgencies>
 	      <dtml-in this_urgencies>
             <input type="radio" id="urgency<dtml-var sequence-index>"
-             value="<dtml-var sequence-item>" name="default_urgency"
+             value="<dtml-var sequence-item>" name="default_urgency:<dtml-var UNICODE_ENCODING>:ustring"
              <dtml-if "_['sequence-item']==default_urgency">checked="checked"</dtml-if>>
 	         <label for="urgency<dtml-var sequence-index>"
               class="<dtml-var "getUrgencyCSSSelector(_['sequence-item'])">"><dtml-var sequence-item html_quote></label>
@@ -347,7 +347,7 @@ href="CompleteList">Complete list</a>) even though added a long time
   <table>
     <tr>
       <td><p><b>Name:</b></td>
-      <td><input type="text" name="sitemaster_name:string" size="35"
+      <td><input type="text" name="sitemaster_name:<dtml-var UNICODE_ENCODING>:ustring" size="35"
            value="<dtml-var "REQUEST.get('sitemaster_name',sitemaster_name)" html_quote>">
           <dtml-var "ShowError(error, 'sitemaster_name')">
       </td>

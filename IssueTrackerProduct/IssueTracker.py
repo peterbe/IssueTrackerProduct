@@ -483,13 +483,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     # used for some templates
     project_homepage = 'http://www.issuetrackerproduct.com'
     
-
-    def __init__(self, id, title='',
+    def __init__(self, id, title=u"",
                  sitemaster_name=DEFAULT_SITEMASTER_NAME,
                  sitemaster_email=DEFAULT_SITEMASTER_EMAIL):
         """ Init IssueTracker class """
         self.id = str(id)
-        self.title = str(title)
+        self.title = unicode(title)
         
         self.types              = list(DEFAULT_TYPES)
         self.urgencies          = list(DEFAULT_URGENCIES)
@@ -1412,7 +1411,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         
         for each in lists:
             if hk(each) and isinstance(get(each), list):
-                dict[each] = Utils.uniqify(get(each))
+                dict[each] = [unicodify(x) for x in Utils.uniqify(get(each))]
 
         for each in booleans:
             if hk(each) and get(each):
@@ -2413,7 +2412,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             firsttime = int(REQUEST.get('firsttime',0))
         except:
             firsttime = 0
-
+            
         stage, msg, error = self._saveFromPropertiesWizard(REQUEST)
 
         if msg:
@@ -2566,7 +2565,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 stage += 1
 
         elif stage == 3:
-            defaultsections = request.get('defaultsections',[])
+            defaultsections = [unicodify(x) for x in request.get('defaultsections',[]) if x.strip()]
             if not defaultsections:
                 request.set('defaultsections', [self.sections_options[0]])
                 m = "None selected, try %s?"%self.sections_options[0]
@@ -2574,6 +2573,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             else:
                 # filter out unrecognized ones
                 checked = []
+                
                 for each in defaultsections:
                     if each in self.sections_options:
                         checked.append(each)
@@ -2623,6 +2623,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         elif stage == 5:
             default_type = request.get('default_type','').strip()
             ok = True
+            
             if default_type not in self.types:
                 error['default_type'] = "Unrecognized"
                 ok = False

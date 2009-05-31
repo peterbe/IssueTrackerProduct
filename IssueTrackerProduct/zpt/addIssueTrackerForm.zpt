@@ -19,8 +19,9 @@ The recommended name to use is: <code>MailHost</code></p>
     <td><input type="text" name="id"></td>
 </tr> 
 <tr><th>Title</th> 
-    <td><input type="text" name="title" value="Issue Tracker" /></td> 
-</tr> 
+    <td><input type="text" name="" value="Issue Tracker"
+               tal:attributes="name string:title:${here/UNICODE_ENCODING}:ustring"/></td>
+</tr>
 <tr><td></td>
     <td><input type="submit" value=" Add " /> 
 	<input type="submit" name="addandgoto" value="Add and go to" />
