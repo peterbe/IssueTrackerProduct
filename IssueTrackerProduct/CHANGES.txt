@@ -1,4 +1,8 @@
-- 
+-
+    New feature: Made DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS
+    default to True so that by default the issue description is shown
+    in the email notifications.
+    
     Bug fixed: Emails in with a subject line containing the word
     'General' without a section option called that failed.
 
