@@ -67,18 +67,11 @@ a.detailslink { font-size:10px; }
  tal:define="in_completelist python:here.thisInURL('CompleteList')">
 
 
-<div tal:define="searchresulturl here/getCameFromSearchURL"
-     tal:condition="searchresulturl">
-<a class="backlink" tal:attributes="href searchresulturl" onclick="history.go(-1);return false"
- >&#171; Back to search results</a>
+<div tal:define="came_from_list here/getRememberedListURL"
+     tal:condition="came_from_list">
+<a class="backlink" tal:attributes="href came_from_list/url" 
+ >&#171; Back to <em tal:content="came_from_list/title"></em></a>
 </div>
-
-<div tal:define="reporturl here/getCameFromReportURL"
-     tal:condition="reporturl">
-<a class="backlink" tal:attributes="href reporturl" onclick="history.go(-1);return false"
- >&#171; Back to report results</a>
-</div>
-
 
 
 <div align="center" class="announcement" tal:condition="here/isRecentlyAdded">

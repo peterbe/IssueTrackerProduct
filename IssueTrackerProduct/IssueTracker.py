@@ -5203,7 +5203,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return a suitable page title for this list (ListIssues or CompleteList) """
         request = self.REQUEST
         if request.get('q'):
-            return _(u"Search Results")
+            return _(u"Search results") + u" '%s'" % request.get('q').strip()
         elif request.get('report'):
             try:
                 # try to find the actual title of the report itself
@@ -5228,7 +5228,41 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 return _(u"Your Issues")
         else:
             return _(u"List Issues")
+        
+        
+    def getRememberedListURL(self):
+        """return a dict {url:<url>, title:<title>} or None about the users last visited
+        list url."""
+        key = LIST_URL_SESSION_KEY
+        try:
+            url, title = self.get_session(key, None)
+        except TypeError:
+            return None
+        return dict(url=url, title=title)
+    
+    def _rememberListURL(self):
+        """Put which list you're in session by remembering
+        (url, title)
+        """
+        key = LIST_URL_SESSION_KEY
+        url = self.REQUEST.URL
+        qs = self.REQUEST.QUERY_STRING
+        
+        title = self.getListPageTitle()
+        # Certain other parameters are usually put into the URL and by the 
+        # __before_publishing_traverse__() it's removed and transformed into
+        # REQUEST variables. Put that stuff back into the URL
+        for each in reversed(self.REQUEST.get('popped',[])):
+            if url.endswith('/'):
+                url += "%s/" % each
+            else:
+                url += "/%s" % each
+                
+        if qs:
+            url += '?' + qs
             
+        self.set_session(key, (url, title))
+        
     
     def setWhichList(self, what):
         """ set a SESSION with which list """
@@ -5242,7 +5276,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             else:
                 # put it in a cookie
                 self.set_cookie(key, what)
-                
+            
+            self._rememberListURL()
+            
         return None
     
     def whichList(self):

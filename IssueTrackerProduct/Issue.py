@@ -1624,6 +1624,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     
     def getCameFromSearchURL(self):
         """ if the previous page was a search, return the URL back to the same """
+        raise NotImplementedError, "This method has be deprecated"
+    
         referer = self.REQUEST.get('HTTP_REFERER')
         if not referer:
             return None
@@ -1649,6 +1651,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         This is used on the ShowIssue page so that we can link back to the 
         report they came from.
         """
+        raise NotImplementedError, "This method has be deprecated"
+    
         referer = self.REQUEST.get('HTTP_REFERER')
         if not referer:
             return None

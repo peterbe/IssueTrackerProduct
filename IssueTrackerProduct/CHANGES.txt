@@ -1,4 +1,8 @@
 -
+
+    New feature: Which list you were at is remembered when visiting an
+    issue even after reloading the issue page. Not just for searches.
+
     New feature: Made DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS
     default to True so that by default the issue description is shown
     in the email notifications.
