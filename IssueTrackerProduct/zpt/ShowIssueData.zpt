@@ -13,6 +13,11 @@
      <img tal:condition="python:here.getSubmissionType()=='email' and not here.hasEmailOriginal()"
      alt="Issue submitted via email" title="Issue submitted via email" width="16" height="16"
      src="/misc_/IssueTrackerProduct/emailicon.gif" />
+
+     <img tal:condition="python:here.getSubmissionType()=='spreadsheet'"
+     alt="Issue submitted via spreadsheet"  width="16" height="16"
+     src="/misc_/IssueTrackerProduct/spreadsheeticon.png" />
+     
     </h3>
     <h3 tal:condition="show_many"><span tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id">
     </span><a tal:attributes="href here/absolute_url_path" tal:content="structure here/showTitle" class="ilink">The Title</a>
@@ -83,7 +88,7 @@
                      onblur="if(!this.options[this.selectedIndex].value){hideAssignmentForm()}"
                      onchange="if(!this.options[this.selectedIndex].value){hideAssignmentForm()}else{showAssignmentForm()}">
              <option value="" style="color:#666">Change assignment...</option>
-				<option tal:repeat="user all_users" style="color:#000"
+             <option tal:repeat="user all_users" style="color:#000"
                  tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected"
                  tal:content="python:user['user'].getFullname()">
 				Statuses</option>

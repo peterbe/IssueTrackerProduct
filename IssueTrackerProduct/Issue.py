@@ -1410,7 +1410,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
     security.declareProtected(ChangeIssuePermission, 'editIssueDetails')
     def editIssueDetails(self, sections=None, type=None, urgency=None,
-                         confidential=False, url2issue=None, 
+                         confidential=False, url2issue=None,
                          estimated_time_hours=None,
                          actual_time_hours=None,
                          due_date=None,
@@ -1497,7 +1497,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             self.urgency = urgency
             
         # due_date must be a valid date
-        if self.EnableDueDate():
+        if self.EnableDueDate() and due_date is not None:
             if due_date or self.getDueDate():
                 if due_date:
                     due_date = self.parseDueDate(due_date)
@@ -2815,7 +2815,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             state = 0
         else:
             state = 1
-        #lastone = assignments[-1]
+            
         if self.hasManagerRole():
             self.createAssignment(assignee, state=state, send_email=send_email)
 

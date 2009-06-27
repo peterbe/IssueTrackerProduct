@@ -3409,13 +3409,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
 
     security.declareProtected(AddIssuesPermission, 'SubmitIssue')
-    def SubmitIssue(self, REQUEST):
+    def SubmitIssue(self, REQUEST, web_view=True):
         """ This is the method to create an Issue Tracker Issue. It
         relies only on the REQUEST object.
         1) Check data
         2) Try to create issue
             2a) If success, RESPONSE.redirect to issue plus Thank you message
             2b) If failure, print failed data and urge to submit again
+            
+        If web_view is False, don't do web things like redirects.
         """
 
         request = self.REQUEST
@@ -3634,7 +3636,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 page = self.QuickAddIssue
             else:
                 page = self.AddIssue
-            return page(REQUEST, SubmitError=SubmitError)
+                
+            if web_view:
+                return page(REQUEST, SubmitError=SubmitError)
+            else:
+                return SubmitError
 
 
         #
@@ -3683,8 +3689,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         urgency         = _rg('urgency')
         description     = unicodify(_rg('description'))
         display_format  = _rg('display_format')
-        confidential    = int(_rg('confidential',0))
-        hide_me         = int(_rg('hide_me',0))
+        confidential    = Utils.niceboolean(_rg('confidential',0))
+        hide_me         = Utils.niceboolean(_rg('hide_me',0))
         status          = _rfg('status', self.getStatuses()[0])
         sections        = sections_newlist
 
@@ -3711,7 +3717,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if _rfg('draft_issue_id'):
                 self._dropDraftIssue(_rfg('draft_issue_id'))
                 
-            return self.REQUEST.RESPONSE.redirect(url)
+            if web_view:
+                return self.REQUEST.RESPONSE.redirect(url)
+            else:
+                return _existing_issue
         
 
         prefix = self.issueprefix
@@ -3726,7 +3735,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     confidential, hide_me, description,
                     display_format, acl_adder=acl_adder,
                     due_date=due_date)
-                    
                     
         for field in self.getCustomFieldObjects():
             value = request.get(field.getId())
@@ -3791,11 +3799,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             logger.error('Could not send always-notify emails',
                          exc_info=True)
 
-        # Where to next?
-        #redirect_url = '%s?NewIssue=Submitted'%(issue.absolute_url())
-        redirect_url = issue.absolute_url()
-        
-        request.RESPONSE.redirect(redirect_url)
+        if web_view:
+            redirect_url = issue.absolute_url()
+            request.RESPONSE.redirect(redirect_url)
+        else:
+            return issue
 
 
 
@@ -3846,10 +3854,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             raise IssueInputError, "Unrecognized issue status %r" % status
         
         if type_ not in self.types:
-            raise ValueError, "Unrecognized issue type"
+            raise ValueError, "Unrecognized issue type %r" % type_
         
         if urgency not in self.urgencies:
-            raise ValueError, "Unrecognized issue urgency"
+            raise ValueError, "Unrecognized issue urgency %r" % urgency
         
         if not isinstance(sections, list):
             raise ValueError, "Sections is not a list"
@@ -7446,6 +7454,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         report = scriptobject
                         request.set('report', scriptid)
                         break
+                    
+        ids = None
+        if request.get('ids'):
+            ids = request.get('ids')
+            if not isinstance(ids, (tuple, list)):
+                ids = [ids]
+            ids = [x.strip() for x in ids if x.strip()]
 
         if request.has_key('filter_in_search'):
             filter_in_search = request.get('filter_in_search')
@@ -7536,6 +7551,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         elif i is not None:
             # The source is by this user
             seq = self.getMyIssues(i)
+            
+        elif ids is not None:
+            seq = self._getIssuesByIds(ids)
             
         elif report is not None:
             seq = self._generateReport(report)

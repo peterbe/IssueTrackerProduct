@@ -455,7 +455,7 @@ def highlight_signature(text, attribute='style="color:#ccc"',
         return text
 
 def niceboolean(value):
-    falseness = ('','no','off','false','none','0', 'f')
+    falseness = ('','no','off','false','none','0', 'f','n')
     return str(value).lower().strip() not in falseness
     
 
