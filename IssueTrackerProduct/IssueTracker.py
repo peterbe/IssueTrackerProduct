@@ -104,6 +104,17 @@ from App.ImageFile import ImageFile
 from ZPublisher.HTTPRequest import record
 from zExceptions import NotFound, Unauthorized
 
+# Is IssueTrackerSpreadsheet installed?
+try:
+    from Products.IssueTrackerSpreadsheet.Constants import INSTANCE_ID \
+      as Spreadsheet_INSTANCE_ID
+    from Products.IssueTrackerSpreadsheet.Constants import \
+      DOWNLOAD_SPREADSHEET_PERMISSION
+    
+except ImportError:
+    Spreadsheet_INSTANCE_ID = None
+    
+
 # Is CMF installed?
 try:
     from Products.CMFCore.utils import getToolByName as CMF_getToolByName
@@ -908,6 +919,21 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def ShowCSVExportLink(self):
         """ return show_csvexport_link """
         return getattr(self, 'show_csvexport_link', DEFAULT_SHOW_CVSEXPORT_LINK)
+    
+    def ShowExcelExportLink(self):
+        
+        if not Spreadsheet_INSTANCE_ID:
+            # not even installed!
+            return False
+
+        if getattr(self, Spreadsheet_INSTANCE_ID, None):
+            # created
+            user = getSecurityManager().getUser()
+            print user, user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
+                                            getattr(self, Spreadsheet_INSTANCE_ID))
+            return user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
+                                       getattr(self, Spreadsheet_INSTANCE_ID))
+        return False
     
     def ShowAccessKeysOption(self):
         """ return show_use_accesskeys_option """
@@ -3785,20 +3811,18 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             script(issue)
             
         # tell the people who wants to know
-        if 1:#try:
-            self.sendAlwaysNotify(issue, email=email, assignee=assignee)
-        else: #except:
-            try:
-                err_log = self.error_log
-                err_log.raising(sys.exc_info())
-            except:
-                pass
-            #typ, val, tb = sys.exc_info()
-            #_classname = self.__class__.__name__
-            #_methodname = inspect.stack()[1][3]
-            logger.error('Could not send always-notify emails',
-                         exc_info=True)
-
+        if not _rfg('send-always-notify', True): # this might need more work
+            if 1:#try:
+                self.sendAlwaysNotify(issue, email=email, assignee=assignee)
+            else: #except:
+                try:
+                    err_log = self.error_log
+                    err_log.raising(sys.exc_info())
+                except:
+                    pass
+                logger.error('Could not send always-notify emails',
+                            exc_info=True)
+    
         if web_view:
             redirect_url = issue.absolute_url()
             request.RESPONSE.redirect(redirect_url)
@@ -5408,6 +5432,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         url = self.relative_url()+'/ListIssues.csv'
         return Utils.AddParam2URL(url, params, plus_quote=True)
+    
+    
+    def ExcelExportURL(self):
+        assert Spreadsheet_INSTANCE_ID, "IssueTrackerSpreadsheet not installed"
+        return getattr(self, Spreadsheet_INSTANCE_ID).absolute_url() + \
+          DateTime().strftime('/export_excel/Issues_%Y-%m-%d.xls')
     
 
     def ResetFilter(self, page='ListIssues', redirectafter=True):

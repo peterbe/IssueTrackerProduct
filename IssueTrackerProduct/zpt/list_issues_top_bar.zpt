@@ -22,6 +22,11 @@
      <span tal:condition="here/ShowCSVExportLink" tal:omit-tag="">
      or <a href="ListIssues.csv" tal:attributes="href here/CSVExportURL">CSV</a>
      </span>
+     
+     <span tal:condition="here/ShowExcelExportLink" tal:omit-tag="">
+     or <a href="ListIssues.xls" tal:attributes="href here/ExcelExportURL">Excel</a>
+     </span>
+     
    </span>
      
   </span>
