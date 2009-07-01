@@ -104,16 +104,6 @@ from App.ImageFile import ImageFile
 from ZPublisher.HTTPRequest import record
 from zExceptions import NotFound, Unauthorized
 
-# Is IssueTrackerSpreadsheet installed?
-try:
-    from Products.IssueTrackerSpreadsheet.Constants import INSTANCE_ID \
-      as Spreadsheet_INSTANCE_ID
-    from Products.IssueTrackerSpreadsheet.Constants import \
-      DOWNLOAD_SPREADSHEET_PERMISSION
-    
-except ImportError:
-    Spreadsheet_INSTANCE_ID = None
-    
 
 # Is CMF installed?
 try:
@@ -921,19 +911,21 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return getattr(self, 'show_csvexport_link', DEFAULT_SHOW_CVSEXPORT_LINK)
     
     def ShowExcelExportLink(self):
-        
-        if not Spreadsheet_INSTANCE_ID:
-            # not even installed!
+        try:
+            # Is IssueTrackerSpreadsheet even installed?
+            from Products.IssueTrackerSpreadsheet.Constants import \
+              INSTANCE_ID as Spreadsheet_INSTANCE_ID
+            print Spreadsheet_INSTANCE_ID
+            
+            from Products.IssueTrackerSpreadsheet.Constants import \
+              DOWNLOAD_SPREADSHEET_PERMISSION
+            
+        except ImportError:
             return False
 
         if getattr(self, Spreadsheet_INSTANCE_ID, None):
             # created
             user = getSecurityManager().getUser()
-            logging.info("user=%s, has_permission=%s" % \
-            (user, user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
-                                            getattr(self, Spreadsheet_INSTANCE_ID))))
-            print user, user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
-                                            getattr(self, Spreadsheet_INSTANCE_ID))
             return user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
                                        getattr(self, Spreadsheet_INSTANCE_ID))
         return False
@@ -5438,7 +5430,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     
     
     def ExcelExportURL(self):
-        assert Spreadsheet_INSTANCE_ID, "IssueTrackerSpreadsheet not installed"
         return getattr(self, Spreadsheet_INSTANCE_ID).absolute_url() + \
           DateTime().strftime('/export_excel/Issues_%Y-%m-%d.xls')
     
