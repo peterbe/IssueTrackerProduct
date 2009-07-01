@@ -929,6 +929,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if getattr(self, Spreadsheet_INSTANCE_ID, None):
             # created
             user = getSecurityManager().getUser()
+            logging.info("user=%s, has_permission=%s" % \
+            (user, user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
+                                            getattr(self, Spreadsheet_INSTANCE_ID))))
             print user, user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
                                             getattr(self, Spreadsheet_INSTANCE_ID))
             return user.has_permission(DOWNLOAD_SPREADSHEET_PERMISSION,
