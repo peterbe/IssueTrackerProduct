@@ -5430,6 +5430,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     
     
     def ExcelExportURL(self):
+        from Products.IssueTrackerSpreadsheet.Constants import \
+          INSTANCE_ID as Spreadsheet_INSTANCE_ID
+        
         return getattr(self, Spreadsheet_INSTANCE_ID).absolute_url() + \
           DateTime().strftime('/export_excel/Issues_%Y-%m-%d.xls')
     
