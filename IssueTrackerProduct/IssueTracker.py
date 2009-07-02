@@ -5432,9 +5432,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def ExcelExportURL(self):
         from Products.IssueTrackerSpreadsheet.Constants import \
           INSTANCE_ID as Spreadsheet_INSTANCE_ID
-        
-        return getattr(self, Spreadsheet_INSTANCE_ID).absolute_url() + \
+    
+        url =  getattr(self, Spreadsheet_INSTANCE_ID).absolute_url() + \
           DateTime().strftime('/export_excel/Issues_%Y-%m-%d.xls')
+        
+        if self.REQUEST.QUERY_STRING:
+            url += '?' + self.REQUEST.QUERY_STRING
+            
+        return url
     
 
     def ResetFilter(self, page='ListIssues', redirectafter=True):
