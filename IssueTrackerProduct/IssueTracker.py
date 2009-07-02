@@ -915,7 +915,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # Is IssueTrackerSpreadsheet even installed?
             from Products.IssueTrackerSpreadsheet.Constants import \
               INSTANCE_ID as Spreadsheet_INSTANCE_ID
-            print Spreadsheet_INSTANCE_ID
             
             from Products.IssueTrackerSpreadsheet.Constants import \
               DOWNLOAD_SPREADSHEET_PERMISSION
