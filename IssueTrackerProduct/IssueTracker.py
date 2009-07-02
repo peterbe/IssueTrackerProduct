@@ -3805,7 +3805,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             script(issue)
             
         # tell the people who wants to know
-        if not _rfg('send-always-notify', True): # this might need more work
+        if _rfg('send-always-notify', True): # this might need more work
             if 1:#try:
                 self.sendAlwaysNotify(issue, email=email, assignee=assignee)
             else: #except:
@@ -5229,7 +5229,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return a suitable page title for this list (ListIssues or CompleteList) """
         request = self.REQUEST
         if request.get('q'):
-            return _(u"Search results") + u" '%s'" % request.get('q').strip()
+            q = request.get('q').strip()
+            if len(q) > 100:
+                half = 50
+                q = q[:half] + '...' + q[-half:]
+            return _(u"Search results") + u" '%s'" % q
         elif request.get('report'):
             try:
                 # try to find the actual title of the report itself
