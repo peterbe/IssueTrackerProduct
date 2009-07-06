@@ -1,4 +1,5 @@
 -
+    Bug fixed: Unicode options for the Default sections. (Real#0672)
 
     New feature: Which list you were at is remembered when visiting an
     issue even after reloading the issue page. Not just for searches.

@@ -1428,7 +1428,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     dict[each] = get(each)
                 else:
                     logger.warn('%s not integer' % get(each))
-                        
+                    
         for each in lists:
             if hk(each) and isinstance(get(each), list):
                 dict[each] = [unicodify(x) for x in Utils.uniqify(get(each))]
