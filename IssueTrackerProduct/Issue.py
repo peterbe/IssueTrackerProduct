@@ -1184,7 +1184,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                                      
                 if len(email_addresses) > 0:
                     self.sendFollowupNotifications(followupobject, 
-                              email_addresses, gentitle)
+                              email_addresses, gentitle,
+                              status_change=action == 'addfollowup')
             
 
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
@@ -1234,7 +1235,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         
         
     security.declarePrivate('sendFollowupNotifications')
-    def sendFollowupNotifications(self, followupobject, email_addresses, change):
+    def sendFollowupNotifications(self, followupobject, email_addresses, change,
+                                  status_change=False):
 
         prefix = self.issueprefix
         
@@ -1251,6 +1253,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         date = DateTime()
         
         assert self.hasIssue(issueID), "This notification has no issue"
+        
+        if status_change:
+            new_status = self.getStatus()
+        else:
+            new_status = ''
+
 
         notification_comment = followupobject.getCommentPure()
         notification = IssueTrackerNotification(
@@ -1258,7 +1266,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                             emails, 
                             followupobject.fromname,
                             comment=notification_comment, 
-                            anchorname=anchorname, change=change)
+                            anchorname=anchorname, 
+                            change=change,
+                            new_status=new_status,
+                            )
         self._setObject(notifyid, notification)
         notifyobject = getattr(self, notifyid)
           

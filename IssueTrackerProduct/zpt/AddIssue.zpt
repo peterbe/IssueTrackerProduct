@@ -310,6 +310,9 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
 
 </form>
 
+<p tal:condition="here/ShowExcelImportLink" tal:omit-tag="">
+  Alternatively, <a href="" tal:attributes="href here/ExcelImportURL">upload a Excel spreadsheet</a>
+</p>
 
 
 

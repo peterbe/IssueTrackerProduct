@@ -31,7 +31,7 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
     meta_type = NOTIFICATION_META_TYPE
     icon = '%s/notification.gif'%ICON_LOCATION
 
-    security=ClassSecurityInfo()
+    security = ClassSecurityInfo()
     
     _properties=({'id':'title',       'type': 'ustring',  'mode':'w'},
                  {'id':'change',      'type': 'ustring',  'mode':'w'},
@@ -44,6 +44,7 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
                  {'id':'fromname',    'type': 'ustring',  'mode':'w'},
                  {'id':'date',        'type': 'date',    'mode':'w'},
                  {'id':'dispatched',  'type': 'boolean', 'mode':'w'},
+                 {'id':'new_status',  'type': 'ustring', 'mode':'w'},
                  )
 
     manage_options = (

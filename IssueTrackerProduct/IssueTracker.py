@@ -929,6 +929,26 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                                        getattr(self, Spreadsheet_INSTANCE_ID))
         return False
     
+    def ShowExcelImportLink(self):
+        try:
+            # Is IssueTrackerSpreadsheet even installed?
+            from Products.IssueTrackerSpreadsheet.Constants import \
+              INSTANCE_ID as Spreadsheet_INSTANCE_ID
+            
+            from Products.IssueTrackerSpreadsheet.Constants import \
+              UPLOAD_SPREADSHEET_PERMISSION
+            
+        except ImportError:
+            print "not installed"
+            return False
+
+        if getattr(self, Spreadsheet_INSTANCE_ID, None):
+            # created
+            user = getSecurityManager().getUser()
+            return user.has_permission(UPLOAD_SPREADSHEET_PERMISSION,
+                                       getattr(self, Spreadsheet_INSTANCE_ID))
+        return False    
+    
     def ShowAccessKeysOption(self):
         """ return show_use_accesskeys_option """
         default=DEFAULT_SHOW_USE_ACCESSKEYS_OPTION
@@ -5443,6 +5463,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             url += '?' + self.REQUEST.QUERY_STRING
             
         return url
+    
+    def ExcelImportURL(self):
+        from Products.IssueTrackerSpreadsheet.Constants import \
+          INSTANCE_ID as Spreadsheet_INSTANCE_ID
+    
+        url =  getattr(self, Spreadsheet_INSTANCE_ID).absolute_url() + \
+          '/upload_excel_file'
+        
+        return url    
     
 
     def ResetFilter(self, page='ListIssues', redirectafter=True):
