@@ -174,8 +174,8 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 
 <div align="center" tal:condition="not:request/compareTo|nothing">
 
-  <span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span>
-  <span tal:condition="request/action|request/draft_followup_id|nothing" tal:replace="structure python:here.ExtensionForm(options)"></span>
+  <div id="optionbuttons-outer"><span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span></div>
+  <div id="extensionform-outer"><span tal:condition="request/action|request/draft_followup_id|nothing" tal:replace="structure python:here.ExtensionForm(options)"></span></div>
 
 
   <!-- id=issue -->

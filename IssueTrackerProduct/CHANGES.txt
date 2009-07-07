@@ -1,4 +1,7 @@
 -
+    New feature: Loading the "Delete issue" form is done in AJAX if
+    Javascript is enabled.
+    
     Bug fixed: Unicode options for the Default sections. (Real#0672)
 
     New feature: Which list you were at is remembered when visiting an

@@ -94,7 +94,7 @@
 	</select>
       </td>
     </tr>
-    <tr tal:condition="python:here.EnableDueDate()">
+    <tr tal:condition="python:here.EnableDueDate() and (change or here.getDueDate())">
       <td tal:condition="python:change or here.getDueDate()"
           class="ilabel">Due date:</td>
       <td tal:condition="python:not change and here.getDueDate()">

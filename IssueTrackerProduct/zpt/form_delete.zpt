@@ -7,22 +7,23 @@ Use 'Complete' for most cases.<br />
 N.B. Nothing "bad" happens if you delete it.
 </p>
 </td></tr></table>
-<h2 align="center">Delete Issue?</h2>
+<h2 align="center">Delete issue?</h2>
 
 <table align="center">
 <tr>
 <td valign="top">
 <form action="../DeleteIssue" method="post">
-	<input type="hidden" name="issueID" value=""
-        tal:attributes="value here/getId">
-	<input type="hidden" name="IssueAction" value="Delete">
-	<input type="submit" value="Yes" class="submitbutton">
+	<input type="hidden" name="issueID" 
+               tal:attributes="value here/getId"/>
+	<input type="hidden" name="IssueAction" value="Delete"/>
+	<input type="submit" value="Yes" class="submitbutton"/>
 </form>
 </td>
 <td tal:content="structure python:'&amp;nbsp;'*10">&nbsp;</td>
 <td valign="top">
-<form action="" method="post"
-      tal:attributes="action here/ActionURL">
+<form method="get"
+      tal:define="goback_url here/ActionURL"
+      tal:attributes="action python:test(goback_url.endswith('form_delete'), '.', goback_url)">
 	<input type="submit" value="No" class="submitbutton" />
 </form>
 </td>

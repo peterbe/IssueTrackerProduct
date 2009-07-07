@@ -5,7 +5,9 @@
     <li tal:condition="here/hasManagerRole" tal:repeat="button here/getOptionButtons"
       ><a tal:attributes="href string:?action=${button/action_quoted};
 	                  onclick string:softsubmit('${button/action}');;return false;;;
-			  onkeypress string:softsubmit('${button/action}');;return false;;"
+			  onkeypress string:softsubmit('${button/action}');;return false;;;
+                          id python:test(button.get('id'), button.get('id'))"
+                          
           tal:content="structure python:button['verb'].replace(' ','&nbsp;')"></a>&nbsp;</li>
 </ul>
 <br style="clear:both" />

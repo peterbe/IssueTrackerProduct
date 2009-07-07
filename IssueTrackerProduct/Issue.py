@@ -2222,8 +2222,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 res.append({'action':action, 'verb':verb.capitalize(),
                             'action_quoted':action_quoted})
                 
-        res.append({'action':u'Delete', 'verb':u'Delete', 
-                    'action_quoted':url_quote_unicodeaware('Delete')})
+        res.append({'action':u'Delete', 'verb':u'Delete',
+                    'action_quoted':url_quote_unicodeaware('Delete'),
+                    'id':'delete_option_button'})
 
         return res
 

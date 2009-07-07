@@ -124,6 +124,12 @@ $(function() {
                                            .text('Turn off highlighting')
       );
    }
+   
+   $('#delete_option_button').attr('onclick','').attr('onkeypress','');
+   $('#delete_option_button').click(function() {
+      $('#optionbuttons-outer').load('form_delete');
+      return false;
+   });
 });
 
 
