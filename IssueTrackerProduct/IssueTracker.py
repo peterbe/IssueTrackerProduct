@@ -2605,7 +2605,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 stage += 1
 
         elif stage == 3:
-            defaultsections = [unicodify(x) for x in request.get('defaultsections',[]) if x.strip()]
+            defaultsections = request.get('defaultsections',[])
+            if isinstance(defaultsections, basestring):
+                defaultsections = [defaultsections]
+            defaultsections = [unicodify(x) for x in defaultsections if x.strip()]
             if not defaultsections:
                 request.set('defaultsections', [self.sections_options[0]])
                 m = "None selected, try %s?"%self.sections_options[0]
