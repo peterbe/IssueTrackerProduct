@@ -2,6 +2,7 @@
                  b_size here/getBatchSize;
                  filteredissues options/filteredissues|here/ListIssuesFiltered;
                  global filteredissues_len python:len(filteredissues);
+                 global total_actual_hours python:here.UseActualTime() and sum([x.getActualTimeHours() for x in filteredissues if x.getActualTimeHours()]);
                  Batch python:modules['ZTUtils'].Batch;
                  global batch python:Batch(filteredissues, b_size, b_start, orphan=1);
 		 dummy python:here.setWhichList('ListIssues')"
@@ -20,7 +21,10 @@
 
 
 
-<span tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len, batch=batch)"></span>
+<span tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len,
+                                                             batch=batch, 
+                                                             total_actual_hours=total_actual_hours
+                                                             )"></span>
 
 
 <table tal:define="sublist here/whichSubList; 
@@ -28,7 +32,11 @@
 tal:replace="structure python:tmpl(batch=batch)"></table>
 
 
-<span tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len, batch=batch, nosum=1, showSubListOptions=1)"></span>
+<span tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len, 
+                                                             batch=batch, 
+                                                             total_actual_hours=total_actual_hours, 
+                                                             nosum=1, 
+                                                             showSubListOptions=1)"></span>
 
 <br /><br />
 

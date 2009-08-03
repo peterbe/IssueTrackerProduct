@@ -314,9 +314,8 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
                     err_log.raising(sys.exc_info())
                 except:
                     pass
-                LOG(self.__class__.__name__, ERROR, 
-                    "Unable to _prerender_comment() in manage_editProperties()",
-                    error=sys.exc_info())        
+                logging.error("Unable to _prerender_comment() in manage_editProperties()",
+                              exc_info=True)
         return result
     
     
@@ -333,9 +332,8 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
                     err_log.raising(sys.exc_info())
                 except:
                     pass
-                LOG(self.__class__.__name__, ERROR, 
-                    "Unable to _prerender_comment() after add",
-                    error=sys.exc_info())
+                logging.error("Unable to _prerender_comment() after add",
+                              exc_info=True)
 
                     
     security.declareProtected(VMS, 'assertAllProperties')

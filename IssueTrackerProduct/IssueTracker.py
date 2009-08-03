@@ -22,6 +22,12 @@ import poplib
 from urlparse import urlparse
 
 try:
+    import simplejson
+except ImportError:
+    simplejson = None
+    
+
+try:
     from poplib import POP3, POP3_SSL
     _has_pop3_ssl = True
 except ImportError:
@@ -801,6 +807,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     
     def EnableDueDate(self):
         return getattr(self, 'enable_due_date', DEFAULT_ENABLE_DUE_DATE)
+    
+    def EnableIssueNotes(self):
+        DEFAULT_ENABLE_ISSUE_NOTES = 1
+        return getattr(self, 'enable_issue_notes', DEFAULT_ENABLE_ISSUE_NOTES)
     
     def getSpamKeywords(self):
         """ return spam_keywords if possible """
@@ -6459,6 +6469,35 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         return out
 
+
+    def showTimeHours(self, value, show_unit=False, hours_per_day=None):
+        """ return a string that shows the value if it's a number. """
+        if value:
+            if show_unit:
+                if value == 1:
+                    return _("1 hour")
+                else:
+                    if int(value)==value: # eg. 1.0 but not 1.1
+                        return _("%s hours") % int(value)
+                    else:
+                        hours, minutes = str(value).split('.')
+                        minutes = float('.%s' % minutes)
+                        minutes = int( minutes * 60)
+                            
+                        if value < 1:
+                            # show only the minutes
+                            return _("%s minutes") % minutes
+                        else:
+                            return _("%s hours %s minutes") % (hours, minutes)
+                        
+            else:
+                if int(value)==value: # eg. 1.0 but not 1.1
+                    return int(value)
+                else:
+                    return "%.2f" % value
+        else:
+            return ""
+
     
     def showFilterOptions(self, checkrequest=True):
         """ Determine if we want to display the filter options """
@@ -9310,6 +9349,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
                 if email.get('is_spam', False):
                     v.append('\tDownloaded email is spam')
+                elif email.get('is_autoreply', False):
+                    v.append('\tDownloaded email is Autoreply')
                 elif email.get('is_blacklisted', False):
                     v.append('\tEmail originator is blacklisted (%s)' % email['email'])
                     
@@ -9800,14 +9841,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ inspect message for certain issue data. """
         allissueids = self.getIssueIds()
         allsections = self.getSectionOptions()
+        
         allsections_ss = [ss(x) for x in allsections]
         alltypes = self.types
         allurgencies = self.urgencies
         
         reg_issueids = "|".join(allissueids)
-        reg_sections = "|".join(allsections)
-        reg_types = "|".join(alltypes)
-        reg_urgencies = "|".join(allurgencies)
+        reg_sections = "|".join([re.escape(x) for x in allsections])
+        reg_types = "|".join([re.escape(x) for x in alltypes])
+        reg_urgencies = "|".join([re.escape(x) for x in allurgencies])
         reg_structuredtext = r'STX|structuredtext|structured-text'
         
         reg_issueids = re.compile(reg_issueids, re.I)
@@ -9824,30 +9866,31 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 m = u"Subject line can not be empty"
                 self.sendReturnErrorEmail(email, m)
                 continue
-            
+
             subject, parsable, delimiter = self._getParsableSubject(s)
             parsable = [x.strip() for x in parsable.split(',')]
             
             # Sections
             sections = []
             for eachpart in parsable[:]:
-                if ss(eachpart) in allsections_ss:
-                    sections.append(correct_caser(eachpart, allsections))
-                    #parsable.remove(eachpart) # Real0265
-                    ss_remove(parsable, eachpart)
-            
+                for each in allsections:
+                    if ss(each) == ss(eachpart):
+                        sections.append(each)
+                        ss_remove(parsable, eachpart)
+
             if sections:
                 email['sections'] = sections
                 
             # Type
             types = []
             for eachpart in parsable:
-                types.extend(reg_types.findall(eachpart))
+                for found_type in reg_types.findall(eachpart):
+                    if found_type in parsable:
+                        parsable.remove(found_type)
+                    types.append(correct_caser(found_type, alltypes))
+                
             if types:
-                try:
-                    parsable.remove(types[0])
-                except ValueError:
-                    pass
+                email['type'] = types[0]
                 
             # Urgency
             urgencies = []
@@ -9880,11 +9923,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # matching accepting email object
             acceptingemail = account.getAcceptingEmailbyTo(email['to'])
             email['acceptingemail'] = acceptingemail
-            if not email.has_key('sections'):
+            if 'sections' not in email:
                 email['sections'] = acceptingemail.defaultsections
-            if not email.has_key('type'):
+            if 'type' not in email:
                 email['type'] = acceptingemail.default_type
-            if not email.has_key('urgency'):
+            if 'urgency' not in email:
                 email['urgency'] = acceptingemail.default_urgency
             
             email['reveal_issue_url'] = acceptingemail.revealIssueURL()
@@ -10026,6 +10069,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         display what happened here.
         The dictionary contains all the headers of the email plus a few extra keys:
             o is_spam (bool)
+            o is_autoreply (bool)
             o originalfile (file object containing the whole emailstring)
             o _character_set
             o fileattachments (dict)
@@ -10050,7 +10094,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         # again, should that second line not be 
         # cStringIO.StringIO(emailstring.encode('latin-1')) ??
-        e = {'is_spam': False, 
+        e = {'is_spam': False,
+             'is_autoreply': False,
              'originalfile':cStringIO.StringIO(emailstring),
              '_character_set':'us-ascii',
              }
@@ -10068,7 +10113,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if ss(key) == 'content-type':
                 if charset_regex.findall(value):
                     e['_character_set'] = charset_regex.findall(value)[0]
-                    
+                
             elif ss(key) == 'subject':
                 if isinstance(value, str) and value.lower().find('?iso-8859') > -1:
                     unicode_value, value_encoding = email_Header.decode_header(value)[0]
@@ -10078,6 +10123,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     else:
                         value = unicode_value
                     e[ss(key)] = value
+            elif ss(key) =='x-autoreply':
+                if Utils.niceboolean(value):
+                    e['is_autoreply'] = True
                 
             if not 'message_id' in e and ss(key) in ('message-id','messageid'):
                 # This might seem stupid but it makes sure that if possible
@@ -11249,7 +11297,137 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             url = Utils.AddParam2URL(url, {'changemsg':msg})
             REQUEST.RESPONSE.redirect(url)
         else:
-            return msg      
+            return msg
+        
+        
+    ##
+    ## Notes stuff
+    ##
+    
+    security.declareProtected('View', 'getIssueNotes_json')
+    def getIssueNotes_json(self, issue_identifier):
+        """return the notes for this issue. 
+        The reason this can't be part of Issue.py is because of the 
+        CompleteList feature which is outside the issue.
+        Also, the identifier looks like this:
+        
+         <issuetracker id>__<issue id>
+        
+        The reason we need the issuetracker id is because we might be using
+        join-in issuetrackers and clicking on Complete list.
+        """
+        
+        if not simplejson:
+            raise SystemError("simplejson not installed")
+        
+        issue = self._get_issue_by_issue_identifier(issue_identifier)
+        if not issue:
+            raise ValueError("Unrecognizable issue_identifier %r" % \
+                             issue_identifier)
+        
+        # combine your notes with the public ones
+        notes = list(issue.findNotes(public=True))
+        
+        # before we fetch all private notes, just check that there are any
+        # before we start the expensive operation of figuring out your
+        # identifier and doing the search
+        if list(issue.findNotes(public=False)):
+                
+            acl_adder = ''
+            issueuser = self.getIssueUser()
+            cmfuser = self.getCMFUser()
+            zopeuser = self.getZopeUser()
+            if issueuser:
+                acl_adder = ','.join(issueuser.getIssueUserIdentifier())
+            elif zopeuser:
+                path = '/'.join(zopeuser.getPhysicalPath())
+                name = zopeuser.getUserName()
+                acl_adder = ','.join([path, name])
+    
+            ckey = self.getCookiekey('name')
+            if issueuser and issueuser.getFullname():
+                fromname = issueuser.getFullname()
+            elif cmfuser and cmfuser.getProperty('fullname'):
+                fromname = cmfuser.getProperty('fullname')
+            elif self.has_cookie(ckey):
+                fromname = self.get_cookie(ckey)
+            else:
+                fromname = ''
+    
+            ckey = self.getCookiekey('email')
+            if issueuser and issueuser.getEmail():
+                email = issueuser.getEmail()
+            elif cmfuser and cmfuser.getProperty('email'):
+                email = cmfuser.getProperty('email')
+            elif self.has_cookie(ckey):
+                email = self.get_cookie(ckey)
+            else:
+                email = ''
+            
+            if acl_adder:
+                notes += list(issue.findNotes(public=False, acl_adder=acl_adder))
+            elif email and fromname:
+                notes += list(issue.findNotes(public=False, 
+                                              fromname=fromname,
+                                              email=email))
+                
+        data = {}
+        # 
+        today = DateTime()
+        for note in notes:
+            if note.getThreadID() not in data:
+                data[note.getThreadID()] = []
+                
+            item = dict(notedate=note.notedate,
+                        date=self.showDate(note.notedate, today=today),
+                        comment=note.showComment(),
+                        fromname=note.getFromname(),
+                        email=note.getEmail())
+                
+            data[note.getThreadID()].append(item)
+            
+        # sort each bucket by notedate and then pop it
+        for threadID, items in data.items():
+            items.sort(lambda x,y: cmp(x['notedate'], y['notedate']))
+            for item in items:
+                item.pop('notedate')
+            data[threadID] = items
+
+        return simplejson.dumps(data)
+        
+    def _get_issue_by_issue_identifier(self, issue_identifier):
+        trackerid, issueid = issue_identifier.split('__')
+        if trackerid == self.getId():
+            return self.getIssueObject(issueid)
+        else:
+            for brother in self._getBrothers():
+                if brother.getId() == trackerid:
+                    return brother.getIssueObject(issueid)
+                
+    security.declareProtected('View', 'saveIssueNote')
+    def saveIssueNote(self, issue_identifier, REQUEST):
+        """post a new note"""
+        print "issue_identifier", issue_identifier
+        print "REQUEST.get('thread_identifier')", repr(REQUEST.get('thread_identifier'))
+        print
+        issue = self._get_issue_by_issue_identifier(issue_identifier)
+        if not issue:
+            raise ValueError("Unrecognizable issue_identifier %r" % \
+                             issue_identifier)
+        
+        comment = REQUEST.get('comment', '').strip()
+        if not comment:
+            return "Error. No comment"
+        
+        public = Utils.niceboolean(REQUEST.get('public', False))
+        threadID = REQUEST.get('threadID', '')
+        
+        note = issue.createNote(comment, public=public, threadID=threadID,
+                                )
+        return ""
+        
+                
+        
         
     ## AutoLogin stuff
     ##

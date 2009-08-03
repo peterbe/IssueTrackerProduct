@@ -1,5 +1,7 @@
 <div class="topbar"
- tal:define="filteredissues_len python:options['filteredissues_len'];batch python:options['batch']">
+ tal:define="filteredissues_len python:options['filteredissues_len'];
+             total_actual_hours python:options.get('total_actual_hours', -1);
+             batch python:options['batch']">
 
   <span class="floatL">
     <div tal:condition="not:python:options.has_key('nosum')" tal:omit-tag="string:&nbsp;">
@@ -7,6 +9,16 @@
      <span style="color:#999" tal:condition="python:request.get('TotalNoIssues') > filteredissues_len">
     (<br tal:replace="python:request.get('TotalNoIssues')-filteredissues_len" /> issues filtered out or hidden)
     </span>
+    <span tal:condition="python:here.UseActualTime() and filteredissues_len and total_actual_hours != -1">
+      &nbsp; Totalling: <abbr tal:attributes="title string:total_actual_hours"
+                              tal:content="python:here.showTimeHours(total_actual_hours)"></abbr> hours
+                        <span style="color:#999"
+                              tal:condition="python:total_actual_hours>10">
+                          (<abbr title="Assuming 8 hours per day"
+                          >approximately <br tal:replace="python:'%.1f'% round(total_actual_hours/8.0,1)"/> days</abbr>)
+                        </span>
+    </span>
+    
     </div>
     <span tal:condition="python:options.get('showSubListOptions') and options['batch']"
 	      tal:define="sublist here/whichSubList" 

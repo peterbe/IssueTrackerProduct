@@ -5,13 +5,14 @@
 import os
 import stat
 from time import time
+import logging
 
 from AccessControl.Permission import registerPermissions
-from zLOG import LOG, ERROR, INFO
 from App.Dialogs import MessageDialog
 
 import IssueTracker
 import Thread
+import Note
 import IssueTrackerNotifyables as Notifyables
 import Issue
 import Email
@@ -134,6 +135,8 @@ def initialize(context):
         registerIcon('issuedraft.gif')
         registerIcon('issuethreaddraft.gif')
         registerIcon('issuethread.gif')
+        registerIcon('issuenote.png')
+        registerIcon('new-issuenote.png')
         registerIcon('issuetracker_notifyable.gif')
         registerIcon('issuetracker_notifyablegroup.gif')
         registerIcon('issueassignment.gif')
@@ -158,6 +161,8 @@ def initialize(context):
         registerJS('jquery-1.3.2.min.js', slim_if_possible=False)
         registerJS('jquery-ui-1.7.1.datepickeronly.min.js', slim_if_possible=False)
         registerJS('manage-customfield.js')
+        registerJS('jquery.qtip-1.0.0-rc3.min.js', slim_if_possible=False)
+        registerJS('issuenotes.js')
         registerCSS('jquery-ui-1.7.1.datepickeronly.css')
         
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())
@@ -189,9 +194,8 @@ def initialize(context):
         sys.stderr.write(string.join(traceback.format_exception(type, val, tb), ''))
         traceback.print_exc(sys.stdout) # for all those people in debug mode zope
         del type, val, tb
-        LOG("IssueTrackerProduct", ERROR, "Could not be installed", 
-            error=sys.exc_info())
-
+        logging.info("IssueTrackerProduct. Could not be installed",
+                     exc_info=True)
 
 
 import OFS, App

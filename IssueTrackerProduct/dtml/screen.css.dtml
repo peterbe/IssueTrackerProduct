@@ -531,3 +531,18 @@ div.problem-warning-message p.error {
 em.filter-title {
   font-weight:bold;
 }
+
+/* Notes */
+a.new-note {
+  float:right;
+  margin:7px;
+  opacity:0.3;
+}
+
+div.thead a.new-note {
+  margin:1px;
+}
+
+a.new-note:hover, a.new-note:active {
+  opacity:1.0;
+}

@@ -5,6 +5,9 @@ class NotAFileError(Exception):
 class IssueInputError(Exception):
     pass
 
+class IssueNoteError(Exception):
+    pass
+
 class NoACLAdderError(Exception):
     """ happens when the ACL user object is not found"""
     pass

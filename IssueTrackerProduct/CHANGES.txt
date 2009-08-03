@@ -1,4 +1,7 @@
 -
+    New feature: Inbound emails with header "X-Autoreply: yes" are
+    ignored (Real#0855). Thanks Nicholas
+
     New feature: Loading the "Delete issue" form is done in AJAX if
     Javascript is enabled.
     

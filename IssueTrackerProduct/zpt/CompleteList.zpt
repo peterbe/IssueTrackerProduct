@@ -2,6 +2,7 @@
                  b_size here/getBatchSize;
                  filteredissues options/filteredissues|here/ListIssuesFiltered;
                  global filteredissues_len python:len(filteredissues);
+                 global total_actual_hours python:here.UseActualTime() and sum([x.getActualTimeHours() for x in filteredissues if x.getActualTimeHours()]);
                  Batch python:modules['ZTUtils'].Batch;
                  global batch python:Batch(filteredissues, b_size, b_start, orphan=1)"
             tal:replace="nothing" 
@@ -23,7 +24,7 @@
 
 
 
-<table tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len, batch=batch)"></table>
+<table tal:replace="structure python:here.list_issues_top_bar(filteredissues_len=filteredissues_len, batch=batch, total_actual_hours=total_actual_hours)"></table>
 
 <table border="0" cellpadding="5" cellspacing="0" width="98%" align="center"
 class="lhead"

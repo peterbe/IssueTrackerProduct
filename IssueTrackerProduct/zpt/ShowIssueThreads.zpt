@@ -6,6 +6,7 @@
 
   <div tal:repeat="thread threads" 
        class="threadbox"
+       tal:attributes="id string:${here/getId}__${thread/getId}"
        align="left">
 
     <a tal:condition="in_completelist"

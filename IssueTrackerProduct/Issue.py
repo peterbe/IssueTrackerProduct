@@ -37,7 +37,6 @@ try:
 except ImportError:
     CMF_getToolByName = None
 
-
 # Product
 from IssueTracker import IssueTracker, debug, safe_hasattr
 from TemplateAdder import addTemplates2Class
@@ -695,33 +694,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """ return actual_time_hours """
         return getattr(self, 'actual_time_hours', None)
     
-    def showTimeHours(self, value, show_unit=False):
-        """ return a string that shows the value if it's a number. """
-        if value:
-            if show_unit:
-                if value == 1:
-                    return _("1 hour")
-                else:
-                    if int(value)==value: # eg. 1.0 but not 1.1
-                        return _("%s hours") % int(value)
-                    else:
-                        hours, minutes = str(value).split('.')
-                        minutes = float('.%s' % minutes)
-                        minutes = int( minutes * 60)
-                            
-                        if value < 1:
-                            # show only the minutes
-                            return _("%s minutes") % minutes
-                        else:
-                            return _("%s hours %s minutes") % (hours, minutes)
-                        
-            else:
-                if int(value)==value: # eg. 1.0 but not 1.1
-                    return int(value)
-                else:
-                    return "%.2f" % value
-        else:
-            return ""
         
     def _parseTimeHours(self, hours):
         """ return a floating point number from the number of hours
@@ -3031,7 +3003,142 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     _all_emails.append(email.lower())
             
         return strings
+    
+    ##
+    ## Notes
+    ##
+    
+    def getNotes(self):
+        """return all note objects"""
+        return self.objectValues(ISSUENOTE_METATYPE)
+    
 
+    security.declareProtected('View', 'createNote')
+    def createNote(self, comment, public=False, threadID='',
+                   REQUEST=None):
+        """create a note via the web"""
+        
+        acl_adder = ''
+        issueuser = self.getIssueUser()
+        cmfuser = self.getCMFUser()
+        zopeuser = self.getZopeUser()
+        if issueuser:
+            acl_adder = ','.join(issueuser.getIssueUserIdentifier())
+        elif zopeuser:
+            path = '/'.join(zopeuser.getPhysicalPath())
+            name = zopeuser.getUserName()
+            acl_adder = ','.join([path, name])
+
+        ckey = self.getCookiekey('name')
+        if issueuser and issueuser.getFullname():
+            fromname = issueuser.getFullname()
+        elif cmfuser and cmfuser.getProperty('fullname'):
+            fromname = cmfuser.getProperty('fullname')
+        elif self.has_cookie(ckey):
+            fromname = self.get_cookie(ckey)
+        else:
+            fromname = ''
+
+        ckey = self.getCookiekey('email')
+        if issueuser and issueuser.getEmail():
+            email = issueuser.getEmail()
+        elif cmfuser and cmfuser.getProperty('email'):
+            email = cmfuser.getProperty('email')
+        elif self.has_cookie(ckey):
+            email = self.get_cookie(ckey)
+        else:
+            email = ''
+
+        saved_display_format = self.getSavedTextFormat()
+        if saved_display_format:
+            display_format = saved_display_format
+        else:
+            display_format = self.getDefaultDisplayFormat()
+            
+        
+        try:
+            note = self._createNote(comment, fromname=fromname, email=email,
+                                      acl_adder=acl_adder,
+                                      public=public, display_format=display_format,
+                                      threadID=threadID)
+        except ValueError, msg:
+            if REQUEST is not None:
+                return "Error: %s" % str(msg)
+            else:
+                raise
+            
+        if REQUEST is not None:
+            redirect_url = self.absolute_url()
+            request.RESPONSE.redirect(redirect_url)
+        else:
+            return note
+            
+        
+    def _createNote(self, comment, fromname=None, email=None, acl_adder=None,
+                   public=False, display_format='', threadID='',
+                   REQUEST=None):
+        
+        # the comment can not be blank
+        if not comment:
+            raise IssueNoteError("Note comment can not be empty")
+        
+        if threadID:
+            try:
+                thread = getattr(self, threadID)
+            except AttributeError:
+                raise ValueError("thread does not exist")
+        
+                
+        # test if the comment doesn't already exist
+        for note in self.findNotes(comment=comment,
+                                    fromname=fromname, email=email,
+                                    acl_adder=acl_adder,
+                                    threadID=threadID):
+            # already created
+            # perhaps user doubleclick the submit button
+            return note
+            
+        randomid_length = self.randomid_length
+        if randomid_length > 3:
+            randomid_length = 3
+        genid = self.generateID(randomid_length,
+                                prefix=self.issueprefix + 'note',
+                                meta_type=ISSUENOTE_METATYPE,
+                                use_stored_counter=False)
+        
+        from Products.IssueTrackerProduct.Note import IssueNote
+        # create a note inside this issue
+        note = IssueNote(genid, title, comment, fromname, email,
+                         public=public, display_format=display_format,
+                         acl_adder=acl_adder, threadID=threadID
+                         )
+        self._setObject(genid, note)
+        note = self._getOb(genid)
+        note.index_object()
+        
+        return note
+        
+    def findNotes(self, comment=None, fromname=None, email=None, 
+                  acl_adder=None, threadID=None, public=None):
+        
+        for note in self.getNotes():
+            if public is not None:
+                if note.isPublic() != bool(public):
+                    continue
+            if comment is not None:
+                if note.getComment() != comment:
+                    continue
+            if fromname is not None:
+                if note.fromname != fromname:
+                    continue
+            if email is not None:
+                if note.email != email:
+                    continue
+            if threadID is not None:
+                if note.threadID != threadID:
+                    continue
+            yield note
+                                    
 
 
 zpts = ({'f':'zpt/ShowIssue', 'optimize':OPTIMIZE and 'xhtml'},
@@ -3434,6 +3541,7 @@ InitializeClass(IssueTrackerDraftIssue)
 from Notification import IssueTrackerNotification
 from Thread import IssueTrackerIssueThread, IssueTrackerDraftIssueThread
 from Assignment import IssueTrackerIssueAssignment
+
 
 
 

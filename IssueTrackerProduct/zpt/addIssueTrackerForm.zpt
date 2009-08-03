@@ -4,7 +4,7 @@
 
 <div tal:condition="not:here/manage_hasAquirableMailHost"
  style="padding:1px 8px;margin:4px;border:1px solid #999;background-color:#efefef;font-family:Arial,sans-serif;">
-<p><b>Warning</b><br />
+<p><strong>Warning</strong><br />
 It appears that you do not have a <code>Mail Host</code> object deploy in your
 Zope acquisition path. An Issue Tracker needs one to be able to send out emails
 when that becomes necessary. Either go back and create one first (recommended)
@@ -20,7 +20,8 @@ The recommended name to use is: <code>MailHost</code></p>
 </tr> 
 <tr><th>Title</th> 
     <td><input type="text" name="" value="Issue Tracker"
-               tal:attributes="name string:title:${here/UNICODE_ENCODING}:ustring"/></td>
+               tal:define="encoding here/UNICODE_ENCODING|string:utf8"
+               tal:attributes="name string:title:${encoding}:ustring"/></td>
 </tr>
 <tr><td></td>
     <td><input type="submit" value=" Add " /> 
@@ -31,8 +32,8 @@ The recommended name to use is: <code>MailHost</code></p>
 </table>
 </form> 
 
-<blockquote style="width:400px;"><p>It is <b>highly recommended</b> that you go through the 
-<b><em>Properties Wizard</em></b> the
+<blockquote style="width:400px;"><p>It is <strong>highly recommended</strong> that you go through the 
+<strong><em>Properties Wizard</em></strong> the
 first time since it will prepare many of internal properties depending on how you intend to
 use this IssueTracker.</p>
 </blockquote>

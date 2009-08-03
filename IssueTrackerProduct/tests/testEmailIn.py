@@ -177,6 +177,27 @@ class EmailInTestCase(TestBase):
         # this should have created an issue 
         self.assertEqual(len(tracker.getIssueObjects()), 1)
         
+    def test_emailIn1_with_autoreply(self):
+        """ test a very basic email in """
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        FakePOP3.files = [abs_path('email-in-1_with-autoreply.email')]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue(result.find('Created 0 issues') > -1)
+
+        # this should have created an issue 
+        self.assertEqual(len(tracker.getIssueObjects()), 0)
+        
         
     def test_emailIn2(self):
         """ test rejecting an email based on from address """
@@ -490,7 +511,6 @@ class EmailInTestCase(TestBase):
         tracker = self.folder.tracker
         
         tracker.sections_options = [u'Other', u'One']
-        print tracker.sections_options
         
         u, p = 'test', 'test' # doesn't really matter
         account = tracker.createPOP3Account('mail.example.com', u, p)

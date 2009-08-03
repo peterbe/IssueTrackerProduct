@@ -1,8 +1,10 @@
 <html metal:use-macro="here/getHeader">
 <metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
 
+
 <script type="text/javascript"
  tal:attributes="src string:$ru/followup.js"></script>
+
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="request/action|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
@@ -24,7 +26,14 @@ $(function() {if($('#textarea').size()) $('#textarea')[0].focus();disableKS();})
         tal:content="structure string:$(function() {$('#id_due_date').datepicker({${here/getDatepickerOptions}})})">
 </script>
 </tal:block>        
- 
+
+<tal:block condition="here/EnableIssueNotes">
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery.qtip-1.0.0-rc3.min.js"></script>
+<script type="text/javascript"
+        tal:content="structure string:var ROOT_URL='${here/getRootURL}';"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes.js"></script>
+</tal:block>
+
  
 </metal:script>
 
