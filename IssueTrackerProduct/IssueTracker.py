@@ -809,7 +809,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return getattr(self, 'enable_due_date', DEFAULT_ENABLE_DUE_DATE)
     
     def EnableIssueNotes(self):
-        DEFAULT_ENABLE_ISSUE_NOTES = 1
+        DEFAULT_ENABLE_ISSUE_NOTES = 0
         return getattr(self, 'enable_issue_notes', DEFAULT_ENABLE_ISSUE_NOTES)
     
     def getSpamKeywords(self):
