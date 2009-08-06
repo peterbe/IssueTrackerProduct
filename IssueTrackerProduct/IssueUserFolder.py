@@ -353,7 +353,9 @@ class IssueUserFolder(User.UserFolder):
         must_change_password=kw.get('must_change_password',False)
         display_format = kw.get('display_format','')
         if password is not None and self.encrypt_passwords:
+            print "password in", repr(password)
             password = self._encryptPassword(password)
+            print "password out", repr(password)
         self.data[name]=IssueUser(name, password, roles, domains,
                                   email, fullname, must_change_password,
                                   display_format)

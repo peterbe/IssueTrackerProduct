@@ -539,7 +539,12 @@ a.new-note {
   opacity:0.3;
 }
 
-div.thead a.new-note {
+a.old-note {
+  float:right;
+  margin:7px 2px;
+}
+
+div.thead a.new-note, div.thead a.old-note {
   margin:1px;
 }
 

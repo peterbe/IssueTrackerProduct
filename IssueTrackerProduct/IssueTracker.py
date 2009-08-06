@@ -552,6 +552,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.spam_keywords = DEFAULT_SPAM_KEYWORDS
         self.show_spambot_prevention = DEFAULT_SHOW_SPAMBOT_PREVENTION
         self.enable_due_date = DEFAULT_ENABLE_DUE_DATE
+        self.enable_issue_notes = DEFAULT_ENABLE_ISSUE_NOTES
 
         self.acl_cookienames = {}
         self.acl_cookieemails = {}
@@ -809,7 +810,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return getattr(self, 'enable_due_date', DEFAULT_ENABLE_DUE_DATE)
     
     def EnableIssueNotes(self):
-        DEFAULT_ENABLE_ISSUE_NOTES = 0
         return getattr(self, 'enable_issue_notes', DEFAULT_ENABLE_ISSUE_NOTES)
     
     def getSpamKeywords(self):
@@ -1440,6 +1440,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'use_actual_time',
                     'include_description_in_notifications',
                     'enable_due_date',
+                    'enable_issue_notes',
                     'show_dates_cleverly',
                     'show_spambot_prevention',
                     ]
@@ -11326,7 +11327,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                              issue_identifier)
         
         # combine your notes with the public ones
-        notes = list(issue.findNotes(public=True))
+        note_objects = list(issue.findNotes(public=True))
         
         # before we fetch all private notes, just check that there are any
         # before we start the expensive operation of figuring out your
@@ -11365,35 +11366,36 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 email = ''
             
             if acl_adder:
-                notes += list(issue.findNotes(public=False, acl_adder=acl_adder))
+                note_objects += list(issue.findNotes(public=False, acl_adder=acl_adder))
             elif email and fromname:
-                notes += list(issue.findNotes(public=False, 
-                                              fromname=fromname,
-                                              email=email))
-                
-        data = {}
+                note_objects += list(issue.findNotes(public=False, 
+                                                     fromname=fromname,
+                                                     email=email))
+        
+        note_objects.sort(lambda x,y: cmp(x.notedate, y.notedate))
+        
+        #data = {}
+        notes = []
         # 
         today = DateTime()
-        for note in notes:
-            if note.getThreadID() not in data:
-                data[note.getThreadID()] = []
+        for note in note_objects:
+            #if note.getThreadID() not in data:
+            #    data[note.getThreadID()] = []
                 
-            item = dict(notedate=note.notedate,
-                        date=self.showDate(note.notedate, today=today),
+            item = dict(date=self.showDate(note.notedate, today=today),
                         comment=note.showComment(),
                         fromname=note.getFromname(),
-                        email=note.getEmail())
-                
-            data[note.getThreadID()].append(item)
-            
-        # sort each bucket by notedate and then pop it
-        for threadID, items in data.items():
-            items.sort(lambda x,y: cmp(x['notedate'], y['notedate']))
-            for item in items:
-                item.pop('notedate')
-            data[threadID] = items
-
-        return simplejson.dumps(data)
+                        email=note.getEmail(),
+                        title=note.getTitle())
+            #print repr(note.getThreadID())
+            if note.getThreadID():
+                item['threadID'] = note.getThreadID()
+             
+            notes.append(item)
+        
+        #from pprint import pprint
+        #pprint(notes)
+        return simplejson.dumps(notes)
         
     def _get_issue_by_issue_identifier(self, issue_identifier):
         trackerid, issueid = issue_identifier.split('__')
@@ -11404,23 +11406,30 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if brother.getId() == trackerid:
                     return brother.getIssueObject(issueid)
                 
+    def _get_thread_by_thread_identifier(self, issue, thread_identifier):
+        return getattr(issue, thread_identifier.split('__')[-1], None)
+                
     security.declareProtected('View', 'saveIssueNote')
-    def saveIssueNote(self, issue_identifier, REQUEST):
+    def saveIssueNote(self, issue_identifier, comment, thread_identifier=None, public=False):
         """post a new note"""
-        print "issue_identifier", issue_identifier
-        print "REQUEST.get('thread_identifier')", repr(REQUEST.get('thread_identifier'))
-        print
         issue = self._get_issue_by_issue_identifier(issue_identifier)
         if not issue:
             raise ValueError("Unrecognizable issue_identifier %r" % \
                              issue_identifier)
         
-        comment = REQUEST.get('comment', '').strip()
+        threadID = ''
+        if thread_identifier:
+            thread = self._get_thread_by_thread_identifier(issue, thread_identifier)
+            if not thread:
+                raise ValueError("Unrecognized thread_identifier %r" %\
+                                 thread_identifier)
+            threadID = thread.getId()
+        
+        comment = unicodify(comment).strip()
         if not comment:
             return "Error. No comment"
         
-        public = Utils.niceboolean(REQUEST.get('public', False))
-        threadID = REQUEST.get('threadID', '')
+        public = Utils.niceboolean(public)
         
         note = issue.createNote(comment, public=public, threadID=threadID,
                                 )
@@ -11599,8 +11608,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         elif not Utils.ValidEmailAddress(email.strip()):
             SubmitError['email'] = "Invalid"
             
-        
-
         if SubmitError and REQUEST is not None:
             REQUEST.set('change','details')
             return self.User(REQUEST, SubmitError=SubmitError)
@@ -11782,10 +11789,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         REQUEST.RESPONSE.redirect(url)
             
-        
-        
-#    security.declareProtected(PERM_ACCESS_ISSUEUSER_INFORMATION,
-#                              'IssueUserChangePassword')
     def IssueUserChangePassword(self, old, new, confirm, 
                                 REQUEST=None):
         """ change the password of the issueuser object """
@@ -11799,10 +11802,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         path = issueuser.getIssueUserIdentifier()[0]
         userfolder = self.unrestrictedTraverse(path)
         user = userfolder.data[issueuser.getUserName()]
+        print "user._getPassword()", repr(user._getPassword())
         if userfolder._isPasswordEncrypted(user._getPassword()):
+            print "userfolder._encryptPassword(%r)"%old, repr(userfolder._encryptPassword(old))
             if not userfolder._encryptPassword(old) == user._getPassword():
                 SubmitError['old'] = "Incorrect"
         else:
+            print "OLD", repr(old)
+            print "user._getPassword()", repr(user._getPassword())
             if not old == user._getPassword():
                 SubmitError['old'] = "Incorrect"
 

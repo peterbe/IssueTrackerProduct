@@ -5,12 +5,10 @@ function L(x) { // shortcut
 }
 
 function saveNote(form, thread_identifier) {
-   L(thread_identifier);   
    var public = false;
    $.each(form.public, function(i, e) {
       if (e.checked && e.value=="yes") public = true;
    });
-//   L(public);
    if (!$(form.comment).val().length) {
       cancelSaveNote(form, thread_identifier);
    }
@@ -24,9 +22,8 @@ function saveNote(form, thread_identifier) {
       public:public},
           function(result) {
       if (result) alert(result);
-      L(thread_identifier);
+      //L(thread_identifier);
       cancelSaveNote(form, thread_identifier);
-                                             
    });
       
 }
@@ -38,8 +35,54 @@ function cancelSaveNote(form, thread_identifier) {
      $('a.new-note', 'div.ihead').qtip('hide');
 }
 
+function _basic_qtip_options(note) {
+   var title = note.date; //"Fake title"; // note.title
+   if (note.fromname)
+     title += " by " + note.fromname;
+   var text = note.comment;
+   return {
+      content: {
+         title: {
+            text: title
+         },
+         text:text
+      },
+      position: {
+                  corner: {
+                     tooltip: 'rightTop', // Use the corner...
+                     target: 'leftBottom' // ...and opposite corner
+                  }
+               },
+      style: {
+                  border: {
+                     width: 2,
+                     radius: 4
+                  },
+                  padding: 3,
+                  textAlign: 'left',
+                  tip: true, // Give it a speech bubble tip with automatic corner detection
+                  name: 'light' // Style it according to the preset 'cream' style
+               }
+
+   };
+}
 function __show_note(issue_identifier, note) {
+   var parent = $('#' + issue_identifier);
+   if (note.threadID) {
+      // the ID of the div for this followup is going to be the 
+      // end of issue_identifier + '__' + note.threadID
+      var containerID = issue_identifier.split('__').pop() + '__' + note.threadID;
+      var container = $('div.thead', '#' + containerID);
+   } else {
+      var container = $('div.ihead', parent);
+   }
+   var link = $('<a href="#"></a>').addClass('old-note').click(function() {
+      return false;
+   }).append(
+             $('<img src="/misc_/IssueTrackerProduct/issuenote.png" border="0"/>').attr('alt',note.title)
+             ).qtip(_basic_qtip_options(note));
    
+   container.prepend(link);
 }
 
 
@@ -138,17 +181,14 @@ $(function () {
       
    });
 
-   
-      
-   
-//   $('div.issue').each(function() {
-//      var issue_identifier = $(this).attr('id');
-//      $.getJSON(ROOT_URL + '/getIssueNotes_json', {issue_identifier:issue_identifier}, function(notes) {
-//	 $.each(notes, function(i, note) {
-//	    __show_note(issue_identifier, note);
-//	 });
-//      });
-//   });
+   $('div.issue').each(function() {
+      var issue_identifier = $(this).attr('id');
+      $.getJSON(ROOT_URL + '/getIssueNotes_json', {issue_identifier:issue_identifier}, function(notes) {
+	 $.each(notes, function(i, note) {
+	    __show_note(issue_identifier, note);
+	 });
+      });
+   });
       
    
    // Create the modal backdrop on document load so all modal tooltips can use it

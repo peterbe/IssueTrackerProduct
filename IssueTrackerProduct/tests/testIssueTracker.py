@@ -18,7 +18,7 @@ from Testing import ZopeTestCase
 from AccessControl import getSecurityManager
 from AccessControl.SecurityManagement import newSecurityManager, noSecurityManager
 from DateTime import DateTime
-
+from zExceptions import Unauthorized
 import Acquisition
 
 from base import TestBase
@@ -33,6 +33,7 @@ from Products.IssueTrackerProduct.Permissions import IssueTrackerManagerRole, Is
 from Products.IssueTrackerProduct.Constants import ISSUEUSERFOLDER_METATYPE, \
  DEBUG, ISSUE_DRAFT_METATYPE, TEMPFOLDER_REQUEST_KEY, \
  FILTERVALUEFOLDER_THRESHOLD_CLEANING, FILTEROPTION_METATYPE
+from Products.IssueTrackerProduct.Errors import DataSubmitError, UserSubmitError
 
 #------------------------------------------------------------------------------
 #
@@ -190,7 +191,7 @@ if traversing:
             super(ZopeTestCase.FunctionalTestCase, self).beforeSetUp()
             component.provideAdapter( \
                         traversing.adapters.DefaultTraversable, (interface.Interface,),ITraversable)
-
+            
             
     
 class IssueTrackerTestCase(TestBase):
@@ -588,8 +589,6 @@ class IssueTrackerTestCase(TestBase):
         self.logout()
         assert getSecurityManager().getUser().getUserName() == 'Anonymous User'
         
-        from zExceptions import Unauthorized
-
         self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'ListIssues')
         self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'rss.xml')
         self.assertRaises(Unauthorized, tracker.restrictedTraverse, 'rdf.xml')
@@ -1998,6 +1997,60 @@ class IssueTrackerTestCase(TestBase):
         
         self.assertEqual([x.getDueDate() for x in seq],
                          [future, tomorrow, today, yesterday, None])
+        
+        
+        
+    def test_change_password(self):
+        """test to change your password when you're an acl user in a 
+        Issue User Folder"""
+        tracker = self.folder.tracker
+        # create an Issue User Folder inside
+        tracker._addRole(IssueTrackerUserRole)
+        tracker._addRole(IssueTrackerManagerRole)
+        tracker.manage_addProduct['IssueTrackerProduct']\
+        .manage_addIssueUserFolder(keep_usernames=True)
+        
+        uf = tracker.acl_users
+        
+        uf.userFolderAddUser("user", "secret", [IssueTrackerUserRole], [],
+                            email="user@test.com",
+                            fullname="User Name")
+
+        # first of all, you can't change your password if you're
+        # not logged in
+#        self.assertRaises(UserSubmitError,
+#                          tracker.IssueUserChangePassword,
+#                          "secret",
+#                          "newpassword",
+#                          "newpassword")
+
+        user = uf.getUserById('user')
+        user = user.__of__(uf)
+        newSecurityManager(None, user)
+        assert getSecurityManager().getUser().getUserName() == 'user'
+        tracker.IssueUserChangePassword("secret", "newpass", "newpass")
+        return
+        
+        
+        # I should now be able to change my password
+        self.assertRaises(DataSubmitError,
+                          tracker.IssueUserChangePassword,
+                          "not right",
+                          "newpassword",
+                          "newpassword")
+        
+        self.assertRaises(DataSubmitError,
+                          tracker.IssueUserChangePassword,
+                          "secret",
+                          "new is",
+                          "different")
+        
+        tracker.IssueUserChangePassword("secret", "newpass", "newpass")
+        
+        
+        
+                
+################################################################################        
         
         
         
