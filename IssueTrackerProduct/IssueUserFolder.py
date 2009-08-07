@@ -5,12 +5,12 @@
 # License: ZPL
 #
 
-__version__='0.0.7'
+__version__='0.0.8'
 
 # python
 
 # Zope
-from AccessControl import User
+from AccessControl import User, AuthEncoding
 from Globals import DTMLFile, MessageDialog, Persistent
 from AccessControl import ClassSecurityInfo
 from AccessControl.Role import DEFAULTMAXLISTUSERS
@@ -353,9 +353,7 @@ class IssueUserFolder(User.UserFolder):
         must_change_password=kw.get('must_change_password',False)
         display_format = kw.get('display_format','')
         if password is not None and self.encrypt_passwords:
-            print "password in", repr(password)
             password = self._encryptPassword(password)
-            print "password out", repr(password)
         self.data[name]=IssueUser(name, password, roles, domains,
                                   email, fullname, must_change_password,
                                   display_format)

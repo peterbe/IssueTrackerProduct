@@ -2015,22 +2015,19 @@ class IssueTrackerTestCase(TestBase):
         uf.userFolderAddUser("user", "secret", [IssueTrackerUserRole], [],
                             email="user@test.com",
                             fullname="User Name")
-
+        
         # first of all, you can't change your password if you're
         # not logged in
-#        self.assertRaises(UserSubmitError,
-#                          tracker.IssueUserChangePassword,
-#                          "secret",
-#                          "newpassword",
-#                          "newpassword")
+        self.assertRaises(UserSubmitError,
+                          tracker.IssueUserChangePassword,
+                          "secret",
+                          "newpassword",
+                          "newpassword")
 
         user = uf.getUserById('user')
         user = user.__of__(uf)
         newSecurityManager(None, user)
         assert getSecurityManager().getUser().getUserName() == 'user'
-        tracker.IssueUserChangePassword("secret", "newpass", "newpass")
-        return
-        
         
         # I should now be able to change my password
         self.assertRaises(DataSubmitError,
@@ -2047,14 +2044,7 @@ class IssueTrackerTestCase(TestBase):
         
         tracker.IssueUserChangePassword("secret", "newpass", "newpass")
         
-        
-        
-                
 ################################################################################        
-        
-        
-        
-        
             
         
 def test_suite():

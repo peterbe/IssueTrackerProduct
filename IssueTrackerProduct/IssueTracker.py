@@ -99,7 +99,7 @@ from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
 from Globals import Persistent, InitializeClass, package_home, DTMLFile
 from OFS import SimpleItem, Folder, PropertyManager
 from DocumentTemplate import sequence
-from AccessControl import ClassSecurityInfo, getSecurityManager
+from AccessControl import ClassSecurityInfo, getSecurityManager, AuthEncoding
 from Products.ZCatalog.CatalogAwareness import CatalogAware
 from Acquisition import aq_inner, aq_parent, aq_base
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
@@ -3988,7 +3988,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return issue    
 
 
-
     def _getFakeFileattachments(self, files):
         """ upload all new file attachments """
         if not isinstance(files, (tuple, list)):
@@ -4029,8 +4028,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         counter_key = '_nextid_%s' % ss(incontainer.meta_type).replace(' ','')
         if use_stored_counter and incontainer.__dict__.has_key(counter_key):
-            #logger.info("HAS (use_stored_counter=%s) %s in %s" % (use_stored_counter, counter_key, incontainer))
             nextid_nr = incontainer.__dict__.get(counter_key)
+            if nextid_nr <= 1 and len(incontainer.objectIds(meta_type)) > 1:
+                nextid_nr = len(incontainer.objectIds(meta_type))
             incontainer.__dict__[counter_key] = nextid_nr + 1
             
             increment = nextid_nr
@@ -4053,7 +4053,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
             incontainer.__dict__[counter_key] = nextid_nr
             return nextid_str
-            
+        
     def _do_generateID(self, incontainer, length, prefix='',
                        meta_type=ISSUE_METATYPE, increment=None,
                        ):
@@ -4065,7 +4065,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             idnr = increment
             increment = increment +1
-        id='%s%s'%(prefix, string.zfill(str(idnr), length))
+        id='%s%s' % (prefix, string.zfill(str(idnr), length))
+        
         if base_hasattr(incontainer, id):
             # ah! Id already exists, try again
             return self._do_generateID(incontainer, length, 
@@ -11802,14 +11803,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         path = issueuser.getIssueUserIdentifier()[0]
         userfolder = self.unrestrictedTraverse(path)
         user = userfolder.data[issueuser.getUserName()]
-        print "user._getPassword()", repr(user._getPassword())
-        if userfolder._isPasswordEncrypted(user._getPassword()):
-            print "userfolder._encryptPassword(%r)"%old, repr(userfolder._encryptPassword(old))
-            if not userfolder._encryptPassword(old) == user._getPassword():
+        if AuthEncoding.is_encrypted(user._getPassword()):
+            if not AuthEncoding.pw_validate(user._getPassword(), old):
                 SubmitError['old'] = "Incorrect"
         else:
-            print "OLD", repr(old)
-            print "user._getPassword()", repr(user._getPassword())
             if not old == user._getPassword():
                 SubmitError['old'] = "Incorrect"
 

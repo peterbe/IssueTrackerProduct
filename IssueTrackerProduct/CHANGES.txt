@@ -1,4 +1,10 @@
 -
+    Bug fixed: Manually reset ID counters could cause excessive
+    recursion when generiting IDs. (Real#0659) Thanks Nicholas
+    
+    Bug fixed: Inability to change password if user folder is
+    configured to encrypt stored passwords. (Real#0823) Thanks Greg
+    
     New feature: Inbound emails with header "X-Autoreply: yes" are
     ignored (Real#0855). Thanks Nicholas
 
