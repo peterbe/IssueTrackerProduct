@@ -186,7 +186,8 @@ class EmailInTestCase(TestBase):
         ae = tracker.createAcceptingEmail(account.getId(), email)
         
         abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
-        FakePOP3.files = [abs_path('email-in-1_with-autoreply.email')]
+        FakePOP3.files = [abs_path('email-in-1_with-autoreply.email'),
+                          abs_path('email-in-2_with-autoreply.email')]
 
         # Monkey patch!
         from Products.IssueTrackerProduct import IssueTracker

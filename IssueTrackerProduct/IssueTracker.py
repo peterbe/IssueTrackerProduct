@@ -5298,7 +5298,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def getRememberedListURL(self):
         """return a dict {url:<url>, title:<title>} or None about the users last visited
         list url."""
-        key = LIST_URL_SESSION_KEY
+        key = "%s-%s" % (LIST_URL_SESSION_KEY,
+                         self.getRoot().absolute_url_path().replace('/',''))
         try:
             url, title = self.get_session(key, None)
         except TypeError:
@@ -5309,7 +5310,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """Put which list you're in session by remembering
         (url, title)
         """
-        key = LIST_URL_SESSION_KEY
+        key = "%s-%s" % (LIST_URL_SESSION_KEY,
+                         self.getRoot().absolute_url_path().replace('/',''))
         url = self.REQUEST.URL
         qs = self.REQUEST.QUERY_STRING
         
@@ -10125,6 +10127,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     else:
                         value = unicode_value
                     e[ss(key)] = value
+                
+                if value.startswith('Out of Office AutoReply: '):
+                    # standard MS Outlook setup for Out of Office autoreplies
+                    e['is_autoreply'] = True
+                    
             elif ss(key) =='x-autoreply':
                 if Utils.niceboolean(value):
                     e['is_autoreply'] = True
