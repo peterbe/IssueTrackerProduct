@@ -10364,12 +10364,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # massage the menu_items list (full of dicts) so that we turn
         # the 'inurl' info into a boolean based on where the user is now
         items = self.getMenuItemsList()
+        
         menu = []
         for e in items:
             if e['inurl'] == '':
                 _inurl = inURL(e['inurl'], homepage=1)
             else:
                 _inurl = inURL(e['inurl'])
+            id = e['href'].split('/')[-1]
+            if not id:
+                id = "Home"
             menu.append([e['label'], e['href'], _inurl, id])
                 
         issueuser = self.getIssueUser()
@@ -10380,24 +10384,24 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             _name = issueuser.getFullname()
             if _name:
                 _name = self._extractFirstName(_name)
-            menu.append([_name, '/User', inURL('User')])
+            menu.append([_name, '/User', inURL('User'), 'User'])
 
         elif cmfuser:
-            menu.append([cmfuser.getProperty('fullname'), '/User', inURL('User')])
+            menu.append([cmfuser.getProperty('fullname'), '/User', inURL('User'), 'User'])
 
         elif zopeuser:
             _name = zopeuser.getUserName()
             if self.getSavedUser('fullname'):
                 _name = self._extractFirstName(self.getSavedUser('fullname'))
-            menu.append([_name, '/User', inURL('User')])
+            menu.append([_name, '/User', inURL('User'), 'User'])
         else:
-            menu.append(['Login', self.ManagerLink(1), False])
+            menu.append(['Login', self.ManagerLink(1), False, 'Login'])
             
         if self.has_cookie(LOGOUT_PAGE_COOKIEKEY) and (issueuser or zopeuser):
             # if we have this cookie, it means that we know the cookie
             # name of the cookie that logged the person in in the 
             # first place. This we can use to log a user out.
-            menu.append(['Log out', self.get_cookie(LOGOUT_PAGE_COOKIEKEY), False])
+            menu.append(['Log out', self.get_cookie(LOGOUT_PAGE_COOKIEKEY), False, 'Logout'])
 
         for i in range(len(menu)):
             href = menu[i][1]
@@ -10419,17 +10423,18 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return fullname
 
     
-    def displayMenuItem(self, menuinfo, underline_first_letter=None):
+    def displayMenuItem(self, menuinfo, underline_first_letter=None,
+                        no_images_in_menu=False):
         """ proxy showing of the title through this and maybe we
         append a little gif with it. """
         imgdata = MENUICONS_DATA
-
+        
         # e.g. menuinfo = [title, url, on]
         title = show_title = menuinfo[0]
         if underline_first_letter and underline_first_letter.lower()==title[0].lower():
             show_title = "<u>%s</u>%s" % (title[0], title[1:])
         
-        if self.imagesInMenu():
+        if self.imagesInMenu() and not no_images_in_menu:
             tmpl = '<img align="left" src="%(src)s" width="%(width)s" height="%(height)s" '
             tmpl += 'alt="%(alt)s" border="0" />'
             identifier = menuinfo[1].split('/')[-1]

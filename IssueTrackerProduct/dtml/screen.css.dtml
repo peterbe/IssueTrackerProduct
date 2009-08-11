@@ -101,18 +101,16 @@ ul#tabnav {
   font: bold 11px verdana,arial;
   list-style-type: none;
   padding-bottom: 24px;
-/*  border-bottom: 1px solid #f9f9f3; this cause a problem in IE */
   margin:0;
 }
 
 ul#tabnav li {
   float: left;
-  height: 21px;
   background-color: #eee;
-  /*background:#CC9 url(/misc_/IssueTrackerProduct/gradhead.png);*/
-  margin: 2px 2px 0 2px;
+  margin: 2px 2px 0px 2px;
   border: 1px solid #999966;
   border-bottom: 1px solid #e4e4c8;
+  height:19px;
 }
 
 div#tab1 li.tab1, body#tab0 li.tab0  {

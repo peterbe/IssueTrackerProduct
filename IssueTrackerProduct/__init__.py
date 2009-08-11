@@ -169,7 +169,9 @@ def initialize(context):
         for icon in icons:
             registerIcon(icon, epath='icons')
         menuicons = ('add.gif', 'list.gif', 'complete.gif', 'home.gif',
-                     'user.gif','login.gif', 'logout.gif')
+                     'user.gif','login.gif', 'logout.gif',
+                     'csg-4a8135ab36765.gif', # sprite
+                    )
         for micon in menuicons:
             registerIcon(micon, epath='menuicons')
         

@@ -554,7 +554,7 @@ disableShowNextactionIssues	IssueTracker.py	/^    def disableShowNextactionIssue
 dispatch	Notification.py	/^    def dispatch(self):$/;"	m	class:IssueTrackerNotification
 dispatcher	IssueTracker.py	/^    def dispatcher(self, notificationobjects=None, min_age_minutes=0, REQUEST=None):$/;"	m	class:IssueTracker
 displayBriefTitle	IssueTracker.py	/^    def displayBriefTitle(self, title):$/;"	m	class:IssueTracker
-displayMenuItem	IssueTracker.py	/^    def displayMenuItem(self, menuinfo, underline_first_letter=None):$/;"	m	class:IssueTracker
+displayMenuItem	IssueTracker.py	/^    def displayMenuItem(self, menuinfo, underline_first_letter=None,$/;"	m	class:IssueTracker
 doAutoLogin	IssueTracker.py	/^    def doAutoLogin(self):$/;"	m	class:IssueTracker
 doCache	IssueTracker.py	/^    def doCache(self, hours=10):$/;"	m	class:IssueTracker
 doDebug	IssueTracker.py	/^    def doDebug(self):$/;"	m	class:IssueTrackerFolderBase
