@@ -4027,18 +4027,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             incontainer = self
 
         counter_key = '_nextid_%s' % ss(incontainer.meta_type).replace(' ','')
-        if use_stored_counter and incontainer.__dict__.has_key(counter_key):
-            nextid_nr = incontainer.__dict__.get(counter_key)
+        if use_stored_counter and getattr(incontainer, counter_key, None):
+            nextid_nr = getattr(incontainer, counter_key)
             if nextid_nr <= 1 and len(incontainer.objectIds(meta_type)) > 1:
                 nextid_nr = len(incontainer.objectIds(meta_type))
-            incontainer.__dict__[counter_key] = nextid_nr + 1
+            setattr(incontainer, counter_key, nextid_nr + 1)
             
             increment = nextid_nr
             #logger.info("START generate a new ID starting on increment %s" % increment)
             return self._do_generateID(incontainer, length, prefix=prefix,
                                        meta_type=meta_type, increment=increment)
         else:
-            #logger.info("NO (use_stored_counter=%s) counter attribute"% use_stored_counter)
             nextid_str = self._do_generateID(incontainer, length,
                                              prefix=prefix, 
                                              meta_type=meta_type)
@@ -4051,7 +4050,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 nextid_nr_str = nextid_str
             nextid_nr = int(nextid_nr_str)
             
-            incontainer.__dict__[counter_key] = nextid_nr
+            setattr(incontainer, counter_key, nextid_nr)
             return nextid_str
         
     def _do_generateID(self, incontainer, length, prefix='',
@@ -4066,6 +4065,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             idnr = increment
             increment = increment +1
         id='%s%s' % (prefix, string.zfill(str(idnr), length))
+        print "* %r" % id
         
         if base_hasattr(incontainer, id):
             # ah! Id already exists, try again
@@ -4076,8 +4076,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             return id
         
-
-
         
     ##
     ## Spambot
@@ -11394,21 +11392,21 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         for note in note_objects:
             #if note.getThreadID() not in data:
             #    data[note.getThreadID()] = []
-                
-            item = dict(date=self.showDate(note.notedate, today=today),
-                        comment=note.showComment(),
-                        fromname=note.getFromname(),
-                        email=note.getEmail(),
-                        title=note.getTitle())
-            #print repr(note.getThreadID())
-            if note.getThreadID():
-                item['threadID'] = note.getThreadID()
-             
-            notes.append(item)
+            notes.append(self._note_object_to_note_dict(note, today=today))
         
-        #from pprint import pprint
-        #pprint(notes)
         return simplejson.dumps(notes)
+    
+    def _note_object_to_note_dict(self, note, today=None):
+        item = dict(date=self.showDate(note.notedate, today=today),
+                    comment=note.showComment(),
+                    fromname=note.getFromname(),
+                    email=note.getEmail(),
+                    title=note.getTitle())
+        if note.getThreadID():
+            item['threadID'] = note.getThreadID()
+            
+        return item
+    
         
     def _get_issue_by_issue_identifier(self, issue_identifier):
         trackerid, issueid = issue_identifier.split('__')
@@ -11446,9 +11444,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         note = issue.createNote(comment, public=public, threadID=threadID,
                                 )
-        return ""
         
-                
+        if not simplejson:
+            logger.error("simplejson not installed")
+            return ""
+        
+        return simplejson.dumps(dict(note=self._note_object_to_note_dict(note)))
         
         
     ## AutoLogin stuff

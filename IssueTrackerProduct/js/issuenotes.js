@@ -1,4 +1,3 @@
-
 function L(x) { // shortcut
    if (window.console && window.console.log)
      window.console.log(x);
@@ -6,37 +5,44 @@ function L(x) { // shortcut
 
 function saveNote(form, thread_identifier) {
    var public = false;
+   var issue_identifier = $(form.issue_identifier).val();
    $.each(form.public, function(i, e) {
       if (e.checked && e.value=="yes") public = true;
    });
    if (!$(form.comment).val().length) {
-      cancelSaveNote(form, thread_identifier);
+      cancelSaveNote(form, issue_identifier, thread_identifier);
    }
    
    if (!thread_identifier) thread_identifier = '';
 
    $.post(ROOT_URL + '/saveIssueNote', {
-      issue_identifier:$(form.issue_identifier).val(),
+      issue_identifier:issue_identifier,
       thread_identifier:thread_identifier,
       comment:$(form.comment).val(), 
       public:public},
           function(result) {
-      if (result) alert(result);
-      //L(thread_identifier);
-      cancelSaveNote(form, thread_identifier);
-   });
-      
+	     if (result && result.error) {
+		alert(result.error);
+		return;
+	     }
+	     if (result && result.note)
+	       __show_note(issue_identifier, result.note);
+	     
+	     cancelSaveNote(form, issue_identifier, thread_identifier);
+	  },
+          "json");
 }
 
-function cancelSaveNote(form, thread_identifier) {
-   if (thread_identifier)
-     $('a.new-note', 'div.thead').qtip('hide');
-   else
-     $('a.new-note', 'div.ihead').qtip('hide');
+function cancelSaveNote(form, issue_identifier, thread_identifier) {
+   if (thread_identifier) 
+      $('a.new-note', 'div.thead').qtip('hide');  // hide all
+   else 
+      $('a.new-note', 'div.ihead').qtip('hide');
+   
 }
 
 function _basic_qtip_options(note) {
-   var title = note.date; //"Fake title"; // note.title
+   var title = note.date;
    if (note.fromname)
      title += " by " + note.fromname;
    var text = note.comment;
@@ -54,15 +60,15 @@ function _basic_qtip_options(note) {
                   }
                },
       style: {
-                  border: {
-                     width: 2,
-                     radius: 4
-                  },
-                  padding: 3,
-                  textAlign: 'left',
-                  tip: true, // Give it a speech bubble tip with automatic corner detection
-                  name: 'light' // Style it according to the preset 'cream' style
-               }
+         border: {
+            width: 2,
+              radius: 4
+         },
+         padding: 3,
+           textAlign: 'left',
+           tip: true, // Give it a speech bubble tip with automatic corner detection
+           name: 'light'
+      }
 
    };
 }
@@ -86,70 +92,72 @@ function __show_note(issue_identifier, note) {
 }
 
 
-$(function () {
-   
-   function _qtip_options(target, issue_identifier, thread_identifier) {
-      var text = '';
-      if (thread_identifier)
-         text += '<form action="" onsubmit="saveNote(this, \'' + thread_identifier+ '\'); return false">';
-      else
-         text += '<form action="" onsubmit="saveNote(this, null); return false">';
-      text += '<input type="hidden" name="issue_identifier" value="'+ issue_identifier+'"/>'+
-               '<textarea name="comment" rows="5" cols="40"></textarea><br/>'+
-               'Public <input type="radio" name="public" value="yes" checked="checked"/>&nbsp;'+
-               'Private <input type="radio" name="public" value=""/><br/>'+
-               '<input type="submit" value="Save"/> ';
-      if (thread_identifier) {
-         text += '<a href="#" onclick="cancelSaveNote(this, \'' + thread_identifier+ '\');return false;">Cancel</a> ';
-      } else {
-         text += '<a href="#" onclick="cancelSaveNote(this, null);return false;">Cancel</a> ';
-      }
-      text += '</form>';
-      
-      return {
-   
-      content: {
-         title: {
-            text: 'Save a new note',
-            button: 'Close'
-         },
-         text: text
-      },
-      position: {
-         target: target, // Position it via the document body...
-         corner: 'right' // ...at the center of the viewport
-      },
-      show: {
-         when: 'click', // Show it on click
-         solo: true // And hide all other tooltips
-      },
-      hide: false,
-      style: {
-         width: { max: 350 },
-         padding: '14px',
-         border: {
-            width: 9,
-            radius: 9,
-            color: '#666666'
-         },
-         name: 'light'
-      },
-      api: {
-         beforeShow: function() {
-            // Fade in the modal "blanket" using the defined show speed
-            $('#qtip-blanket').fadeIn(this.options.show.effect.length);
-         },
-         onShow: function() {
-            $('textarea[name="comment"]')[0].focus();
-         },
-         beforeHide: function() {
-            // Fade out the modal "blanket" using the defined hide speed
-            $('#qtip-blanket').fadeOut(this.options.hide.effect.length);
-         }
-      }
-      };
-   }
 
+function _qtip_options(target, issue_identifier, thread_identifier) {
+   var text = '';
+   if (thread_identifier)
+      text += '<form action="" onsubmit="saveNote(this, \'' + thread_identifier+ '\'); return false">';
+   else
+      text += '<form action="" onsubmit="saveNote(this, null); return false">';
+   text += '<input type="hidden" name="issue_identifier" value="'+ issue_identifier+'"/>'+
+           '<textarea name="comment" rows="5" cols="40"></textarea><br/>'+
+           'Private <input type="radio" name="public" value="" checked="checked"/>&nbsp;'+
+           'Public <input type="radio" name="public" value="yes"/><br/>'+
+           '<input type="submit" value="Save"/> ';
+   if (thread_identifier) {
+      text += '<a href="#" onclick="cancelSaveNote(this, \'' + issue_identifier + '\', \'' + thread_identifier+ '\');return false;">Cancel</a> ';
+   } else {
+      text += '<a href="#" onclick="cancelSaveNote(this, \'' + issue_identifier + '\',null);return false;">Cancel</a> ';
+   }
+   text += '</form>';
+   
+   return {
+
+   content: {
+      title: {
+         text: 'Save a new note',
+         button: 'Close'
+      },
+      text: text
+   },
+   position: {
+      target: target, // Position it via the document body...
+      corner: 'right' // ...at the center of the viewport
+   },
+   show: {
+      when: 'click', // Show it on click
+      solo: true // And hide all other tooltips
+   },
+   hide: false,
+   style: {
+      width: { max: 350 },
+      padding: '14px',
+      border: {
+         width: 9,
+         radius: 9,
+         color: '#666666'
+      },
+      name: 'light'
+   },
+   api: {
+      beforeShow: function() {
+         // Fade in the modal "blanket" using the defined show speed
+         $('#qtip-blanket').fadeIn(this.options.show.effect.length);
+         $('textarea[name="comment"]:visible').val('');
+      },
+      onShow: function() {
+         $('textarea[name="comment"]:visible')[0].focus();
+      },
+      beforeHide: function() {
+         // Fade out the modal "blanket" using the defined hide speed
+         $('#qtip-blanket').fadeOut(this.options.hide.effect.length);
+      }
+   }
+ };
+}
+
+$(function () {
+  
    var issue_identifier;
    var thread_identifier;
    
@@ -206,6 +214,5 @@ $(function () {
       })
       .appendTo(document.body) // Append to the document body
       .hide(); // Hide it initially
-   
    
 });
