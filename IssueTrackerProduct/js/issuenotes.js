@@ -91,6 +91,15 @@ function __show_note(issue_identifier, note) {
    container.prepend(link);
 }
 
+function onblur_textarea(element) {
+   if (typeof enableKS != "undefined")
+     enableKS();
+}
+
+function onfocus_textarea(element) {
+   if (typeof disableKS != "undefined")
+     disableKS();
+}
 
 
 function _qtip_options(target, issue_identifier, thread_identifier) {
@@ -100,7 +109,8 @@ function _qtip_options(target, issue_identifier, thread_identifier) {
    else
       text += '<form action="" onsubmit="saveNote(this, null); return false">';
    text += '<input type="hidden" name="issue_identifier" value="'+ issue_identifier+'"/>'+
-           '<textarea name="comment" rows="5" cols="40"></textarea><br/>'+
+           '<textarea name="comment" rows="5" cols="40" onblur="onblur_textarea(this)" '+
+           'onfocus="onfocus_textarea(this)"></textarea><br/>'+
            'Private <input type="radio" name="public" value="" checked="checked"/>&nbsp;'+
            'Public <input type="radio" name="public" value="yes"/><br/>'+
            '<input type="submit" value="Save"/> ';
