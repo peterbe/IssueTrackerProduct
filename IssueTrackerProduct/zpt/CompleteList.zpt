@@ -44,7 +44,7 @@ tal:define="todaysdate python:here.ZopeTime()"
 <br />
 
 
-<div tal:repeat="issue batch" align="center" tal:define="show_threads here/doShowThreads">
+<div tal:repeat="issue batch" align="center" class="issue-and-threads" tal:define="show_threads here/doShowThreads">
 	
 <br tal:replace="structure issue/ShowIssueData" />
 		
@@ -61,4 +61,10 @@ tal:define="todaysdate python:here.ZopeTime()"
 <br />
 
 </div>
+
+<metal:block tal:condition="here/EnableIssueNotes"
+             fill-slot="extrajs">
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes.js"></script>
+</metal:block>
+
 </html>

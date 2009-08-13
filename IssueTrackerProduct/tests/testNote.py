@@ -54,7 +54,6 @@ class NoteTestCase(TestBase):
         note = issue._getOb('1')
         note.index_object()
         
-        self.assertFalse(note.isPublic())
         self.assertEqual(note.getFromname(),
                          u'B\xc3\xa9b')
         self.assertEqual(note.getEmail(),
@@ -93,7 +92,6 @@ class NoteTestCase(TestBase):
         # completed these things aren't set in the cookies
         #self.assertEqual(note.getFromname(), u'B\xc3\xa9b')
         #self.assertEqual(note.getEmail(), 'email@address.com')
-        self.assertFalse(note.isPublic(), 'email@address.com')
         self.assertEqual(note.getThread(), None)
         
 

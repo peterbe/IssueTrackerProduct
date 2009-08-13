@@ -263,7 +263,7 @@ ALREADY_NOT_SPAMBOT_COOKIE_KEY = '__it_AlreadyNotSpambot'
 
 
 # Misc
-AUTOSAVE_INTERVAL_SECONDS = 4
+AUTOSAVE_INTERVAL_SECONDS = 4 # DEPRECATED?
 FILTERVALUER_EXPIRATION_DAYS = 30 # saved filters > this gets cleaned away
 FILTERVALUER_MAX_PER_USER = 20 # how many saved filters one person can have
 FILTERVALUEFOLDER_THRESHOLD_CLEANING = 1000 # when 

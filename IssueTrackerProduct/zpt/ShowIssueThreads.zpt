@@ -27,7 +27,7 @@
 
         &nbsp;&nbsp;-&nbsp;&nbsp;
 	<span tal:define="fromname thread/getFromname;email thread/getEmail"
-	     tal:replace="structure python:here.ShowNameEmail(fromname,email)">
+	     tal:replace="structure python:here.ShowNameEmail(fromname,email, encode=not request.get('no_email_encoding', False))">
 				Name and Email</span>
 
     <a class="plink"

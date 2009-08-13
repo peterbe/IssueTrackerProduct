@@ -1451,6 +1451,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if not isinstance(sections, list):
                 sections = [sections]
                 
+            sections = [unicodify(x) for x in sections]
+                
             if not self.CanAddNewSections():
                 # check that all sections are recognized
                 _options = self.getSectionOptions()
@@ -3109,7 +3111,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         from Products.IssueTrackerProduct.Note import IssueNote
         # create a note inside this issue
         note = IssueNote(genid, title, comment, fromname, email,
-                         public=public, display_format=display_format,
+                         display_format=display_format,
                          acl_adder=acl_adder, threadID=threadID
                          )
         self._setObject(genid, note)
@@ -3118,13 +3120,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         
         return note
         
-    def findNotes(self, comment=None, fromname=None, email=None, 
-                  acl_adder=None, threadID=None, public=None):
+    def findNotes(self, comment=None, fromname=None, email=None,
+                  acl_adder=None, threadID=None):
         
         for note in self.getNotes():
-            if public is not None:
-                if note.isPublic() != bool(public):
-                    continue
             if comment is not None:
                 if note.getComment() != comment:
                     continue

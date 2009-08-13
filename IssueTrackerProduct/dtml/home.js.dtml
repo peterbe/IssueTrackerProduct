@@ -33,7 +33,7 @@ refreshinterval=orig_refreshinterval=5; // seconds
 function startautorefresh() {
   checkRefresh();
   r_timer=window.setTimeout(startautorefresh, refreshinterval*1000);
-  refreshinterval+= refreshinterval*0.08;
+  refreshinterval+= refreshinterval*0.07;
 }
 
 $(function() {
@@ -42,7 +42,9 @@ $(function() {
       if (resp) modified_timestamp = resp;
    });
    
-   startautorefresh();
+   setTimeout(function() {
+      startautorefresh();
+   }, 3*1000);
    
 
 });

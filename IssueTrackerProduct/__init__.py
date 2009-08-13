@@ -162,7 +162,10 @@ def initialize(context):
         registerJS('jquery-ui-1.7.1.datepickeronly.min.js', slim_if_possible=False)
         registerJS('manage-customfield.js')
         registerJS('jquery.qtip-1.0.0-rc3.min.js', slim_if_possible=False)
+        registerJS('followup.js')
         registerJS('issuenotes.js')
+        registerJS('issuenotes-core.js')
+        registerJS('issuenotes-list.js')
         registerCSS('jquery-ui-1.7.1.datepickeronly.css')
         
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())

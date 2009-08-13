@@ -333,7 +333,7 @@ ul.r {
 /* Show Issue      ----------------------- */
 
 
-.issue { 
+div.issue { 
   border:1px solid #999; 
   background-color:#eee;
   padding:0;
@@ -342,7 +342,7 @@ ul.r {
 } 
 
  
-.ihead {
+div.ihead {
   margin:0;  
   background:#ccc url(/misc_/IssueTrackerProduct/gradissuehead.png);
   border-right:1px solid #999;
@@ -351,11 +351,11 @@ ul.r {
   height:30px;
 }
 
-html>body .ihead {
+html>body div.ihead {
   height:31px;
 }
 
-.ihead h3 {
+div.ihead h3 {
   font-family:arial,sans-serif;
   font-size:14px;
   padding:6px 10px 0 15px;
@@ -531,13 +531,12 @@ em.filter-title {
 }
 
 /* Notes */
-a.new-note {
+div.ihead a.new-note, div.thead a.new-note {
   float:right;
   margin:7px;
-  opacity:0.3;
 }
 
-a.old-note {
+div.ihead a.old-note, div.thead a.old-note {
   float:right;
   margin:7px 2px;
 }
@@ -546,6 +545,9 @@ div.thead a.new-note, div.thead a.old-note {
   margin:1px;
 }
 
+a.new-note, a.new-note {
+  opacity:0.3;
+}  
 a.new-note:hover, a.new-note:active {
   opacity:1.0;
 }

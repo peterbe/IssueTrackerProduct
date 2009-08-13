@@ -275,6 +275,7 @@ class IssueTrackerFolderBase(Folder.Folder, Persistent):
     def getAutosaveInterval(self):
         """ return the seconds interval of how often the autosaving function
         should submit. """
+        # XXX I THINK THIS ONE IS DEPRECATED AND NO LONGER NEEDED
         return AUTOSAVE_INTERVAL_SECONDS
     
     def ValidEmailAddress(self, email):
@@ -4065,7 +4066,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             idnr = increment
             increment = increment +1
         id='%s%s' % (prefix, string.zfill(str(idnr), length))
-        print "* %r" % id
         
         if base_hasattr(incontainer, id):
             # ah! Id already exists, try again
@@ -7884,6 +7884,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 object = getattr(self, string.zfill(q, self.randomid_length))
                 return [object]
             
+            
+        brains_notes = []
+        if self.EnableIssueNotes() and (not search_only_on or 'note' in search_only_on):
+            brains_notes = catalog.searchResults(comment=q)
         
         # these variables are used in the loop to avoid calling LOG()
         # for every bloody object that goes wrong
@@ -7947,12 +7951,43 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     LOG(self.__class__.__name__, WARNING, m)
                 continue
             
-            object = threadobject.aq_parent
+            #object = threadobject.aq_parent
+            object = aq_parent(aq_inner(threadobject))
             if object not in seq:
                 if first_thread_id is None:
                     first_thread_id = object.getId()
                     request.set('FirstThreadResultId', first_thread_id)
                 seq.append(object)
+                
+        first_note_id = None
+        found_notes_by_issue = {}
+        
+        for notebrain in brains_notes:
+            noteobject = notebrain.getObject()
+            if noteobject is None:
+                if not _has_logged_about_NoneType:
+                    _has_logged_about_NoneType = 1
+                    m = "%s has references to Zope objects that do not exist. "
+                    m = m%self.getCatalog().getId()
+                    m += "Please press the Update Everything button under the "\
+                         "Management tab in the Zope management interface."
+                    LOG(self.__class__.__name__, WARNING, m)
+                continue
+            
+            issue = aq_parent(aq_inner(noteobject))
+            if issue not in seq:
+                if first_note_id is None:
+                    first_note_id = issue.getId()
+                    request.set('FirstNoteResultId', first_note_id)
+                seq.append(issue)
+                if issue.getId() not in found_notes_by_issue:
+                    found_notes_by_issue[issue.getId()] = []
+                found_notes_by_issue[issue.getId()].append(noteobject.getId())
+                
+        if found_notes_by_issue:
+            old = request.get('found_notes_by_issue', {})
+            old.update(found_notes_by_issue)
+            request.set('found_notes_by_issue', old)
 
         if self.searchWithOR(q) and search_only_on is None:
             for issue in self._searchCatalog(self.searchWithOR(q)):
@@ -11317,11 +11352,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     ##
     
     security.declareProtected('View', 'getIssueNotes_json')
-    def getIssueNotes_json(self, issue_identifier):
-        """return the notes for this issue. 
+    def getIssueNotes_json(self, ids):
+        """return the notes for these issues.
         The reason this can't be part of Issue.py is because of the 
         CompleteList feature which is outside the issue.
-        Also, the identifier looks like this:
+        Also, the identifiers looks like this:
         
          <issuetracker id>__<issue id>
         
@@ -11332,18 +11367,51 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if not simplejson:
             raise SystemError("simplejson not installed")
         
+        if not isinstance(ids, (tuple, list)):
+            ids = [ids]
+        
+        notes = []
+        today = DateTime()
+        for issue_identifier in ids:
+            for note in self._getIssueNotes(issue_identifier):
+                note_dict = self._note_object_to_note_dict(note, today=today)
+                note_dict['issue_identifier'] = issue_identifier
+                notes.append(note_dict)
+    
+        return simplejson.dumps(notes)
+    
+    
+    def _note_object_to_note_dict(self, note, today=None):
+        item = dict(date=self.showDate(note.notedate, today=today),
+                    comment=note.showComment(),
+                    fromname=note.getFromname(),
+                    email=note.getEmail(),
+                    title=note.getTitle())
+        if note.getThreadID():
+            item['threadID'] = note.getThreadID()
+            
+        return item
+    
+    def _getIssueNotes(self, issue_identifier):
+        note_objects = []
         issue = self._get_issue_by_issue_identifier(issue_identifier)
         if not issue:
             raise ValueError("Unrecognizable issue_identifier %r" % \
-                             issue_identifier)
+                            issue_identifier)
         
-        # combine your notes with the public ones
-        note_objects = list(issue.findNotes(public=True))
+        # first figure out if there are any notes in the issue
+        # before we figure out who we can and search for them
+        # properly.
+        # The reason for this is that
+        any_notes = False
+        for __ in issue.findNotes():
+            any_notes = True
+            break
         
         # before we fetch all private notes, just check that there are any
         # before we start the expensive operation of figuring out your
         # identifier and doing the search
-        if list(issue.findNotes(public=False)):
+        if any_notes:
                 
             acl_adder = ''
             issueuser = self.getIssueUser()
@@ -11377,35 +11445,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 email = ''
             
             if acl_adder:
-                note_objects += list(issue.findNotes(public=False, acl_adder=acl_adder))
+                note_objects += list(issue.findNotes(acl_adder=acl_adder))
             elif email and fromname:
-                note_objects += list(issue.findNotes(public=False, 
-                                                     fromname=fromname,
-                                                     email=email))
+                note_objects += list(issue.findNotes(fromname=fromname,
+                                                    email=email))
         
         note_objects.sort(lambda x,y: cmp(x.notedate, y.notedate))
         
-        #data = {}
-        notes = []
-        # 
-        today = DateTime()
-        for note in note_objects:
-            #if note.getThreadID() not in data:
-            #    data[note.getThreadID()] = []
-            notes.append(self._note_object_to_note_dict(note, today=today))
-        
-        return simplejson.dumps(notes)
-    
-    def _note_object_to_note_dict(self, note, today=None):
-        item = dict(date=self.showDate(note.notedate, today=today),
-                    comment=note.showComment(),
-                    fromname=note.getFromname(),
-                    email=note.getEmail(),
-                    title=note.getTitle())
-        if note.getThreadID():
-            item['threadID'] = note.getThreadID()
+        return note_objects
             
-        return item
     
         
     def _get_issue_by_issue_identifier(self, issue_identifier):
@@ -11421,7 +11469,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return getattr(issue, thread_identifier.split('__')[-1], None)
                 
     security.declareProtected('View', 'saveIssueNote')
-    def saveIssueNote(self, issue_identifier, comment, thread_identifier=None, public=False):
+    def saveIssueNote(self, issue_identifier, comment, thread_identifier=None):
         """post a new note"""
         issue = self._get_issue_by_issue_identifier(issue_identifier)
         if not issue:
@@ -11440,9 +11488,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if not comment:
             return "Error. No comment"
         
-        public = Utils.niceboolean(public)
-        
-        note = issue.createNote(comment, public=public, threadID=threadID,
+        note = issue.createNote(comment, threadID=threadID,
                                 )
         
         if not simplejson:
@@ -13572,8 +13618,7 @@ dtmls = ({'f':'dtml/screen.css', 'optimize':OPTIMIZE and 'css'},
          {'f':'dtml/QuickAddIssueJavascript', 'n':'quickaddissue.js',
           'optimize':OPTIMIZE and 'js', 
           },
-         {'f':'dtml/followup.js', 'optimize':OPTIMIZE and 'js', 
-          },
+         #{'f':'dtml/followup.js', 'optimize':OPTIMIZE and 'js'},
          {'f':'dtml/home.js', 'optimize':OPTIMIZE and 'js',
           },
 

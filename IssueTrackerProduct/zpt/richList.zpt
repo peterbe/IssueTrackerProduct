@@ -1,5 +1,5 @@
 <table border="0" cellpadding="5" cellspacing="0" width="98%" align="center"
-       tal:define="todaysdate python:here.ZopeTime(); enable_due_date here/EnableDueDate"
+       tal:define="todaysdate python:here.ZopeTime(); enable_due_date here/EnableDueDate; root here/getRoot"
         style="border:1px solid #ccc">
    <thead>
 	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
@@ -12,14 +12,19 @@
 
 	</tr>
    </thead>
-   <tbody tal:repeat="issue options/batch" tal:attributes="class python:test(path('repeat/issue/odd'), 'lodd','leven');ondblclick string:G('${issue/absolute_url_path}')">
-		<tr tal:condition="python:request.get('FirstThreadResultId')==issue.id and request.get('sortorder','')=='search'"
+   <tbody tal:repeat="issue options/batch" tal:attributes="class python:test(path('repeat/issue/odd'), 'lodd','leven')">
+	<tr tal:condition="python:request.get('FirstThreadResultId')==issue.id and request.get('sortorder','')=='search'"
           class="l_commenthead">
-			<td colspan="x"
-                            tal:attributes="colspan python:enable_due_date and 6 or 5">Found in comment...</td>
-		</tr>
-		<tr> 
-			<td colspan="2">
+          <td colspan="x"
+              tal:attributes="colspan python:enable_due_date and 6 or 5">Found in comment...</td>
+	</tr>
+	<tr tal:condition="python:request.get('FirstNoteResultId')==issue.id and request.get('sortorder','')=='search'"
+          class="l_commenthead">
+          <td colspan="x"
+              tal:attributes="colspan python:enable_due_date and 6 or 5">Found in notes...</td>
+	</tr>        
+        <tr class="issue" tal:attributes="id string:${root/getId}__${issue/getId}"> 
+			<td colspan="2" class="ihead">
 			        <span tal:condition="here/ShowIdWithTitle" tal:content="structure string:#${issue/getId} " class="id">
 				</span>
 				<a class="ilink" tal:attributes="title string:Go to issue #${issue/id}; href python:issue.absolute_url_path()" tal:content="structure issue/showTitle">Title

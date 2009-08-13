@@ -11,6 +11,12 @@
 <style type="text/css" metal:fill-slot="extracss">
 .bd { font-size:90%}
 </style>
+
+<metal:block tal:condition="here/EnableIssueNotes"
+             fill-slot="extrajs">
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes-list.js"></script>
+</metal:block>
+
 <div metal:fill-slot="body" tal:omit-tag="">
 
 
@@ -39,7 +45,6 @@ tal:replace="structure python:tmpl(batch=batch)"></table>
                                                              showSubListOptions=1)"></span>
 
 <br /><br />
-
 
 </div>
 </html>

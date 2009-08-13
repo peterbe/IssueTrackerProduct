@@ -113,6 +113,14 @@ ul#tabnav a {
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/core.js"></script>
 <script type="text/javascript" tal:condition="here/useAccessKeys"
  tal:attributes="src string:${here/getRootRelativeURL}/keyboardshortcuts.js"></script>
+
+<tal:block condition="here/EnableIssueNotes">
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery.qtip-1.0.0-rc3.min.js"></script>
+<script type="text/javascript"
+        tal:content="structure string:var ROOT_URL='${here/getRootURL}';"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes-core.js"></script>
+</tal:block>
+ 
 <script metal:define-slot="extrajs" tal:omit-tag=""></script>
 
 </body>

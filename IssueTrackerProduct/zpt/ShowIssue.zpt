@@ -1,16 +1,39 @@
 <html metal:use-macro="here/getHeader">
 <metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
 
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/followup.js"></script>
+<script type="text/javascript" tal:condition="python:here.SaveDrafts() and here.UseAutoSave()">
+function autosave() {
+   $.post(_base_url+'/AutoSaveDraftThread', 
+          $(document.form_followup).fastSerialize(),
+          function(resp) {
+	    if (resp)
+               $('input[name="draft_followup_id"]').val(resp);
+          });
+}
 
-<script type="text/javascript"
- tal:attributes="src string:$ru/followup.js"></script>
-
+var as_timer;
+var orig_autosaveinterval=4;
+var autosaveinterval=4;
+startautosave = function() {
+  autosave(); 
+  as_timer=window.setTimeout("startautosave()", autosaveinterval*1000);
+};
+stopautosave=function() {
+  if (as_timer) window.clearTimeout(as_timer);
+  
+};
+</script>
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="request/action|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
 $(function() {if($('#textarea').size()) $('#textarea')[0].focus();});</script>
 <script type="text/javascript" tal:condition="useaccesskeys">
 $(function() {if($('#textarea').size()) $('#textarea')[0].focus();disableKS();});</script>
+</tal:block>
+
+<tal:block condition="here/EnableIssueNotes">
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes.js"></script>
 </tal:block>
 
  
@@ -27,12 +50,6 @@ $(function() {if($('#textarea').size()) $('#textarea')[0].focus();disableKS();})
 </script>
 </tal:block>        
 
-<tal:block condition="here/EnableIssueNotes">
-<script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery.qtip-1.0.0-rc3.min.js"></script>
-<script type="text/javascript"
-        tal:content="structure string:var ROOT_URL='${here/getRootURL}';"></script>
-<script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes.js"></script>
-</tal:block>
 
  
 </metal:script>
@@ -181,7 +198,7 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
 </span>
 
 
-<div align="center" tal:condition="not:request/compareTo|nothing">
+<div align="center" class="issue-and-threads" tal:condition="not:request/compareTo|nothing">
 
   <div id="optionbuttons-outer"><span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span></div>
   <div id="extensionform-outer"><span tal:condition="request/action|request/draft_followup_id|nothing" tal:replace="structure python:here.ExtensionForm(options)"></span></div>

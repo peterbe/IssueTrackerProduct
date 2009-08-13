@@ -50,7 +50,6 @@ class IssueNote(SimpleItem, PropertyManager, CatalogAware,
 
     _properties=({'id':'title',         'type': 'ustring', 'mode':'w'},
                  {'id':'comment',       'type': 'utext',   'mode':'w'},
-                 {'id':'public',        'type': 'boolean', 'mode':'w'},
                  {'id':'notedate',      'type': 'date',    'mode':'w'},
                  {'id':'fromname',      'type': 'ustring', 'mode':'w'},
                  {'id':'email',         'type': 'string',  'mode':'w'},
@@ -68,8 +67,8 @@ class IssueNote(SimpleItem, PropertyManager, CatalogAware,
     acl_adder = '' # backward compatability
 
     def __init__(self, id, title, comment, fromname, email,
-                 public=False, notedate=None, 
-                 display_format=None, acl_adder='', threadID=''):
+                 notedate=None, display_format=None, acl_adder='', 
+                 threadID=''):
         """ create thread """
         self.id = str(id)
         self.title = unicodify(title)
@@ -79,7 +78,6 @@ class IssueNote(SimpleItem, PropertyManager, CatalogAware,
         elif not notedate:
             notedate = DateTime()
         self.notedate = notedate
-        self.public = bool(public)
         self.fromname = unicodify(fromname)
         if isinstance(email, basestring):
             email = asciify(email, 'ignore')
@@ -98,9 +96,6 @@ class IssueNote(SimpleItem, PropertyManager, CatalogAware,
     def getModifyDate(self):
         return self.bobobase_modification_time()
     
-    def isPublic(self):
-        return self.public
-
     def getFromname(self, issueusercheck=True):
         """ return fromname """
         acl_adder = self.getACLAdder()
@@ -231,7 +226,7 @@ class IssueNote(SimpleItem, PropertyManager, CatalogAware,
             # because I don't want to put mutable defaults in 
             # the keyword arguments
             idxs = ['comment', 'meta_type', 'fromname', 'email',
-                    'path', 'modifydate']#, 'public']
+                    'path', 'modifydate']
         else:
             # No matter what, when indexing you must always include 'path'
             # otherwise you might update indexes without putting the object

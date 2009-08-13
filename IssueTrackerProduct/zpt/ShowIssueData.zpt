@@ -42,7 +42,7 @@
       <span tal:define="emptystring python:''; hide_me here/hide_me; 
 	                  fromname here/getFromname| emptystring; 
                       email here/getEmail | emptystring"
-	      tal:replace="structure python:here.ShowNameEmail(fromname,email,hide_me)">Author</span>
+	      tal:replace="structure python:here.ShowNameEmail(fromname, email, hide_me, encode=not request.get('no_email_encoding', False))">Author</span>
 
     <div tal:define="issuedate here/getIssueDate;
                      difference python:here.timeSince(issuedate, here.ZopeTime(), afterword='old');
