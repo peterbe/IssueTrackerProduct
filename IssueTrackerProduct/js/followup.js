@@ -54,20 +54,16 @@ clairvoyantinterval=orig_clairvoyantinterval=4;
 start_clairvoyant_followups = function() {
    clairvoyant_followups();
    cf_timer=window.setTimeout("start_clairvoyant_followups()", clairvoyantinterval*1000);
-   clairvoyantinterval+=0.1; 
+   clairvoyantinterval += 0.05;
 }
 
-  
-  
-  
 var r_timer;
 var refreshinterval,orig_refreshinterval;
 refreshinterval=orig_refreshinterval=3;
 function startautorefresh() {
    checkRefresh();
    r_timer=window.setTimeout(startautorefresh, refreshinterval*1000);
-   refreshinterval+= refreshinterval*0.07;
-   
+   refreshinterval += refreshinterval*0.007;
 }
 
 function toggleHighlight() {
@@ -86,15 +82,15 @@ $(function() {
       $.get(_base_url+'/getModifyTimestamp', {}, function(resp) {
 	 if (resp) modified_timestamp = resp;
       });
-   }, 1000);
+   }, 3*1000);
    
    setTimeout(function() {
       startautorefresh();
-   }, 2*1000);
+   }, 5*1000);
    
    setTimeout(function() {
       start_clairvoyant_followups();
-   }, 3*1010);   
+   }, 7*1010);   
    
    if ($('span.q_highlight').size() && $('a.backlink')) {
       // make a javascript link that removes the highlighting

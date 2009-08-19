@@ -4028,7 +4028,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             incontainer = self
 
         counter_key = '_nextid_%s' % ss(incontainer.meta_type).replace(' ','')
-        if use_stored_counter and getattr(incontainer, counter_key, None):
+        if use_stored_counter and safe_hasattr(incontainer, counter_key):
             nextid_nr = getattr(incontainer, counter_key)
             if nextid_nr <= 1 and len(incontainer.objectIds(meta_type)) > 1:
                 nextid_nr = len(incontainer.objectIds(meta_type))
@@ -11363,6 +11363,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         The reason we need the issuetracker id is because we might be using
         join-in issuetrackers and clicking on Complete list.
         """
+        import warnings
+        warnings.warn("Going to be deprecated")
         
         if not simplejson:
             raise SystemError("simplejson not installed")

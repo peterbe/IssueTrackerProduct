@@ -1,5 +1,6 @@
 <div class="issue" align="left"
      tal:define="show_many python:here.thisInURL('CompleteList') or request.get('compareTo');
+                 enable_issue_notes here/EnableIssueNotes;
                  dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING);
                  root here/getRoot"
  tal:attributes="ondblclick python:test(show_many, 'G(\'%s\')'%here.absolute_url_path());
@@ -7,6 +8,18 @@
   <div class="istatus" tal:define="status here/status"
 			        tal:content="python:status.capitalize()">Status</div>
   <div class="ihead">
+  
+    <a tal:condition="enable_issue_notes" 
+       onclick="return new_note(this, null)"
+       class="new-note" href="#" title="Click to add a new note">
+      <img border="0" src="/misc_/IssueTrackerProduct/new-issuenote.png" alt="New note"/>
+    </a>
+  
+    <a tal:repeat="note python:here.getYourNotes(threadID='')"
+       href="#" class="old-note"
+       tal:attributes="title python:here.showDate(note.notedate)+'|'+note.showComment()"
+       ><img border="0" src="/misc_/IssueTrackerProduct/issuenote.png" alt="Note"/></a>
+       
     <h3 tal:condition="not:show_many"><span 
       tal:condition="here/ShowIdWithTitle" tal:content="string:#${here/getIssueId} " class="id"></span><br tal:replace="structure here/showTitle" />
     &nbsp;<a tal:condition="here/hasEmailOriginal" href="ShowOriginalEmail" rel="nofollow"><img tal:condition="python:here.getSubmissionType()=='email'"

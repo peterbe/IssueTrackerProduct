@@ -3014,6 +3014,66 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """return all note objects"""
         return self.objectValues(ISSUENOTE_METATYPE)
     
+    def getYourNotes(self, threadID=None):
+        # first figure out if there are any notes in the issue
+        # before we figure out who we can and search for them
+        # properly.
+        # The reason for this is that
+        any_notes = False
+        for __ in self.findNotes(threadID=threadID):
+            any_notes = True
+            break
+        
+        note_objects = []
+        
+        # before we fetch all private notes, just check that there are any
+        # before we start the expensive operation of figuring out your
+        # identifier and doing the search
+        if any_notes:
+            acl_adder = ''
+            issueuser = self.getIssueUser()
+            cmfuser = self.getCMFUser()
+            zopeuser = self.getZopeUser()
+            if issueuser:
+                acl_adder = ','.join(issueuser.getIssueUserIdentifier())
+            elif zopeuser:
+                path = '/'.join(zopeuser.getPhysicalPath())
+                name = zopeuser.getUserName()
+                acl_adder = ','.join([path, name])
+    
+            ckey = self.getCookiekey('name')
+            if issueuser and issueuser.getFullname():
+                fromname = issueuser.getFullname()
+            elif cmfuser and cmfuser.getProperty('fullname'):
+                fromname = cmfuser.getProperty('fullname')
+            elif self.has_cookie(ckey):
+                fromname = self.get_cookie(ckey)
+            else:
+                fromname = ''
+    
+            ckey = self.getCookiekey('email')
+            if issueuser and issueuser.getEmail():
+                email = issueuser.getEmail()
+            elif cmfuser and cmfuser.getProperty('email'):
+                email = cmfuser.getProperty('email')
+            elif self.has_cookie(ckey):
+                email = self.get_cookie(ckey)
+            else:
+                email = ''
+            
+            if acl_adder:
+                note_objects += list(self.findNotes(acl_adder=acl_adder,
+                                                    threadID=threadID))
+            elif email and fromname:
+                note_objects += list(self.findNotes(fromname=fromname,
+                                                    email=email,
+                                                    threadID=threadID))
+        
+        note_objects.sort(lambda x,y: cmp(x.notedate, y.notedate))
+        
+        return note_objects
+        
+    
 
     security.declareProtected('View', 'createNote')
     def createNote(self, comment, public=False, threadID='',

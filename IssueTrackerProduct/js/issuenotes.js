@@ -1,55 +1,31 @@
 // This script won't work unless issuenotes-core.js is loaded
+// 
+function new_note(element, thread_identifier) {
+   var jelement = $(element);
+   if (thread_identifier) {
+     var issue_identifier = $('div.issue', jelement.parents('div.issue-and-threads')).attr('id');
+   } else
+     var issue_identifier = jelement.parents('div.issue').attr('id');
+   var options = _qtip_options(jelement, issue_identifier, thread_identifier);
+   options.show = { when: 'click', ready: true, solo: true };
+   jelement.qtip(options);
+   return false;
+}
+ 
 $(function () {
   
-   var issue_identifier;
-   var thread_identifier;
-   var issue_identifiers = new Array();
-   var block;
-   
-   $('div.issue-and-threads').each(function() {
-      block = this;
-      $('div.issue', this).each(function() {
-         issue_identifier = $(this).attr('id');
-         issue_identifiers.push(issue_identifier);
-         
-         $('div.ihead', this).prepend($('<a href="#"></a>').click(function() {
-            return false;
-         }).addClass('new-note').attr('title', 'Click to add a new note')
-                                      .append($('<img>')
-                                              .attr('src','/misc_/IssueTrackerProduct/new-issuenote.png')
-                                              .attr('border','0')
-                                              .attr('alt','New note')
-                                              ).qtip(_qtip_options($(this), issue_identifier, null))
-                                      );
-         
-         $('div.threadbox', block).each(function() {
-            thread_identifier = $(this).attr('id');
-            $('div.thead', this).prepend($('<a href="#"></a>').click(function() {
-               return false;
-            }).addClass('new-note').attr('title', 'Click to add a new note')
-                                         .append($('<img>')
-                                                 .attr('src','/misc_/IssueTrackerProduct/new-issuenote.png')
-                                                 .attr('border','0')
-                                                 .attr('alt','New note')
-                                                 ).qtip(_qtip_options($(this), issue_identifier, thread_identifier))
-                                         );
-         });
-      });
+   $('a.old-note').each(function(i, e) {
+      $(e).qtip(_qtip_options_by_title($(this)));
+      $(e).attr('title','');
+   }).click(function() {
+      return false;
    });
    
-   if (issue_identifiers.length > 1) {
-      $.post(ROOT_URL + '/getIssueNotes_json', {ids:issue_identifiers}, function(notes) {
-         $.each(notes, function(i, note) {
-            __show_note(note.issue_identifier, note);
-         });
-      }, "json");      
-   } else {
-      $.getJSON(ROOT_URL + '/getIssueNotes_json', {ids:issue_identifiers}, function(notes) {
-         $.each(notes, function(i, note) {
-            __show_note(note.issue_identifier, note);
-         });
-      });
-   }
+   //$.post(ROOT_URL + '/getIssueNotes_json', {ids:issue_identifiers}, function(notes) {
+   //   $.each(notes, function(i, note) {
+   //      __show_note(note.issue_identifier, note);
+   //   });
+   //}, "json");      
 
    
    // Create the modal backdrop on document load so all modal tooltips can use it

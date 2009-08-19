@@ -67,6 +67,39 @@ function _basic_qtip_options(note) {
 
    };
 }
+
+function _qtip_options_by_title(jelement) {
+   var title = jelement.attr('title');
+   var point = title.search(/\|/);
+   var text = title.substr(point+1, title.length);
+   title = title.substr(0, point);
+   return {
+      content: {
+         title: {
+            text: title
+         },
+         text:text
+      },
+      position: {
+                  corner: {
+                     tooltip: 'rightTop', // Use the corner...
+                     target: 'leftBottom' // ...and opposite corner
+                  }
+               },
+      style: {
+         border: {
+            width: 2,
+              radius: 4
+         },
+         padding: 3,
+           textAlign: 'left',
+           tip: true, // Give it a speech bubble tip with automatic corner detection
+           name: 'light'
+      }
+
+   };   
+}
+
 function __show_note(issue_identifier, note) {
    var parent = $('#' + issue_identifier);
    if (note.threadID) {
