@@ -87,6 +87,7 @@ function _qtip_options_by_title(jelement) {
                   }
                },
       style: {
+	 width: { max:400, min:250 },
          border: {
             width: 2,
               radius: 4
@@ -134,6 +135,12 @@ function onfocus_textarea(element) {
      disableKS();
 }
 
+
+function _autoexpanding_textarea() {
+   if (_getNoLines(this) > parseInt(this.rows))
+     this.rows = '' + Math.min(_getNoLines(this) + 2, 15);
+    
+}
 
 function _qtip_options(target, issue_identifier, thread_identifier) {
    var text = '';
@@ -187,6 +194,7 @@ function _qtip_options(target, issue_identifier, thread_identifier) {
          $('textarea[name="comment"]:visible').val('');
       },
       onShow: function() {
+	 $('textarea[name="comment"]:visible').bind('keyup', _autoexpanding_textarea);
          $('textarea[name="comment"]:visible')[0].focus();
       },
       beforeHide: function() {
