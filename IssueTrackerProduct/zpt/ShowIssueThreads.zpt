@@ -1,6 +1,6 @@
 <div align="center" 
      tal:define="threads python:here.ListThreads();
-                 enable_issue_notes here/EnableIssueNotes;
+                 use_issue_notes here/useIssueNotes;
                  in_completelist python:here.thisInURL('CompleteList');
                  dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)" 
      tal:condition="threads">
@@ -16,13 +16,14 @@
        tal:attributes="name string:i${repeat/thread/number}"></a>
     <div class="thead">
     
-    <a tal:condition="enable_issue_notes"
+    <a tal:condition="use_issue_notes"
        tal:attributes="onclick string:return new_note(this, '${here/getId}__${thread/getId}')"
        class="new-note" href="#" title="Click to add a new note">
       <img border="0" src="/misc_/IssueTrackerProduct/new-issuenote.png" alt="New note"/>
     </a>
     
-    <a tal:repeat="note python:here.getYourNotes(threadID=thread.getId())"
+    <a tal:condition="use_issue_notes"
+       tal:repeat="note python:here.getYourNotes(threadID=thread.getId())"
        href="#" class="old-note"
        tal:attributes="title python:here.showDate(note.notedate)+'|'+note.showComment()"
        ><img border="0" src="/misc_/IssueTrackerProduct/issuenote.png" alt="Note"/></a>

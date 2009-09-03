@@ -175,6 +175,13 @@ Display format:
  &nbsp;<a href="Your-next-action-issues">more info</a>
 </div>
 
+<div tal:define="show here/useIssueNotes"
+     tal:attributes="class python:test(not show,'shaded')">
+<input type="checkbox" name="use_issuenotes" id="use_issuenotes" value="1" onchange="this.form.submit()"
+ tal:attributes="checked python:test(show)" /> <label for="use_issuenotes">Enable 'Issue notes'</label>
+ &nbsp;<a href="About-issue-notes">more info</a>
+</div>
+
 <noscript>
 <input type="submit" value="Save changes" />
 </noscript>

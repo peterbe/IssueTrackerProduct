@@ -636,7 +636,12 @@ class IssueUser(User.SimpleUser, Persistent):
         """ return if 'Your next action issues' should be shown on the homepage
         """
         return getattr(self, 'show_nextactions', default)
-    
+
+    def useIssueNotes(self, default=False):
+        """return if 'Use Issue notes' should be shown on the homepage
+        """
+        return getattr(self, 'use_issuenotes', default)
+
     def setRememberSavedfilterPersistently(self, toggle):
         """ set to saved last savedfilter id persistently or not """
         self.remember_savedfilter_persistently = not not toggle
@@ -644,6 +649,10 @@ class IssueUser(User.SimpleUser, Persistent):
     def setUseNextActionIssues(self, toggle):
         """ set to saved last savedfilter id persistently or not """
         self.show_nextactions = not not toggle
+
+    def setUseIssueNotes(self, toggle):
+        """enable issue notes"""
+        self.use_issuenotes = not not toggle
 
     def setAccessKeys(self, toggle):
         """ set prefered displayformat """

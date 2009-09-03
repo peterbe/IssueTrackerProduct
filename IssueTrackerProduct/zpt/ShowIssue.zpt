@@ -32,7 +32,7 @@ $(function() {if($('#textarea').size()) $('#textarea')[0].focus();});</script>
 $(function() {if($('#textarea').size()) $('#textarea')[0].focus();disableKS();});</script>
 </tal:block>
 
-<tal:block condition="here/EnableIssueNotes">
+<tal:block condition="here/useIssueNotes">
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes.js"></script>
 </tal:block>
 

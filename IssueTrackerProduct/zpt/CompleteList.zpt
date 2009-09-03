@@ -62,7 +62,7 @@ tal:define="todaysdate python:here.ZopeTime()"
 
 </div>
 
-<metal:block tal:condition="here/EnableIssueNotes"
+<metal:block tal:condition="here/useIssueNotes"
              fill-slot="extrajs">
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes.js"></script>
 </metal:block>

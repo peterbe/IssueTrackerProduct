@@ -810,9 +810,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def EnableDueDate(self):
         return getattr(self, 'enable_due_date', DEFAULT_ENABLE_DUE_DATE)
     
-    def EnableIssueNotes(self):
-        return getattr(self, 'enable_issue_notes', DEFAULT_ENABLE_ISSUE_NOTES)
-    
     def getSpamKeywords(self):
         """ return spam_keywords if possible """
         return getattr(self, 'spam_keywords', DEFAULT_SPAM_KEYWORDS)
@@ -6408,6 +6405,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             ckey = self.getCookiekey('show_nextactions')
             return Utils.niceboolean(self.get_cookie(ckey, default))
         
+    def useIssueNotes(self):
+        """return true if the logged in user wants to use issue notes"""
+        issueuser = self.getIssueUser()
+        default = False
+        if issueuser:
+            return issueuser.useIssueNotes(default=default)
+        else:
+            # look in cookies
+            ckey = self.getCookiekey('use_issuenotes')
+            return Utils.niceboolean(self.get_cookie(ckey, default))
+        
 
     def ShowNameEmail(self, fromname, email=None, hideme=None, highlight=1,
                       nolink=0, encode=True, angle_brackets=1):
@@ -7886,7 +7894,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
             
         brains_notes = []
-        if self.EnableIssueNotes() and (not search_only_on or 'note' in search_only_on):
+        if self.useIssueNotes() and (not search_only_on or 'note' in search_only_on):
             brains_notes = catalog.searchResults(comment=q)
         
         # these variables are used in the loop to avoid calling LOG()
@@ -11306,7 +11314,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             return m
         
-        
+    ##
     ## Use 'Your next action issues'
     ##
     
@@ -11350,6 +11358,43 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     ##
     ## Notes stuff
     ##
+    
+    security.declareProtected('View', 'enableUseIssueNotes')
+    def enableUseIssueNotes(self, REQUEST=None):
+        """ remember that the user wants to write issue notes """
+        issueuser = self.getIssueUser()
+        if issueuser:
+            issueuser.setUseIssueNotes(True)
+        else:
+            c_key = self.getCookiekey('use_issuenotes')
+            self.set_cookie(c_key, 1)
+            
+        msg = "Issue notes enabled"
+        if REQUEST is not None:
+            url = self.getRootURL()+'/User'
+            url = Utils.AddParam2URL(url, {'changemsg':msg})
+            REQUEST.RESPONSE.redirect(url)
+        else:
+            return msg
+        
+    security.declareProtected('View', 'disableUseIssueNotes')
+    def disableUseIssueNotes(self, REQUEST=None):
+        """ remember that the user wants to write issue notes"""
+        issueuser = self.getIssueUser()
+        if issueuser:
+            issueuser.setUseIssueNotes(False)
+        else:
+            c_key = self.getCookiekey('use_issuenotes')
+            self.set_cookie(c_key, 0)
+            
+        msg = "Issue notes disabled"
+        if REQUEST is not None:
+            url = self.getRootURL()+'/User'
+            url = Utils.AddParam2URL(url, {'changemsg':msg})
+            REQUEST.RESPONSE.redirect(url)
+        else:
+            return msg
+    
     
     security.declareProtected('View', 'getIssueNotes_json')
     def getIssueNotes_json(self, ids):
@@ -11490,9 +11535,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if not comment:
             return "Error. No comment"
         
-        note = issue.createNote(comment, threadID=threadID,
-                                )
-        
+        note = issue.createNote(comment, threadID=threadID)
+
         if not simplejson:
             logger.error("simplejson not installed")
             return ""
@@ -11580,12 +11624,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             return msg
             
-            
-            
 
     security.declareProtected('View', 'changeUserOptions')
     def changeUserOptions(self, remember_savedfilter_persistently=False,
-        autologin=False, use_accesskeys=False, 
+        autologin=False, use_accesskeys=False, use_issuenotes=False, 
         show_nextactions=False, REQUEST=None):
         """ if you submit the form on User.zpt that asks the various 
         questions such as use accesskeys, autologin and persistent 
@@ -11633,8 +11675,18 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             m = self.disableShowNextactionIssues()
             if was_show_nextactions:
-                msgs.append(m)                
-            
+                msgs.append(m)
+                
+        was_use_issuenotes = self.useIssueNotes()
+        if use_issuenotes:
+            m = self.enableUseIssueNotes()
+            if not was_use_issuenotes:
+                msgs.append(m)
+        else:
+            m = self.disableUseIssueNotes()
+            if was_use_issuenotes:
+                msgs.append(m)
+                
         msg = ', '.join(msgs)
         if REQUEST is not None:
             url = self.getRootURL()+'/User'

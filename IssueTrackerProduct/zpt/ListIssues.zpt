@@ -12,7 +12,7 @@
 .bd { font-size:90%}
 </style>
 
-<metal:block tal:condition="here/EnableIssueNotes"
+<metal:block tal:condition="here/useIssueNotes"
              fill-slot="extrajs">
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes-list.js"></script>
 </metal:block>
