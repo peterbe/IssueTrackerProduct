@@ -565,23 +565,6 @@ issue towards the top of List Issues.
   </td> 
 </tr>
 
-<tr>
-  <td align="left" valign="top">
-  <div class="form-label">
-  <label for="cb-signature_text">Enable issue notes</label>
-  </div>
-  </td>
-  <td align="left" valign="top">
-    <div class="form-element">
-	<input type="checkbox" name="enable_issue_notes:boolean" <dtml-if "EnableIssueNotes()">checked="checked"</dtml-if> />
-      
-    </div>
-  </td>
-  <td align="left" valign="top">
-  <p>Adds the ability to post little notes on issues and followups. The notes can be made public or private.
-  </p>
-  </td> 
-</tr>
 </table>
 
 <div class="submitarea" align="center">

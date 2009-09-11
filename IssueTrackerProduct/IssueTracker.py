@@ -553,7 +553,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.spam_keywords = DEFAULT_SPAM_KEYWORDS
         self.show_spambot_prevention = DEFAULT_SHOW_SPAMBOT_PREVENTION
         self.enable_due_date = DEFAULT_ENABLE_DUE_DATE
-        self.enable_issue_notes = DEFAULT_ENABLE_ISSUE_NOTES
 
         self.acl_cookienames = {}
         self.acl_cookieemails = {}
@@ -1438,7 +1437,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'use_actual_time',
                     'include_description_in_notifications',
                     'enable_due_date',
-                    'enable_issue_notes',
                     'show_dates_cleverly',
                     'show_spambot_prevention',
                     ]
