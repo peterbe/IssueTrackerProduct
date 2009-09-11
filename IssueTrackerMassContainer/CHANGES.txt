@@ -1,3 +1,8 @@
+- 0.0.10
+
+    New feature: Masscontainer only counts issues, not join-in issues
+    in trackers that have this defined.
+
 - 0.0.9
 
     New feature: Activity AJAX just gets the new issues since last

@@ -29,6 +29,8 @@ from Products.PythonScripts.PythonScript import PythonScript
 from Products.PythonScripts.standard import url_quote
 from zLOG import LOG, INFO
 
+from Products.IssueTrackerProduct.Constants import ISSUE_METATYPE
+
 # product
 from Constants import *
 import Utils
@@ -240,7 +242,6 @@ class MassContainer(Folder.Folder, Persistent):
                         since = float(DateTime(since))
             issues = [x for x in issues 
                       if float(x.getModifyDate()) > since]
-                 
         
         # sort them all
         issues.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
@@ -254,7 +255,7 @@ class MassContainer(Folder.Folder, Persistent):
     def _getAllIssues(self, in_object, skippable_paths):
         issues = []
         root_url = self.getRoot().absolute_url()
-        for o in in_object.objectValues([MASSCONTAINER_METATYPE,'Issue Tracker']):
+        for o in in_object.objectValues([MASSCONTAINER_METATYPE, 'Issue Tracker']):
             path = o.absolute_url().replace(root_url,'')
             if path in skippable_paths:
                 continue
@@ -262,7 +263,7 @@ class MassContainer(Folder.Folder, Persistent):
             if o.meta_type == MASSCONTAINER_METATYPE:
                 issues.extend(self._getAllIssues(o, skippable_paths))
             elif o.meta_type == 'Issue Tracker':
-                issues.extend(o.getIssueObjects())
+                issues.extend(list(o._getIssueContainer().objectValues(ISSUE_METATYPE)))
                 
         return issues
         
