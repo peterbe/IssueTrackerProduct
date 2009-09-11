@@ -1,3 +1,5 @@
+var since_timestamp = (new Date).getTime()/1000;
+
 function _showLoading() {
    $('#table-refresher a').hide();
    $('#table-refresher').append($('<img>')
@@ -14,8 +16,15 @@ function _hideLoading() {
 }
 function refreshActivityTable() {
    _showLoading();
-   $('#table-outer').load('show_activity_table?nocache='+(Math.random()+"").substr(2, 5), function() {
+   
+   $.get('show_recent_activity_tbodies?since='+since_timestamp, function(res) {
+      if ($.trim(res)) {
+         var table = $('#activity-table');
+         $('thead', '#activity-table').after(res);
+      }
       _hideLoading();
+      
+      since_timestamp = (new Date).getTime()/1000;
    });
 }
 
@@ -23,7 +32,7 @@ function autorefreshActivityTable() {
    refreshActivityTable();
    window.setTimeout(function() {
       autorefreshActivityTable();
-   }, 1000*30);
+   }, 1000*60);
 }
 
 $(function() {
@@ -39,7 +48,7 @@ $(function() {
         .fadeTo(0, 0.3);      
    });
    
-   window.setTimeout(function() {autorefreshActivityTable()}, 1000*30);
+   window.setTimeout(function() {autorefreshActivityTable()}, 1000*60);
    
 });
 

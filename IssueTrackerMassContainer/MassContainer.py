@@ -34,6 +34,8 @@ from Constants import *
 import Utils
 from Utils import cookIdAndTitle
 
+from RecentActivity import getRecentActivity
+
 try:
     from Products.IssueTrackerUtils import _replace_special_chars
 except:
@@ -218,11 +220,27 @@ class MassContainer(Folder.Folder, Persistent):
     
         
     
-    def getRecentIssues(self, recursive=True, batch_size=20, batch_start=0):
+    def getRecentIssues(self, since=None, recursive=True, batch_size=20, batch_start=0):
         """ return a list of all the most recent issues """
         skippable_paths = self.getSkippablePaths()
         
         issues = self._getAllIssues(self.getRoot(), skippable_paths)
+        if since is not None:
+            if hasattr(since, 'strftime'):
+                since = float(since)
+            else:
+                if type(since) is int:
+                    since = float(since)
+                elif isinstance(since, basestring):
+                    if since.isdigit():
+                        since = float(int(since))
+                    elif since.replace('.','').isdigit():
+                        since = float(since)
+                    else:
+                        since = float(DateTime(since))
+            issues = [x for x in issues 
+                      if float(x.getModifyDate()) > since]
+                 
         
         # sort them all
         issues.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
@@ -258,6 +276,8 @@ class MassContainer(Folder.Folder, Persistent):
     index_html = PTF('zpt/index_html', globals())
     show_tree = PTF('zpt/show_tree', globals())
     show_activity_table = PTF('zpt/show_activity_table', globals())
+    show_recent_activity_tbodies = PTF('zpt/show_recent_activity_tbodies', globals())
+    activity_macros = PTF('zpt/activity_macros', globals())
     StandardHeader = PTF('zpt/StandardHeader', globals())
     masscontainer_style_css = DTMLFile('dtml/masscontainer_style.css', globals())
 
@@ -497,6 +517,19 @@ class MassContainer(Folder.Folder, Persistent):
         """
         title = title.lower().replace(' ','-')
         return title != oid.lower()
+    
+    
+    ##
+    ## Experimental Recent Activity
+    ##
+    
+    security.declareProtected('View', 'RecentActivity')
+    def RecentActivity(self, since=None):
+        """ return the HTML body of the recent activity """
+        res = getRecentActivity(self, since=since)
+        res = '\n'.join(res)
+        return "<html><body>%s</body></html>" % html_quote(res).replace('\n','<br/>\n')
+    
         
     
 setattr(MassContainer, 'masscontainer_style.css', MassContainer.masscontainer_style_css)
