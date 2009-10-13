@@ -1,4 +1,4 @@
-<dtml-call "doCache(hours=0)"><dtml-call "RESPONSE.setHeader('Content-type','application/x-javascript')">
+<dtml-call "doCache(hours=24)"><dtml-call "RESPONSE.setHeader('Content-type','application/x-javascript')">
 
   
 var modified_timestamp;

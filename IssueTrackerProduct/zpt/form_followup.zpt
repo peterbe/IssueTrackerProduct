@@ -3,9 +3,10 @@
  tal:replace="structure here/show_submissionerror_message">
 </span>
 
-<div id="recent-draftthread-author" style="display:none;color:#666">&nbsp;
+<div id="recent-draftthread-author-outer">&nbsp;
 <input type="hidden" name="page_generated_timestamp"
        tal:attributes="value python:int(DateTime())" />
+<span id="recent-draftthread-author" style="color:#666;font-size:80%"></span>       
 </div>
 
 <form method="post" name="form_followup" enctype="multipart/form-data"

@@ -1,4 +1,6 @@
 -
+    New feature: Clairvoyant Javascript optimized with JSON.
+    
     New feature: Menu icons in a CSS Sprite for much faster loading.
     
     Bug fixed: Manually reset ID counters could cause excessive

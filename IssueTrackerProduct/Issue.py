@@ -14,6 +14,14 @@ except ImportError:
     # we must be in an older than 2.8 version of Zope
     transaction = None
     
+try:
+    import simplejson
+except ImportError:
+    import warnings
+    warnings.warn("simplejson no installed (easy_install simplejson)")
+    simplejson = None
+    
+    
 # Zope
 from Acquisition import aq_inner, aq_parent
 from Globals import InitializeClass
@@ -1879,8 +1887,75 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     else:
                         name = draft.getEmail()
                     return fmt_followup % name
-        return None        
+        return None
     
+    def getRecentOtherDraftThreadAuthorFast(self, min_timestamp=None,
+                                            max_age_seconds=40, REQUEST=None):
+        """ return the name of the author of the most recent draft followup or None
+        """
+        # XXX: Needs a unit test with decent coverage
+        template = u"%s is working on a followup"
+        try:
+            draft = self._v_recent_draft
+            if max_age_seconds:
+                if int(DateTime()) - int(draft.getModifyDate()) > max_age_seconds:
+                    return None
+            if min_timestamp:
+                if int(draft.getModifyDate()) < int(min_timestamp):
+                    return None
+                
+            no_words = len(draft.comment.split())
+            if not no_words:
+                return None
+                
+            fromname = draft.getFromname(issueusercheck=False)
+            if fromname:
+                you_fromname = self.getSavedUser('fromname')
+                if fromname != you_fromname:
+                    msg =  template % fromname
+                    if no_words == 1:
+                        msg += " (1 word)"
+                    else:
+                        msg += " (%s words)" % no_words
+                    return msg
+                
+        except AttributeError:
+            # it has simply not been set. Very common
+            pass
+        
+        # default is to return None
+        
+    
+    def getRecentOtherDraftThreadAuthor_json(self, 
+                                             only_fromname=False,
+                                             max_age_seconds=20,
+                                             min_timestamp=None,
+                                             REQUEST=None):
+        """JSON wrapper on getRecentOtherDraftThreadAuthor()
+        Returns either {} or {'msg':'Something'}
+        """
+        t0=time()
+        
+        msg = self.getRecentOtherDraftThreadAuthorFast(max_age_seconds=max_age_seconds,
+                                                       min_timestamp=min_timestamp)
+        t1=time()
+        import logging
+        logging.info("Took %s seconds" % (t1-t0))
+        #print msg
+        
+        if REQUEST is not None:
+            REQUEST.RESPONSE.setHeader('Content-Type', 'application/javascript')
+            
+        if msg:
+            r = dict(msg=msg)
+        else:
+            r = dict()
+            
+        if simplejson:
+            return simplejson.dumps(r)
+        else:
+            return repr(r)
+
     def getLatestDraftThreadAuthor(self, only_if_not_you=False):
         """ return the fullname of the latest draft thread author.
         
@@ -1978,7 +2053,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         rget = REQUEST.get
 
         # only modify the thread draft if comment, fromname or email has changed
-        if draftthread.comment==rget('comment') and draftthread.fromname == rget('fromname') \
+        if draftthread.comment == rget('comment') and draftthread.fromname == rget('fromname') \
           and draftthread.email == rget('email'):
             # the thread hasn't changed enough, no need to call ModifyThread()
             # again which would be a waste of ZODB transactions and would also
@@ -1994,6 +2069,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                  display_format=rget('display_format', self.getSavedTextFormat()),
                  is_autosave=is_autosave,
                  )
+        
+        self._v_recent_draft = draftthread
                  
         # remember this
         issueuser = self.getIssueUser()
@@ -2014,6 +2091,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 self.set_cookie(self.getCookiekey('email'), rget('email'))
                 
         return draft_followup_id
+    
+            
 
     
     def _createDraftThread(self, id, issueid, action):

@@ -44,7 +44,6 @@ class IssueTrackerNotification(SimpleItem.SimpleItem,
                  {'id':'fromname',    'type': 'ustring',  'mode':'w'},
                  {'id':'date',        'type': 'date',    'mode':'w'},
                  {'id':'dispatched',  'type': 'boolean', 'mode':'w'},
-                 {'id':'new_status',  'type': 'ustring', 'mode':'w'},
                  )
 
     manage_options = (

@@ -68,11 +68,16 @@ function _basic_qtip_options(note) {
    };
 }
 
-function _qtip_options_by_title(jelement) {
+function _qtip_options_by_title(jelement, corner) {
    var title = jelement.attr('title');
    var point = title.search(/\|/);
    var text = title.substr(point+1, title.length);
    title = title.substr(0, point);
+   
+   if (!corner) 
+      corner = {tooltip: 'rightTop',
+	        target: 'leftBottom'};
+   
    return {
       content: {
          title: {
@@ -80,11 +85,7 @@ function _qtip_options_by_title(jelement) {
          },
          text:text
       },
-      position: {
-                  corner: {
-                     tooltip: 'rightTop', // Use the corner...
-                     target: 'leftBottom' // ...and opposite corner
-                  }
+      position: {corner: corner
                },
       style: {
 	 width: { max:400, min:250 },
@@ -142,7 +143,7 @@ function _autoexpanding_textarea() {
     
 }
 
-function _qtip_options(target, issue_identifier, thread_identifier) {
+function _qtip_options(target, issue_identifier, thread_identifier, corner) {
    var text = '';
    if (thread_identifier)
       text += '<form action="" onsubmit="saveNote(this, \'' + thread_identifier+ '\'); return false">';
@@ -159,6 +160,9 @@ function _qtip_options(target, issue_identifier, thread_identifier) {
    }
    text += '</form>';
    
+   if (!corner)
+     corner = 'right';
+   
    return {
 
    content: {
@@ -170,7 +174,7 @@ function _qtip_options(target, issue_identifier, thread_identifier) {
    },
    position: {
       target: target, // Position it via the document body...
-      corner: 'right' // ...at the center of the viewport
+      corner: corner // ...at the center of the viewport
    },
    show: {
       when: 'click', // Show it on click

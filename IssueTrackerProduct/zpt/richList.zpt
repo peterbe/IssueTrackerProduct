@@ -1,5 +1,8 @@
 <table border="0" cellpadding="5" cellspacing="0" width="98%" align="center"
-       tal:define="todaysdate python:here.ZopeTime(); enable_due_date here/EnableDueDate; root here/getRoot"
+       tal:define="todaysdate python:here.ZopeTime(); 
+                   enable_due_date here/EnableDueDate;
+		   use_issue_notes here/useIssueNotes;
+		   root here/getRoot"
         style="border:1px solid #ccc">
    <thead>
 	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
@@ -38,6 +41,18 @@
                                       tal:content="brother/getTitle"></a>)
                                  </tal:test>
 				 - <b class="status" tal:content="python:issue.status.capitalize()">Status</b>
+
+				 <a tal:condition="use_issue_notes"
+				    onclick="return new_note(this, null)"
+				    class="new-note" href="#" title="Click to add a new note">
+				   <img border="0" src="/misc_/IssueTrackerProduct/new-issuenote.png" alt="New note"/>
+				 </a>
+				 
+				 <a tal:condition="use_issue_notes"
+				    tal:repeat="note python:issue.getYourNotes(threadID='')"
+				    href="#" class="old-note"
+				    tal:attributes="title python:here.showDate(note.notedate)+'|'+note.showComment()"
+				    ><img border="0" src="/misc_/IssueTrackerProduct/issuenote.png" alt="Note"/></a>
 			</td>
             <td colspan="x" class="bd"
                 tal:attributes="colspan python:enable_due_date and 4 or 3"

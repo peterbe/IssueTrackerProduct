@@ -3378,8 +3378,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             _html += '</a>\n'
 
             file_id = file.getId()
-            if len(file_id) > 50:
-                file_id = file_id[:25]+'...'+file_id[-25:]
+            if len(file_id) > 60:
+                file_id = file_id[:30]+'...'+file_id[-30:]
                 
             _html += '%s%s</a>'%(href, self.HighlightQ(file_id, highlight_digits=True))
             
@@ -5886,6 +5886,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             notificationobjects = [notificationobjects]
             
         sendworthy = [x for x in notificationobjects if not x.isDispatched()]
+        print len(notificationobjects)
+        print len(sendworthy)
         
         # if the @min_age_minutes is set to something other than 0,
         # a check is made that the notifications aren't too young.
@@ -6207,7 +6209,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ Go through all issues and find all notification objects """
         all = []
         for issue in self.getIssueObjects():
-            all = all+issue.objectValues(NOTIFICATION_META_TYPE)
+            all.extend(list(issue.objectValues(NOTIFICATION_META_TYPE)))
         return all
 
     def preParseEmailString(self, email_string, aslist=0, allnotifyables=1):

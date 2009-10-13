@@ -1,31 +1,33 @@
 // This script won't work unless issuenotes-core.js is loaded
 //
-$(function () {
-  
-   var issue_identifier;
-   var thread_identifier;
-   var issue_identifiers = new Array();
 
-   $('tr.issue', 'table').each(function() {
-      issue_identifier = $(this).attr('id');
-      issue_identifiers.push(issue_identifier);
-         
-      $('td.ihead', this).append($('<a href="#"></a>').click(function() {
-         return false;
-      }).addClass('new-note').attr('title', 'Click to add a new note')
-                                      .append($('<img>')
-                                              .attr('src','/misc_/IssueTrackerProduct/new-issuenote.png')
-                                              .attr('border','0')
-                                              .attr('alt','New note')
-                                              ).qtip(_qtip_options($(this), issue_identifier, null))
-                                      );
-         
+function cancelSaveNote(form, issue_identifier, thread_identifier) {
+   if (thread_identifier) 
+      $('a.new-note', '.ihead').qtip('hide');  // hide all
+   else 
+      $('a.new-note', '.ihead').qtip('hide');
+}
+
+function new_note(element, thread_identifier) {
+   var jelement = $(element);
+   if (thread_identifier) {
+     var issue_identifier = jelement.parents('tr.issue').attr('id');
+   } else
+     var issue_identifier = jelement.parents('tr.issue').attr('id');
+   var options = _qtip_options(jelement, issue_identifier, thread_identifier, 'left');
+   options.show = { when: 'click', ready: true, solo: true };
+   jelement.qtip(options);
+   return false;
+}
+
+$(function () {
+
+   $('a.old-note').each(function(i, e) {
+      $(e).qtip(_qtip_options_by_title($(this)));
+      $(e).attr('title','');
+   }).click(function() {
+      return false;
    });
    
-   $.post(ROOT_URL + '/getIssueNotes_json', {ids:issue_identifiers}, function(notes) {
-      $.each(notes, function(i, note) {
-         __show_note(note.issue_identifier, note, 'td');
-      });
-   }, "json");      
    
 });

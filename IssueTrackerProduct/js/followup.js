@@ -16,6 +16,7 @@ function checkRefresh() {
          if (document.title.indexOf("(automatically refreshed) ")==-1)
            document.title = "(automatically refreshed) " + document.title;
          refreshinterval = orig_refreshinterval;
+         previous_clairvoyant_note = '';
       }
    });
 }
@@ -25,32 +26,42 @@ function clearAutoRefreshTitle() {
 }
   
 var previous_clairvoyant_note='';
-var page_generated_timestamp;
+var clairvoyant_timer;
+var page_generated_timestamp, last_clairvoyant_check_timestamp;
 function clairvoyant_followups() {
-   var url = _base_url+'/getRecentOtherDraftThreadAuthor?nochache='+(Math.random()+"").substr(2, 5);
-   if ($('input[name=page_generated_timestamp]').size())
-     page_generated_timestamp = $('input[name=page_generated_timestamp]').val();
-   if (page_generated_timestamp)
-     url += '&min_timestamp='+page_generated_timestamp;
-   $.get(url, {'only_fromname':1}, function(resp) {
+   var url = _base_url+'/getRecentOtherDraftThreadAuthor_json?nochache='+(Math.random()+"").substr(2, 5);
+   
+   if (last_clairvoyant_check_timestamp) {
+      url += '&min_timestamp='+last_clairvoyant_check_timestamp;
+   } else {
+      if ($('input[name=page_generated_timestamp]').size())
+        page_generated_timestamp = $('input[name=page_generated_timestamp]').val();
+      if (page_generated_timestamp)
+        url += '&min_timestamp='+page_generated_timestamp;
+   }
+   $.getJSON(url, {'only_fromname':1}, function(resp) {
       try {
-      if (resp && resp != previous_clairvoyant_note) {
-         var previous_title = document.title;
-         $('#recent-draftthread-author').text(resp).show();
-         document.title = resp + ' - ' + document.title;
-         previous_clairvoyant_note = resp;
-         setTimeout(function() {
-            $('#recent-draftthread-author').fadeOut(500);
-            document.title = previous_title;
-         }, 15*1000);
-	 clairvoyantinterval = orig_clairvoyantinterval;
-      }
+         last_clairvoyant_check_timestamp = parseInt(new Date().getTime() / 1000);
+	 if (resp && resp.msg && resp.msg != previous_clairvoyant_note) {
+	    var previous_title = document.title;
+	    $('#recent-draftthread-author').text(resp.msg);
+            $('#recent-draftthread-author:hidden').fadeIn(300);
+	    document.title = resp.msg + ' - ' + document.title;
+	    previous_clairvoyant_note = resp.msg;
+            if (clairvoyant_timer)
+              clearTimeout(clairvoyant_timer);
+	    clairvoyant_timer = setTimeout(function() {
+	       $('#recent-draftthread-author:visible').fadeOut(500);
+	       document.title = previous_title;
+	    }, 10*1000);
+	    clairvoyantinterval = orig_clairvoyantinterval;
+	 }
       } catch(ex) {alert(ex);}
    });
 }
 var cf_timer;
 var clairvoyantinterval,orig_clairvoyantinterval;
-clairvoyantinterval=orig_clairvoyantinterval=4;
+clairvoyantinterval=orig_clairvoyantinterval=7;
 start_clairvoyant_followups = function() {
    clairvoyant_followups();
    cf_timer=window.setTimeout("start_clairvoyant_followups()", clairvoyantinterval*1000);
