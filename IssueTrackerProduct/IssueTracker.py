@@ -3084,6 +3084,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 'remember_savedfilter_persistently': REMEMBER_SAVEDFILTER_PERSISTENTLY_COOKIEKEY,
                 'draft_followup_ids': DRAFT_THREAD_IDS_COOKIEKEY,
                 'show_nextactions': SHOW_NEXTACTIONS_COOKIEKEY,
+                'use_issuenotes': USE_ISSUENOTES_COOKIEKEY,
         }
         for k, v in keys.items():
             if match_decorate(k) == which:
@@ -5885,9 +5886,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if not isinstance(notificationobjects, (list, tuple)):
             notificationobjects = [notificationobjects]
             
-        sendworthy = [x for x in notificationobjects if not x.isDispatched()]
-        print len(notificationobjects)
-        print len(sendworthy)
+        notificationobjects = [x for x in notificationobjects if not x.isDispatched()]
         
         # if the @min_age_minutes is set to something other than 0,
         # a check is made that the notifications aren't too young.
@@ -5900,7 +5899,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if min_age_minutes:
             now = DateTime()
             min_age_days = float(min_age_minutes)/(24*60)
-            sendworthy = [x for x in sendworthy if (now-x.date) >= min_age_days]
+            notificationobjects = [x for x in notificationobjects if (now-x.date) >= min_age_days]
 
         roottitle = self.getRoot().getTitle()
         sitemaster_name = self.getSitemasterName()
@@ -5918,7 +5917,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         senttos = {}
 
         
-        for notification in sendworthy:
+        for notification in notificationobjects:
             
             # The notification is either about a followup or a new issue.
             # The way to distinguish that is by the attribute notification.change
