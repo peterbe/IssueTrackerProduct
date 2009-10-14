@@ -50,10 +50,10 @@ span.tracker-path {
 <div id="activity-table-outer">
 <h3>Latest activity</h3>
 <div id="table-outer">
-<table tal:replace="structure here/show_activity_table"></table>
+<p><img src="/misc_/IssueTrackerMassContainer/loading-bar.gif" width="180" height="14" alt="Loading..."/></p>
 </div>
 
-  <div id="table-refresher">
+  <div id="table-refresher" style="display:none">
   <a href="." onclick="refreshActivityTable();return false"><img src="/misc_/IssueTrackerMassContainer/refresh_icon.png" border="0" alt="Refresh" /></a>
   <a href="." onclick="refreshActivityTable();return false">Refresh</a>
   </div>
@@ -61,4 +61,12 @@ span.tracker-path {
 
 
 </div>
+
+<script type="text/javascript" metal:fill-slot="extrajs">
+$(function() {
+  $('#table-outer').load('show_activity_table');
+  
+});
+</script>
+
 </html>

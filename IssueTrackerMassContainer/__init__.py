@@ -55,7 +55,7 @@ def initialize(context):
             registerIcon('gradtablehead.png')
 
             registerJS('core.js', slim_if_possible=False)
-            registerJS('jquery-1.2.3.min.js', slim_if_possible=False)
+            registerJS('jquery-1.3.2.min.js', slim_if_possible=False)
             registerJS('jquery.treeview.min.js', slim_if_possible=False)
             registerJS('jquery.cookie.js', slim_if_possible=False)
             registerCSS('jquery.treeview.css', slim_if_possible=False)

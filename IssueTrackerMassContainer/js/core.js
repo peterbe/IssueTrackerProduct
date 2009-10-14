@@ -15,6 +15,9 @@ function _hideLoading() {
    
 }
 function refreshActivityTable() {
+   // only go ahead if the Loading is or was hidden (needs testing)
+   if ($('a:hidden', '#table-refresher').length) return false;
+   
    _showLoading();
    
    $.get('show_recent_activity_tbodies?since='+since_timestamp, function(res) {
@@ -26,6 +29,7 @@ function refreshActivityTable() {
       
       since_timestamp = (new Date).getTime()/1000;
    });
+   return true;
 }
 
 function autorefreshActivityTable() {
@@ -36,9 +40,11 @@ function autorefreshActivityTable() {
 }
 
 $(function() {
+   var collapsed = $('li.folder', 'ul#tree').length > 3;
    $('#tree').treeview({
       animated:300,
-      persist:"cookie"
+      persist:"cookie",
+      collapsed: collapsed
    });
    
    $('li.ignored').each(function() {

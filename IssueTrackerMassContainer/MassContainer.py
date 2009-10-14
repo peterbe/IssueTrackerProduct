@@ -266,16 +266,32 @@ class MassContainer(Folder.Folder, Persistent):
                 issues.extend(list(o._getIssueContainer().objectValues(ISSUE_METATYPE)))
                 
         return issues
+    
+    def show_tree(self, context, REQUEST, in_object):
+        """ wrapper on rendering the tree in a template for optimization reasons """
+        try:
+            cache = self._v_show_tree_cache
+        except AttributeError:
+            cache = {}
         
+        try:
+            timestamp, tree_rendered = cache[in_object.absolute_url_path()]
+            if (DateTime() - timestamp) > (0.5/24.0):
+                tree_rendered = None
+        except KeyError:
+            tree_rendered = None
+        
+        if tree_rendered is None:
+            tree_rendered = self.show_tree_template(context, REQUEST, in_object=in_object)
+            cache[in_object.absolute_url_path()] = (DateTime(), tree_rendered)
+            self._v_show_tree_cache = cache
+            
+        return tree_rendered
 
     # some templates
-    #security.declareProtected('View', 'AllrecentIssues')
-    #AllrecentIssues = DTMLFile('dtml/AllrecentIssues', globals())
-    #trackersOfInterestForm = DTMLFile('dtml/trackersOfInterestForm', globals())
-
     security.declareProtected('View', 'index_html')
     index_html = PTF('zpt/index_html', globals())
-    show_tree = PTF('zpt/show_tree', globals())
+    show_tree_template = PTF('zpt/show_tree_template', globals())
     show_activity_table = PTF('zpt/show_activity_table', globals())
     show_recent_activity_tbodies = PTF('zpt/show_recent_activity_tbodies', globals())
     activity_macros = PTF('zpt/activity_macros', globals())
