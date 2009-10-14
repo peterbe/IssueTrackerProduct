@@ -59,12 +59,16 @@ span.tracker-path {
   </div>
 </div>
 
+<p>&nbsp;</p>
 
 </div>
 
 <script type="text/javascript" metal:fill-slot="extrajs">
 $(function() {
   $('#table-outer').load('show_activity_table');
+  setTimeout(function() {
+    $('#table-refresher').show();
+  }, 1*1000);
   
 });
 </script>

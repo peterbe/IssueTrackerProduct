@@ -24,6 +24,7 @@ function refreshActivityTable() {
       if ($.trim(res)) {
          var table = $('#activity-table');
          $('thead', '#activity-table').after(res);
+	 refresh_interval = orig_refresh_interval;
       }
       _hideLoading();
       
@@ -32,11 +33,13 @@ function refreshActivityTable() {
    return true;
 }
 
+var orig_refresh_interval = refresh_interval = 30;
 function autorefreshActivityTable() {
    refreshActivityTable();
+   refresh_interval += 5; // seconds to added every time
    window.setTimeout(function() {
       autorefreshActivityTable();
-   }, 1000*60);
+   }, refresh_interval * 1000);
 }
 
 $(function() {
