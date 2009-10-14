@@ -1934,15 +1934,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """JSON wrapper on getRecentOtherDraftThreadAuthor()
         Returns either {} or {'msg':'Something'}
         """
-        t0=time()
-        
         msg = self.getRecentOtherDraftThreadAuthorFast(max_age_seconds=max_age_seconds,
                                                        min_timestamp=min_timestamp)
-        t1=time()
-        import logging
-        logging.info("Took %s seconds" % (t1-t0))
-        #print msg
-        
         if REQUEST is not None:
             REQUEST.RESPONSE.setHeader('Content-Type', 'application/javascript')
             
