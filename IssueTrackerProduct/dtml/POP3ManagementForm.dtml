@@ -195,17 +195,17 @@ subject of the email see the <a href="#examplelist">bottom of this page</a>.
          >Reveal issue URL</acronym><br/>
     </td>
     <td valign="top" rowspan="2"><p>Default sections</p>
-	<select name="defaultsections:list" size="<dtml-var "_.min(5, _.len(sections_options))">" multiple="multiple">
-	<dtml-in sections_options>
+	<select name="defaultsections:list" size="<dtml-var "_.min(5, _.len(getSectionOptions()))">" multiple="multiple">
+	<dtml-in "getSectionOptions()">
 	<option value="<dtml-var sequence-item>"
-	<dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>><dtml-var sequence-item></option>
+	<dtml-if "_['sequence-item'] in getDefaultSections()">selected="selected"</dtml-if>><dtml-var sequence-item></option>
 	</dtml-in>
 	</select>
     </td>
     <td valign="top"><p>Default type</p>
 	<select name="default_type">
 	<dtml-in types>
-	<option <dtml-if "_['sequence-item']==default_type">SELECTED</dtml-if>
+	<option <dtml-if "_['sequence-item']==default_type">selected="selected"</dtml-if>
 	><dtml-var sequence-item></option>
 	</dtml-in>
 	</select>
@@ -213,7 +213,7 @@ subject of the email see the <a href="#examplelist">bottom of this page</a>.
     <td valign="top"><p>Default urgency</p>
 	<select name="default_urgency">
 	<dtml-in urgencies>
-	<option <dtml-if "_['sequence-item']==default_urgency">SELECTED</dtml-if>
+	<option <dtml-if "_['sequence-item']==default_urgency">selected="selected"</dtml-if>
 	><dtml-var sequence-item></option>
 	</dtml-in>
 	</select>
@@ -265,21 +265,21 @@ subject of the email see the <a href="#examplelist">bottom of this page</a>.
           <a href="manage_POP3ManagementForm?pop3accountid=<dtml-var "REQUEST['pop3accountid']" url_quote>&amp;blackwhitelist=<dtml-var getId url_quote>#ae<dtml-var getId>"
            >Manage white- and blacklists</a>
 	</td>
-	<td><select name="defaultsections-<dtml-var getId>:list" size="<dtml-var "_.min(5, _.len(sections_options))">" multiple>
-	<dtml-in sections_options>
+	<td><select name="defaultsections-<dtml-var getId>:list" size="<dtml-var "_.min(5, _.len(getSectionOptions()))">" multiple>
+	<dtml-in "getSectionOptions()">
 	<option value="<dtml-var sequence-item>"
-	<dtml-if "_['sequence-item'] in defaultsections">SELECTED</dtml-if>><dtml-var sequence-item></option>
+	<dtml-if "_['sequence-item'] in getDefaultSections()">selected="selected"</dtml-if>><dtml-var sequence-item></option>
 	</dtml-in>
 	</select></td>
 	<td valign="top"><select name="default_type-<dtml-var getId>">
 	<dtml-in types>
-	<option <dtml-if "_['sequence-item']==default_type">SELECTED</dtml-if>
+	<option <dtml-if "_['sequence-item']==default_type">selected="selected"</dtml-if>
 	><dtml-var sequence-item></option>
 	</dtml-in>
 	</select></td>
 	<td valign="top"><select name="default_urgency-<dtml-var getId>">
 	<dtml-in urgencies>
-	<option <dtml-if "_['sequence-item']==default_urgency">SELECTED</dtml-if>
+	<option <dtml-if "_['sequence-item']==default_urgency">selected="selected"</dtml-if>
 	><dtml-var sequence-item></option>
 	</dtml-in>
 	</select></td>
@@ -445,9 +445,9 @@ subject of the email see the <a href="#examplelist">bottom of this page</a>.
 
 
 
-<br>&nbsp;
+<br/>&nbsp;
 
-<style>
+<style type="text/css">
 td.code {
 	font-family: 'Courier New', Courier;
 	font-size:80%;

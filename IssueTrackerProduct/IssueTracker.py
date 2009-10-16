@@ -249,7 +249,7 @@ class IssueTrackerFolderBase(Folder.Folder, Persistent):
         strftime = strftime.replace('%b', 'mon')
         return strftime.strip()
     
-    def unicodify(self, s):
+    def unicodify(self, s, encodings=(UNICODE_ENCODING, 'latin1', 'utf8')):
         """return a Unicode object of this string.
         It will only do this if the object (the string object) is a byte 
         string.
@@ -266,7 +266,7 @@ class IssueTrackerFolderBase(Folder.Folder, Persistent):
           <input tal:attributes="value request/myvar"/>
         Then ZPT will have to guess and it will most likely get it wrong.
         """
-        return unicodify(s)
+        return unicodify(s, encodings=encodings)
 
     def doDebug(self):
         """ return True if we're in debug mode """
@@ -9430,6 +9430,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         Write all verbose messages as strings into the list @log.
         """
+        assert type(email['body']) is unicode
         if email.get('fromname','') == '':
             email['fromname'] = combos.get(email.get('email','').lower(),'')
             email['fromname'] = email['fromname'].replace('<','').replace('>','')
@@ -10167,7 +10168,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     else:
                         value = unicode_value
                     e[ss(key)] = value
-                
+                elif type(value) is str:
+                    e[ss(key)] = unicodify(value)
+                    
                 if value.startswith('Out of Office AutoReply: '):
                     # standard MS Outlook setup for Out of Office autoreplies
                     e['is_autoreply'] = True
@@ -10211,6 +10214,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 continue
             
             if name is None:
+                if [x for x in part.get_charsets() if x]:
+                    # sometimes part.get_charsets() is [None]
+                    # hence the list comprehension
+                    content = unicodify(content, [x for x in part.get_charsets() if x])
+                elif type(content) is str:
+                    # desperately guess the encoding
+                    content = unicodify(content)
+                
                 if str(part.get_content_type()).lower() in ('html', 'text/html'):
                     content_html = content
                 else:

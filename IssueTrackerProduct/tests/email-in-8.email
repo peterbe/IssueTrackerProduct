@@ -1,10 +1,13 @@
 Date: Fri, 8 Feb 2008 18:03:56 +0000
 From: Mr Exception <special@peterbe.com>
+Content-Type: text/plain;
+        charset="iso-8859-1"
 To: mail@example.com
 Sender: special@peterbe.com
-Subject: Test
+Subject: Test £9.99
 
 
 This is the body
+Only: £99.99
 
 

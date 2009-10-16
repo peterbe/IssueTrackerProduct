@@ -369,8 +369,6 @@ class EmailInTestCase(TestBase):
         from Products.IssueTrackerProduct import IssueTracker
         IssueTracker.POP3 = FakePOP3
         
-        
-        
         result = tracker.check4MailIssues(verbose=True)
         
         receipt = self.snatched_emails[0]
