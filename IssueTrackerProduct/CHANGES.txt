@@ -1,4 +1,6 @@
 -
+    Bug fixed: Emails encoded in unicode-1-1-utf-7 encoded as utf-7
+    
     Bug fixed: Email in body parsed correctly into Unicode.
     
     New feature: Clairvoyant Javascript optimized with JSON.

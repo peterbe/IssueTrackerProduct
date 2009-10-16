@@ -390,6 +390,31 @@ class EmailInTestCase(TestBase):
         issue2 = tracker.getIssueObjects()[1]
         receipt = self.snatched_emails[1]
         self.assertTrue(receipt['msg'].count(issue2.absolute_url()))
+        
+        
+    def test_emailIn9(self):
+        """Test email with content encoding 'unicode-1-1-utf-7'"""
+        tracker = self.folder.tracker
+        u, p = 'test', 'test' # doesn't really matter
+        account = tracker.createPOP3Account('mail.example.com', u, p)
+        email = 'mail@example.com'
+        ae = tracker.createAcceptingEmail(account.getId(), email)
+        ae.send_confirm = True
+        
+        abs_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+        
+        # 'email-in-4.email' sends to peter@example.com but is CCed to
+        # mail@example.com
+        FakePOP3.files = [abs_path('email-in-9.email'),]
+
+        # Monkey patch!
+        from Products.IssueTrackerProduct import IssueTracker
+        IssueTracker.POP3 = FakePOP3
+        
+        result = tracker.check4MailIssues(verbose=True)
+        self.assertTrue('Saved email' in result)
+        
+        
 
         
     def test_emailIn_none(self):

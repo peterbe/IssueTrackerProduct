@@ -10214,10 +10214,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 continue
             
             if name is None:
-                if [x for x in part.get_charsets() if x]:
+                # Python2.5 fixes the problem of aliasing 'unicode-1-1-utf-7'
+                # to 'utf-7' but if we're using Python2.4 we have to do this 
+                # manually here
+                charsets = [x.replace('unicode-1-1-utf-7','utf7') for x 
+                            in part.get_charsets() if x]
+                if charsets:
                     # sometimes part.get_charsets() is [None]
                     # hence the list comprehension
-                    content = unicodify(content, [x for x in part.get_charsets() if x])
+                    content = unicodify(content, charsets)
                 elif type(content) is str:
                     # desperately guess the encoding
                     content = unicodify(content)
