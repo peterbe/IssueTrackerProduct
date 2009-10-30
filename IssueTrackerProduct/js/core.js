@@ -1,6 +1,5 @@
 $.id=function(id){return document.getElementById(id)};
 
-
 function econvert(s) {
    return s.replace(/%7E/g,'~').replace(/%28/g,'(').replace(/%29/g,')').replace(/%20/g,' ').replace(/_dot_| dot |_\._|\(\.\)/gi, '.').replace(/_at_|~at~/gi, '@');
 }

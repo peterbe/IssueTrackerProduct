@@ -22,7 +22,7 @@ function checkRefresh() {
 }
 
 function clearAutoRefreshTitle() {
-  document.title = document.title.replace(/\(automatically refreshed\) /,'');
+   document.title = document.title.replace(/\(automatically refreshed\) /,'');
 }
   
 var previous_clairvoyant_note='';
