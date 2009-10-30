@@ -1,5 +1,16 @@
 var since_timestamp = (new Date).getTime()/1000;
 
+
+function __load_favicon(href) {
+   $('link[rel="shortcut icon"]','head').remove();
+   var link = $('<link>')
+     .attr('type','image/x-icon')
+       .attr('rel', 'shortcut icon')
+	 .attr('href', href);
+   $('head').append(link);
+   
+}
+
 function _showLoading() {
    $('#table-refresher a').hide();
    $('#table-refresher').append($('<img>')
@@ -8,10 +19,14 @@ function _showLoading() {
                                 .attr('width','180')
                                 .attr('height','14')
                                 .attr('alt','Loading...'));
+   __load_favicon('/misc_/IssueTrackerMassContainer/loading-arrows.gif');
 }
 function _hideLoading() {
    $('img.loading-bar', $('#table-refresher')).remove();
    $('#table-refresher a').show();
+   
+   __load_favicon(original_favicon_href);
+   
    
 }
 function refreshActivityTable() {
@@ -42,7 +57,9 @@ function autorefreshActivityTable() {
    }, refresh_interval * 1000);
 }
 
+var original_favicon_href;
 $(function() {
+   original_favicon_href = $('link[rel="shortcut icon"]','head').attr('href');
    var collapsed = $('li.folder', 'ul#tree').length > 3;
    $('#tree').treeview({
       animated:300,

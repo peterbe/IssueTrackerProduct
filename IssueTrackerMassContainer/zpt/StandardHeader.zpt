@@ -4,6 +4,8 @@
  tal:define="dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING);dummy here/StopCache">
 
 <head tal:define="root_relative_url here/getRootRelativeURL">
+<link rel="shortcut icon" href="/favicon.ico"
+      tal:attributes="href string:${root_relative_url}/favicon.ico" />
 
 <title tal:content="structure string:${here/title_or_id} - IssueTracker mass Container"></title>
 <meta http-equiv="Content-Type" tal:attributes="content string:text/html;; charset=${here/UNICODE_ENCODING}" />

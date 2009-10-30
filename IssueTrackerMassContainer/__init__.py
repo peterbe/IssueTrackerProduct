@@ -51,6 +51,7 @@ def initialize(context):
             registerIcon('icon_ignore.gif')
             registerIcon('refresh_icon.png')
             registerIcon('loading-bar.gif')
+            registerIcon('loading-arrows.gif')
             registerIcon('gradissuehead.png')
             registerIcon('gradtablehead.png')
 
