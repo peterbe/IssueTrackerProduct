@@ -1,4 +1,7 @@
 -
+    Bug fixed: Inability to set the defaultsections Thanks Jean
+    (Real#0880)
+    
     Bug fixed: Emails encoded in unicode-1-1-utf-7 encoded as utf-7
     
     Bug fixed: Email in body parsed correctly into Unicode.

@@ -1441,31 +1441,38 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'show_dates_cleverly',
                     'show_spambot_prevention',
                     ]
-        dict = self.__dict__
+        properties = self.__dict__
         for each in strings:
             if hk(each) and isinstance(get(each), basestring):
-                dict[each] = get(each).strip()
+                properties[each] = get(each).strip()
 
         for each in unicodes:
             if hk(each) and isinstance(get(each), basestring):
-                dict[each] = unicodify(get(each).strip())
+                properties[each] = unicodify(get(each).strip())
                 
         for each in ints:
             if hk(each):
                 if isinstance(get(each), int):
-                    dict[each] = get(each)
+                    properties[each] = get(each)
                 else:
                     logger.warn('%s not integer' % get(each))
                     
         for each in lists:
-            if hk(each) and isinstance(get(each), list):
-                dict[each] = [unicodify(x) for x in Utils.uniqify(get(each))]
+            if hk(each):
+                value = get(each)
+                if isinstance(value, tuple):
+                    value = list(value)
+                elif not isinstance(value, list):
+                    value = [value]
+                    
+                properties[each] = [unicodify(x) for x in Utils.uniqify(value)]
+                
 
         for each in booleans:
             if hk(each) and get(each):
-                dict[each] = True
+                properties[each] = True
             elif not carefulbooleans:
-                dict[each] = False
+                properties[each] = False
                 
         # now for a special one
         if hk('statuses-and-verbs'):
