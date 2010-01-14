@@ -1,4 +1,10 @@
 -
+    Bug fixed: Custom checkbox boolean fields whose values were True
+    appeared as a unchecked checkbox on editing details (Real#0893)
+    
+    Bug fixed: Custom checkbox boolean fields whose values were False
+    didn't show up issue details.
+    
     Bug fixed: Inability to set the defaultsections Thanks Jean
     (Real#0880)
     

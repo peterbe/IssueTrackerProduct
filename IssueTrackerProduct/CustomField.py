@@ -581,20 +581,26 @@ class CustomField(Folder):
         elif self.input_type == 'checkbox':
             # another special case
             
+            v = None
+            if value:
+                v = value[0] # from the argument
+            elif 'value' in attributes:
+                v = attributes.pop('value')
+            
             # If there are no options you can work this like a normal text input
             if not self.getOptions():
-                template = u'<input type="checkbox" %(inner)s />'
+                # but what if it should be a boolean and it's true, then the 
+                # tag needs to contain checked="checked"
+                if v:
+                    template = u'<input type="checkbox" checked="checked" %(inner)s />'
+                else:
+                    template = u'<input type="checkbox" %(inner)s />'
                 
             else:
                 # crap!
                 template = u'%(all_inputs)s'
                 all_inputs = []
                 
-                v = None
-                if value:
-                    v = value[0] # from the argument
-                elif 'value' in attributes:
-                    v = attributes.pop('value')
                     
                 special_attributes = ''
                 inner = []
@@ -1396,8 +1402,10 @@ class CustomFieldsIssueBase:
             value = values.get(field.getId(), None)
             if value is None:
                 continue
-            if exclude_empty and not value:
-                continue
+            if exclude_empty:
+                # but if the field is a boolean python type include its "empty" value
+                if not value and field.getPythonType() != 'boolean':
+                    continue
             fields.append(dict(field=field, value=value, key=field.getId()))
 
         return fields
