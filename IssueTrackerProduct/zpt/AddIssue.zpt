@@ -143,6 +143,8 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
 			<input type="radio" tabindex="5" name="display_format" value="plaintext" tal:attributes="checked python:display_format=='plaintext'" />Plain as it's written
 			<input type="radio" tabindex="6" name="display_format" value="structuredtext" tal:attributes="checked python:display_format=='structuredtext'" />
 			<a href="What-is-StructuredText">Structured Text</a>
+			<input tal:condition="here/hasMarkdown" type="radio" tabindex="7" name="display_format" value="markdown" tal:attributes="checked python:display_format=='markdown'" />
+			<a tal:condition="here/hasMarkdown" href="What-is-Markdown">Markdown</a>
 		</td>
 	</tr>
 	<tr>

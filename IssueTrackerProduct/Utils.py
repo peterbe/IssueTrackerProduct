@@ -17,6 +17,12 @@ import warnings
 import formatter, htmllib, StringIO
 
 
+try:
+    import markdown
+    markdown_converter = markdown.Markdown(safe_mode="escape")
+except ImportError:
+    markdown_converter = None
+
 entitydefs_inverted = {}
 for k,v in entitydefs.items():
     entitydefs_inverted[v] = k
@@ -1025,6 +1031,21 @@ def ShowDescription(text, display_format='',
                       urllinkfunction=urllinkfunction)
             
         return st
+    
+    elif display_format == 'markdown':
+        if not markdown_converter:
+            import warnings
+            warnings.warn("Markdown is not installed")
+            
+            return text
+        
+        text = markdown_converter.convert(text)
+        
+        text = addhrefs(text, 
+                        emaillinkfunction=emaillinkfunction,
+                        urllinkfunction=urllinkfunction)
+        
+        return text
     
     elif display_format == 'html':
         return text

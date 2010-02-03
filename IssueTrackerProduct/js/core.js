@@ -5,7 +5,7 @@ function econvert(s) {
 }
 
 function fixEncodedLinks() {
-   $("a.aeh", $("#main")).each(function() {
+   $("#main a.aeh").each(function() {
       this.href = econvert(this.href);
       this.innerHTML = econvert(this.innerHTML);
    });

@@ -76,6 +76,10 @@ tal:attributes="id python:test(request.get('change'),'rightcorner_change','right
         <input type="radio" tabindex="5" name="display_format" value="plaintext" tal:attributes="checked python:display_format=='plaintext'" />Plain as it's written<br />
 	<input type="radio" tabindex="6" name="display_format" value="structuredtext" tal:attributes="checked python:display_format=='structuredtext'" />
 	<a href="What-is-StructuredText">Structured Text</a><br />
+        <tal:test condition="here/hasMarkdown">
+	<input type="radio" tabindex="7" name="display_format" value="markdown" tal:attributes="checked python:display_format=='markdown'" />
+	<a href="What-is-Markdown">Markdown</a>
+        </tal:test>
         <tal:test condition="here/hasWYSIWYGEditor">
 	<input type="radio" tabindex="7" name="display_format" value="html" tal:attributes="checked python:display_format=='html'" />
 	<a href="What-is-WYSIWYG">WYSIWYG</a>
@@ -138,7 +142,8 @@ tal:attributes="id python:test(request.get('change'),'rightcorner_change','right
 <tal:block define="df here/getSavedTextFormat">
 Display format: 
 <span tal:condition="python:df=='plaintext'">Plain as it's written</span>
-<span tal:condition="python:df=='structuredtext'">Structured Text</span>
+<span tal:condition="python:df=='structuredtext'"><a href="What-is-StructuredText">Structured Text</a></span>
+<span tal:condition="python:df=='markdown'"><a href="What-is-Markdown">Markdown</a></span>
 <span tal:condition="python:df=='html'">WYSIWYG</span>
 </tal:block>
 

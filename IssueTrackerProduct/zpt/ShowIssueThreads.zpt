@@ -60,7 +60,7 @@
              tal:define="comment thread/getComment"
              tal:attributes="onclick python:test(path('repeat/thread/end'), 'clearAutoRefreshTitle()')">
 	    <div tal:condition="comment"				            
-			tal:replace="structure thread/showComment">
+			tal:replace="structure python:thread.showComment()">
 			    COMMENT here
 	    </div>
 	    <p tal:condition="not:comment"><em>No comment.</em></p>

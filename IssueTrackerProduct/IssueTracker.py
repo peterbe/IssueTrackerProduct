@@ -93,6 +93,12 @@ try:
     _has_formatflowed_ = True
 except ImportError:
     _has_formatflowed_ = False
+    
+try:
+    import markdown
+    _has_markdown_ = True
+except ImportError:
+    _has_markdown_ = False
 
 # Zope
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
@@ -2311,6 +2317,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             df = list(self.display_formats)
             df.append('html')
             self.display_formats = df
+            
+        if self.hasMarkdown() and 'markdown' not in self.display_formats:
+            df = list(self.display_formats)
+            df.append('markdown')
+            self.display_formats = df
         
 
         msg = "Standard objects deployed\n"
@@ -3047,6 +3058,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     title = _('%(root_title)s - Add Issue') % _rtdict
             elif page == 'What-is-WYSIWYG':
                 title = "WYSIWYG = What You See Is What You Get"
+            elif page == 'What-is-Markdown':
+                title = "About Markdown"
             elif page == 'What-is-StructuredText':
                 title = "About Structured Text"
         
@@ -3058,6 +3071,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # new way
             return title
     
+    def hasMarkdown(self):
+        """ return if markdown is installed """
+        return _has_markdown_
     
     def hasWYSIWYGEditor(self):
         """ return true if we have a WYSIWYG editor available """
@@ -3921,12 +3937,22 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         if confidential not in [1,0]:
             raise ValueError, "Confidential value is not boolean (1 or 0)"
-        
+
         if hide_me not in [1,0]:
             raise ValueError, "Hide_me value is not boolean (1 or 0)"
         
         if display_format not in self.display_formats:
-            raise ValueError, "Invalid display format %r" % display_format
+            if display_format == 'markdown' and self.hasMarkdown():
+                # To enable Markdown, not only do you need to install the 
+                # dependency, you also have to add it to self.display_formats
+                # which is updated automatically when you make the first 
+                # DeployStandards.
+                # At this point we don't want to bother admins to have to
+                # run DeployStandards() just to get markdown an option.
+                # Eventually this can go away.
+                pass
+            else:
+                raise ValueError, "Invalid display format %r" % display_format
         
         if issuedate is None or issuedate =='':
             issuedate = DateTime()
@@ -12491,6 +12517,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if newsection:
             sections.insert(0, newsection)
             
+        sections = [unicodify(x) for x in sections]
         sections = Utils.uniqify(sections)
         
         return ', '.join(sections)
@@ -13658,6 +13685,7 @@ zpts = ('zpt/StandardHeader',
         
         'zpt/ShowIssueThreads',
         'zpt/What-is-StructuredText',
+        'zpt/What-is-Markdown',
         'zpt/What-is-WYSIWYG',        
         'zpt/Keyboard-shortcuts',
         'zpt/Your-next-action-issues',

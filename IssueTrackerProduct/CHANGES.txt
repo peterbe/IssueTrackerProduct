@@ -1,4 +1,13 @@
 -
+    New feature: Added Markdown as a display format option if installed.
+    To enable, just install markdown on the python path.
+    
+    Bug fixed: Previewing an issue with chosen sections that are
+    non-ASCII caused a UnicodeDecodeError.
+    
+    New feature: DEFAULT_ENCODE_EMAILDISPLAY is disabled by default in
+    new trackers. Issuetrackers are rarely public.
+    
     Bug fixed: Custom checkbox boolean fields whose values were True
     appeared as a unchecked checkbox on editing details (Real#0893)
     

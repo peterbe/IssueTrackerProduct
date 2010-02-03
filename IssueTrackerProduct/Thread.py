@@ -195,7 +195,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         display_format = self.display_format
         formatted = self.ShowDescription(comment+' ', display_format)
         
-        if self.getSubmissionType()=='email':
+        if self.getSubmissionType() == 'email':
             formatted = Utils.highlight_signature(formatted, 'class="sig"')
         
         formatted = self._findIssueLinks(formatted)

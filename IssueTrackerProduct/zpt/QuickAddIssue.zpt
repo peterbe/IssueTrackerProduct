@@ -107,6 +107,8 @@ here's a special script that converts 'section' into ['section'] if present and 
 		<input type="radio" name="display_format" tabindex="5" value="plaintext" tal:attributes="checked python:display_format=='plaintext'" />Plain as it's written
 		<input type="radio" name="display_format" tabindex="6" value="structuredtext" tal:attributes="checked python:display_format=='structuredtext'" />
 		<a href="What-is-StructuredText">Structured Text</a>
+			<input tal:condition="here/hasMarkdown" type="radio" tabindex="7" name="display_format" value="markdown" tal:attributes="checked python:display_format=='markdown'" />
+			<a tal:condition="here/hasMarkdown" href="What-is-Markdown">Markdown</a>
 	    </td>
 	</tr>
     <tr tal:condition="here/useSpambotPrevention">
