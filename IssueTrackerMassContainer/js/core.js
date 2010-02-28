@@ -8,7 +8,6 @@ function __load_favicon(href) {
        .attr('rel', 'shortcut icon')
 	 .attr('href', href);
    $('head').append(link);
-   
 }
 
 function _showLoading() {

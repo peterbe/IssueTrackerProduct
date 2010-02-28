@@ -1,3 +1,8 @@
+- 0.0.11
+
+    New feature: Massive optimization success. See 
+    http://www.peterbe.com/plog/massive-improvement-on-sorting-a-fat-list
+
 - 0.0.10
 
     New feature: Masscontainer only counts issues, not join-in issues

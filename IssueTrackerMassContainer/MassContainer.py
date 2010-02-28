@@ -221,12 +221,21 @@ class MassContainer(Folder.Folder, Persistent):
         return objs
     
         
-    
-    def getRecentIssues(self, since=None, recursive=True, batch_size=20, batch_start=0):
+    def getRecentIssues(self, since=None, recursive=True, batch_size=20, batch_start=0,
+                        by_add_date=False):
         """ return a list of all the most recent issues """
         skippable_paths = self.getSkippablePaths()
+        root = self.getRoot()
+        issues = self._getAllIssues(root, skippable_paths)
         
-        issues = self._getAllIssues(self.getRoot(), skippable_paths)
+        if by_add_date:
+            issues = [(float(x.getIssueDate()), 
+                       '/'.join(x.getPhysicalPath())) 
+                      for x in issues]            
+        else:
+            issues = [(float(x.getModifyDate()), 
+                       '/'.join(x.getPhysicalPath())) 
+                      for x in issues]
         if since is not None:
             if hasattr(since, 'strftime'):
                 since = float(since)
@@ -240,16 +249,17 @@ class MassContainer(Folder.Folder, Persistent):
                         since = float(since)
                     else:
                         since = float(DateTime(since))
-            issues = [x for x in issues 
-                      if float(x.getModifyDate()) > since]
-        
+            #issues = [x for x in issues 
+            #          if float(x.getModifyDate()) > since]
+            issues = [(t,i) for (t,i) in issues
+                      if t > since]
+
         # sort them all
-        issues.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
-        
+        issues.sort()
+        issues.reverse()
         # cut off
-        issues = issues[int(batch_start):int(batch_size)]
-        
-        return issues
+        issue_paths = [x[1] for x in issues[int(batch_start):int(batch_size)]]
+        return [root.unrestrictedTraverse(p) for p in issue_paths]
     
 
     def _getAllIssues(self, in_object, skippable_paths):
@@ -266,7 +276,9 @@ class MassContainer(Folder.Folder, Persistent):
                 issues.extend(list(o._getIssueContainer().objectValues(ISSUE_METATYPE)))
                 
         return issues
-    
+
+
+
     def show_tree(self, context, REQUEST, in_object):
         """ wrapper on rendering the tree in a template for optimization reasons """
         try:
@@ -329,7 +341,7 @@ class MassContainer(Folder.Folder, Persistent):
         xml=''
         if batchsize is None:
             batchsize = 10
-        for issue in self.getAllRecentIssues()[:batchsize]:
+        for issue in self.getRecentIssues(batch_size=batchsize, by_add_date=True):
             title = "%s (%s)"%(issue.title, issue.status.capitalize()) 
             title = self._prepare_feed(title)
             description = self._prepare_feed(issue.description)
@@ -356,6 +368,7 @@ class MassContainer(Folder.Folder, Persistent):
         """ prepare the text for XML usage """
         _replace = _replace_special_chars
         s = html_quote(s)
+        return s
         s = s.replace('\xa3','&#163;')
         if _replace is not None:
             s = _replace(s, html_encoding=1)
