@@ -16,6 +16,7 @@ Credits:
 import os, sys
 from urlparse import urlparse, urlunparse
 import logging
+from time import time
 
 # zope
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
@@ -226,6 +227,18 @@ class MassContainer(Folder.Folder, Persistent):
         """ return a list of all the most recent issues """
         skippable_paths = self.getSkippablePaths()
         root = self.getRoot()
+        
+        if getattr(self, '_v_skippable_paths', None):
+            skippable_paths.extend(self._v_skippable_paths)
+            
+        elif getattr(self, '_v_oldest_timestamp', since):
+            # cool, we can use this to make sure we're not going to sort issues from
+            # trackers that are older than this
+            older_than = since and float(since) or self._v_oldest_timestamp
+            paths = self._getOlderIssueTrackerPaths(root, DateTime(older_than))
+            self._v_skippable_paths = paths
+            skippable_paths.extend(paths)
+            
         issues = self._getAllIssues(root, skippable_paths)
         
         if by_add_date:
@@ -249,18 +262,49 @@ class MassContainer(Folder.Folder, Persistent):
                         since = float(since)
                     else:
                         since = float(DateTime(since))
-            #issues = [x for x in issues 
-            #          if float(x.getModifyDate()) > since]
             issues = [(t,i) for (t,i) in issues
                       if t > since]
-
-        # sort them all
+            
         issues.sort()
         issues.reverse()
+        
+        # Let's now take the opportunity to remember the timestamp of the
+        # oldest one of these so that the next time this page is requested
+        # at least it won't do anything deeper than this.
+        if since is None and not skippable_paths:
+            # very first time!
+            self._v_oldest_timestamp = issues[int(batch_size)+int(batch_start)][0]
+        
         # cut off
-        issue_paths = [x[1] for x in issues[int(batch_start):int(batch_size)]]
+        issue_paths = [x[1] for x in issues[int(batch_start):int(batch_size)+int(batch_start)]]
         return [root.unrestrictedTraverse(p) for p in issue_paths]
     
+    def _getOlderIssueTrackerPaths(self, in_object, older_than):
+        assert hasattr(older_than, 'strftime'), "older_than must be a DateTime instance"
+        paths = []
+        root_url = self.getRoot().absolute_url()
+        for o in in_object.objectValues([MASSCONTAINER_METATYPE, 'Issue Tracker']):
+            if o.meta_type == MASSCONTAINER_METATYPE:
+                paths.extend(self._getOlderIssueTrackerPaths(o, older_than))
+            elif o.meta_type == 'Issue Tracker':
+                # the "age" of the tracker is the modify date of the youngest issue
+                # fish that out
+                mod_dates = [x.getModifyDate()
+                             for x in o._getIssueContainer().objectValues(ISSUE_METATYPE)]
+                mod_dates.sort()
+                mod_dates.reverse()
+                try:
+                    most_recent = mod_dates[0]
+                except IndexError:
+                    # doesn't have any issues, then definitely skip this one
+                    paths.append(o.absolute_url().replace(root_url, ''))
+                    continue
+                
+                if most_recent < older_than:
+                    paths.append(o.absolute_url().replace(root_url, ''))
+                    continue
+                
+        return paths
 
     def _getAllIssues(self, in_object, skippable_paths):
         issues = []
