@@ -1,4 +1,7 @@
 -
+    Bug fixed: Editing urgency and type on submitted issues could
+    cause UnicodeDecodeError.
+    
     New feature: Added Markdown as a display format option if installed.
     To enable, just install markdown on the python path.
     

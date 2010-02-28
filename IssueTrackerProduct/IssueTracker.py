@@ -3051,6 +3051,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             elif page == 'About.html':
                 title = _('About the IssueTrackerProduct version %s')
                 title = title % self.getIssueTrackerVersion()
+            elif page == 'About-issue-notes':
+                title = _('About issue notes')
             elif page == 'SubmitIssue':
                 if self.REQUEST.get('HTTP_REFERER').find('QuickAddIssue'):
                     title = _('%(root_title)s - Quick Add Issue') % _rtdict
@@ -13684,6 +13686,7 @@ zpts = ('zpt/StandardHeader',
         'zpt/showissue_macros',
         
         'zpt/ShowIssueThreads',
+        'zpt/About-issue-notes',
         'zpt/What-is-StructuredText',
         'zpt/What-is-Markdown',
         'zpt/What-is-WYSIWYG',        

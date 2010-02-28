@@ -157,6 +157,7 @@ def initialize(context):
         registerIcon('gradissuehead.png')
         registerIcon('gradtablehead.png')
         registerIcon('customfieldfolder.png')
+        registerIcon('issue-note-screenshot.png')
         registerJS('core.js')
         registerJS('jquery-1.3.2.min.js', slim_if_possible=False)
         registerJS('jquery-ui-1.7.1.datepickeronly.min.js', slim_if_possible=False)

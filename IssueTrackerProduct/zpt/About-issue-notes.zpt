@@ -1,0 +1,24 @@
+<html metal:use-macro="here/getHeader">
+
+<style type="text/css" metal:fill-slot="extracss">
+#screenshots img { border:1px solid #ccc; padding:3px;}
+</style>
+
+
+<div metal:fill-slot="body">
+
+<h3>About issue notes</h3>
+
+<div class="bumf">
+<p style="font-weight:bold;">Issue notes makes it possible for you to store little post-it like 
+notes on issues and followups.</p>
+<p>They are private to you only. The content of the notes can be searched for so if you want to
+you can make a note just to help yourself making an issue or a followup easy to find.</p>
+</div>
+
+<p id="screenshots"><img src="/misc_/IssueTrackerProduct/issue-note-screenshot.png" alt="Example of a note"/><br/>
+Example of making a new issue note
+</p>
+
+</div>
+</html>

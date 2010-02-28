@@ -1,0 +1,76 @@
+<html metal:use-macro="here/getHeader">
+<div metal:fill-slot="body">
+
+<h3>About Markdown</h3>
+
+<style type="text/css">
+td.st-o { 
+    font-family:'Courier New', Courier; 
+}
+
+td.st-r { 
+    font-family:Arial, Verdana, sans-serif; 
+    background-color:#cccccc;
+}
+
+</style>
+
+<div class="bumf">
+<p style="font-weight:bold;">Markdown is a lightweight markup language. 
+The language takes many cues from existing conventions for marking up plain text in email.</p>
+<p>See <a href="http://en.wikipedia.org/wiki/Markdown">Wikipedia article on Markdown</a></p>
+</div>
+
+
+
+<table align="center" border="1" cellpadding="5" cellspacing="0">
+<tr>
+  <td width="30%"><p><strong>You enter...</strong></p></td>
+  <td width="30%" class="st-r"><p><strong>You get...</strong></p></td>
+</tr>
+<tr>
+  <td class="st-o">Sam said: *I* did **not** do _it_</td>
+  <td class="st-r">Sam said: <em>I</em> did <strong>not</strong> do <em>it</em></td>
+</tr>
+<tr>
+  <td class="st-o">Send [email](mailto:info@foo.com) to<br /> [Foo.com](http://www.foo.com)</td>
+  <td class="st-r">Send <a href="mailto:info@foo.com">email</a> to <a href="http://www.foo.com">Foo.com</a></td>
+</tr>
+<tr>
+  <td class="st-o">Line breaks<br />don't matter.<br /><br />Only paragraph breaks<br />do.</td>
+  <td class="st-r">Line breaks don't matter.<br /><br />Only paragraph breaks do.</td>
+</tr>
+<tr>
+  <td class="st-o">Inline `code` and block code:<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;while (!perl) {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print "Python";<br />&nbsp;&nbsp;&nbsp;&nbsp;}</td>
+  <td class="st-r">Inline <code>code</code> and block code:
+<pre style="background-color:#eeeeee;">
+ while (!perl) {
+    print "Python";
+ }
+</pre></td>
+</tr>
+<tr>
+  <td class="st-o">- Bulleted lists can be...<br/>- Written using '-', '*' or '<code>o</code>'...<br />- Or using numbers like <code>'1.'</code>, <code>'2.'</code>, etc.</td>
+  <td class="st-r"><ul>
+<li>Bulleted lists can be...</li>
+<li>Written using '-', <code>*</code> or <code>o</code>...</li>
+<li>Or using numbers like <code>1.</code>, <code>2.</code>, etc.</li>
+
+</ul></td>
+</tr>
+</table>
+
+<div class="bumf">
+
+
+<p>Alternative external links:</p>
+<ul>
+  <li><a href="http://daringfireball.net/projects/markdown/">Official Markdown project at Daring Fireball</a></li>
+  <li><a href="http://warpedvisions.org/projects/markdown-cheat-sheet/">Markdown cheat sheet</a></li>
+</ul>  
+
+
+</div>
+
+</div>
+</html>

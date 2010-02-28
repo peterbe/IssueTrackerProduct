@@ -71,7 +71,11 @@
       <td tal:condition="not:change" tal:content="here/type">
       </td>
       <td tal:condition="change">
-        <select name="type" tal:define="types here/types; size python:min(6, len(types)); type here/getType" tal:attributes="size size">
+        <select name="type" tal:define="types here/types; 
+                                        size python:min(6, len(types)); 
+                                        type here/getType" 
+                tal:attributes="size size;
+                                name string:type:${here/UNICODE_ENCODING}:ustring">
           <option 
            tal:repeat="option types" 
            tal:attributes="value option;
@@ -89,7 +93,8 @@
         <select tal:define="urgencies here/urgencies;
                             size python:min(6, len(urgencies)); 
                             urgency here/getUrgency"
-         tal:attributes="size size" name="urgency">
+         tal:attributes="size size;
+                         name string:urgency:${here/UNICODE_ENCODING}:ustring">
             <option  tal:repeat="option urgencies" tal:attributes="value option; selected python:urgency == option" tal:content="option">Urgencies</option>
 	</select>
       </td>
