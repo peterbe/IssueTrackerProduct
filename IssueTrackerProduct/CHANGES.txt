@@ -1,4 +1,7 @@
 -
+    New feature: Home page list of recent issues is much optimized by
+    using the catalog to search by 'modifydate'.
+    
     Bug fixed: Editing urgency and type on submitted issues could
     cause UnicodeDecodeError.
     
