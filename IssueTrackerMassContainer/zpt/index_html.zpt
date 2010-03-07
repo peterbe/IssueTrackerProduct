@@ -50,27 +50,28 @@ span.tracker-path {
 <div id="activity-table-outer">
 <h3>Latest activity</h3>
 <div id="table-outer">
+  <tal:item replace="structure here/show_activity_table"/>
+<tal:comment replace="nothing">
 <p><img src="/misc_/IssueTrackerMassContainer/loading-bar.gif" width="180" height="14" alt="Loading..."/></p>
+</tal:comment>
 </div>
 
-  <div id="table-refresher" style="display:none">
+  
+  <div id="table-refresher">
+  <tal:comment replace="nothing">
+  <!-- Now that the server-side of activity table refreshing is fast and works there's
+       no point offering this extra link to refresh. You can just sit tight and wait
+       for another 10 seconds to get a refresh anyway -->
   <a href="." onclick="refreshActivityTable();return false"><img src="/misc_/IssueTrackerMassContainer/refresh_icon.png" border="0" alt="Refresh" /></a>
   <a href="." onclick="refreshActivityTable();return false">Refresh</a>
+  </tal:comment>
   </div>
+  
 </div>
 
 <p>&nbsp;</p>
 
 </div>
 
-<script type="text/javascript" metal:fill-slot="extrajs">
-$(function() {
-  $('#table-outer').load('show_activity_table');
-  setTimeout(function() {
-    $('#table-refresher').show();
-  }, 1*1000);
-  
-});
-</script>
 
 </html>

@@ -2,18 +2,17 @@
 
 
 <dl  tal:define="days_filter python:30*2;
+		 today context/ZopeTime;
+                 todaystrf nocall:today/strftime;
                  batch_limit context/getOutlookBatchSize;
                  dummy python:request.set('keep_sortorder',0);
                  dummy python:request.set('sortorder', 'modifydate');
                  dummy python:request.set('reverse',0);
-                 filteredissues python:here.ListIssuesFiltered(skip_filter=1)[:batch_limit];
-		 today context/ZopeTime;
-                 todaystrf nocall:today/strftime;
+                 since python:request.get('since', today-days_filter);
+                 filteredissues python:here.ListIssuesFiltered(skip_filter=1, modified_since=since)[:batch_limit];
                  daylabels python:here.getOutlookDaylabels(filteredissues);
                  ">
     <tal:repeat repeat="issue filteredissues">
-    <tal:cutoff define="age python:int(today-issue.getModifyDate())"
-                condition="python:age < days_filter">
       <tal:item define="global at_least_one_found python:1" />
 
       <dt tal:define="label python:daylabels.get(issue.getId())" tal:condition="label" 
@@ -52,7 +51,6 @@
 		
 	    </tal:new>	    
       </dd>
-    </tal:cutoff>
     </tal:repeat>
     
 <p tal:condition="not:at_least_one_found">    

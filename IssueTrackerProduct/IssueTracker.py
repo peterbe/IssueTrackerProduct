@@ -7562,10 +7562,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return self.get_session(key, default)
         
     
-    def ListIssuesFiltered(self, q=None, **kw):
+    def ListIssuesFiltered(self, q=None, modified_since=None, added_since=None, **kw):
         """ wrapper around _ListIssuesFiltered() that prepares a search
         if REQUEST holds 'q'
         """
+        
+        assert not (modified_since and added_since), "can't be both"
         
         request = self.REQUEST
         q_orig = q
@@ -7710,6 +7712,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             seq = self._generateReport(report)
             self.RememberReportRun(report.getId(), len(seq))
             
+        elif modified_since:
+            # use catalog to only get objects older than this date
+            seq = self._getIssueObjectsSince('modified', modified_since)
+            
+        elif added_since:
+            # use catalog to only get objects older than this date
+            seq = self._getIssueObjectsSince('added', added_since)
+        
         else:
             # We won't need the ZCatalog, we can use objectValues() which
             # is many times faster if the amount of issues is small
@@ -7737,6 +7747,31 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         return self._ListIssuesFiltered(seq, skip_filter=skip_filter,
                                         skip_sort=skip_sort)
+    
+    def _getIssueObjectsSince(self, key, since):
+        """return only objects that have either been modified or added since a 
+        certain date.
+        Use the ZCatalog if possible"""
+        
+        assert key in ('added','modified'), key
+        
+        catalog = self.getCatalog()
+        if isinstance(since, basestring):
+            since = DateTime(since)
+        elif isinstance(since, (int, float)):
+            since = DateTime(since)
+        elif not hasattr(since, 'strftime'):
+            raise ValueError("%r (%s) is not a DateTime object" % \
+            (since, type(since)))
+        
+        search = {'meta_type': ISSUE_METATYPE,
+                  'modifydate': {'query': since, 'range':'min'}}
+        issues = []
+        for brain in catalog.searchResults(**search):
+            issues.append(brain.getObject())
+            
+        return issues
+
 
 
     def _validIssueIDList(self, comma_delimited_string):

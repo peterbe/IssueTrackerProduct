@@ -2437,15 +2437,20 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         
         indexes = catalog._catalog.indexes
         
-        if 'status' in idxs and not indexes.has_key('status'):
-            idxs.remove('status')
+        # this test is really old
+        #if 'status' in idxs and not indexes.has_key('status'):
+        #    idxs.remove('status')
             
         if 'modifydate' in idxs and not indexes.has_key('modifydate'):
+            import warnings
+            msg = "%s Catalog out of date. " % self.getRoot().absolute_url_path()
+            msg += "Missing 'modifydate'. Press the Update Everything button"
+            warnings.warn(msg)
             idxs.remove('modifydate')
             
         if self.EnableDueDate() and indexes.has_key('due_date'):
             idxs.append('due_date')
-
+            
         catalog.catalog_object(self, path, idxs=idxs)
  
     def getTitle_idx(self):

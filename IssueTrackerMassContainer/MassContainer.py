@@ -19,6 +19,7 @@ import logging
 from time import time
 
 # zope
+from Products.ZCatalog.Catalog import CatalogError
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
 from Globals import Persistent, InitializeClass, package_home, DTMLFile
 from Products.PythonScripts.standard import html_quote, url_quote_plus
@@ -222,7 +223,7 @@ class MassContainer(Folder.Folder, Persistent):
         return objs
     
         
-    def getRecentIssues(self, since=None, recursive=True, batch_size=20, batch_start=0,
+    def XXXgetRecentIssues(self, since=None, recursive=True, batch_size=20, batch_start=0,
                         by_add_date=False):
         """ return a list of all the most recent issues """
         skippable_paths = self.getSkippablePaths()
@@ -278,6 +279,91 @@ class MassContainer(Folder.Folder, Persistent):
         # cut off
         issue_paths = [x[1] for x in issues[int(batch_start):int(batch_size)+int(batch_start)]]
         return [root.unrestrictedTraverse(p) for p in issue_paths]
+
+
+    def getRecentIssues(self, since=None, recursive=True, batch_size=20, 
+                        batch_start=0, by_add_date=False):
+        """ return a list of all the most recent issues """
+        root = self.getRoot()
+        
+        try:
+            # If a _v_min_modifydate attribute is set, only bother with 
+            # trackers that have been updated since then. 
+            # In Zope, when an issue is saved in ZODB, the parent folder's 
+            # modify date (bobobase_modification_time) gets updated too.
+            # Even if the issues are in a BTreeFolder2 inside the tracker.
+            issuetrackers = self._getAllIssueTrackers(root,
+                                    modified_since=self._v_min_modifydate)
+        except AttributeError:
+            issuetrackers = self._getAllIssueTrackers(root)
+        
+        issues = []
+        search = {'meta_type':'Issue Tracker Issue'}
+
+        if since:
+            # If since comes in as timestamp, then it means the request is 
+            # only interested in issues that have changed since this date
+            # because anything else won't relevant and it'd be a shame to
+            # have to sort them and then find this out after anyway.
+            search['modifydate'] = {'query': DateTime(float(since)),
+                                    'range': 'min'}
+        else:
+            try:
+                search['modifydate'] = {'query': self._v_min_modifydate,
+                                        'range': 'min'}
+            except AttributeError:
+                # self._v_min_modifydate hasn't been set yet
+                pass
+            
+        for issuetracker in issuetrackers:
+            catalog = issuetracker.getCatalog()
+            try:
+                brains = catalog(sort_on='modifydate', **search)[:batch_size]
+            except (CatalogError, AttributeError):
+                logging.warn("Catalog in tracker %s (%s) is out of date. "\
+                "Press the Update Everything button" % \
+                (issuetracker.getTitle(), issuetracker.absolute_url_path()))
+                continue
+            
+            for brain in brains:
+                try:
+                    issues.append(brain.getObject())
+                except KeyError:
+                    print issuetracker.absolute_url_path(), "broken :("
+                    
+        # sorting on Zope DateTime objects is unpredictable whereas sorting on
+        # floating point numbers is always predictable
+        issues = [(float(x.getModifyDate()), x) for x in issues]
+        issues.sort()
+        issues.reverse()
+        issues = [x[1] for x in issues]
+        
+        issues = issues[int(batch_start):int(batch_size)+int(batch_start)]
+        # The next time we run this we know that there's no point including...
+        if not since:
+            try:
+                # because if it's included and the last one to appear why would
+                # we ever need to get issues out that are older than this?
+                # So, remember that the oldest one that can appear from now
+                # on is this one
+                self._v_min_modifydate = issues[-1].getModifyDate()
+                
+            except IndexError:
+                # no issues, can't set a new _v_min_modifydate
+                pass
+            
+        return issues
+    
+    def _getAllIssueTrackers(self, in_object, modified_since=None):
+        trackers = []
+        for o in in_object.objectValues([MASSCONTAINER_METATYPE, 'Issue Tracker']):
+            if o.meta_type == MASSCONTAINER_METATYPE:
+                trackers.extend(self._getAllIssueTrackers(o, modified_since))
+            elif not modified_since or (modified_since and \
+              o.bobobase_modification_time() > modified_since):
+                trackers.append(o)
+        return trackers
+        
     
     def _getOlderIssueTrackerPaths(self, in_object, older_than):
         assert hasattr(older_than, 'strftime'), "older_than must be a DateTime instance"

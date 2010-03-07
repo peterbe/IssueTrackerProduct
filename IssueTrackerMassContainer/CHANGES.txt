@@ -1,3 +1,11 @@
+- 0.1.0
+
+    New feature: Thanks to optimization the dashboard AJAX refresh
+    interval can go down to 
+
+    New feature: Even more optimized dashboard and even more memory
+    efficient not most importantly, not broken like version 0.0.12 was.
+    
 - 0.0.12
 
     New feature: Further improvements from 0.0.11. Now, with a cache

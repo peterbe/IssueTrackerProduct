@@ -47,10 +47,10 @@ function refreshActivityTable() {
    return true;
 }
 
-var orig_refresh_interval = refresh_interval = 30;
+var orig_refresh_interval = refresh_interval = 10;
 function autorefreshActivityTable() {
    refreshActivityTable();
-   refresh_interval += 5; // seconds to added every time
+   refresh_interval += 1; // seconds to added every time
    window.setTimeout(function() {
       autorefreshActivityTable();
    }, refresh_interval * 1000);
@@ -73,7 +73,7 @@ $(function() {
         .fadeTo(0, 0.3);      
    });
    
-   window.setTimeout(function() {autorefreshActivityTable()}, 1000*60);
+   window.setTimeout(function() {autorefreshActivityTable()}, 1000*30);
    
 });
 
