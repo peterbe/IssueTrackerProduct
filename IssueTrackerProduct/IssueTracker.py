@@ -103,7 +103,7 @@ except ImportError:
 # Zope
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
 from Globals import Persistent, InitializeClass, package_home, DTMLFile
-from OFS import SimpleItem, Folder, PropertyManager
+from OFS import Folder
 from DocumentTemplate import sequence
 from AccessControl import ClassSecurityInfo, getSecurityManager, AuthEncoding
 from Products.ZCatalog.CatalogAwareness import CatalogAware
@@ -158,7 +158,6 @@ from Datepicker import DatepickerBase
 from Permissions import *
 from Constants import *
 from Errors import *
-
 
 #----------------------------------------------------------------------------
 
@@ -2270,8 +2269,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         return count
         
-        
-            
 
     security.declareProtected(VMS, 'DeployStandards')
     def DeployStandards(self, remove_oldstuff=0, DestinationURL=None,
@@ -5475,7 +5472,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         params = {key:newtype}
         
         for e in ('q','i','f-statuses','f-fromname','f-email','f-sections',
-                  'f-urgencies','f-types','report','f-due'):
+                  'f-urgencies','f-types','report','f-due', 'f-assignee'):
             if request.get(e):
                 params[e] = request.get(e)
             
@@ -5491,7 +5488,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         params = {}
         
         for e in ('q','i','f-statuses','f-fromname','f-email','f-sections',
-                  'f-urgencies','f-types','report'):
+                  'f-urgencies','f-types','f-assignee','report'):
             if request.get(e):
                 params[e] = request.get(e)
             
@@ -6557,6 +6554,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         keys = ['statuses','sections','urgencies','types','fromname','email']
         if self.EnableDueDate():
             keys.append('due')
+        if self.UseIssueAssignment():
+            keys.append('assignee')
         field_ids = [x.getId() for x in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions())]
         keys += field_ids
 
@@ -6599,6 +6598,32 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     return "overdue, due " + ', '.join([x for x in due_options if not x=='overdue'])
 
                 return "due " + ', '.join(due_options)
+            
+            def name_assignee_filter(assignee):
+                ufpath, name = assignee.split(',')
+                root = self.getRoot()
+                if isinstance(ufpath, unicode):
+                    ufpath = ufpath.encode()
+                try:
+                    uf = root.unrestrictedTraverse(ufpath)
+                except KeyError:
+                    try:
+                        uf = root.unrestrictedTraverse(ufpath.split('/')[-1])
+                    except KeyError:
+                        # the userfolder (as it was saved) no longer exists
+                        return None
+                
+                if uf.meta_type == ISSUEUSERFOLDER_METATYPE:
+                    if uf.data.has_key(name):
+                        issueuserobj = uf.data[name]            
+                        return issueuserobj.getFullname() or issueuserobj.name
+                #elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
+                #    mtool = CMF_getToolByName(self, 'portal_membership')
+                #    member = mtool.getMemberById(name)
+                #    if member and member.getProperty('fullname'):
+                #        return member.getProperty('fullname')                
+                #print "where can I find", repr(assignee)
+                #return None
 
             def getFVal(key, zope=self, filterlogic=filterlogic):
                 return zope.getFilterValue(key, filterlogic,
@@ -6613,6 +6638,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             f_due = None
             if self.EnableDueDate():
                 f_due = getFVal('due')
+            f_assignee = None
+            if self.UseIssueAssignment():
+                f_assignee = getFVal('assignee')                
             
             main_option = self.getFilterlogic()
             
@@ -6634,6 +6662,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if isinstance(f_due, basestring):
                     f_due = [f_due]
                 name += _("that are") + " " + name_due_filter(f_due) + " "
+            if f_assignee:
+                assignee_fullname = name_assignee_filter(f_assignee)
+                if assignee_fullname:
+                    name += _("assigned to") + " " + assignee_fullname + " "
+                
                 
             if f_fromname and f_email:
                 L = [f_fromname.strip(), f_email.strip()]
@@ -6717,6 +6750,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         f_due = None
         if self.EnableDueDate():
             f_due = getFVal('due')
+        f_assignee = None
+        if self.UseIssueAssignment():
+            f_assignee = getFVal('assignee')
 
         custom_filters = {}
         for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
@@ -6828,6 +6864,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         valuer.set('email', f_email)
         if f_due is not None:
             valuer.set('due', f_due)
+        if f_assignee is not None:
+            valuer.set('assignee', f_assignee)
 
         if custom_filters:
             valuer.set_custom_fields_filter(custom_filters)
@@ -8212,7 +8250,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # o 'f-sections' is from the More statistics page
         #
         if request.get('filteroptions') or request.get('f-statuses') or \
-          request.get('f-sections') or request.get('f-due'):
+          request.get('f-sections') or request.get('f-due') or request.get('f-assignee'):
             # they have applied some filter options
             
             # by default we want to save the filter for later
@@ -8253,6 +8291,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # since they won't use the filter options to reuse their used filters.
         if _do_save_filter and is_bot_user_agent(request.get('HTTP_USER_AGENT','')):
             _do_save_filter = False
+            
 
         # get filter setup
         filterlogic = self.getFilterlogic()
@@ -8272,6 +8311,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         f_due = None
         if self.EnableDueDate():
             f_due = getFVal('due')
+        f_assignee = None
+        if self.UseIssueAssignment():
+            f_assignee = getFVal('assignee')            
         
         custom_filters = {}
         for field in self.getCustomFieldObjects(lambda x: x.includeInFilterOptions()):
@@ -8298,7 +8340,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                f_statuses is None and f_sections is None and \
                f_urgencies is None and f_types is None and \
                f_fromname is None and f_email is None and \
-               f_due is None and \
+               f_due is None and f_assignee is None and \
                not custom_filters:
             # Filter logic is to show only selected items but
             # nothing has been set so just return everything
@@ -8378,6 +8420,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         continue
                     elif not in_due_date_filter(dd, f_due):
                         continue
+                    
+                if f_assignee:
+                    # the issue has to be assigned to this person
+                    last_assignment = issue.getLastAssignment()
+                    if last_assignment:
+                        if last_assignment.getACLAssignee() != f_assignee:
+                            continue
+                    else:
+                        continue
 
                 if f_fromname is not None:
                     if f_fromname and not f_fromname_regex.findall(issue.getFromname()):
@@ -8442,6 +8493,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         # issue doesn't have a due date how can be block it
                         pass
                     elif in_due_date_filter(dd, f_due):
+                        continue
+                    
+                if f_assignee:
+                    last_assignment = issue.getLastAssignment()
+                    if last_assignment and last_assignment.getACLAssignee() == f_assignee:
                         continue
 
                 if f_fromname: # conditional covers both None and ""
@@ -13857,117 +13913,7 @@ from Notification import IssueTrackerNotification
 from Issue import IssueTrackerIssue, IssueTrackerDraftIssue
 from Thread import IssueTrackerIssueThread
 from Email import POP3Account
-
-
-#----------------------------------------------------------------------------
-
-class FilterValuer(SimpleItem.SimpleItem, PropertyManager.PropertyManager,
-                   CatalogAware):
-    """ a simple class that helps us remember a set of filter options. """
-    
-    meta_type = FILTEROPTION_METATYPE
-    
-    _properties = ({'id':'title',         'type':'ustring', 'mode':'w'},
-                   {'id':'adder_fromname','type':'ustring', 'mode':'w'},
-                   {'id':'adder_email',   'type':'string', 'mode':'w'},
-                   {'id':'acl_adder',     'type':'string', 'mode':'w'},
-                   {'id':'key',           'type':'string', 'mode':'r'},
-                   {'id':'mod_date',      'type':'date',   'mode':'w'},
-                   {'id':'filterlogic',   'type':'string', 'mode': 'w'},
-                   {'id':'statuses',      'type':'ulines',  'mode': 'w'},
-                   {'id':'sections',      'type':'ulines',  'mode': 'w'},
-                   {'id':'urgencies',     'type':'ulines',  'mode': 'w'},
-                   {'id':'types',         'type':'ulines',  'mode': 'w'},
-                   {'id':'due',           'type':'ulines',  'mode': 'w'},
-                   {'id':'fromname',      'type':'ustring', 'mode': 'w'},
-                   {'id':'email',         'type':'string', 'mode': 'w'},
-                   )
-
-    manage_options = PropertyManager.PropertyManager.manage_options
-    
-    def __init__(self, id, title):
-        self.id = id
-        self.title = title
-        self.acl_adder = ''
-        self.adder_fromname = u''
-        self.adder_email = ''
-        self.key = '' # Used by people who don't have a name
-        self.custom_filters = {}
-        self.mod_date = DateTime()
-        self.usage_count = 0
-        
-    def getId(self):
-        return self.id
-    
-    def getTitle(self, length_limit=None):
-        title = self.title
-        if length_limit is not None:
-            if len(title) > length_limit:
-                return title[:length_limit] + '...'
-        return title
-    
-    def getModificationDate(self):
-        """ return when it was last changed """
-        return self.mod_date
-    
-    def getKey(self):
-        return getattr(self, 'key', None)
-        
-    def set(self, key, value):
-        if not key in [x['id'] for x in self._properties]:
-            raise ValueError, "Unrecognized property key %r" % key
-        self.__dict__[key] = value
-        
-    def set_custom_fields_filter(self, custom_filters):
-        self.custom_filters = custom_filters
-
-        
-    def populateRequest(self, request):
-        """ put all the filter values in this class into self.REQUEST """
-        rset = request.set
-
-        rset('Filterlogic', self.filterlogic)
-        rset('f-statuses', self.statuses)
-        rset('f-sections', self.sections)
-        rset('f-urgencies', self.urgencies)
-        rset('f-types', self.types)
-        rset('f-fromname', self.fromname)
-        rset('f-email', self.email)
-        if getattr(self, 'due', None):
-            rset('f-due', self.due)
-        
-        for field_id, value in getattr(self, 'custom_filters', {}).items():
-            rset('f-%s' % field_id, value)
-        
-        
-    def incrementUsageCount(self):
-        self.usage_count = self.getUsageCount() + 1
-	
-    def updateModDate(self):
-        self.mod_date = DateTime()
-        
-    def getUsageCount(self):
-        """ return how many times this has been used """
-        return getattr(self, 'usage_count', 0)
-
-
-    ##
-    ## Indexing
-    ##
-    
-    def index_object(self):
-        """A common method to allow Findables to index themselves."""
-        idxs = ['meta_type','acl_adder','adder_fromname','adder_email',
-                'key','mod_date','path','title']
-        path = '/'.join(self.getPhysicalPath())
-        catalog = self.getFilterValuerCatalog()
-        catalog.catalog_object(self, path, idxs=idxs)
-        
-    def unindex_object(self):
-        catalog = self.getFilterValuerCatalog()
-        if catalog is not None:
-            catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
-        
+from filtervaluer import FilterValuer
 
 
 #----------------------------------------------------------------------------

@@ -167,14 +167,14 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
             </td>
     </tr>
     <tr tal:condition="here/ShowIssueURLOption">
-	<td><b>URL:</b></td>
+	<td><strong>URL:</strong></td>
         <td><input name="url2issue" tabindex="12" size="40" value="" tal:define="url2issue request/url | request/url2issue | emptystring" 
               tal:attributes="value url2issue" /></td>
     </tr>
     
     <tr tal:define="all_users here/getAllIssueUsers"
         tal:condition="python:here.UseIssueAssignment() and all_users">
-	<td><b>Assign to:</b></td>
+	<td><strong>Assign to:</strong></td>
 	<td>
   		  <select name="assignee" tabindex="30"
                           tal:define="selected python:request.get('assignee',''); 

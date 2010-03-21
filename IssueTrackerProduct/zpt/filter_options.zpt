@@ -7,10 +7,10 @@ function swapFilterLogic() {
     $('#currentfilterlogic').html('Do not show');
     $('#changefilterlogic').attr("href", function(){
       return this.href.replace('=show','=block');
-    }).html('Do only show...');
+    }).html('Only show...');
   } else {
     hidden.value='show';
-    $('#currentfilterlogic').html('Do only show');
+    $('#currentfilterlogic').html('Only show');
     $('#changefilterlogic').attr("href", function(){
       return this.href.replace('=block','=show');
     }).html('Do not show...');

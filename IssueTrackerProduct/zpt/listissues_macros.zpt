@@ -8,11 +8,11 @@
                         <input type="hidden" name="Filterlogic" value="block" />
 			<b id="currentfilterlogic">Do not show...</b>
             (switch logic to <a id="changefilterlogic" tal:attributes="href string:${rooturl}/${page}?Filterlogic=show&amp;ShowFilterOptions=1#filteroptions"
-             onclick="swapFilterLogic();return false;" onkeypress="swapFilterLogic();return false;">Do only show</a>)
+             onclick="swapFilterLogic();return false;" onkeypress="swapFilterLogic();return false;">Only show</a>)
             </span>
             <span tal:condition="python:filterlogic=='show'">
                         <input type="hidden" name="Filterlogic" value="show" />
-			<b id="currentfilterlogic">Do only show...</b>
+			<b id="currentfilterlogic">Only show...</b>
             (switch logic to <a id="changefilterlogic" tal:attributes="href string:${rooturl}/${page}?Filterlogic=block&amp;ShowFilterOptions=1#filteroptions"
              onclick="swapFilterLogic();return false;" onkeypress="swapFilterLogic();return false;">Do not show</a>)
             </span>
@@ -99,6 +99,21 @@
                 </td>
               </tr>
             </table>
+	    
+	    <tal:block define="all_users here/getAllIssueUsers"
+                       condition="python:here.UseIssueAssignment() and all_users">
+	    <div class="ftitle">Assigned to</div>
+            
+  		  <select name="f-assignee" tabindex="30"
+                          tal:define="preval python:here.getFilterValue('assignee', filterlogic, default='')">
+                     <option value=""></option>
+		     <option tal:repeat="user all_users" 
+                             tal:attributes="value python:user['identifier']; selected python:user['identifier']==preval" 
+                             tal:content="python:user['user'].getFullname()">Statuses</option>
+	           </select>            
+            
+	    </tal:block>
+	    
           </td>
 	</tr>
         <tr tal:define="fields python:here.getCustomFieldObjects(lambda x: x.includeInFilterOptions())"

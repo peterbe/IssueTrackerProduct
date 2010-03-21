@@ -1,4 +1,6 @@
 -
+    New feature: Now possible to filter by assignees.
+    
     New feature: Home page list of recent issues is much optimized by
     using the catalog to search by 'modifydate'.
     

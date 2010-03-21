@@ -2904,6 +2904,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             return self.getAssignments()[0]
         except IndexError:
             return None
+        
+    def getLastAssignment(self):
+        """ return the last assignment or None """
+        try:
+            return self.getAssignments()[-1]
+        except IndexError:
+            return None        
     
     
     def createAssignment(self, assignee_identifier, state=1,
