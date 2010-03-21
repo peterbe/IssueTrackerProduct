@@ -7752,10 +7752,20 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """return only objects that have either been modified or added since a 
         certain date.
         Use the ZCatalog if possible"""
+        issues = self._getIssueObjectsSinceInTracker(self.getRoot(), key, since)
+        for tracker in self._getBrothers():
+            issues.extend(self._getIssueObjectsSinceInTracker(tracker, key, since))
+            
+        return issues
+        
+        
+    def _getIssueObjectsSinceInTracker(self, tracker, key, since):
+        """see comment in _getIssueObjectsSince() as it's the same but here we
+        limit to this tracker."""
         
         assert key in ('added','modified'), key
         
-        catalog = self.getCatalog()
+        catalog = tracker.getCatalog()
         if isinstance(since, basestring):
             since = DateTime(since)
         elif isinstance(since, (int, float)):
@@ -10652,6 +10662,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             a certain time
         """
         
+        # check that since isn't a string
+        if isinstance(since, basestring):
+            since = DateTime(since)
+        elif self.REQUEST.has_key('count_status_since'):
+            try:
+                since = DateTime()-int(self.REQUEST['count_status_since'])
+            except ValueError:
+                since = None
+        
         # Because of legacy, not all issuetrackers have an up to date
         # catalog with the necessary indexes in which case we rely on the
         # old (slow) way of counting statuses
@@ -10661,53 +10680,44 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         else:
             return self._CountStatuses_objectValues(since=since)
         
-        #t0=time()
-        #r = self._CountStatuses_objectValues(since=since)
-        #t1=time()
-        #print "OLD",
-        #print t1-t0
-        #print r
-        #t0=time()
-        #r2 = self._CountStatuses_catalog(since=since)
-        #t1 = time()
-        #print "NEW",
-        #print t1-t0
-        #print r2
-        #print ""
-        #return r
-    
-    
     def _CountStatuses_catalog(self, since=None):
         """ by counting in zcatalog """
-        sR = self.getCatalog().searchResults
+        tres = self._CountStatuses_catalog_in_tracker(self.getRoot(), since=since)
+        for tracker in self._getBrothers():
+            # needs to merge the list of tuples
+            if isinstance(tres, list):
+                tres = dict(tres)
+            tres.update(dict(self._CountStatuses_catalog_in_tracker(tracker, since=since)))
+                
+        if isinstance(tres, dict):
+            # needs to be sorted back
+            tres_list = []
+            for status in self.getStatuses():
+                tres_list.append((status, tres[status]))
+            tres = tres_list
+            
+        return tres
+        
+    def _CountStatuses_catalog_in_tracker(self, tracker, since=None):
+        """ by counting in zcatalog """
+        sR = tracker.getCatalog().searchResults
         tres = []
         search = {'meta_type':ISSUE_METATYPE}
-        
-        # check that since isn't a string
-        if isinstance(since, basestring):
-            since = DateTime(since)
-        elif self.REQUEST.has_key('count_status_since'):
-            try:
-                since = DateTime()-int(self.REQUEST['count_status_since'])
-            except ValueError:
-                since = None
-            
+                    
         if since is not None:
             search['modifydate'] = {'query':since, 'range':'min'}
             
-        for status in self.getStatuses():
+        for status in tracker.getStatuses():
             search['status'] = status
-            tres.append([status, len(sR(**search))])
-            
+            tres.append((status, len(sR(**search))))
+        
         return tres
 
         
     def _CountStatuses_objectValues(self, since=None):
         """ Count by counting all issues as objects
         """
-        #
-        # NEEDS WORK!!
-        #
+        # Need deprecation warning here. Should not be used unless you've updated your catalog
         
         #return {}
         request = self.REQUEST
