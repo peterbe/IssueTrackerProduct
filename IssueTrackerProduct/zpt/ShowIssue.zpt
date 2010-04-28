@@ -142,67 +142,13 @@ a.detailslink { font-size:10px; }
 </div>
 
 
-<span tal:condition="request/previewissue|nothing" tal:omit-tag="">
-
-<h3 class="preview">Preview before saving</h3>
-
-<div class="threadbox" tal:define="previewtitle python:here.getPreviewTitle(here.status, request['action'])">
-	<div class="thead" tal:define="issueuser here/getIssueUser"> 
-	<b tal:content="structure python:here.colorizeThreadChange(previewtitle)">
-		Title
-	</b>
-	 &nbsp;&nbsp;-&nbsp;&nbsp;
-	<span tal:condition="issueuser"
-	     tal:content="structure python:here.ShowNameEmail(issueuser, highlight=0)">
-				Name and Email
-	</span>
-	<span tal:condition="not:issueuser"
-         tal:define="fromname python:here.getSavedUser('fromname');
-                     email python:here.getSavedUser('email');
-                     emptystring string:;
-                     fromname request/fromname|fromname|emptystring;
-                     email request/email|email|emptystring"
-	     tal:content="structure python:here.ShowNameEmail(fromname,email,highlight=0)">
-				Name and Email
-	</span>
-    </div>
-	<div class="trest" tal:define="emptystring string:;
-                                       comment request/comment | emptystring;
-                                       display_format python:here.getSavedTextFormat;
-                                       display_format request/display_format|display_format|here/default_display_format">
-	
-        <div class="tbody">
-	    <p tal:condition="comment"				            
-			tal:replace="structure python:here.ShowDescription(comment.strip()+' ', display_format)">
-			    COMMENT here
-	    </p>
-        <span tal:condition="not:comment">
-	    <em tal:condition="python:request['action'].lower()!='addfollowup'">No comment.</em>
-        <span class="submiterror" tal:condition="not:python:request['action'].lower()!='addfollowup'">Follow ups must have a comment</span>
-        </span>
-        </div>
-
-	    <div align="right" tal:content="structure python:here.showDate(here.ZopeTime())">date</div>
-
-        <div class="followupfiles" tal:content="structure python:here.showFileattachments(only_temporary=1)"></div>
-
-    </div>
-
-</div>
-
-<div tal:define="false python:0;notify request/notify | false; dispatch here/doDispatchOnSubmit; Others2Notify python:here.Others2Notify(format='merged', requireemail=1)"
-    tal:condition="python:notify and Others2Notify">
-Notification will be sent to: <br tal:replace="structure python:', '.join(Others2Notify)" />
-</div>
-
-</span>
 
 
 <div align="center" class="issue-and-threads" tal:condition="not:request/compareTo|nothing">
 
-  <div id="optionbuttons-outer"><span tal:condition="not:request/action|request/draft_followup_id|nothing" tal:replace="structure here/OptionButtons"></span></div>
-  <div id="extensionform-outer"><span tal:condition="request/action|request/draft_followup_id|nothing" tal:replace="structure python:here.ExtensionForm(options)"></span></div>
-
+  <div id="optionbuttons-outer">
+    <span tal:replace="structure here/OptionButtons"></span>
+  </div>
 
   <!-- id=issue -->
   <a name="i"></a>
@@ -217,9 +163,82 @@ Notification will be sent to: <br tal:replace="structure python:', '.join(Others
        tal:content="structure here/ShowIssueThreads">Show the threads
   </div>
   <!-- /Show Issue Threads -->
+
+  <a name="followup"></a>
+
+  <div id="followup-preview" style="width:610px" tal:condition="request/reviewissue|request/showpreview|nothing">
   
+  <h3 align="left" class="preview">Preview before saving</h3>
+  
+  <div class="threadbox" tal:define="previewtitle python:here.getPreviewTitle(here.status, request.get('otherAction', request.get('action')))">
+  	<div class="thead" tal:define="issueuser here/getIssueUser">
+  	<b tal:content="structure python:here.colorizeThreadChange(previewtitle)">
+  		Title
+  	</b>
+  	 &nbsp;&nbsp;-&nbsp;&nbsp;
+  	<span tal:condition="issueuser"
+  	     tal:content="structure python:here.ShowNameEmail(issueuser, highlight=0)">
+  				Name and Email
+  	</span>
+  	<span tal:condition="not:issueuser"
+           tal:define="fromname python:here.getSavedUser('fromname');
+                       email python:here.getSavedUser('email');
+                       emptystring string:;
+                       fromname request/fromname|fromname|emptystring;
+                       email request/email|email|emptystring"
+  	     tal:content="structure python:here.ShowNameEmail(fromname,email,highlight=0)">
+  				Name and Email
+  	</span>
+      </div>
+  	<div class="trest" tal:define="emptystring string:;
+                                         comment request/comment | emptystring;
+                                         display_format python:here.getSavedTextFormat;
+                                         display_format request/display_format|display_format|here/default_display_format">
+  	
+          <div class="tbody">
+  	    <p tal:condition="comment"				            
+  			tal:replace="structure python:here.ShowDescription(comment.strip()+' ', display_format)">
+  			    COMMENT here
+  	    </p>
+          <span tal:condition="not:comment">
+  	    <em tal:condition="python:request['action'].lower()!='addfollowup'">No comment.</em>
+          <span class="submiterror" tal:condition="not:python:request['action'].lower()!='addfollowup'">Follow ups must have a comment</span>
+          </span>
+          </div>
+  
+          <div class="threaddate" tal:content="structure python:here.showDate(here.ZopeTime())">date</div>
+
+          <div class="followupfiles" tal:content="structure python:here.showFileattachments(only_temporary=True)"></div>
+          <div class="clearerR">&nbsp;</div>
+
+      </div>
+  
+  </div>
+  
+  <div align="left" tal:define="false python:0;notify request/notify | false; dispatch here/doDispatchOnSubmit; Others2Notify python:here.Others2Notify(format='merged', requireemail=1)"
+      tal:condition="python:notify and Others2Notify">
+  Notification will be sent to: <br tal:replace="structure python:', '.join(Others2Notify)" />
+  </div>
+  
+  </div>
+
+
+<!--
+  <div id="extensionform-outer"><span tal:condition="request/action|request/draft_followup_id|nothing"
+                                      tal:replace="structure python:here.ExtensionForm(options)"></span></div>
+-->                                      
+
+  <tal:block condition="request/action|request/draft_followup_id|nothing"
+             replace="structure python:here.ExtensionForm(options)"></tal:block>
+
+  <tal:block condition="not:request/action|request/draft_followup_id|nothing"
+             replace="structure here/quick_form_followup"></tal:block>
+  
+  
+  <tal:comment replace="nothing">
   <tal:block condition="not:python:request.has_key('previewissue') or request.has_key('action')"
              replace="structure here/quick_form_followup"></tal:block>
+  </tal:comment>
   
 
 </div>

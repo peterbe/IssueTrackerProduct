@@ -3348,12 +3348,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             
         return rand_id
 
-    def getFileattachmentContainer(self, only_temporary=0):
+    def getFileattachmentContainer(self, only_temporary=None):
         """ if TEMPFOLDER_REQUEST_KEY is set in REQUEST return folder
         object, otherwise return self. """
         request = self.REQUEST
         rkey = TEMPFOLDER_REQUEST_KEY
-        if request.has_key(rkey) and request.get(rkey) is not None:
+        if request.has_key(rkey) and request.get(rkey) is not None and only_temporary:
             return getattr(self._getTempFolder(), request[rkey])
         elif only_temporary:
             return None

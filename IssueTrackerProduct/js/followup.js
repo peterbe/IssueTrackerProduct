@@ -140,7 +140,6 @@ function softsubmit(action) {
   }
 }
 
-
 function showAssignmentForm() {
    $('#assignment-form-rest').show(300);
    $('#assignee').css('color','#000');

@@ -83,7 +83,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
       <tr>
 		<td><b>Subject:</b></td>
 		<td>
-         <input name="title" tabindex="1" size="40" maxlength="70" id="title"
+         <input name="title" tabindex="1" size="50" maxlength="70" id="title"
           tal:attributes="value python:request.get('title','');
                           name string:title:${here/UNICODE_ENCODING}:ustring" />
                           
@@ -168,7 +168,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
     </tr>
     <tr tal:condition="here/ShowIssueURLOption">
 	<td><strong>URL:</strong></td>
-        <td><input name="url2issue" tabindex="12" size="40" value="" tal:define="url2issue request/url | request/url2issue | emptystring" 
+        <td><input name="url2issue" tabindex="12" size="50" value="" tal:define="url2issue request/url | request/url2issue | emptystring" 
               tal:attributes="value url2issue" /></td>
     </tr>
     

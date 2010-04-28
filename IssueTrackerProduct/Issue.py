@@ -659,8 +659,19 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         return count
                 
     security.declareProtected('View', 'index_html')
-    def index_html(self, REQUEST, *args, **kw):
-        """ show the issue """
+    def index_html(self, REQUEST,
+                   savedraftfollowup=False,
+                   cancelfollowup=False,
+                   previewfollowup=False,
+                   savefollowup=False,
+                   *args, **kw):
+        """ show the issue 
+        
+        The parameters savedraftfollowup, cancelfollowup, previewfollowup and
+        savedraftfollowup are all here because that's the only way to make the
+        buttons on the followup form all go to this place yet do different 
+        things.
+        """
         if self.canViewIssue():
             #self.RememberIssueVisit(self.getId())
             self.RememberRecentIssue(self.getId(), 'viewed')
@@ -673,7 +684,21 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     self.REQUEST.set('previewissue',None)
                     return self.ShowIssue(self, self.REQUEST, SubmitError=SubmitError, **kw)
             
+            # XXX is this really necessary every time?
             self._uploadTempFiles()
+            
+            
+            if savedraftfollowup:
+                return self.SaveDraftThread(REQUEST, *args, **kw)
+            elif cancelfollowup:
+                # necessary to overwrite the anchor so that it's not #followup
+                REQUEST.RESPONSE.redirect(self.absolute_url() + "#top")
+                return "redirecting"
+            elif savefollowup:
+                return self.ModifyIssue(REQUEST, *args, **kw)
+            elif previewfollowup:
+                self.REQUEST.set('showpreview', True)
+            
             return self.ShowIssue(self, self.REQUEST, **kw)
         else:
             response = self.REQUEST.RESPONSE
@@ -762,14 +787,14 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if lowercase_values.has_key(action):
             past_tense = statuses_and_verbs_reversed[lowercase_values[action]]
         else:
-            action = 'addfollowup'
+            action = 'add followup'
                                         
-        if action == 'addfollowup':
+        if action == 'add followup':
             gentitle = 'Added Issue followup'
         else:
             gentitle = 'Changed status from %s to %s'%\
                        (oldstatus.capitalize(), past_tense.capitalize())
-
+        
         return gentitle
 
 
@@ -803,7 +828,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     request.set('email', draft_object.getEmail())
                 if not request.get('display_format'):
                     request.set('display_format', draft_object.display_format)
-
+                    
         request_action = unicodify(request.get('action','')).lower()
                     
         if request_action == 'delete':
@@ -815,7 +840,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             request.set('otherComment', "Optional comment")
             request.set('otherAction', 'rejectassignment')
             
-        elif request_action != 'addfollowup':
+        elif request_action != 'add followup':
             title, action, comment = self._constructOtherTitles(self.status, request_action)
             if title:
                 request.set('otherActionTitle', title)
@@ -851,6 +876,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     def ManagerOptionsExtend(self):
         """ Determine which forms to show to Managers """
         request = self.REQUEST
+        
+        print " * * * ManagerOptionsExtend  * * * "
 
         has_key_special = self.has_key_special
         get_special_key = self.get_special_key
@@ -2261,7 +2288,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         for item in self.getStatusesMerged(aslist=1):
             status, verb = item
             if issuestatus != status.lower():
-                action = verb.replace(' ','').capitalize()
+                action = verb.capitalize()
                 action_quoted = url_quote_unicodeaware(action)
                 
                 #res.append([action, verb.capitalize()])

@@ -22,12 +22,14 @@ function _getNoLines(element) {
 
 
 function hideFileAttachments() {
-  $('tr.fileattachment').hide();
-  $('tr.fileattachment-tip').show();
+   $('div.fileattachment-off').hide();
+   $('div.fileattachment-on').show();
+   $('tr.fileattachment').hide();
 } 
 function showFileAttachments() {
-  $('tr.fileattachment-tip').hide();
-  $('tr.fileattachment').show();
+   $('div.fileattachment-on').hide();
+   $('div.fileattachment-off').show();
+   $('tr.fileattachment').show();
 }
 
 $(function() {
@@ -51,13 +53,14 @@ $(function() {
   if (!($('tr.fileattachment-error').size() || $('tr.fileattachment input[type="checkbox"]').size())) {
      hideFileAttachments();
   } else {
-     $('tr.fileattachment a.fileattachment-tip').hide();
+     showFileAttachments();
   }
+   
   $('input[type="file"]').change(function() {
      if (this.value)
-       $('tr.fileattachment a.fileattachment-tip').hide();
+       $('.fileattachment a.fileattachment-tip').hide();
      else
-       $('tr.fileattachment a.fileattachment-tip:hidden').show();
+       $('.fileattachment a.fileattachment-tip:hidden').show();
   });
    
 });

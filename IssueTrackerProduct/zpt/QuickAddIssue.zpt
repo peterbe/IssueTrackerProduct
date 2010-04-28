@@ -62,7 +62,7 @@ here's a special script that converts 'section' into ['section'] if present and 
                               use_autosave python:here.SaveDrafts() and here.UseAutoSave()">
 	<tr>
 		<td><b>Subject:</b></td>
-		<td><input name="title" tabindex="1" size="40" maxlength="70" id="title"
+		<td><input name="title" tabindex="1" size="50" maxlength="70" id="title"
                       tal:attributes="value python:request.get('title','');
                                       onfocus python:test(use_autosave, 'startautosave()');
                                       onblur python:test(use_autosave, 'stopautosave()');

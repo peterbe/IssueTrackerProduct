@@ -9,16 +9,21 @@
 <span id="recent-draftthread-author" style="color:#666;font-size:80%"></span>       
 </div>
 
+
+
 <form method="post" name="form_followup" enctype="multipart/form-data"
-      tal:attributes="action here/relative_url"
- tal:define="minimalformfollowup python:request.has_key('minimalformfollowup'); 
+ tal:define="minimalformfollowup python:1 or request.has_key('minimalformfollowup');
              issueuser here/getIssueUser;
              cmfuser here/getCMFUser;
              zopeuser here/getZopeUser;
              loggedin python:issueuser or (zopeuser and here.getSavedUser('fromname') and here.getSavedUser('email'));
-	     errors python:options.get('SubmitError',{})">
+	     errors python:options.get('SubmitError',{})"
+ tal:attributes="style python:test(minimalformfollowup, 'width:610px', 'width:690px;;margin-bottom:30px');
+                 action string:${here/relative_url}#followup">
+                 
+<input type="hidden" name="showpreview" value="1"/>
 
-<input type="hidden" name="action" value="AddFollowup"
+<input type="hidden" name="action" value="Add followup"
        tal:attributes="value request/otherAction | default" />
 <input type="hidden" tal:condition="python:request.has_key('Tempfolder_fileattachments')"
 	   tal:attributes="value request/Tempfolder_fileattachments" name="Tempfolder_fileattachments" />
@@ -28,11 +33,10 @@
 <em tal:condition="python:options.get('draft_saved')"
  >(draft saved)</em></h3>
 
-<table border="0">
-	<tr>
-		<td colspan="2">
-		<div tal:condition="python:request.has_key('otherComment')">
-		<b tal:content="request/otherComment | default">Other title</b></div>
+		<div align="left" tal:condition="python:request.has_key('otherComment')">
+		<b tal:content="request/otherComment | default">Other title</b>
+		</div>
+		
                 <span class="submiterror" 
 	         tal:condition="errors/comment|nothing" 
       	         tal:content="structure python:here.ShowSubmitError(options, 'comment', linebreak=1)"></span>
@@ -40,15 +44,13 @@
 		tal:attributes="name string:comment:${here/UNICODE_ENCODING}:utext;
                                 rows python:test(minimalformfollowup, 5, 10);
                                 cols python:test(minimalformfollowup, 70, 70);
+				style python:test(minimalformfollowup, 'width:610px', 'width:690px');
                                 onfocus python:test(here.SaveDrafts() and here.UseAutoSave(), 'startautosave();;clearAutoRefreshTitle()','clearAutoRefreshTitle()');
                                 onblur python:test(here.SaveDrafts() and here.UseAutoSave(), 'stopautosave()')
                                 "
 		tal:content="python:request.get('comment','')"></textarea>
         
-		</td>
-	</tr>
-	<tr tal:condition="python:not minimalformfollowup and not loggedin">
-		<td colspan="2" align="center">
+	<div style="float:right" tal:condition="python:not minimalformfollowup and not loggedin">
 		<b>Display format:</b>
 		<span tal:define="display_format request/display_format | here/getSavedTextFormat">
 			<input type="radio" tabindex="2" name="display_format:string"
@@ -58,12 +60,28 @@
           value="structuredtext"
           tal:attributes="checked python:display_format=='structuredtext'" />
           <a tal:attributes="href string:${here/getRootURL}/What-is-StructuredText">Structured Text</a>
-		</span>
-		</td>
-	</tr>
-	<tr>
-		<td tal:define="fromname request/form/fromname | python:here.getSavedUser('fromname');email request/form/email | python:here.getSavedUser('email')">
-		
+	  </span>
+	</div>
+	
+	<br style="clear:right"/>
+	
+	<div id="followup-buttons" style="float:right">
+            <input type="submit" name="savefollowup" value="  Save  " class="submitbutton"
+             onclick="javascript:this.value='Saving...'" />
+	    <input type="submit" name="previewfollowup" value="  Preview  " class="submitbutton" />
+            <input type="submit" value="Cancel" name="cancelfollowup"
+             tal:condition="request/showpreview|nothing" />
+            <input type="submit" name="savedraftfollowup" value=" Save draft " 
+             tal:condition="python:request.get('showpreview') and here.SaveDrafts()"
+             onclick="javascript:this.value='Saving draft...'" />	     
+	
+	</div>
+	
+	<div align="left" 
+	     tal:define="fromname request/form/fromname | python:here.getSavedUser('fromname');
+	                 email request/form/email | python:here.getSavedUser('email');
+                         number_of_files here/getNoFileattachments;">
+
 			<input type="hidden" name="fromname::"
 			tal:condition="not:python:minimalformfollowup and fromname=='' or not minimalformfollowup"
 			tal:attributes="value fromname;
@@ -71,8 +89,27 @@
 			<input type="hidden" name="email"
 			tal:condition="not:python:minimalformfollowup and email=='' or not minimalformfollowup"
 			tal:attributes="value email" />
+                        
+                 <div class="fileattachment-on" 
+                      tal:condition="number_of_files">
+                  <a href="#" class="fileattachment-tip"
+                       onclick="showFileAttachments();return false"
+                       ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Click here to attach
+                   <tal:block condition="python:number_of_files==1">a file</tal:block>
+                   <tal:block condition="not:python:number_of_files==1">one or more files</tal:block>
+                    </a>
+                </div>
+                
+                <div class="fileattachment-off" style="display:none"
+                     tal:condition="number_of_files">
+                     <a href="#" class="fileattachment-tip" onclick="hideFileAttachments();return false">
+                     <img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Hide again" />
+                     Hide file attachments</a>
+                </div>
+                
+                
 			
-	        <table tal:define="number_of_files here/getNoFileattachments" style="width:420px">
+	        <table>
                 <tr tal:condition="python:loggedin and not minimalformfollowup">
                    <td><b>User:</b></td>
                    <td tal:condition="issueuser"
@@ -120,57 +157,26 @@
                 <tr tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
                     <td colspan="2"><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
                 </tr>
-                
-    <tr class="fileattachment-tip" style="display:none"
-        tal:condition="number_of_files">
-      <td align="left" colspan="2"><a href="AddIssue" onclick="showFileAttachments();return false"
-             class="fileattachment-tip"
-            ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Click here to attach
-          <tal:block condition="python:number_of_files==1">a file</tal:block>
-          <tal:block condition="not:python:number_of_files==1">one or more files</tal:block>
-      </a>
-      </td>
-    </tr>
+
     
-		<tr tal:repeat="each python:range(number_of_files)" class="fileattachment">
+              <tr tal:repeat="each python:range(number_of_files)" class="fileattachment" style="display:none">
 		    <td><b>File attachment:</b></td>
 		    <td tal:define="index repeat/each/index" tal:content="structure python:here.getFileattachmentInput(index, initsize=25)"></td>
-		</tr>
-                <tr tal:condition="number_of_files" class="fileattachment">
-                  <td colspan="2" align="left">
-                     <a href="#" class="fileattachment-tip" onclick="hideFileAttachments();return false">
-                     <img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Hide again" />
-                     hide file attachments</a>
-                  </td>
-                </tr>
-		</table>
-		</td>
-		<td align="left" valign="top" 
-            tal:attributes="align python:test(minimalformfollowup and not here.getNoFollowupFileattachments(),'right','left')">
-			<div tal:condition="not:minimalformfollowup">&nbsp;</div>
-			<input type="submit" name="ModifyIssue:method" value="  Save  " class="submitbutton"
-             onclick="javascript:this.value='Saving...'" />
-			<input type="submit" name="previewissue" value="  Preview  " class="submitbutton" />
-            <input type="submit" value="Cancel" name="Cancel:method" 
-             tal:condition="not:minimalformfollowup" />
-            <input type="submit" name="SaveDraftThread:method" value=" Save draft " 
-             tal:condition="python:not minimalformfollowup and here.SaveDrafts()"
-             onclick="javascript:this.value='Saving draft...'" />	     
+	      </tr>
+	    </table>
 		
-		</td>
-
-	</tr>
-	<tr tal:define="Others2Notify python:here.Others2Notify(format='merged', requireemail=1)" tal:condition="Others2Notify">
-		<td colspan="2" width="500"><input type="checkbox" id="notify" name="notify:boolean" value="1"
+	  </div>
+	  
+	<div align="left"
+	     tal:define="Others2Notify python:here.Others2Notify(format='merged', requireemail=1)" tal:condition="Others2Notify">
+	<input type="checkbox" id="notify" name="notify:boolean" value="1"
 		tal:attributes="checked python:request.has_key('notify') or not request.has_key('asked_notify')" />
 			<input type="hidden" name="asked_notify:boolean" value="1" />
 			<label for="notify">Notify the others</label>
 			<span tal:condition="python:Others2Notify">(<span
              tal:replace="structure python:', '.join(Others2Notify)">Peter Bengtsson &lt;mail@peterbe.com&gt;</span>)</span>
-			</td>
-		</tr>
-	
-</table>
+			
+        </div>	
 
 <input type="hidden" name="draft_followup_id" 
  tal:define="draft_followup_id python:options.get('draft_followup_id', request.get('draft_followup_id', ''))"

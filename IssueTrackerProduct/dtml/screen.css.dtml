@@ -78,6 +78,7 @@ a.backlink { font-weight:bold; }
 
 abbr { text-decoration:none; border-bottom:0px solid #efefef; }
 
+textarea.autoexpanding { width:610px; } /* same as thread box */
 #tsizer a {
   border:1px solid #ccc;
   text-decoration:none; 
@@ -215,11 +216,13 @@ div#topright {
 
 .thead {
   padding:5px 10px;
+  text-align:left;
   background-color:#ccc;
 }
 
 .trest {
   background-color:#eee;
+  text-align:left;
 }
 
 .tbody {

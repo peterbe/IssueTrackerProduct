@@ -369,12 +369,12 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         return count    
 
 
-    def showThreadFileattachments(self, only_temporary=0):
+    def showThreadFileattachments(self, only_temporary=False):
         """ wrap around the showFileattachments() method """
         files = []
         container = self.getFileattachmentContainer(only_temporary=only_temporary)
         return self.showFileattachments(container)
-    
+
     def filenames(self):
         """ return all the filenames of this issue splitted """
         files = self.objectValues('File')
