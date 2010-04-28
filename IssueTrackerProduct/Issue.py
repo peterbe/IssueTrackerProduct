@@ -707,9 +707,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             listpage = '/%s'%self.whichList()
             response.redirect(self.getRootURL()+listpage)
             
-    def _cancelDraftThreads(self):
+    def _cancelDraftThreads(self, autosaved_only=False):
         """remove any draft threads you have in this issue"""
-        followupdrafts = self.getMyFollowupDrafts(issueid=self.getId())
+        followupdrafts = self.getMyFollowupDrafts(issueid=self.getId(),
+                                                  autosaved_only=autosaved_only)
         for draft in followupdrafts:
             # this will remove it from the cookie 
             self.DeleteDraftThread(draft.getId())
@@ -1190,6 +1191,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 # this recently added followupobject
                 self._dropMatchingDraftThreads(followupobject)
                 
+                # in fact, drop all drafts in this issue
+                self._cancelDraftThreads(autosaved_only=True)
+                
             if not self.doDispatchOnSubmit() and followupobject.getEmail():
                 # Notifications aren't sent out immediately, that means that
                 # there's a chance of a notification already exists inside
@@ -1211,7 +1215,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                               email_addresses, gentitle,
                               status_change=action == 'addfollowup')
             
-
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
         redirect_url = '%s#i%s'%(issueobject.absolute_url(),
                                  len(objectIds))

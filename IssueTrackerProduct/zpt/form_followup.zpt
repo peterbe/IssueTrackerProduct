@@ -167,7 +167,7 @@
 		
 	  </div>
 	  
-	<div align="left"
+	<div align="left" style="clear:left"
 	     tal:define="Others2Notify python:here.Others2Notify(format='merged', requireemail=1)" tal:condition="Others2Notify">
 	<input type="checkbox" id="notify" name="notify:boolean" value="1"
 		tal:attributes="checked python:request.has_key('notify') or not request.has_key('asked_notify')" />
@@ -175,7 +175,6 @@
 			<label for="notify">Notify the others</label>
 			<span tal:condition="python:Others2Notify">(<span
              tal:replace="structure python:', '.join(Others2Notify)">Peter Bengtsson &lt;mail@peterbe.com&gt;</span>)</span>
-			
         </div>	
 
 <input type="hidden" name="draft_followup_id" 
