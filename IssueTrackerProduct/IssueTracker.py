@@ -12129,40 +12129,47 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return getattr(root, folderid)
 
     
-    def getMyFollowupDrafts(self, skip_draft_id=None, autosaved_only=False):
+    def getMyFollowupDrafts(self, skip_draft_id=None, autosaved_only=False,
+                            issueid=None):
         """ return a list of thread draft objects """
         
         if not self.SaveDrafts():
             return []
         
-        ids = self._getDraftThreadIds()
+        ids = self._getDraftThreadIds(include_current=False)
+        print "(ids", ids
         container = self.getDraftsContainer()
+        print "Container", container
         objects = []
         for id in ids:
             if id == skip_draft_id:
+                print "\tSKIP", draft.getId()
                 continue
             
             if hasattr(container, id):
-                object = getattr(container, id)
-                if object.meta_type == ISSUETHREAD_DRAFT_METATYPE:
-                    if not autosaved_only or object.isAutoSave():
-                        objects.append(object)
+                draft = getattr(container, id)
+                print "* draft", repr(draft),
+                if draft.meta_type == ISSUETHREAD_DRAFT_METATYPE:
+                    print "ISSUEID", repr(draft.issueid)
+                    if issueid and issueid != draft.issueid:
+                        print "\tSKIP", draft.getId()
+                        continue
+                    if not autosaved_only or draft.isAutoSave():
+                        objects.append(draft)
+                    else:
+                        print "\tSKIP", draft.getId()
+            else:
+                print id, "not in", container
                         
+        print "RETURNING", objects, [x.issueid for x in objects]
         return objects
     
 
-    def _getDraftThreadIds(self, separate=False):
+    def _getDraftThreadIds(self, separate=False, include_current=True):
         """ return the possible draft ids (of threads) for this user """
         c_key = self.getCookiekey('draft_followup_ids')
         c_key = self.defineInstanceCookieKey(c_key)
-        #ids_cookie = self.get_cookie(c_key, '')
-        # in the code cleanup the variable 'draft_thread_id(s)' was changed to 
-        # 'draft_followup_id(s)'. For legacy reasons we here dig out if the
-        # user has some old cookies left under that name. This legacy hack 
-        # can be removed in 2006.
-        _legacy_c_key = '__issuetracker_draft_thread_ids'
-        ids_cookie = self.get_cookie(c_key, self.get_cookie(_legacy_c_key, ''))
-        
+        ids_cookie = self.get_cookie(c_key, '')
         ids_cookie = [x.strip() for x in ids_cookie.split('|') if x.strip()]
         
         issueuser = self.getIssueUser()
@@ -12174,8 +12181,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             for draft in all_draftobjects:
                 if draft.getACLAdder()==acl_adder:
                     ids_user.append(draft.getId())
+                    
+        # has the user a chosen one?
+        if include_current:
+            chosen_id = self.REQUEST.get('draft_followup_id')
+            if chosen_id:
+                if chosen_id in ids_cookie:
+                    ids_cookie.remove(chosen_id)
+                if chosen_id in ids_user:
+                    ids_user.remove(chosen_id)
             
-
         if separate:
             return Utils.uniqify(ids_cookie), Utils.uniqify(ids_user)
         else:

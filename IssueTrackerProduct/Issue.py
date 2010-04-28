@@ -691,6 +691,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if savedraftfollowup:
                 return self.SaveDraftThread(REQUEST, *args, **kw)
             elif cancelfollowup:
+                if self.SaveDrafts():
+                    self._cancelDraftThreads()
                 # necessary to overwrite the anchor so that it's not #followup
                 REQUEST.RESPONSE.redirect(self.absolute_url() + "#top")
                 return "redirecting"
@@ -704,6 +706,21 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             response = self.REQUEST.RESPONSE
             listpage = '/%s'%self.whichList()
             response.redirect(self.getRootURL()+listpage)
+            
+    def _cancelDraftThreads(self):
+        """remove any draft threads you have in this issue"""
+        followupdrafts = self.getMyFollowupDrafts(issueid=self.getId())
+        for draft in followupdrafts:
+            # this will remove it from the cookie 
+            self.DeleteDraftThread(draft.getId())
+            # this will remove it independent of cookie
+            self._dropDraftThread(draft.getId())
+        
+        if getattr(self,'_v_recent_draft', None):
+            if self._v_recent_draft.issueid == self.getId():
+                del self._v_recent_draft
+        
+        assert not self.getMyFollowupDrafts(issueid=self.getId())
         
     security.declarePrivate('canViewIssue')
     def canViewIssue(self):
@@ -1718,35 +1735,29 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     
         return objects
 
-    def _getDraftThreadIds(self, separate=False):
-        """ return the possible draft ids we have """
-        c_key = self.getCookiekey('draft_followup_ids')
-        c_key = self.defineInstanceCookieKey(c_key)
-        ids_cookie = self.get_cookie(c_key, '')
-        ids_cookie = [x.strip() for x in ids_cookie.split('|') if x.strip()]
-            
-        issueuser = self.getIssueUser()
-        ids_user = []
-        if issueuser:
-            container = self.getDraftsContainer()
-            all_draftobjects = container.objectValues(ISSUETHREAD_DRAFT_METATYPE)
-            acl_adder = ','.join(issueuser.getIssueUserIdentifier())
-            for draft in all_draftobjects:
-                if draft.getACLAdder()==acl_adder:
-                    ids_user.append(draft.getId())
-        
-        # has the user a chosen one?
-        chosen_id = self.REQUEST.get('draft_followup_id')
-        if chosen_id:
-            if chosen_id in ids_cookie:
-                ids_cookie.remove(chosen_id)
-            if chosen_id in ids_user:
-                ids_user.remove(chosen_id)
-                
-        if separate:
-            return Utils.uniqify(ids_cookie), Utils.uniqify(ids_user)
-        else:
-            return Utils.uniqify(ids_cookie+ids_user)
+    # Commented out because this is already happening in IssueTracker.py
+    #def _getDraftThreadIds(self, separate=False, include_current=True):
+    #    """ return the possible draft ids we have """
+    #    c_key = self.getCookiekey('draft_followup_ids')
+    #    c_key = self.defineInstanceCookieKey(c_key)
+    #    ids_cookie = self.get_cookie(c_key, '')
+    #    ids_cookie = [x.strip() for x in ids_cookie.split('|') if x.strip()]
+    #        
+    #    issueuser = self.getIssueUser()
+    #    ids_user = []
+    #    if issueuser:
+    #        container = self.getDraftsContainer()
+    #        all_draftobjects = container.objectValues(ISSUETHREAD_DRAFT_METATYPE)
+    #        acl_adder = ','.join(issueuser.getIssueUserIdentifier())
+    #        for draft in all_draftobjects:
+    #            if draft.getACLAdder()==acl_adder:
+    #                ids_user.append(draft.getId())
+    #    
+    #                
+    #    if separate:
+    #        return Utils.uniqify(ids_cookie), Utils.uniqify(ids_user)
+    #    else:
+    #        return Utils.uniqify(ids_cookie+ids_user)
     
     
     security.declareProtected('View', 'DeleteDraftIssue')
@@ -1768,7 +1779,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         issueuser = self.getIssueUser()
         if id in ids_user and issueuser:
             matched = True
-
+            
         if matched:
             # mark the draft issue as obsolete
             container = self.getDraftsContainer()
@@ -1830,8 +1841,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         save a draft on the side. """
         if prevent_preview:
             REQUEST.set('previewissue', False)
-
-        _saver = self._saveDraftThread
+            
         if self.SaveDrafts() and \
                (\
                  (draft_followup_id is None and self._reason2saveDraft(REQUEST)) \
@@ -1840,7 +1850,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                ):
             action = REQUEST.get('action','')
             issueid = self.getId()
-            draft_followup_id = _saver(issueid, action, REQUEST, draft_followup_id)
+            draft_followup_id = self._saveDraftThread(issueid, action, REQUEST, draft_followup_id)
             kw['draft_followup_id'] = draft_followup_id
             kw['draft_saved'] = True
         return self.index_html(REQUEST, *args, **kw)
@@ -1851,9 +1861,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                        *args, **kw):
         """ Called by the Ajax script. Return the draft_followup_id that
         we create if so."""
-        
-        
-        _saver = self._saveDraftThread
+
+
         if self.SaveDrafts() and \
                (\
                  (not draft_followup_id and self._reason2saveDraft(REQUEST)) \
@@ -1862,7 +1871,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                ):
             action = REQUEST.get('action','')
             issueid = self.getId()
-            draft_followup_id = _saver(issueid, action, REQUEST, draft_followup_id, is_autosave=True)
+            draft_followup_id = self._saveDraftThread(issueid, action, REQUEST, draft_followup_id, is_autosave=True)
             return draft_followup_id
         else:
             return ""
