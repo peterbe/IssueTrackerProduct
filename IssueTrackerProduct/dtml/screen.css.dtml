@@ -66,6 +66,11 @@ div.errormessage {
   padding-right:10px;  
 }
 
+div.followup-errormessage-outer {
+  width:610px;
+  text-align:left;
+}
+
 .submiterror {
   color:red;
   font-weight:bold;

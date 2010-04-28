@@ -149,7 +149,7 @@ a.detailslink { font-size:10px; }
   <div id="optionbuttons-outer">
     <span tal:replace="structure here/OptionButtons"></span>
   </div>
-
+  
   <!-- id=issue -->
   <a name="i"></a>
   <div tal:attributes="id python:test(not in_completelist, 'issuedata')"
@@ -233,12 +233,6 @@ a.detailslink { font-size:10px; }
 
   <tal:block condition="not:request/action|request/draft_followup_id|nothing"
              replace="structure here/quick_form_followup"></tal:block>
-  
-  
-  <tal:comment replace="nothing">
-  <tal:block condition="not:python:request.has_key('previewissue') or request.has_key('action')"
-             replace="structure here/quick_form_followup"></tal:block>
-  </tal:comment>
   
 
 </div>

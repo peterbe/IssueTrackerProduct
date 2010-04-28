@@ -682,7 +682,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     m = "Filename entered but no file content"
                     SubmitError = {'fileattachment':m}
                     self.REQUEST.set('previewissue',None)
-                    return self.ShowIssue(self, self.REQUEST, SubmitError=SubmitError, **kw)
+                    return self.ShowIssue(self, self.REQUEST, FollowupSubmitError=SubmitError, **kw)
             
             # XXX is this really necessary every time?
             self._uploadTempFiles()
@@ -821,7 +821,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         request = self.REQUEST
         
         # extract what we need from this caller templates options
-        SubmitError = options.get('SubmitError')
+        SubmitError = options.get('FollowupSubmitError',
+                                  options.get('SubmitError'))
+    
+            
         draft_followup_id = options.get('draft_followup_id', 
                                         request.get('draft_followup_id'))
         
@@ -866,8 +869,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 request.set('otherAction', action)
             if comment:
                 request.set('otherComment', comment)
-            
-        return self.form_followup(SubmitError=SubmitError, 
+                
+        return self.form_followup(SubmitError=SubmitError,
                                   draft_followup_id=draft_followup_id,
                                   draft_saved=draft_saved)
                                   
@@ -957,11 +960,14 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         return form
 
     
-    def ModifyIssue(self, REQUEST, action='Addfollowup'):
+    def ModifyIssue(self, REQUEST, action=None):
         """ advanced change to issue properties """
         request = self.REQUEST
         SubmitError = {}
-
+        
+        if action is None:
+            action = request.get('action', 'Add followup')
+            
         issueobject = self
         action = unicodify(ss(action))
         oldstatus = self.status
@@ -983,39 +989,38 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             else:
                 request.set('display_format', self.getDefaultDisplayFormat())
 
-        req_manager = 1 # require manager by default
-        addfollowup = 0
+        req_manager = True # require manager by default
+        addfollowup = False
         past_tense = None
-        statuses_and_verbs = self.getStatusesMerged(asdict=1)
+        statuses_and_verbs = self.getStatusesMerged(asdict=True)
         lowercase_values = {}
         statuses_and_verbs_reversed = {}
         for key, value in statuses_and_verbs.items():
             lowercase_values[value.lower()] = value
             statuses_and_verbs_reversed[value] = key
-
+            
         if lowercase_values.has_key(action):
             past_tense = statuses_and_verbs_reversed[lowercase_values[action]]
-            addfollowup = 1
+            addfollowup = True
         
         elif action == 'delete':
             DeleteIssue(self, self.id)
-            addfollowup = 0
+            addfollowup = False
             redirect_url = request.URL2
-        elif action == 'addfollowup':
-            addfollowup = 1
-            req_manager = 0
+        elif action == 'add followup':
+            addfollowup = True
+            req_manager = False
             
-
         if req_manager and not self.hasManagerRole():
             # the chosen action requires manager role,
             # but the person is not a manager
             self.redirectlogin(came_from=self.absolute_url())
-   
+
         if past_tense is not None and self.status != past_tense:
             self.status = past_tense
         else:
             if self.status == past_tense:
-                action = 'addfollowup'
+                action = 'add followup'
                 REQUEST.set('action', action)
                 if not comment:
                     # oops! someone is accidently trying to set the status of this issue
@@ -1083,7 +1088,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     SubmitError['fileattachment'] = m
 
             if SubmitError:
-                return self.ShowIssue(self, REQUEST, SubmitError=SubmitError)
+                return self.ShowIssue(self, REQUEST, FollowupSubmitError=SubmitError)
 
         # most actions may perhaps add a little comment
         if addfollowup:
@@ -1097,7 +1102,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                            meta_type=ISSUETHREAD_METATYPE,
                                            use_stored_counter=False)
 
-            if action == 'addfollowup':
+            if action == 'add followup':
                 gentitle = "Added Issue followup"
             else:
                 gentitle = 'Changed status from %s to %s'%\
@@ -1213,7 +1218,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if len(email_addresses) > 0:
                     self.sendFollowupNotifications(followupobject, 
                               email_addresses, gentitle,
-                              status_change=action == 'addfollowup')
+                              status_change=action == 'add followup')
             
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
         redirect_url = '%s#i%s'%(issueobject.absolute_url(),

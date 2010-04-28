@@ -12137,31 +12137,21 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return []
         
         ids = self._getDraftThreadIds(include_current=False)
-        print "(ids", ids
         container = self.getDraftsContainer()
-        print "Container", container
         objects = []
         for id in ids:
             if id == skip_draft_id:
-                print "\tSKIP", draft.getId()
                 continue
             
             if hasattr(container, id):
                 draft = getattr(container, id)
-                print "* draft", repr(draft),
                 if draft.meta_type == ISSUETHREAD_DRAFT_METATYPE:
-                    print "ISSUEID", repr(draft.issueid)
                     if issueid and issueid != draft.issueid:
-                        print "\tSKIP", draft.getId()
                         continue
-                    if not autosaved_only or draft.isAutoSave():
+                    
+                    if not autosaved_only or draft.isAutosave():
                         objects.append(draft)
-                    else:
-                        print "\tSKIP", draft.getId()
-            else:
-                print id, "not in", container
                         
-        print "RETURNING", objects, [x.issueid for x in objects]
         return objects
     
 

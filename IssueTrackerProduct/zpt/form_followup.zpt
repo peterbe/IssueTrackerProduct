@@ -1,7 +1,9 @@
 
-<span tal:condition="python:options.get('SubmitError')"
- tal:replace="structure here/show_submissionerror_message">
-</span>
+
+<div class="followup-errormessage-outer"
+     tal:condition="python:options.get('SubmitError')"
+     tal:content="structure here/show_submissionerror_message">
+</div>
 
 <div id="recent-draftthread-author-outer">&nbsp;
 <input type="hidden" name="page_generated_timestamp"
