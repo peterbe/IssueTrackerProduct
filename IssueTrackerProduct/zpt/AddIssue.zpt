@@ -215,15 +215,25 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
       <td><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
     </tr>
 
-    <tr class="fileattachment-tip" style="display:none"
+    <tr class="fileattachment-tip" 
         tal:condition="number_of_files">
       <td>&nbsp;</td>
-      <td><a href="AddIssue" onclick="showFileAttachments();return false"
+      <td>
+          <div class="fileattachment-on">
+          <a href="AddIssue" onclick="showFileAttachments();return false"
              class="fileattachment-tip"
             ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Click here to attach
           <span tal:condition="python:number_of_files==1">a file</span>
           <span tal:condition="not:python:number_of_files==1">one or more files</span>
-      </a>
+          </a>
+	  </div>
+	  
+	  <div class="fileattachment-off" style="display:none">
+          <a href="#" class="fileattachment-tip" onclick="hideFileAttachments();return false">
+          <img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Hide again" />
+          hide file attachments</a>
+	  </div>
+	  
       </td>
     </tr>
 
@@ -233,13 +243,6 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
           <input tal:replace="structure python:here.getFileattachmentInput(index)" />
         </td>
     </tr>
-    <tr tal:condition="number_of_files" class="fileattachment">
-        <td colspan="2" align="left">
-          <a href="#" class="fileattachment-tip" onclick="hideFileAttachments();return false">
-          <img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Hide again" />
-          hide file attachments</a>
-        </td>
-    </tr>    
 
     <tr tal:repeat="field here/getCustomFieldObjects">
       <td>
