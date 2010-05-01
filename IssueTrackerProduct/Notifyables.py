@@ -4,7 +4,16 @@
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 from OFS import SimpleItem, Folder
 from AccessControl import ClassSecurityInfo
-from Globals import MessageDialog, InitializeClass, DTMLFile
+from App.Dialogs import MessageDialog
+
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import DTMLFile, InitializeClass
+
 
 # Product
 import Utils

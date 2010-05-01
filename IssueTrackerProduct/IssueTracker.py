@@ -102,7 +102,6 @@ except ImportError:
 
 # Zope
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
-from Globals import Persistent, InitializeClass, package_home, DTMLFile
 from OFS import Folder
 from DocumentTemplate import sequence
 from AccessControl import ClassSecurityInfo, getSecurityManager, AuthEncoding
@@ -115,6 +114,16 @@ from DateTime.DateTime import DateError
 from App.ImageFile import ImageFile
 from ZPublisher.HTTPRequest import record
 from zExceptions import NotFound, Unauthorized
+
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+    from Persistence import Persistent
+    from App.class_init import InitializeClass
+    from App.Common import package_home
+except ImportError:
+    # < Zope 2.12
+    from Globals import DTMLFile, Persistent, InitializeClass, package_home
 
 
 # Is CMF installed?
@@ -4243,8 +4252,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if request.has_key(rkey):
             files_copied = []
             upload_folder_id = request.get(rkey)
+            if not upload_folder_id:
+                return
             if not hasattr(self._getTempFolder(), upload_folder_id):
-                return             
+                return
             upload_folder = self._getTempFolder()[upload_folder_id]
             confirms = self._getConfirmFileattachments()
 
@@ -5759,7 +5770,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         textindexes = ('email','url2issue')
         for idx in textindexes:
             if not indexes.has_key(idx):
-                zcatalog.addIndex(idx, 'TextIndex')
+                try:
+                    zcatalog.addIndex(idx, 'TextIndex')
+                except ValueError:
+                    # >= Zope 2.12
+                    extras = Empty()
+                    extras.index_type = 'Okapi BM25 Rank'
+                    extras.lexicon_id = 'Lexicon'
+                    zcatalog.addIndex(idx, 'ZCTextIndex', extras)
                 
         dateindexes = ['modifydate']
         if self.EnableDueDate():
@@ -13072,8 +13090,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         except:
             def _check_permission(*a, **k):
                 return False
-            LOG("standard_error_message", ERROR, 
-                "_check_permission() function disabled", error=sys.exc_info())
+            logger.error("_check_permission() function disabled", exc_info=True)
 
         try:
             if _check_permission(VMS, error_log):
@@ -13082,9 +13099,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 file.write(error_log.getLogEntryAsText(id=last_entry.get('id')))
                 file.write("\n\n")
         except:
-            LOG("standard_error_message", ERROR, 
-                "Could not get the last traceback",
-                error=sys.exc_info())
+            logger.error("Could not get the last traceback", exc_info=True)
                 
         version = self.getIssueTrackerVersion()
         file.write("IssueTrackerProduct version: %s\n"%version)
@@ -13112,9 +13127,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             temp_folder.manage_addFile(fileid, file=file,
                            content_type='text/plain')
         except:
-            LOG("standard_error_message", ERROR, 
-                    "Could not create error file object",
-                    error=sys.exc_info())
+            logger.error("Could not create error file object", exc_info=True)
             return None            
             
         fileobject = getattr(temp_folder, fileid)
@@ -13861,8 +13874,8 @@ setattr(IssueTracker, 'captcha_numbers_map', numbers_map)
     
          
 all = list(dtmls+zpts)
-if not DEBUG:
-    all.append('zpt/standard_error_message')
+#if not DEBUG:
+#    all.append('zpt/standard_error_message')
 addTemplates2Class(IssueTracker, tuple(all))
 
 setattr(IssueTracker, 'About.html', IssueTracker.About)

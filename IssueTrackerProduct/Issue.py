@@ -24,11 +24,18 @@ except ImportError:
     
 # Zope
 from Acquisition import aq_inner, aq_parent
-from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
-from webdav.WriteLockInterface import WriteLockInterface
+
+try:
+    # >= Zope 2.12
+    from webdav.interfaces import IWriteLock
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from webdav.WriteLockInterface import WriteLockInterface as IWriteLock
+    from Globals import InitializeClass
 
 try:
     from persistent.mapping import PersistentMapping
@@ -3354,7 +3361,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
     It's like the regular Issue objects except that it
     doesn't get cataloged. """
     
-    __implements__ = (WriteLockInterface,)
+    __implements__ = (IWriteLock,)
 
     meta_type = ISSUE_DRAFT_METATYPE
     icon = '%s/issuedraft.gif'%ICON_LOCATION

@@ -1,6 +1,14 @@
 
 from AccessControl import ClassSecurityInfo
-from Globals import InitializeClass
+
+try:
+    # >= Zope 2.12
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import InitializeClass
+
+
 
 from Constants import DEFAULT_DATEPICKER_OPTIONS
 

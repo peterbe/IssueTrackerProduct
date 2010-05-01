@@ -8,12 +8,17 @@
 
 
 # Zope
-from Globals import InitializeClass
 from OFS import SimpleItem
 from AccessControl import ClassSecurityInfo
-from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
 from Acquisition import aq_inner, aq_parent
+
+try:
+    # >= Zope 2.12
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import InitializeClass
 
 
 # Product

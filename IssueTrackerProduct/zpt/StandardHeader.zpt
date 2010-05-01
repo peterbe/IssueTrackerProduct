@@ -45,7 +45,7 @@ ul#tabnav a {
 
 <body>
 <div id="head">
-  <h1 class="head" tal:content="structure python:here.getRoot().title_or_id().replace(' ','&nbsp;')">The Title</h1>
+  <h1 class="head" tal:content="structure python:here.getRoot().title_or_id()">The Title</h1>
 
 <div id="topright">
 <form metal:use-macro="here/search_widget/macros/search_form"></form>

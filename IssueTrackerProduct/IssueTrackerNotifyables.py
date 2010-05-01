@@ -1,3 +1,7 @@
+import warnings
+warnings.warn("This file is deprecated in favor of Notifyables.py",
+              DeprecationWarning, 2)
+
 # python
 from types import ListType
 

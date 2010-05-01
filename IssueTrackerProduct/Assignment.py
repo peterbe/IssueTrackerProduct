@@ -8,10 +8,15 @@
 # python
 
 # Zope
-from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
-from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
+
+try:
+    # >= Zope 2.12
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import InitializeClass
 
 # Product
 from Issue import IssueTrackerIssue

@@ -9,10 +9,18 @@
 import sys
 
 # Zope
-from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo
 from zLOG import LOG, ERROR, INFO, PROBLEM, WARNING
 from DateTime import DateTime
+
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import DTMLFile, InitializeClass
+
 
 # Is CMF installed?
 try:

@@ -7,11 +7,18 @@
 # Zope
 from OFS.SimpleItem import SimpleItem
 from OFS.PropertyManager import PropertyManager
-from Globals import InitializeClass, DTMLFile
 from Products.ZCatalog.CatalogAwareness import CatalogAware 
 from AccessControl import ClassSecurityInfo
 from DateTime import DateTime
 from Acquisition import aq_inner, aq_parent
+
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import InitializeClass, DTMLFile
 
 # Is CMF installed?
 try:

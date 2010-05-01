@@ -13,7 +13,7 @@ from App.Dialogs import MessageDialog
 import IssueTracker
 import Thread
 import Note
-import IssueTrackerNotifyables as Notifyables
+import Notifyables
 import Issue
 import Email
 import IssueUserFolder
@@ -208,11 +208,26 @@ import OFS, App
 
 from App.Common import rfc1123_date
 from ZPublisher.Iterators import filestream_iterator
-from Globals import package_home, DevelopmentMode
+from Globals import DevelopmentMode
+
 try:
-    from zope.app.content_types import guess_content_type
+    # >= Zope 2.12
+    from App.Common import package_home
 except ImportError:
-    from OFS.content_types import guess_content_type
+    # < Zope 2.12
+    from Globals import package_home
+
+
+try:
+    # >= Zope 2.12
+    from zope.contenttype import guess_content_type
+except ImportError:
+    try:
+        # >= Zope 2.10
+        from zope.app.content_types import guess_content_type
+    except ImportError:
+        # < Zope 2.10 (I think)
+        from OFS.content_types import guess_content_type
     
 FILESTREAM_ITERATOR_THRESHOLD = 2 << 16 # 128 Kb (from LocalFS StreamingFile.py)
 

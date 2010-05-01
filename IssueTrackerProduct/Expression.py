@@ -22,12 +22,17 @@ Copied from CMFCore and modified for IssueTrackerProduct
 
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base, aq_inner, aq_parent
-from Globals import InitializeClass
-from Globals import Persistent
 from Products.PageTemplates.Expressions import getEngine
 from Products.PageTemplates.Expressions import SecureModuleImporter
 
-#from utils import getToolByName
+try:
+    # >= Zope 2.12
+    from Persistence import Persistent
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import Persistent, InitializeClass
+
 
 
 class Expression (Persistent):

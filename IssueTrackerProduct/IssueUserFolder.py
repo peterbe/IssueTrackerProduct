@@ -11,9 +11,17 @@ __version__='0.0.8'
 
 # Zope
 from AccessControl import User, AuthEncoding
-from Globals import DTMLFile, MessageDialog, Persistent
+from App.Dialogs import MessageDialog
 from AccessControl import ClassSecurityInfo
 from AccessControl.Role import DEFAULTMAXLISTUSERS
+
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+    from Persistence import Persistent
+except ImportError:
+    # < Zope 2.12
+    from Globals import DTMLFile, Persistent
 
 # Product
 import Utils

@@ -12,12 +12,20 @@ from types import InstanceType
 
 # Zope
 from OFS.Folder import Folder
-from Globals import DTMLFile, InitializeClass, DevelopmentMode
+from Globals import DevelopmentMode
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_inner, aq_parent, aq_base
 from DateTime import DateTime
 from DateTime.DateTime import DateError
 
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+    from App.class_init import InitializeClass
+except ImportError:
+    # < Zope 2.12
+    from Globals import DTMLFile, InitializeClass
+    
 try:
     from persistent.mapping import PersistentMapping
 except ImportError:

@@ -33,10 +33,15 @@ for k,v in entitydefs.items():
 from Products.PythonScripts.standard import html_quote, newline_to_br, \
          url_quote, url_quote_plus
 
-from StructuredText.StructuredText import HTML
+try:
+    # >= Zope 2.12
+    from zope.structuredtext import stx2html
+except ImportError:
+    # < Zope 2.12
+    from StructuredText.StructuredText import HTML as stx2html
 
 def structured_text(txt):
-    return HTML(txt,
+    return stx2html(txt,
                 level=int(os.environ.get('STX_DEFAULT_LEVEL',3)),
                 header=0)
 

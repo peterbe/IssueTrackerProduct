@@ -18,12 +18,20 @@ except ImportError:
     
 
 # zope
-from Globals import DTMLFile, InitializeClass, package_home
 from Products.PythonScripts.PythonScript import PythonScript
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_inner, aq_parent
 from DateTime import DateTime
-from zLOG import LOG, INFO
+
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+    from App.class_init import InitializeClass
+    from App.Common import package_home
+except ImportError:
+    # < Zope 2.12
+    from Globals import DTMLFile, InitializeClass, package_home
+
 
 from Shared.DC.Scripts.Script import defaultBindings # Script, BindingsUI,
 

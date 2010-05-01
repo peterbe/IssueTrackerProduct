@@ -8,6 +8,6 @@
 			  onkeypress string:softsubmit('${button/action}');;return false;;;
                           id python:test(button.get('id'), button.get('id'))"
                           
-          tal:content="structure python:button['verb'].replace(' ','&nbsp;')"></a>&nbsp;</li>
+          tal:content="structure python:button['verb']"></a>&nbsp;</li>
 </ul>
 <br style="clear:both" />

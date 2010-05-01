@@ -107,7 +107,13 @@ __version__='0.1.10'
 import os
 import time
 
-from Globals import DTMLFile
+try:
+    # >= Zope 2.12
+    from App.special_dtml import DTMLFile
+except ImportError:
+    # < Zope 2.12
+    from Globals import DTMLFile
+    
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
 try:

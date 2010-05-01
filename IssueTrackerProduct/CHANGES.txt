@@ -1,4 +1,7 @@
 -
+    New feature: Made IssueTrackerProduct work in Zope 2.12. (Thanks
+    Suresh V)
+    
     New feature: Now possible to filter by assignees.
     
     New feature: Home page list of recent issues is much optimized by
