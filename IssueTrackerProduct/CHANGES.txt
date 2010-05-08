@@ -1,4 +1,8 @@
 -
+
+    Bug fixed: Page AddIssue now security protected with the same
+    permission as for submitting issues.
+    
     New feature: Made IssueTrackerProduct work in Zope 2.12. (Thanks
     Suresh V)
     

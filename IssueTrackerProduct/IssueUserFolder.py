@@ -51,8 +51,13 @@ def manage_addIssueUserFolder(self, title='', webmaster_email='',
     for role in [IssueTrackerManagerRole, IssueTrackerUserRole]:
         # only add these roles if they don't already exist
         if role not in self.valid_roles():
-            self.REQUEST.set('role', role)
-            self.manage_defined_roles(submit='Add Role', REQUEST=self.REQUEST)
+            #self.REQUEST.set('role', role)
+            #self.manage_defined_roles(submit='Add Role', REQUEST=self.REQUEST)
+            aq_self = self.this()
+            roles = list(aq_self.__ac_roles__)
+            roles.append(role)
+            aq_self.__ac_roles__ = tuple(roles)
+            
 
     if old_users and REQUEST is not None:
         old_users_dict = {}

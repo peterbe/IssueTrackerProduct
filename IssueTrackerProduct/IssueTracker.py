@@ -12604,6 +12604,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return REQUEST.RESPONSE.redirect(self.absolute_url())
 
     
+    security.declareProtected(AddIssuesPermission, 'AddIssue')
     def AddIssue(self, REQUEST, *args, **kw):
         """ Override this template so we can upload temp file
         attachments when needing to """
