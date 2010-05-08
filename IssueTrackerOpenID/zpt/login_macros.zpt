@@ -1,0 +1,116 @@
+<metal:block define-macro="loginform">
+
+<form action="" method="post" name="loginform"
+ tal:define="came_from python:request.get('came_from',''); action_url python:came_from or 'logged_in'"
+ tal:attributes="action action_url">
+
+<p style="color:red; font-weight:bold"
+ tal:condition="python:request.get('retry')">Please try again.</p>
+
+<input type="hidden" name="came_from" value="&dtml-came_from;"
+ tal:condition="came_from"
+ tal:attributes="value came_from">
+
+<table class="FormLayout" align="center">
+<tr>
+  <td align="left" valign="top">
+  <strong>Name</strong>
+  </td>
+  <td align="left" valign="top">
+  <input type="text" name="__ac_name" size="20"
+   value=""
+   tal:attributes="value python:request.get('__ac_name','')" />
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <strong>Password</strong>
+  </td>
+  <td align="left" valign="top">
+  <input type="password" name="__ac_password" size="20" />
+  </td>
+</tr>
+
+<tr valign="top" align="left">
+<td></td>
+<td><input type="checkbox" name="remember_login_days" value="61"
+      tal:attributes="value here/long_login_days;
+                      checked python:int(request.cookies.get('use_remember_login_days',0))"
+      id="cb_remember" />
+<label for="cb_remember" class="remember">Remember my password on this computer for two months.</label>
+</td></tr>
+
+<tr>
+  <td align="left" valign="top">
+  </td>
+  <td align="left" valign="top">
+  <input type="submit" name="submit" value="Log in" onclick="this.value='Logging in...'" />
+  </td>
+</tr>
+
+</table>
+</form>
+
+<p style="font-size:0.8em" tal:condition="python:request.get('retry')">
+Cookies are used for the login. If it doesn't work, make sure your webbrowser accepts cookies.
+</p>
+
+</metal:block>
+
+
+
+<metal:block define-macro="openidform">
+
+<form action="initiateOpenID" method="post" id="openid-form"
+      tal:define="came_from python:request.get('came_from','')">
+
+<tal:came_from condition="came_from">
+  <tal:comment replace="nothing"><!-- Because we're not passing the came_from as a hidden variable
+  we have to store it in a session just for the OpenID authentication -->
+  </tal:comment>
+  
+  <tal:item define="dummy python:here.remember_came_from(came_from)"
+            replace="nothing"/>
+  
+</tal:came_from>
+
+<p><strong>Log in with your OpenID</strong></p>
+
+<div id="known-providers">
+
+<tal:block repeat="provider here/getAvailableProviders">
+  <a tal:define="icon provider/getIcon"
+     tal:attributes="id provider/getId;
+                     href string:initiateOpenID?provider=${provider/getId};
+                     class python:test(provider.requiresUsername(), 'requires-username');
+                     title string:Log in with your ${provider/getTitle} account;
+                     style string:background:white url(${icon/absolute_url_path}) no-repeat scroll center center">
+  </a>
+</tal:block>
+
+<input type="hidden" id="id_provider" name="provider" value=""/>
+</div>
+<div class="clearer">&nbsp;</div>
+
+<div id="username-part" style="display:none">
+  <p><label for="id_username">Username:</label>
+  <input id="id_username" name="username" 
+         tal:define="username here/getRememberedOpenIDUsername"
+         tal:attributes="value username"/>
+  <input type="submit" value="Log in" id="username-login-button"/>
+  </p>
+  
+</div>
+
+
+<div style="display:none">
+<input name="url" size="30" class="openid-identifier" style="color:#ccc"
+   onfocus="if(this.value=='Manually enter your OpenID URL'){this.value='';this.style.color='#000'}"
+   onblur="if(this.value==''){this.value='Manually enter your OpenID URL';this.style.color='#ccc'}"
+   value="Manually enter your OpenID URL"/>
+<input type="submit" name="submit" value="Log in" onclick="this.value='Redirecting...'" />
+</div>
+
+</form>
+
+</metal:block>

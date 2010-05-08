@@ -1,0 +1,23 @@
+<html metal:use-macro="here/header_footer/macros/standard">
+<div metal:fill-slot="body">
+
+
+
+
+<p><strong>Authentication failed</strong></p>
+
+
+<div tal:condition="options/username|request/username|nothing">
+  <p>No account associated with the username 
+  <code tal:content="options/username|request/username"></code> unfortunately.</p>
+</div>
+
+<div tal:condition="not:options/username|request/username|nothing">
+  <p>No username credentials could be acquired.</p>
+</div>
+
+
+<p><a tal:attributes="href here/absolute_url">Try again</a></p>
+
+</div>
+</html>

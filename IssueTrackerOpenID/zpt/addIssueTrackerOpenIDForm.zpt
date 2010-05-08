@@ -1,0 +1,22 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+
+<h2>Add Issue Tracker OpenID authenticator</h2>
+
+
+<form action="manage_addIssueTrackerOpenID">
+<table border="0"> 
+<tr><th>Id</th> 
+    <td><input type="text" name="oid" value="authentication"/></td>
+</tr> 
+<tr><th>Title</th> 
+    <td><input type="text" name="title:utf8:ustring" value="OpenID Authentication"/></td>
+</tr>
+<tr><td></td>
+    <td><input type="submit" value="Add" />
+</td>
+</tr> 
+</table>
+</form> 
+
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

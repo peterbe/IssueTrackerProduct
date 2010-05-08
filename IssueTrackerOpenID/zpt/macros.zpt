@@ -1,0 +1,59 @@
+<metal:block define-macro="loginform">
+
+<form action="" method="post" name="loginform"
+ tal:define="came_from python:request.get('came_from',''); action_url python:came_from or 'logged_in'"
+ tal:attributes="action action_url">
+
+<p style="color:red; font-weight:bold"
+ tal:condition="python:request.get('retry')">Please try again.</p>
+
+<input type="hidden" name="came_from" value="&dtml-came_from;"
+ tal:condition="came_from"
+ tal:attributes="value came_from">
+
+<table class="FormLayout" align="center">
+<tr>
+  <td align="left" valign="top">
+  <strong>Name</strong>
+  </td>
+  <td align="left" valign="top">
+  <input type="text" name="__ac_name" size="20"
+   value=""
+   tal:attributes="value python:request.get('__ac_name','')" />
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+  <strong>Password</strong>
+  </td>
+  <td align="left" valign="top">
+  <input type="password" name="__ac_password" size="20" />
+  </td>
+</tr>
+
+<tr valign="top" align="left">
+<td></td>
+<td><input type="checkbox" name="remember_login_days" value="61"
+      tal:attributes="value here/long_login_days;
+                      checked python:int(request.cookies.get('use_remember_login_days',0))"
+      id="cb_remember" />
+<label for="cb_remember" class="remember">Remember my password on this computer for two months.</label>
+</td></tr>
+
+<tr>
+  <td align="left" valign="top">
+  </td>
+  <td align="left" valign="top">
+  <input type="submit" name="submit" value=" Login " onclick="this.value='Logging in...'" />
+  </td>
+</tr>
+
+</table>
+</form>
+
+<p>
+Cookies are used for the login. If it doesn't work, make sure your webbrowser accepts cookies.
+</p>
+
+</metal:block>
+

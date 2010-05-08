@@ -1,0 +1,2 @@
+* (compare the openid email and fullname with that of the saved user)
+

@@ -1,0 +1,63 @@
+<html metal:use-macro="here/header_footer/macros/standard">
+<div metal:fill-slot="body">
+
+
+<div id="forms-wrapper">
+<div id="traditional">
+  <form metal:use-macro="here/login_macros/macros/loginform"></form>
+</div>
+
+<div id="openid">
+  <form metal:use-macro="here/login_macros/macros/openidform"></form>
+</div>
+
+<div class="clearer">&nbsp;</div>
+</div>
+
+
+</div>
+
+<metal:script fill-slot="extrajs">
+
+<script tal:condition="not:python:request.get('retry',0)" type="text/javascript">
+
+function _submit_openid() {
+    if (!$('#id_provider').val()) {
+       alert("Please select provider first");
+       return false;
+    }
+    
+    if (!$('#id_username').val()) {
+      alert("Please enter your username first");
+      return false;
+    }
+    $('#username-login-button').val("Redirecting...");
+    return true;
+}
+
+$(function() {
+  if ($('input[name="__ac_name"]').length && !$('input[name="__ac_name"]').val())
+    $('input[name="__ac_name"]')[0].focus();
+  
+  $('a.requires-username').click(function() {
+    $('#id_provider').val($(this).attr('id'));
+    $('#username-part:hidden').show(500);
+    $('#id_username')[0].focus();
+    
+    return false;
+  });
+  
+  $('#username-login-button').click(function() {
+    return _submit_openid();
+  });
+  
+  $('#openid-form').bind('submit', function() {
+    return _submit_openid();
+  });
+  
+});    
+</script>
+
+</metal:script>
+
+</html>

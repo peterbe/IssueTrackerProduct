@@ -1,0 +1,33 @@
+<h1 tal:replace="structure here/manage_page_header">Header</h1>
+
+<h2>Add OpenID provider</h2>
+
+
+<form action="manage_addIssueTrackerOpenIDProvider" method="post"
+      enctype="multipart/form-data">
+<table border="0"> 
+<tr><th>Id</th> 
+    <td><input type="text" name="oid" value=""/>
+    <span class="form-help">(e.g. aol)</span></td>
+</tr> 
+<tr><th>Title</th> 
+    <td><input type="text" name="title:utf8:ustring" value=""/>
+    <span class="form-help">(e.g. AOL)</span></td>
+</tr>
+<tr><th>URL</th> 
+    <td><input type="text" name="url" size="40" value=""/>
+    <span class="form-help">(e.g. http://openid.aol.com/USERNAME)</span></td>
+</tr>
+<tr><th>Icon</th> 
+    <td><input type="file" name="icon"/>
+    <span class="form-help">(max 85 pixels wide or high)</span></td>
+</tr>
+<tr><td></td>
+    <td><input type="submit" value="Add" />
+</td>
+</tr> 
+</table>
+</form> 
+
+
+<h1 tal:replace="structure here/manage_page_footer">Footer</h1>

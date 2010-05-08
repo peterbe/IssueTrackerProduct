@@ -1,0 +1,35 @@
+<html metal:use-macro="here/header_footer/macros/standard">
+<div metal:fill-slot="body" tal:omit-tag="">
+
+
+<tal:block tal:define="came_from python:request.get('came_from','');
+                 url_quote nocall:modules/Products/PythonScripts/standard/url_quote;
+		 came_from_quoted python:url_quote(came_from);
+                 username python:modules['AccessControl'].getSecurityManager().getUser()">
+
+<div tal:condition="python:str(username).lower() == 'anonymous user'">
+ <!-- Redirect or generate an unauthorized response -->
+ <br tal:define="dummy python:request['RESPONSE'].unauthorized()" />
+
+ <h3>Login failed</h3>
+ <p>Please <a href="login_form?came_from=&dtml.url_quote-came_from;"
+   tal:attributes="href string:login_form?came_from=${came_from_quoted}"
+   >try again.</a></p>
+
+</div>
+<div tal:condition="not:python:str(username).lower() == 'anonymous user'">
+
+ <span tal:condition="came_from">
+   <br tal:replace="python:request.RESPONSE.redirect(came_from)" />
+ </span>
+
+ <h3>Login successful</h3>
+ <p><a href="../">Continue</a></p>
+
+</div>
+
+</tal:block>
+
+
+</div>
+</html>
