@@ -164,6 +164,7 @@ from bot_user_agents import is_bot_user_agent
 from Webservices import IssueTrackerWebservices
 from CustomField import CustomFieldsIssueTrackerBase
 from Datepicker import DatepickerBase
+from Summary import SummaryBase
 from Permissions import *
 from Constants import *
 from Errors import *
@@ -479,6 +480,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                    Notifyables.Notifyables, IssueTrackerWebservices,
                    CustomFieldsIssueTrackerBase,
                    DatepickerBase,
+                   SummaryBase,
                    ):
     """ IssueTracker class """
     

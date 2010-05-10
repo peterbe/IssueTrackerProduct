@@ -1,0 +1,9 @@
+<html metal:use-macro="here/getHeader">
+<div metal:fill-slot="body">
+
+<h3>This month summary</h3>
+
+
+
+</div>
+</html>
