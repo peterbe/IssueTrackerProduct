@@ -1,0 +1,193 @@
+<html metal:use-macro="here/getHeader">
+<style type="text/css" metal:fill-slot="extracss">
+#added_issues, #modified_issues { width:48%; float:left;}
+#added_issues { margin-right:20px; }
+#added_issues ul li, #modified_issues ul li { list-style-type:none; padding-bottom:4px;}
+#added_issues ul, #modified_issues ul { margin-left:0; padding-left:12px;}
+#added_issues h3, #modified_issues h3 { border-bottom:1px solid #ccc; width:90% }
+b.adjacent { display:none; }
+a.adjacent { background-color:#ffff88; }
+#actual_hours, #estimated_hours { padding-left:12px; }
+#main { margin-bottom:100px; }
+</style>
+<div metal:fill-slot="body">
+
+<h2 tal:content="python:here.getSummaryPageTitle(month=request.get('month'), year=request.get('year'))"></h2>
+
+<div tal:define="prev_next python:here.getPrevNextMonthURLs(month=request.get('month'), year=request.get('year'));
+                 prev_url python:prev_next[0];
+                 next_url python:prev_next[1]">
+  <p>
+    <a tal:condition="prev_url"
+       tal:attributes="href prev_url">&larr; previous month</a>
+     &#183;
+    <a tal:condition="next_url"
+       tal:attributes="href next_url">next month &rarr;</a>       
+  </p>
+</div>
+
+
+<div tal:define="summary python:here.getIssueSummaryByMonth(month=request.get('month'), year=request.get('year'));
+                 today context/ZopeTime;
+                 count_added_issues python:len(summary['added_issues'])">
+
+  <div id="added_issues">
+  <h3 tal:condition="python:count_added_issues==0">No issues added</h3>
+  <h3 tal:condition="python:count_added_issues==1">1 issue added</h3>
+  <h3 tal:condition="python:count_added_issues>1"
+      ><tal:item replace="python:count_added_issues"/> issues added</h3>
+
+  
+  <ul tal:condition="summary/added_issues">
+  <li tal:repeat="issue summary/added_issues"
+      tal:attributes="class python:here.getUniqueIssueClassname(issue)">
+    <span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
+    
+         <a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
+               tal:attributes="href issue/absolute_url_path;
+                               title python:test(diff, diff)"
+	         tal:content="structure python:context.displayBriefTitle(issue.getTitle(), limit=60)"
+		 class="ilink"
+		 ></a>
+                 by:
+                 <a tal:replace="structure python:here.ShowNameEmail(issue.getFromname(), issue.getEmail(), hideme=issue.isHidden())"></a>
+                 <img src="/misc_/IssueTrackerProduct/paperclip.gif"
+                  tal:define="noattachments issue/countFileattachments"
+                  tal:condition="noattachments"
+                  tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                  <tal:confidential condition="issue/isConfidential">
+                  (<acronym title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym>)
+                  </tal:confidential>
+                  <tal:test tal:condition="python:here.isFromBrother(issue)">
+                   (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+                       tal:attributes="href brother/absolute_url_path" class="brother"
+                       tal:content="brother/getTitle"></a>)
+                  </tal:test>                              
+                 <tal:comment replace="nothing">- <b class="status" tal:content="python:issue.getStatus().capitalize()"></b><br/></tal:comment>
+                 
+          <b class="adjacent">&larr; same issue</b>
+         
+  </li>
+  </ul>
+  
+    <p id="actual_hours" tal:condition="python:here.UseEstimatedTime() and summary['added_issues']">
+      <b>Total estimated hours:</b>
+      <tal:block define="total_hours python:sum([x.getEstimatedTimeHours() for x in summary['added_issues'] if x.getEstimatedTimeHours()])">
+      
+         <abbr tal:attributes="title string:total_hours"
+               tal:condition="total_hours"
+               tal:content="python:here.showTimeHours(total_hours)"></abbr>
+         <tal:item condition="not:total_hours">0</tal:item>
+         hours
+         <span style="color:#999"
+               tal:condition="python:total_hours>10">
+               (<abbr title="Assuming 8 hours per day"
+               >approximately <br tal:replace="python:'%.1f'% round(total_hours/8.0,1)"/> days</abbr>)
+         </span>
+      </tal:block>
+    </p>  
+  
+  </div>
+
+  <div id="modified_issues">
+  <tal:change repeat="modified_issue_list summary/modified_issues">
+    <h3 tal:define="status python:modified_issue_list[0];
+                       count python:len(modified_issue_list[1])">
+      <tal:item replace="count"/>
+      <tal:item condition="python:count==1">issue</tal:item>
+      <tal:item condition="not:python:count==1">issues</tal:item>
+      changed 
+      <tal:item condition="python:here.isFirstStatusOption(status)">back</tal:item>
+      to <b class="status" tal:content="python:status.capitalize()"></b>
+    </h3>
+    
+    <ul>
+      <li tal:repeat="issue_and_thread python:modified_issue_list[1]"
+          tal:attributes="class python:here.getUniqueIssueClassname(issue_and_thread[0])">
+      <tal:block define="issue python:issue_and_thread[0]; thread python:issue_and_thread[1]">
+        <span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
+         <a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
+               tal:attributes="href issue/absolute_url_path;
+                               title python:test(diff, diff)"
+	         tal:content="structure python:context.displayBriefTitle(issue.getTitle(), limit=60)"
+		 class="ilink"
+		 ></a>
+                 by: <a tal:replace="structure python:here.ShowNameEmail(thread.getFromname(), thread.getEmail())"></a>
+                 <img src="/misc_/IssueTrackerProduct/paperclip.gif"
+                  tal:define="noattachments issue/countFileattachments"
+                  tal:condition="noattachments"
+                  tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                  <tal:confidential condition="issue/isConfidential">
+                  (<acronym title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym>)
+                  </tal:confidential>
+                  <tal:test tal:condition="python:here.isFromBrother(issue)">
+                   (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+                       tal:attributes="href brother/absolute_url_path" class="brother"
+                       tal:content="brother/getTitle"></a>)
+                  </tal:test>
+          <b class="adjacent">&larr; same issue</b>
+                
+      </tal:block>
+      </li>
+    </ul>
+    
+    <p id="actual_hours" tal:condition="python:here.isLastStatusOption(modified_issue_list[0]) and here.UseActualTime()">
+      <b>Total actual hours:</b>
+      <tal:block define="total_actual_hours python:sum([x[0].getActualTimeHours() for x in modified_issue_list[1] if x[0].getActualTimeHours()])">
+      
+         <abbr tal:attributes="title string:total_actual_hours"
+               tal:condition="total_actual_hours"
+               tal:content="python:here.showTimeHours(total_actual_hours)"></abbr>
+         <tal:item condition="not:total_actual_hours">0</tal:item>
+         hours
+         <span style="color:#999"
+               tal:condition="python:total_actual_hours>10">
+               (<abbr title="Assuming 8 hours per day"
+               >approximately <br tal:replace="python:'%.1f'% round(total_actual_hours/8.0,1)"/> days</abbr>)
+         </span>
+      </tal:block>
+    </p>
+    
+  </tal:change>
+  </div>
+
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+</div>
+
+<script type="text/javascript" metal:fill-slot="extrajs">
+$(function() {
+  $('#added_issues a.ilink').bind('mouseover', function() {
+    var also = false
+    $('#modified_issues .' +$(this).parents('li').attr('class')).each(function() {
+      $('b.adjacent', this).show();
+      $('a.ilink', this).addClass('adjacent');
+      also = true;
+    });
+    if (also) $(this).addClass('adjacent');
+  }).bind('mouseout', function() {
+    $('#modified_issues b.adjacent:visible').hide();
+    $('#modified_issues a.adjacent').removeClass('adjacent');
+    $('a.adjacent').removeClass('adjacent');
+  });
+
+  // now in reverse
+  $('#modified_issues a.ilink').bind('mouseover', function() {
+    var also = false
+    $('#added_issues .' +$(this).parents('li').attr('class')).each(function() {
+      $('b.adjacent', this).show();
+      $('a.ilink', this).addClass('adjacent');
+      also = true;
+    });
+    if (also) $(this).addClass('adjacent');
+  }).bind('mouseout', function() {
+    $('#added_issues b.adjacent:visible').hide();
+    $('#added_issues a.adjacent').removeClass('adjacent');
+    $('a.adjacent').removeClass('adjacent');
+  });
+  
+});
+</script>
+</html>

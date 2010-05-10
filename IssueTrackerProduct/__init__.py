@@ -150,6 +150,7 @@ def initialize(context):
         registerIcon('spreadsheeticon.png')
         registerIcon('reports.gif')
         registerIcon('statistics.gif')
+        registerIcon('summary.png')
         registerIcon('report-big.png')
         registerIcon('close.gif')
         registerIcon('paperclip.gif')

@@ -49,7 +49,7 @@
 	    <tal:new condition="not:threads">
  	      Submitted by: <a tal:replace="structure python:here.ShowNameEmail(issue.getFromname(), issue.getEmail(), hideme=issue.isHidden())"></a><br />
 		
-	    </tal:new>	    
+	    </tal:new>
       </dd>
     </tal:repeat>
     

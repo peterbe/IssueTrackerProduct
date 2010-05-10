@@ -32,6 +32,7 @@ ul.further li a {
 
 
 #statistics { background-image: url(/misc_/IssueTrackerProduct/statistics.gif); }
+#summary { background-image: url(/misc_/IssueTrackerProduct/summary.png); }
 #reports { background-image: url(/misc_/IssueTrackerProduct/reports.gif); }
 
 

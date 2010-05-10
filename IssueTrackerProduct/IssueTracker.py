@@ -195,7 +195,10 @@ def base_hasattr(obj, name):
 
 
 _first_name_regex = re.compile('^([A-Z][a-z]+)\s')
-    
+
+
+MONTH_NAMES = [DateTime(2010, i+1, 1).strftime('%B')
+               for i in range(12)]
 
 #----------------------------------------------------------------------------
 
@@ -3155,6 +3158,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if stack:
             stack_copy = stack[:]
             
+            # If the fist two items are something like this:
+            #  ['April','2012', ...] then this is a summary page
+            if len(stack_copy) >= 2 and stack_copy[0] in MONTH_NAMES and \
+              len(stack_copy[1]) == 4 and stack_copy[1].isdigit():
+                # it's a summary
+                request.set('month', stack_copy[0])
+                request.set('year', stack_copy[1])
+                stack.remove(stack_copy[0])
+                stack.remove(stack_copy[1])
+                stack.insert(0, 'show_summary')
+                
             found_item = 1
             for each in range(len(stack_copy)):
                 found_item = 0
@@ -4919,9 +4933,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return url
 
     
-    def displayBriefTitle(self, title):
+    def displayBriefTitle(self, title, limit=BRIEF_TITLE_MAX_LENGTH):
         """ return the title or truncate it a bit """
-        limit = BRIEF_TITLE_MAX_LENGTH
         if self.ShowIdWithTitle():
             limit -= self.randomid_length
         if isinstance(title, str):

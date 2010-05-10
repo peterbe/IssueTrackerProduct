@@ -40,6 +40,9 @@
 
   <br />
   <ul class="further">
+    <li id="summary"
+      ><a tal:attributes="href here/getSummaryPageURL"
+          tal:content="here/getSummaryPageTitle"></a></li>
     <li id="statistics"
      tal:condition="python:here.hasManagerRole() or not here.PrivateStatistics()"
       ><a href="Statistics">Statistics</a></li>
