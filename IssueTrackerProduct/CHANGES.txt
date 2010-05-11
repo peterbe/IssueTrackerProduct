@@ -1,4 +1,7 @@
 -
+    Bug fixed: Saved filters that refer to objects that no longer
+    exist could cause an error on the filter option.
+    
     New feature: Monthly summary report
 
     New feature: By default ID is shown with title on new Issue

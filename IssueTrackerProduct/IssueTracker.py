@@ -20,6 +20,7 @@ import string, os, re, sys
 import random
 import poplib
 from urlparse import urlparse
+import warnings
 
 try:
     import simplejson
@@ -885,7 +886,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def ShowDownloadButton(self):
         """ return show_download_button """
-        import warnings
+        
         m = "Download button is deprecated."
         warnings.warn(m, DeprecationWarning)
         return False
@@ -7147,7 +7148,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
         objects = []
         for brain in catalog.searchResults(**search):
-            objects.append(brain.getObject())
+            try:
+                objects.append(brain.getObject())
+            except KeyError:
+                warings.warn("ZCatalog %s is out-of-date" % \
+                  catalog.absolute_url_path())
             
         return objects
             
