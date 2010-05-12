@@ -181,11 +181,18 @@ class SummaryBase(object):
         prev_date = date - datetime.timedelta(days=1)
         next_date = date + datetime.timedelta(days=31) # e.g. Jan 1 + 31 days is some time in Feb
         
-        prev_url = self.absolute_url_path() + prev_date.strftime('/%Y/%B')
+        if self.absolute_url_path() == '/':
+            prev_url = prev_date.strftime('/%Y/%B')
+        else:
+            prev_url = self.absolute_url_path() + prev_date.strftime('/%Y/%B')
+            
         if next_date > datetime.date.today():
             next_url = None
         else:
-            next_url = self.absolute_url_path() + next_date.strftime('/%Y/%B')
+            if self.absolute_url_path() == '/':
+                next_url = next_date.strftime('/%Y/%B')
+            else:
+                next_url = self.absolute_url_path() + next_date.strftime('/%Y/%B')
         return prev_url, next_url
         
     
