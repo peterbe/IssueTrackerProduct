@@ -2286,8 +2286,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         
 
     security.declareProtected(VMS, 'DeployStandards')
-    def DeployStandards(self, remove_oldstuff=0, DestinationURL=None,
-                        initzcatalog=1):
+    def DeployStandards(self, remove_oldstuff=False, DestinationURL=None,
+                        initzcatalog=True):
         """ copy images and other documents into the instance unless they
             are already there
         """
@@ -5795,9 +5795,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     extras.lexicon_id = 'Lexicon'
                     zcatalog.addIndex(idx, 'ZCTextIndex', extras)
                 
-        dateindexes = ['modifydate']
+        dateindexes = ['modifydate','issuedate']
         if self.EnableDueDate():
-            dateindexes = ['due_date']
+            dateindexes.append('due_date')
+            
         for idx in dateindexes:
             if not indexes.has_key(idx):
                 #extra = record()

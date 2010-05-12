@@ -570,7 +570,7 @@ class IssueTrackerTestCase(TestBase):
 
         # rss.xml
         rss_xml = getattr(tracker, 'rss.xml')()
-        self.assertTrue(rss_xml.find('<title><![CDATA[TITLE (Open)]]></title>') > -1)
+        self.assertTrue(rss_xml.find('<title><![CDATA[TITLE #001 (Open)]]></title>') > -1)
         
         # rdf.xml
         rdf_xml = getattr(tracker, 'rdf.xml')()
@@ -2043,6 +2043,36 @@ class IssueTrackerTestCase(TestBase):
                           "different")
         
         tracker.IssueUserChangePassword("secret", "newpass", "newpass")
+        
+        
+    def test_catalog_search_by_issuedate(self):
+        """it should be possible to search the issuetracker catalog by the issuedate
+        """
+        # create an issue
+        request = self.app.REQUEST
+        
+        tracker = self.folder.tracker
+        catalog = tracker.getCatalog()
+        self.assertTrue('issuedate' in catalog._catalog.indexes.keys())
+        
+        request.set('fromname', u'B\xc3\xa9b')
+        request.set('email', u'email@address.com')
+        request.set('description', u"\xef Description")
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getDefaultUrgency())
+        request.set('title', u"Sample issue")
+        html = tracker.SubmitIssue(request)
+        
+        # find it again
+        # just check basic catalog search first
+        brains = catalog()
+        self.assertTrue(brains)
+        self.assertEqual(brains[0].getObject().getTitle(), u"Sample issue")
+        
+        
+        brains = catalog(issuedate={'query':DateTime()-1, 'range':'min'})
+        self.assertTrue(brains)
+        self.assertEqual(brains[0].getObject().getTitle(), u"Sample issue")
         
 ################################################################################        
             
