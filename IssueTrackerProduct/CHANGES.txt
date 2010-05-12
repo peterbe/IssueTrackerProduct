@@ -1,4 +1,5 @@
--
+- 0.11.0
+
     Bug fixed: Saved filters that refer to objects that no longer
     exist could cause an error on the filter option.
     
