@@ -4990,16 +4990,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     
         return all
 
-    #def _findIssueLinks(self, text):
-    #    """ return a compiled regular expression of where there are 
-    #    links to other issues. The rules for making a link is:
-    #        <issuetracker id>#<issue id> (eg. Real#0103)
-    #        #<issue id> (eg. #0103)
-    #        #prefix<issue id> (eg. #ibm0103)
-    #    Bare in mind that the text might contain hyperlinks to issues
-    #    from before, ignore them.
-    #    """
-        
         
 
     ## Cookies!

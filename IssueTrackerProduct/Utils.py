@@ -685,7 +685,7 @@ def preParseEmailString(es, names2emails={}, aslist=0):
     But suppose names2email={'joe','joey@host.com')
     then you would expect:
     "mail@peterbe.com; peter@grenna.net; joey@host.com"
-    Bare in mind that names2emails can have values that are
+    Bear in mind that names2emails can have values that are
     lists, like this: {'group: Friends':['foo@bar.com',...]}
     """
     
