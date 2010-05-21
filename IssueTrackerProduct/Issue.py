@@ -1213,8 +1213,21 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 # this issue that is designated to the submitter of this followup.
                 self._removeUnsentNotifications(followupobject.getEmail())
             
-
-            if request.has_key('notify'):
+                
+            if request.get('notify-more-options'):
+                email_addresses = request.get('notify_email')
+                # check that they're all email address that are possible
+                possible_email_addresses = self.Others2Notify(do='email',
+                                                              emailtoskip=email)
+                email_addresses = [x.strip() for x 
+                                   in email_addresses 
+                                   if x.strip() and x.strip() in possible_email_addresses]
+                if email_addresses:
+                    self.sendFollowupNotifications(followupobject, 
+                              email_addresses, gentitle,
+                              status_change=action == 'add followup')
+            
+            elif request.has_key('notify'):
                         
                 # now, create and email-alert-queue object
                 # using filtered email address
@@ -1223,10 +1236,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                                      emailtoskip=email)
 
                                                      
-                if len(email_addresses) > 0:
+                if email_addresses:
                     self.sendFollowupNotifications(followupobject, 
                               email_addresses, gentitle,
                               status_change=action == 'add followup')
+                              
             
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
         redirect_url = '%s#i%s'%(issueobject.absolute_url(),
@@ -2202,7 +2216,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if requireemail and not Utils.ValidEmailAddress(_email):
                 continue # skip it!
             
-            if format == 'email':
+            if format == 'tuple':
+                add = (_email, nameemailshower(_name and _name or _email, _email))
+            elif format == 'email':
                 add = _email or _name
             elif format == 'name':
                 add = _name or _email
@@ -2224,7 +2240,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         add = nameemailshower(_email, _email)
             if add and add not in all:
                 all.append(add)
-                
+            
         return all
                         
 

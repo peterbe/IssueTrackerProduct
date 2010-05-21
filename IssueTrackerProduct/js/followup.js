@@ -117,6 +117,14 @@ $(function() {
       $('#optionbuttons-outer').load('form_delete');
       return false;
    });
+   
+   $('a.notify-tip').click(function() {
+      $('#notify-others').fadeOut(500);
+      $('#notify-more-options:hidden').fadeIn(400);
+      $('#notify-more-options input[name="notify-more-options"]').val('1');
+      
+      return false;
+   });
 });
 
 

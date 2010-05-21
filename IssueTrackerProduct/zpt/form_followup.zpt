@@ -168,16 +168,37 @@
 	    </table>
 		
 	  </div>
-	  
-	<div align="left" style="clear:left"
-	     tal:define="Others2Notify python:here.Others2Notify(format='merged', requireemail=1)" tal:condition="Others2Notify">
+        
+	<tal:block define="Others2Notify python:here.Others2Notify(format='merged', requireemail=1)" 
+	           condition="Others2Notify">
+		   
+	<div align="left" style="clear:right" id="notify-others"
+             tal:attributes="style python:test(request.get('notify-more-options'), 'display:none')">
 	<input type="checkbox" id="notify" name="notify:boolean" value="1"
 		tal:attributes="checked python:request.has_key('notify') or not request.has_key('asked_notify')" />
 			<input type="hidden" name="asked_notify:boolean" value="1" />
 			<label for="notify">Notify the others</label>
 			<span tal:condition="python:Others2Notify">(<span
              tal:replace="structure python:', '.join(Others2Notify)">Peter Bengtsson &lt;mail@peterbe.com&gt;</span>)</span>
-        </div>	
+               <a class="notify-tip" href="?notify-more-options=1#followup">more options</a>
+        </div>
+	<div align="left" style="display:none" id="notify-more-options"
+             tal:attributes="style python:test(not request.get('notify-more-options'), 'display:none')"
+	     tal:define="email_and_names python:here.Others2Notify(format='tuple', requireemail=True)">
+	  <p>
+          <input type="hidden" name="notify-more-options" 
+                tal:attributes="value python:test(request.get('notify-more-options'), 1)"/>
+          <input type="hidden" name="notify_email" value=""/>
+	  <tal:block repeat="email_and_name email_and_names">
+	    <input type="checkbox" name="notify_email" 
+                   tal:attributes="value python:email_and_name[0];
+                                   checked python:test(not request.has_key('notify_email') or email_and_name[0] in request.get('notify_email',[]))" />
+	    <tal:item replace="structure python:email_and_name[1]"/><br/>
+	  </tal:block>
+	  </p>
+	</div>
+	
+	</tal:block>
 
 <input type="hidden" name="draft_followup_id" 
  tal:define="draft_followup_id python:options.get('draft_followup_id', request.get('draft_followup_id', ''))"

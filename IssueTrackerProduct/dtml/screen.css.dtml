@@ -510,7 +510,7 @@ a.plink:hover { text-decoration:none; color:#999; }
 * html .trest {height: 1%;}
 /* End hide from IE5-mac */
 
-a.fileattachment-tip {
+a.fileattachment-tip, a.notify-tip {
   text-decoration:none;
   color:#666;
 }
