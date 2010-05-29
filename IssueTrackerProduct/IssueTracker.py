@@ -37,6 +37,7 @@ except ImportError:
     
 import cgi
 import cStringIO
+import StringIO
 import inspect
 from time import time
 from socket import error as socket_error
@@ -4195,19 +4196,23 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ create a thumbnail of the fileobject and name it
         'thumbnail--'+fileobject.getId() """
         oriFile = cStringIO.StringIO(str(fileobject.data))
-
+        #oriFile = StringIO.StringIO(str(fileobject.data))
+        #print dir(fileobject)
+        #print type(fileobject.data)
+        
         try:
             image = Image.open(oriFile)
         except IOError:
             m = "PIL.Image could not read %s bytes imagefile"
-            m = m%len(oriFile.getvalue())
-            LOG(self.__class__.__name__, WARNING, m, error=sys.exc_info())
+            m = m % len(oriFile.getvalue())
+            logger.error(m, exc_info=True)
             raise
         except:
             # all other
-            typ, val, tb = sys.exc_info()
+            #typ, val, tb = sys.exc_info()
             m = "Unable to create Image instance with open()"
-            LOG(self.__class__.__name__, ERROR, m, error=sys.exc_info())
+            logger.error(m, exc_info=True)
+            #LOG(self.__class__.__name__, ERROR, m, error=sys.exc_info())
             return 
 
         image.thumbnail((45, 45))
