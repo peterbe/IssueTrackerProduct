@@ -293,7 +293,8 @@ class IssueTrackerOpenID(CookieCrumbler):
             # this is expected to be a relative path compared to the parent of
             # the openid instance itself and we can expect to tack this on
             assert cc_in_path.startswith('/')
-            search_context = aq_parent(aq_inner(self)).unrestrictedTraverse(cc_in_path.split('/')[1:])
+            #search_context = aq_parent(aq_inner(self)).unrestrictedTraverse(cc_in_path.split('/')[1:])
+            search_context = self.unrestrictedTraverse(cc_in_path)
         
         # Now we just need to find this user in the acl_users folder here
         found_user = self._traverse_find_user(search_context, username, email=email)
@@ -301,9 +302,6 @@ class IssueTrackerOpenID(CookieCrumbler):
             found_user = self._traverse_find_user(search_context, None, email=email)
         
         if found_user:
-            #print "FOUND USER", found_user
-            #print dir(found_user)
-            #print "roles:", found_user.getRoles()
             # programmatically log in the user here
             REQUEST.set(self.name_cookie, found_user.getUserName())
             REQUEST.set(self.pw_cookie, found_user._getPassword())
@@ -315,8 +313,10 @@ class IssueTrackerOpenID(CookieCrumbler):
         if self.REQUEST.SESSION.get('cc_came_from'):
             url = self.REQUEST.SESSION.get('cc_came_from')
         elif self.REQUEST.SESSION.get('cc_in_path'):
-            url = aq_parent(aq_inner(self)).absolute_url_path() + \
-              self.REQUEST.SESSION.get('cc_in_path')
+            # cc_in_path is a path to a physical object
+            # It needs to be turned into virtual host URL
+            as_obj = self.unrestrictedTraverse(self.REQUEST.SESSION.get('cc_in_path'))
+            url = as_obj.absolute_url()
         else:
             # desperate
             url = aq_parent(aq_inner(self)).absolute_url()
@@ -445,16 +445,7 @@ class IssueTrackerOpenID(CookieCrumbler):
         return url
 
     def _set_cc_in_path(self):
-        openid_parent = aq_parent(aq_inner(self))
-        
-        in_path = self.REQUEST.URL1
-        if '/%s' % self.getId() in in_path:
-            in_path = self.REQUEST.URL2
-            
-        in_path = in_path.replace(openid_parent.absolute_url(), '')
-        assert in_path.startswith('/')
-        assert not in_path.endswith('/')
-        print "-> in_path", in_path
+        in_path = '/'.join(self.getPhysicalPath()[:-1])
         self.REQUEST.SESSION['cc_in_path'] = in_path
         
 
