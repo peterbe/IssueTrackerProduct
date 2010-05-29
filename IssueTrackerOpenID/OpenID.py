@@ -82,10 +82,17 @@ def _create_default_providers(container):
     
     # create these
     for each in default_providers:
+        if each.startswith('.'):
+            # e.g. '.svn'
+            continue
         id = re.sub('\d+_', '', each)
         _folder = os.path.join(default_providers_dir, each)
-        title = open(os.path.join(_folder, 'title.txt')).read().strip()
-        url = open(os.path.join(_folder, 'url.txt')).read().strip()
+        try:
+            title = open(os.path.join(_folder, 'title.txt')).read().strip()
+            url = open(os.path.join(_folder, 'url.txt')).read().strip()
+        except IOError:
+            logging.warn("Invalid provider folder %s" % _folder)
+            continue
         
         # also expect a file like icon.(gif|png|jpg)
         adder(id, url, title=title)
