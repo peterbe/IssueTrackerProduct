@@ -180,7 +180,8 @@
 			<label for="notify">Notify the others</label>
 			<span tal:condition="python:Others2Notify">(<span
              tal:replace="structure python:', '.join(Others2Notify)">Peter Bengtsson &lt;mail@peterbe.com&gt;</span>)</span>
-               <a class="notify-tip" href="?notify-more-options=1#followup">more options</a>
+               <a tal:condition="python:len(Others2Notify)>1"
+	          class="notify-tip" href="?notify-more-options=1#followup">more options</a>
         </div>
 	<div align="left" style="display:none" id="notify-more-options"
              tal:attributes="style python:test(not request.get('notify-more-options'), 'display:none')"
