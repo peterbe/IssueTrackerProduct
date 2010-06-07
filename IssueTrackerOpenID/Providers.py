@@ -33,13 +33,15 @@ class IssueTrackerOpenIDProvider(Folder):
     
     _properties = ({'id':'title', 'type': 'ustring', 'mode':'w'},
                    {'id':'url', 'type': 'string', 'mode':'w'},
+                   {'id':'disabled', 'type': 'bool', 'mode':'w'},
                    )
     
-    def __init__(self, id, url, title=u''):
+    def __init__(self, id, url, title=u'', disabled=False):
         super(IssueTrackerOpenIDProvider, self).__init__(id)
         assert self.id
         self.url = url
         self.title = title
+        self.disabled = disabled
         
     def getId(self):
         return self.id

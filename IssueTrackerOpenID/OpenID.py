@@ -87,6 +87,7 @@ def _create_default_providers(container):
             continue
         id = re.sub('\d+_', '', each)
         _folder = os.path.join(default_providers_dir, each)
+        
         try:
             title = open(os.path.join(_folder, 'title.txt')).read().strip()
             url = open(os.path.join(_folder, 'url.txt')).read().strip()
@@ -94,8 +95,13 @@ def _create_default_providers(container):
             logging.warn("Invalid provider folder %s" % _folder)
             continue
         
+        if os.path.isfile(os.path.join(_folder, 'disabled.txt')):
+            disabled = True
+        else:
+            disabled = False
+        
         # also expect a file like icon.(gif|png|jpg)
-        adder(id, url, title=title)
+        adder(id, url, title=title, disabled=disabled)
         provider = getattr(container, id)
         if os.path.isfile(os.path.join(_folder, 'icon.png')):
             icon_path = os.path.join(_folder, 'icon.png')
@@ -130,7 +136,9 @@ class IssueTrackerOpenID(CookieCrumbler):
         return Consumer(session, self.store)
     
     def getAvailableProviders(self):
-        return self.providers.objectValues('Issue Tracker OpenID provider')
+        return [x for x 
+                in self.providers.objectValues('Issue Tracker OpenID provider')
+                if not getattr(x, 'disabled', False)]
     
         
     # taken from CookieCrumblerIssueTrackerProduct
@@ -293,8 +301,11 @@ class IssueTrackerOpenID(CookieCrumbler):
             # this is expected to be a relative path compared to the parent of
             # the openid instance itself and we can expect to tack this on
             assert cc_in_path.startswith('/')
-            #search_context = aq_parent(aq_inner(self)).unrestrictedTraverse(cc_in_path.split('/')[1:])
-            search_context = self.unrestrictedTraverse(cc_in_path)
+            
+        if self.REQUEST.SESSION.get('cc_security_context_path'):
+            cc_security_context_path = self.REQUEST.SESSION.get('cc_security_context_path')
+            assert cc_security_context_path.startswith('/')
+            search_context = self.unrestrictedTraverse(cc_security_context_path)
         
         # Now we just need to find this user in the acl_users folder here
         found_user = self._traverse_find_user(search_context, username, email=email)
@@ -445,9 +456,27 @@ class IssueTrackerOpenID(CookieCrumbler):
         return url
 
     def _set_cc_in_path(self):
-        in_path = '/'.join(self.getPhysicalPath()[:-1])
+        in_object = self.REQUEST.PARENTS[0]
+        in_path = '/'.join(in_object.getPhysicalPath()[:-1])
         self.REQUEST.SESSION['cc_in_path'] = in_path
         
+        # The security context is where the user tried to log in
+        # Suppose you have this structure:
+        #  /
+        #  /acl_users
+        #  /openid
+        #  /trackers/
+        #     /acl_users
+        #     /issutracker1/
+        # 
+        # Then if a user tries to log in at /trackers/issutracker1/ we will of
+        # course use the OpenID instance in /openid to do all the template 
+        # rendering stuff for the login. 
+        # But the user is only trying to log in at /trackers/issutracker1/ and
+        # her username might be defined only inside /trackers/acl_users and not 
+        # in the root /acl_users
+        security_context_path = '/'.join(self.REQUEST.PARENTS[0].getPhysicalPath())
+        self.REQUEST.SESSION['cc_security_context_path'] = security_context_path
 
     
     
