@@ -708,7 +708,15 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return self.ModifyIssue(REQUEST, *args, **kw)
             elif previewfollowup:
                 self.REQUEST.set('showpreview', True)
+                
+            session_key = '%s-%s-notify_emails' % (self.getRoot().getId(),
+                                                   self.getId())
             
+            notify_emails = self.get_session(session_key)
+            if notify_emails:
+                self.REQUEST.set('notify-more-options', '1')
+                self.REQUEST.set('notify_email', notify_emails)
+
             return self.ShowIssue(self, self.REQUEST, **kw)
         else:
             response = self.REQUEST.RESPONSE
@@ -1219,13 +1227,27 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 # check that they're all email address that are possible
                 possible_email_addresses = self.Others2Notify(do='email',
                                                               emailtoskip=email)
-                email_addresses = [x.strip() for x 
+                email_addresses = [x.strip() for x
                                    in email_addresses 
                                    if x.strip() and x.strip() in possible_email_addresses]
+                                   
                 if email_addresses:
                     self.sendFollowupNotifications(followupobject, 
                               email_addresses, gentitle,
                               status_change=action == 'add followup')
+                              
+                              
+                    session_key = '%s-%s-notify_emails' % (self.getRoot().getId(),
+                                                           self.getId())
+                    if email_addresses == possible_email_addresses:
+                        # forget this session variable because the user has gone
+                        # back to selecting all email addresses possible
+                        self.delete_session(session_key)
+                    else:
+                        # put this in a session variable so the next time you get to
+                        # this followup form it will preselect the same notification 
+                        # options.
+                        self.set_session(session_key, email_addresses)
             
             elif request.has_key('notify'):
                         
