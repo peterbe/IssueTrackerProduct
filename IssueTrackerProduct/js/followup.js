@@ -119,7 +119,7 @@ $(function() {
    });
    
    $('a.notify-tip').click(function() {
-      $('#notify-others').fadeOut(500);
+      $('#notify-others').hide();
       $('#notify-more-options:hidden').fadeIn(400);
       $('#notify-more-options input[name="notify-more-options"]').val('1');
       
