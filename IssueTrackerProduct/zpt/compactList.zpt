@@ -46,7 +46,7 @@
 				<span tal:condition="ainfo" tal:content="structure ainfo" class="bd">
 				</span>
 			</td>
-			<td tal:define="sections python:', '.join(issue.getSections())">
+			<td tal:define="sections python:u', '.join(issue.getSections())">
                            <span tal:condition="python:len(sections)>40" style="font-size:90%" tal:content="sections"></span>
                            <span tal:condition="not:python:len(sections)>40" tal:replace="sections"></span>
 			</td>

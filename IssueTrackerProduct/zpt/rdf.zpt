@@ -27,7 +27,7 @@
          tal:content="string:${issue/getTitle} (${status})"></title>
   <link tal:content="issue/absolute_url"></link>
   <dc:date tal:content="python:issue.getIssueDate().strftime('%Y-%m-%dT%H:%M:%S+00:00')"></dc:date>
-  <dc:subject tal:content="python:', '.join(issue.getSections())"></dc:subject>
+  <dc:subject tal:content="python:u', '.join(issue.getSections())"></dc:subject>
   <description tal:content="structure python:here.CDATAText(issue.showDescription())"></description>
 </item>
 

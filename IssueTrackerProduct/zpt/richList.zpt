@@ -61,7 +61,7 @@
 		</tr>
 		<tr>
 			<td tal:content="structure python:issue.showAdditionalInformation()">Additional info</td>
-			<td tal:content="structure python:', '.join(issue.getSections())+'&nbsp;'">sections</td>
+			<td tal:content="python:', '.join(issue.getSections())">sections</td>
             <td valign="top" tal:define="hide_me issue/hide_me | nothing; 
                                 fromname issue/getFromname; 
                                 email issue/getEmail"

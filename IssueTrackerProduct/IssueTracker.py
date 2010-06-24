@@ -969,7 +969,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
               UPLOAD_SPREADSHEET_PERMISSION
             
         except ImportError:
-            print "not installed"
             return False
 
         if getattr(self, Spreadsheet_INSTANCE_ID, None):
@@ -3081,9 +3080,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             elif page == 'What-is-StructuredText':
                 title = "About Structured Text"
         
-        if isinstance(title, basestring):
+        if isinstance(title, str):
             # legacy
-            
             return Utils.html_entity_fixer(title)
         else:
             # new way

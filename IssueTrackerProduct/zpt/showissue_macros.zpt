@@ -54,7 +54,7 @@
     <tr>
       <td class="ilabel">Sections:</td>
       <td tal:condition="not:change"
-          tal:content="python:', '.join(here.getSections())">Homepage, Other
+          tal:content="python:u', '.join(here.getSections())">Homepage, Other
       </td>
       <td tal:condition="change">
         <select name="sections:list" multiple="multiple" 
