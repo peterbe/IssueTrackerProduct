@@ -82,7 +82,7 @@ CUSTOMFIELDFOLDER_METATYPE = 'Issue Tracker Custom Field Folder'
 CUSTOMFIELD_VALIDATION_EXPRESSION_METATYPE = 'Issue Tracker Custom Field Validation Expression'
 PAGE_METATYPE = 'Issue Tracker Page'
 PAGE_FOLDER_METATYPE = 'Issue Tracker Page Folder'
-
+PAGE_CHANGE_METATYPE = 'Issue Tracker Page Change'
 
 # properties
 #DEFAULT_TYPES = ('general', 'announcement', 'idea', 'bug report',
@@ -262,6 +262,7 @@ RECENTHISTORY_ISSUEIDVISITKEY = '__issuetracker_recenthistory_issueidvisit'
 RECENTHISTORY_ISSUESKEY = '__issuetracker_recenthistory_issues'
 RECENTHISTORY_ADDISSUEIDKEY = '__issuetracker_recenthistory_addissueid'
 RECENTHISTORY_REPORTSKEY = '__issuetracker_recenthistory_reports'
+RECENTHISTORY_PAGESKEY = '__issuetracker_recenthistory_pages'
 SHOW_FILTEROPTIONS_KEY = '__issuetracker_show_filteroptions'
 FILTEROPTIONS_KEY = '__issuetracker_filteroptions'
 ALREADY_NOT_SPAMBOT_COOKIE_KEY = '__it_AlreadyNotSpambot'

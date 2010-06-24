@@ -135,6 +135,7 @@ div#tab1 li.tab1 a, body#tab0 li.tab0 a {
   color: #666;
   text-decoration: none;
   padding:4px;
+  height:16px;
 }
 
 #tabnav a:hover {

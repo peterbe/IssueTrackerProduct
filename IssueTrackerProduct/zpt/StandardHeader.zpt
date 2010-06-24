@@ -34,7 +34,7 @@ ul#tabnav a {
 #menuitem-Login { background-position: 0 -264px; } 
 #menuitem-Logout { background-position: 0 -330px; } 
 #menuitem-User { background-position: 0 -396px; }
-#menuitem-Pages { background-position: 0 -400px; }
+#menuitem-Pages { background-position: 0 -452px; }
 </style>
 <style metal:define-slot="extracss" tal:omit-tag=""></style>
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" tal:attributes="href string:${root_relative_url}/favicon.ico" />

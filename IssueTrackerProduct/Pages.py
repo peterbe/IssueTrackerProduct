@@ -21,6 +21,8 @@
 from AccessControl import ClassSecurityInfo, getSecurityManager
 from DateTime import DateTime
 from OFS.Folder import Folder
+from OFS.SimpleItem import SimpleItem
+from Acquisition import aq_inner, aq_parent
 
 try:
     # >= Zope 2.12
@@ -45,7 +47,7 @@ except ImportError:
 # Product
 from TemplateAdder import addTemplates2Class
 #import Utils
-from Utils import unicodify#, asciify, merge_changes
+from Utils import unicodify, asciify, safeId
 from Constants import *
 from Errors import *
 from Permissions import VMS
@@ -56,8 +58,25 @@ from I18N import _
 
 # Misc stuff
 
+class BodyValidationError(Exception):
+    pass
+
+
 class Empty:
     pass
+
+
+def _title_to_id(title):
+    oid = asciify(title, 'ignore')
+    oid = oid.replace(' ','-')
+    oid = safeId(oid)
+    if len(oid) > 50:
+        oid = oid[:50]
+        while oid.endswith('-'):
+            oid = oid[:-1]
+    
+    return oid
+
 
 #----------------------------------------------------------------------------
 
@@ -213,10 +232,44 @@ class PageFolder(Folder, Persistent):
             
             if not indexes.has_key(idx):
                 zcatalog.addIndex(idx, 'ZCTextIndex', extras)
+                
+                
+    ##
+    ## For adding new pages
+    ##
+    
+    def addNewPage(self, REQUEST, RESPONSE):
+        """page for adding new pages"""
+        
+        SubmitError = {}
+        
+        if REQUEST.REQUEST_METHOD == 'POST':
+            print REQUEST.form
+            title = REQUEST.form.get('title', '').strip()
             
+            if not title:
+                SubmitError['title'] = _(u"Title missing")
+                
+            if not SubmitError:
+                page = self._createNewPage(title)
+                
+                return RESPONSE.redirect(page.absolute_url()+'/edit')
+            
+        return self.addNewPage_template(REQUEST, RESPONSE,
+                                        SubmitError=SubmitError)
+        
+        
+    def _createNewPage(self, title):
+        """create the new Page instance and return it"""
+        
+        oid = _title_to_id(title)
+        page = Page(oid, title, u"")
+        self._setObject(oid, page)
+        return getattr(self, oid)
         
     
 zpts = ('zpt/Pages/index_html',
+        'zpt/Pages/addNewPage_template',
 )    
 addTemplates2Class(PageFolder, zpts, extension='zpt')
 
@@ -251,9 +304,10 @@ class Page(Folder, Persistent):
     def __init__(self, id, title, body):
         self.id = str(id)
         self.title = unicodify(title.strip())
+        self.body = unicodify(body.strip())
         self.pagedate = DateTime()
         
-        self.blocks_changelog = PersistentMapping()
+        #self.blocks_changelog = PersistentMapping()
         self.related_pages = PersistentMapping()
         self.subscribers = []
         
@@ -338,13 +392,15 @@ class Page(Folder, Persistent):
             response = self.REQUEST.RESPONSE
             listpage = '/%s'%self.whichList()
             response.redirect(self.getRootURL()+listpage)
-            
-    
-    def ModifyPage(self, REQUEST):
-        """save changes to page"""
-        request = self.REQUEST
-        SubmitError = {}
+
         
+    def canViewPage(self):
+        # stubby
+        return 1
+    
+    def edit(self, REQUEST, RESPONSE):
+        """save changes to page"""
+        SubmitError = {}
         
             
         if not self.canViewPage():
@@ -353,13 +409,57 @@ class Page(Folder, Persistent):
             self.redirectlogin(came_from=self.absolute_url())
             return 
 
-        SubmitError = {}
-        if SubmitError:
-            return self.ShowIssue(self, REQUEST, SubmitError=SubmitError)
-        
+        if REQUEST.REQUEST_METHOD == "POST":
+            
+            title = REQUEST.form.get('title', '').strip()
+            body = REQUEST.form.get('body', '').strip()
+            
+            parent = aq_parent(aq_inner(self))
+            
+            if not title:
+                SubmitError['title'] = _(u"Missing")
+            else:
+                # check that there isn't already a page by this exact title
+                for page in parent.getPages():
+                    if page is not self:
+                        if page.getTitle().lower() == title.lower():
+                            SubmitError['title'] = \
+                              _(u"Duplicate title. Already used on another page")
+                            break
+                
+            body = unicodify(body)
+            try:
+                body = self._validate_and_clean_body(body)
+            except BodyValidationError, msg:
+                SubmitError['body'] = unicodify(msg)
+                
+            if not SubmitError:
+                
+                if title != self.getTitle():
+                    # new title, need to rename
+                    oid = _title_to_id(title)
+                    
+                    parent.manage_renameObjects([self.getId()], [oid])
+                
+                self._savePage(title, body, REQUEST)
 
+                # ready ! redirect!
+                RESPONSE.redirect(self.absolute_url()+'/edit')
+            
+        return self.edit_template(REQUEST, RESPONSE, SubmitError=SubmitError)
+    
+    def _validate_and_clean_body(self, html):
+        # try to clean it and if we encounter any serious errors we can't
+        # recover from then raise a BodyValidationError
+        
+        raise NotImplementedError("Use page templates as a final check")
+        return html
+    
+                                  
+    def _savePage(self, title, body, request):
+        
         issueuser = self.getIssueUser()
-        cmfuser = self.getCMFUser()
+        #cmfuser = self.getCMFUser()
         zopeuser = self.getZopeUser()
         if issueuser:
             acl_adder = ','.join(issueuser.getIssueUserIdentifier())
@@ -372,8 +472,8 @@ class Page(Folder, Persistent):
         ckey = self.getCookiekey('name')
         if issueuser and issueuser.getFullname():
             fromname = issueuser.getFullname()
-        elif cmfuser and cmfuser.getProperty('fullname'):
-            fromname = cmfuser.getProperty('fullname')
+        #elif cmfuser and cmfuser.getProperty('fullname'):
+        #    fromname = cmfuser.getProperty('fullname')
         elif not request.get('fromname') and self.has_cookie(ckey):
             fromname = self.get_cookie(ckey)
         elif request.get('fromname'):
@@ -383,8 +483,8 @@ class Page(Folder, Persistent):
         ckey = self.getCookiekey('email')
         if issueuser and issueuser.getEmail():
             email = issueuser.getEmail()
-        elif cmfuser and cmfuser.getProperty('email'):
-            email = cmfuser.getProperty('email')
+        #elif cmfuser and cmfuser.getProperty('email'):
+        #    email = cmfuser.getProperty('email')
         elif not request.get('email') and self.has_cookie(ckey):
             email = self.get_cookie(ckey)
         elif request.get('email'):
@@ -444,8 +544,6 @@ class Page(Folder, Persistent):
         self.unindex_object()
         self.index_object()
         
-        # ready ! redirect!
-        request.RESPONSE.redirect(redirect_url)
         
         
         
@@ -1067,10 +1165,11 @@ class Page(Folder, Persistent):
                 if note.threadID != threadID:
                     continue
             yield note
+            
                                     
 
-
 zpts = ('zpt/Pages/ShowPage',
+        'zpt/Pages/edit_template',
         )
 
         
@@ -1082,5 +1181,30 @@ InitializeClass(Page)
 
 #----------------------------------------------------------------------------
 
+VALID_CHANGES = ('add','edit','delete')
 
+
+class PageChange(SimpleItem, Persistent):
+    
+    meta_type = PAGE_CHANGE_METATYPE
+     
+    def __init__(self, id, fromname, email, acl_adder='',
+                 blocks=None, change='add', change_html=None):
+                     
+        self.id = str(id)
+        self.fromname = unicodify(fromname)
+        self.email = asciify(email)
+        self.acl_adder = acl_adder
+        
+        if blocks is None:
+            blocks = []
+        self.blocks = blocks
+        if change not in VALID_CHANGES:
+            raise ValueError("Invalid change value %r" % change)
+        self.change = change
+        if isinstance(change_html, str):
+            change_html = unicodify(change_html)
+        self.change_html = change_html
+                  
+     
 

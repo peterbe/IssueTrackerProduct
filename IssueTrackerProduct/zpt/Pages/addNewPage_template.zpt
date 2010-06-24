@@ -1,0 +1,36 @@
+<html metal:use-macro="here/getHeader">
+
+<script type="text/javascript" metal:fill-slot="extrajs"
+        tal:attributes="src string:${here/getRootRelativeURL}/pages.js"
+        ></script>
+
+<style type="text/css" metal:fill-slot="extracss">
+form#add-new-page label,
+form#add-new-page input { font-size:120%; font-weight:bold; }
+</style>
+ 
+<div metal:fill-slot="body">
+
+
+<h2>Active pages</h2>
+
+
+<form id="add-new-page" action="addNewPage" method="post"
+      tal:define="errors python:options.get('SubmitError',{})">
+  <div>
+             
+    <label for="id_title">Title:</label>
+    <input id="id_title" class="large-input" size="45"
+           tal:attributes="value request/form/title|nothing;
+                           name string:title:${here/UNICODE_ENCODING}:ustring"/>
+           <span class="submiterror" tal:condition="errors/title|nothing"
+	     tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>
+    <input type="submit" value="Add"/>
+  </div>
+</form>
+
+
+
+</div>
+</html>
+ 

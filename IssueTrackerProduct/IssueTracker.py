@@ -9066,7 +9066,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # keep the numbers small
                 issues = issues[:25]
             self.set_session(key, issues)
-        
     
 
     def hasRecentIssues(self, check_each=False):
@@ -9117,12 +9116,79 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return items
 
     
+    def RememberRecentPage(self, pageid, action):
+        """ return that we've touched this issue """
+        assert action in ('viewed','added')
+        
+        key = RECENTHISTORY_PAGESKEY
+        pages = self.get_session(key, [])
+        as_dict = {'id': pageid, 'action':action}
+        
+        if pageid not in [each['pageid'] for each in pages]:
+            pages.insert(0, as_dict)
+            pages = pages[:10]
+            self.set_session(key, pages)
+
+    def hasRecentPages(self, check_each=False):
+        """ return true if have either recent issue visits or
+        recent issue adds """
+        return bool(self.getRecentPages(check_each=check_each))
+    
+    def getRecentPages(self, length=None, check_each=True):
+        """ return a combination of added issues and visited issues """
+        key = RECENTHISTORY_PAGESKEY
+        pages = self.get_session(key, [])
+        if length:
+            pages = pages[:length]
+            
+        if check_each:
+            container = self._getPagesContainer()
+            checked = []
+            for page in pages:
+                if hasattr(container, page['pageid']):
+                    checked.append(page)
+            return checked
+        else:
+            return pages
+    
+    def getNiceRecentPages(self, length=None):
+        """ return a list of nicely formatted links to recent issues """
+        pages = self.getRecentPages(length=length)
+        container = self._getPagesContainer()
+        items = []
+        for page in pages:
+            chunks = []
+            pageobject = getattr(container, page['pageid'], None)
+            if not pageobject:
+                continue
+            
+            chunks.append('<a href="%s">' % pageobject.absolute_url_path())
+            chunks.append(self.displayBriefTitle(pageobject.getTitle()))
+            if page['action'] == 'added':
+                chunks.append('</a> (added)')
+            else:
+                chunks.append('</a>')
+                
+            items.append(''.join(chunks))
+            
+        return items
+    
+    
     def hasRecentHistory(self):
         """ check if anything is stored """
         test1 = self.hasRecentIssues(check_each=True)
+        if test1: return True
+        
         test2 = self.hasRecentSearchTerms()
+        if test2: return True
+        
         test3 = self.hasRecentReportRuns()
-        return test1 or test2 or test3
+        if test3: return True
+        
+        test4 = self.hasRecentPages()
+        if test4: return True
+            
+        return False
 
 
     def filterTooRecent(self, recenthistory):
