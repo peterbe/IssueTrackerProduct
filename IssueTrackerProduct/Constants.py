@@ -80,6 +80,9 @@ REPORTS_CONTAINER_METATYPE = 'Report Scripts Container'
 CUSTOMFIELD_METATYPE = 'Issue Tracker Custom Field'
 CUSTOMFIELDFOLDER_METATYPE = 'Issue Tracker Custom Field Folder'
 CUSTOMFIELD_VALIDATION_EXPRESSION_METATYPE = 'Issue Tracker Custom Field Validation Expression'
+PAGE_METATYPE = 'Issue Tracker Page'
+PAGE_FOLDER_METATYPE = 'Issue Tracker Page Folder'
+
 
 # properties
 #DEFAULT_TYPES = ('general', 'announcement', 'idea', 'bug report',
@@ -151,6 +154,7 @@ DEFAULT_SPAM_KEYWORDS = ['poker-stadium.com',
                          ]
 DEFAULT_ENABLE_DUE_DATE = False
 DEFAULT_ENABLE_ISSUE_NOTES = False
+DEFAULT_ENABLE_PAGES = False
 
 NATIVE_PROPERTIES = ('title', 'types', 'urgencies', 'sections_options',
                      'defaultsections', 'when_ignore_word', 'display_date',

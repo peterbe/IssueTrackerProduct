@@ -167,6 +167,7 @@ from Webservices import IssueTrackerWebservices
 from CustomField import CustomFieldsIssueTrackerBase
 from Datepicker import DatepickerBase
 from Summary import SummaryBase
+from Pages import PageBase
 from Permissions import *
 from Constants import *
 from Errors import *
@@ -486,6 +487,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                    CustomFieldsIssueTrackerBase,
                    DatepickerBase,
                    SummaryBase,
+                   PageBase,
                    ):
     """ IssueTracker class """
     
@@ -1459,6 +1461,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'use_actual_time',
                     'include_description_in_notifications',
                     'enable_due_date',
+                    'enable_pages',
                     'show_dates_cleverly',
                     'show_spambot_prevention',
                     ]
@@ -10602,6 +10605,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             if not id:
                 id = "Home"
             menu.append([e['label'], e['href'], _inurl, id])
+            
+        if self.EnablePages():
+            page_folder = self.getPageFolder()
+            menu.append([page_folder.getTitle(), '/Pages', inURL('Pages'), 'Pages'])
                 
         issueuser = self.getIssueUser()
         zopeuser = self.getZopeUser()

@@ -565,6 +565,23 @@ issue towards the top of List Issues.
   </td> 
 </tr>
 
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-signature_text">Enable pages</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+    <div class="form-element">
+	<input type="checkbox" name="enable_pages:boolean" <dtml-if "EnablePages()">checked="checked"</dtml-if> />
+      
+    </div>
+  </td>
+  <td align="left" valign="top">
+  <p>Pages are online documents that you can annotate issues to. </p>
+  </td> 
+</tr>
+
 </table>
 
 <div class="submitarea" align="center">

@@ -1,0 +1,25 @@
+<html metal:use-macro="here/getHeader">
+
+<script type="text/javascript" metal:fill-slot="extrajs"
+        tal:attributes="src string:${here/getRootRelativeURL}/pages.js"
+        ></script>
+
+<link rel="stylesheet" type="text/css" metal:fill-slot="extracss"
+ tal:attributes="href string:${here/getRootRelativeURL}/pages.css" />
+ 
+<div metal:fill-slot="body">
+
+<form action="addNewPage">
+  <div>
+    <input type="submit" value="Add new page"/>
+  </div>
+</form>
+
+<h2>Active pages</h2>
+
+
+
+
+</div>
+</html>
+ 

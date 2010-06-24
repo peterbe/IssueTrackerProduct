@@ -6,11 +6,11 @@
 <head tal:define="root_relative_url here/getRootRelativeURL">
 
 <title tal:content="structure here/titleTag"></title>
-<meta name="generator" content="IssueTrackerProduct - http://www.issuetrackerproduct.com" />
-<meta http-equiv="Content-Type" tal:attributes="content here/getAndSetContentType" />
+<meta name="generator" content="IssueTrackerProduct - http://www.issuetrackerproduct.com"/>
+<meta http-equiv="Content-Type" tal:attributes="content here/getAndSetContentType"/>
 <link rel="alternate" type="application/rss+xml" title="RSS" tal:attributes="href string:${root_relative_url}/rss.xml" />
 <link rel="alternate" type="application/rss+xml" title="RSS (with followups)" tal:attributes="href string:${root_relative_url}/rss.xml?show=all" />
-<link rel="start" tal:attributes="href string:${root_relative_url}/" title="Home" />
+<link rel="start" tal:attributes="href string:${root_relative_url}/" title="Home"/>
 <tal:block define="forced_css here/getForcedStylesheet">
 <link tal:condition="not:forced_css" rel="stylesheet" type="text/css" tal:attributes="href string:${root_relative_url}/screen.css" media="screen" />
 <link tal:condition="not:forced_css" rel="stylesheet" type="text/css" tal:attributes="href string:${root_relative_url}/print.css" media="print" />
@@ -33,7 +33,8 @@ ul#tabnav a {
 #menuitem-ListIssues { background-position: 0 -198px; } 
 #menuitem-Login { background-position: 0 -264px; } 
 #menuitem-Logout { background-position: 0 -330px; } 
-#menuitem-User { background-position: 0 -396px; } 
+#menuitem-User { background-position: 0 -396px; }
+#menuitem-Pages { background-position: 0 -400px; }
 </style>
 <style metal:define-slot="extracss" tal:omit-tag=""></style>
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" tal:attributes="href string:${root_relative_url}/favicon.ico" />
