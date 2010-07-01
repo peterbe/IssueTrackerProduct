@@ -3341,10 +3341,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if hasattr(file, 'filename'):
             if getattr(file, 'filename').strip() != '':
                 # read 1 byte
-                if file.read(1) == "":
+                file.seek(0)
+                if not file.read(1):
                     m = _(u"Filename provided (%s) but not file content")
                     m = m % getattr(file, 'filename')
-                    raise NotAFileError, m
+                    raise NotAFileError(m)
                 else:
                     file.seek(0) #rewind file
                     return True
@@ -4057,6 +4058,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             try:
                 ok = self._isFile(file)
             except NotAFileError:
+                print "\tnot a file", repr(getattr(file, 'filename', None))
                 # if this exception is raised, it means that the user
                 # didn't press the "Browse..." button but rather wrote
                 # something for the file name.
