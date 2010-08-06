@@ -1,6 +1,3 @@
-    Bug fixed: Sometimes files wouldn't be uploaded as attachments
-    unless you previewed first. (Thanks Chris West)
-    
     New feature: Ability to override which email addresses to notify
     on a followup.
     
