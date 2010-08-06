@@ -1,3 +1,6 @@
+    Bug fixed: CSS corrected so body of issue text gets the same font
+    as the rest of the page.
+    
     New feature: Ability to override which email addresses to notify
     on a followup.
     
