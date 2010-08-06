@@ -5622,7 +5622,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ override the session.delete method """
         if not globally:
             name = self.defineInstanceCookieKey(name)
-        self.REQUEST.SESSION.delete(name)
+        try:
+            self.REQUEST.SESSION.delete(name)
+        except KeyError:
+            # can happen in Products.Transcience.TransientObject
+            # if running a ZEO cluster. Harmless
+            pass
 
     ## URL related
     

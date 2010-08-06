@@ -1,3 +1,6 @@
+    Bug fixed: Possible KeyErrors raised on deleting session keys when
+    running Zope in a cluster.
+
     Bug fixed: CSS corrected so body of issue text gets the same font
     as the rest of the page.
     
