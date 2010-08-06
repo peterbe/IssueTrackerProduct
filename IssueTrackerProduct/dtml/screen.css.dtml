@@ -32,7 +32,8 @@ h3 span.id {
 }
 
 h1.head {
-  font:bold 18pt Verdana;
+  font-weight:bold;
+  font-size:18pt;
 }
 
 h3.preview {
@@ -104,7 +105,8 @@ div#tabs {
 }
 
 ul#tabnav {
-  font: bold 11px verdana,arial;
+  font-weight:bold;
+  font-size:11px;
   list-style-type: none;
   padding-bottom: 24px;
   margin:0;
@@ -233,7 +235,6 @@ div#topright {
 
 .tbody {
   font-size: 10pt;
-  font-family:verdana,helvetica, arial, sans-serif;
   padding:2px 20px;
 }
 
@@ -374,7 +375,7 @@ div.ihead h3 {
 .istatus {
   padding:8px 12px;
   float: right;
-  font-family:verdana;
+  font-family:Verdana,Arial,sans-serif;
   font-weight:bold;
   color:red;
   background-color: #eee;
@@ -382,7 +383,6 @@ div.ihead h3 {
 
 .ibody {
   font-size: 10pt;
-  font-family:verdana;
   padding:6px 24px;
 }
 
