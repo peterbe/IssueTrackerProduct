@@ -1,0 +1,76 @@
+<metal:block define-macro="standard"><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+      tal:define="dummy here/StopCache">
+
+<head tal:define="root_relative_url here/getRootRelativeURL">
+
+<title tal:content="structure here/titleTag"></title>
+<meta name="generator" content="IssueTrackerProduct - http://www.issuetrackerproduct.com"/>
+<meta http-equiv="Content-Type" tal:attributes="content here/getAndSetContentType"/>
+<style type="text/css">
+/* ??? */
+</style>
+<style metal:define-slot="extracss" tal:omit-tag=""></style>
+
+<meta tal:replace="here/testAutoLogin" />
+
+</head>
+
+<body>
+<div id="head">
+  <h1 class="head" tal:content="structure python:here.getRoot().title_or_id()">The Title</h1>
+
+<div id="topright">
+<form metal:use-macro="here/search_widget/macros/search_form"></form>
+</div><!--/topright-->
+
+
+<div class="clearer">&nbsp;</div>
+
+<div id="tabs">
+<div id="tab1">
+<ul id="tabnav" tal:define="use_accesskeys here/useAccessKeys">
+	<li tal:repeat="menu here/getMenuItems"
+        tal:attributes="class python:test(menu[2],'tab1','tab0')"
+        ><a tal:attributes="href python:menu[1]; 
+                            id python:'menuitem-%s' % menu[3]"
+	    tal:content="structure python:here.displayMenuItem(menu, no_images_in_menu=True)"></a></li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+<!-- BODY -->
+
+<div id="main">
+<div metal:define-slot="body">
+
+<!--METALbody-->
+
+</div><!--/metal:body-->
+</div>
+
+<div class="clearerR">&nbsp;</div>
+
+<div id="foot" align="center">
+  <a tal:attributes="href string:${here/getRootURL}/DisableMobileVersion">Go to standard web version</a>
+    <br />
+  <tal:block tal:repeat="menu here/getMenuItems"><a tal:attributes="href python:menu[1]; style python:test(menu[2], 'text-decoration:none')" tal:content="python:menu[0]">Home</a> <br tal:condition="not:repeat/menu/end" tal:replace="structure string:&#183;" /></tal:block>
+    <br />
+    <a tal:attributes="href string:http://www.issuetrackerproduct.com?version=${here/getIssueTrackerVersion}">IssueTrackerProduct.com</a>  &#183;
+    <a tal:attributes="href string:${here/getRootRelativeURL}/About.html" class="foot" >About</a>
+    <br />&nbsp;
+</div><!--/foot-->
+  
+ 
+<script metal:define-slot="extrajs" tal:omit-tag=""></script>
+
+</body>
+</html>
+
+        
+</metal:block>

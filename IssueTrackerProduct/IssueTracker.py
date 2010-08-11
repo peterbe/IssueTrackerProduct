@@ -6364,6 +6364,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # XXX: There should be a mobile version here and it should be 
         # optional since here there'd need to be a MUA test (mobile user agent).
         
+        return bool(self.REQUEST.get('MOBILE_VERSION'))
         # This is a stub at the moment
         return False
     
@@ -13869,6 +13870,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
 #----------------------------------------------------------------------------
 zpts = ('zpt/StandardHeader',
+        'zpt/MobileHeader',
         {'f':'zpt/QuickAddIssue', 'n':'QuickAddIssueTemplate',
          'optimize':OPTIMIZE and 'xhtml'},
         {'f':'zpt/AddManyIssues', 'n':'AddManyIssuesTemplate',
