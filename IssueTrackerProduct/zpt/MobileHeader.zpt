@@ -9,7 +9,100 @@
 <meta name="generator" content="IssueTrackerProduct - http://www.issuetrackerproduct.com"/>
 <meta http-equiv="Content-Type" tal:attributes="content here/getAndSetContentType"/>
 <style type="text/css">
-/* ??? */
+html, body {
+  margin:0; 
+  padding:0;
+  background-color: white; color: black;
+  font-family:Arial, sans-serif, verdana;
+}
+.clearer { clear: left; line-height: 0; height: 0; }
+.clearerR { clear: right; line-height: 0; height: 0; }
+/*#topright { float:right; }*/
+#topright { position:absolute; top:1px; right:1px; }
+ul#tabnav {
+  margin:0;
+  padding:0;
+  font-size:120%;
+  list-style-type: none;
+}
+ul#tabnav li {
+  float: left;
+  margin: 2px 6px 0px 2px;
+}
+#head {  
+  background-color:#CC9;
+  padding-bottom:6px;
+  border-bottom:1px solid #666;
+}
+
+.status { color:red; }
+
+#main { padding:4px;  }
+h1.head { margin:0; padding-bottom:4px; }
+#foot { text-align:left; padding:20px 5px 5px 5px;}
+tr.lhead { background-color:#C3C3C3; }
+.leven { background-color:#DFDFDF; }
+.lodd { background-color:#F1F1F1; }
+
+/* When viewing an issue */
+div.issue-and-threads { text-align:left; }
+ul#navlist li { display:inline;}
+ul#navlist li a {
+  color: #000;
+  background-color: #eee;
+  padding: 0.2em 1em;
+  text-decoration: none;
+  border: 1px solid #ccc;
+}
+.istatus {
+  float: right;
+  padding:8px 12px;
+  color:red;
+  font-weight:bold;
+}  
+div.issue { 
+  border:1px solid #999; 
+  background-color:#eee;
+  padding:0;
+  margin-bottom:1.1em;
+} 
+div.ihead {
+  margin:0;  
+  background-color:#ccc;
+  border-right:1px solid #999;
+}  
+div.ihead h3 {
+  margin:0;
+  padding:10px;
+}
+a.plink { display:none; }
+div#threads div { text-align:left; }
+.threadbox {
+  border:1px solid #999;
+  margin:15px;
+  /*
+  margin-left:15px;
+  margin-right:15px;
+  margin-bottom:13px;
+  */
+}
+.thead {
+  padding:5px 10px;
+  text-align:left;
+  background-color:#ccc;
+}
+
+.trest {
+  background-color:#eee;
+  text-align:left;
+}
+
+.tbody {
+  padding:2px 20px;
+}
+.threaddate { 
+  float:right; 
+}
 </style>
 <style metal:define-slot="extracss" tal:omit-tag=""></style>
 
@@ -39,6 +132,8 @@
 </ul>
 </div>
 </div>
+
+<div class="clearer">&nbsp;</div>
 
 </div>
 

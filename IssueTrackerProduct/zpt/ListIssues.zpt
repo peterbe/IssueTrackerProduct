@@ -10,6 +10,10 @@
 /><html metal:use-macro="here/getHeader">
 <style type="text/css" metal:fill-slot="extracss">
 .bd { font-size:90%}
+table#richlist {
+  border:1px solid #ccc
+  width:98%;
+}
 </style>
 
 <metal:block tal:condition="here/useIssueNotes"

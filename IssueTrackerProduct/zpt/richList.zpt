@@ -3,7 +3,7 @@
                    enable_due_date here/EnableDueDate;
 		   use_issue_notes here/useIssueNotes;
 		   root here/getRoot"
-        style="border:1px solid #ccc">
+        >
    <thead>
 	<tr class="lhead" tal:define="sortinfo here/getSortOrder">
 		<td width="30%"><span tal:replace="structure python:here.HeadingLinks(here.translateSortorderOption(here.getDefaultSortorder()), here.getDefaultSortorder(), default=1, inverted=1, sortinfo=sortinfo)">Date</span></td>

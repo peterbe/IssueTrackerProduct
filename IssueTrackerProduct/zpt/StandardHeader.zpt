@@ -87,6 +87,11 @@ ul#tabnav a {
 <div class="clearer">&nbsp;</div>
 
 <div id="foot" align="center">
+  <tal:block condition="python:request.HTTP_USER_AGENT and here.isMobileUserAgent(request.HTTP_USER_AGENT, ignore_disabling=True)">
+  <a tal:attributes="href string:${here/getRootURL}/EnableMobileVersion">Go to mobile optimized web version</a>
+  </tal:block>
+    <br />
+
   <tal:block tal:repeat="menu here/getMenuItems"><a tal:attributes="href python:menu[1]; style python:test(menu[2], 'text-decoration:none')" tal:content="python:menu[0]">Home</a> <br tal:condition="not:repeat/menu/end" tal:replace="structure string:&#183;" /></tal:block>
     <br />
     <a tal:attributes="href string:${here/getRootRelativeURL}/rss.xml">RSS</a> &#183;

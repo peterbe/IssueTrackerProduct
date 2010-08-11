@@ -166,6 +166,7 @@ from bot_user_agents import is_bot_user_agent
 from Webservices import IssueTrackerWebservices
 from CustomField import CustomFieldsIssueTrackerBase
 from Datepicker import DatepickerBase
+from Mobile import MobileBase
 from Summary import SummaryBase
 from Pages import PageBase
 from Permissions import *
@@ -487,6 +488,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                    CustomFieldsIssueTrackerBase,
                    DatepickerBase,
                    SummaryBase,
+                   MobileBase,
                    PageBase,
                    ):
     """ IssueTracker class """
@@ -6363,10 +6365,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         """ return true if the user should have the mobile version """
         # XXX: There should be a mobile version here and it should be 
         # optional since here there'd need to be a MUA test (mobile user agent).
-        
-        return bool(self.REQUEST.get('MOBILE_VERSION'))
+        if self.REQUEST.get('MOBILE_VERSION'):
+            return Utils.niceboolean(self.REQUEST['MOBILE_VERSION'])
         # This is a stub at the moment
-        return False
+        if not self.REQUEST.HTTP_USER_AGENT:
+            return False
+        
+        # from the mixin class MobileBase
+        return self.isMobileUserAgent(self.REQUEST.HTTP_USER_AGENT)
     
 
     def ManagerLink(self, shortlink=False, absolute_url=False):
