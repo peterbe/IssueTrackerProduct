@@ -1105,7 +1105,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
             if SubmitError:
                 return self.ShowIssue(self, REQUEST, FollowupSubmitError=SubmitError)
-
+            
         # most actions may perhaps add a little comment
         if addfollowup:
 
@@ -1384,6 +1384,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             #
         allthreads = self.ListThreads()
         for thread in allthreads:
+            
+            
             if thread.getTitle() == title and thread.getComment() == comment:
                 #
                 # looking like it's a duplicate.
@@ -1400,6 +1402,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     continue
                 
                 if email and ss(email) != ss(thread.getEmail()):
+                    continue
+
+                # If it was posted more than 5 minutes ago
+                days_ago = DateTime() - thread.getThreadDate()
+                if days_ago * 24 * 60 >= 5:
                     continue
                 
                 return thread

@@ -1,3 +1,7 @@
+    New feature: Followup duplicates are only duplicates if they have
+    the same name and content and was posted within 5 minutes. (Thanks
+    Radim)
+    
     New feature: Mobile web XHTML version which is lighter and more
     optimized CSS margins.
 
