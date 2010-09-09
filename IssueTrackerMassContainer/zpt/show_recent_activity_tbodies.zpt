@@ -7,7 +7,7 @@
 <tal:block condition="python:options.get('since', request.get('since'))">
 <tal:block define="root here/getRoot;
                    root_url root/absolute_url;
-                   batch_size python:int(request.get('batch_size', 15));
+                   batch_size python:int(request.get('batch_size', 20));
                    batch_start python:int(request.get('batch_start', 0));
                    issues python:here.getRecentIssues(since=options.get('since', request.get('since')), batch_size=batch_size, batch_start=batch_start)">
            

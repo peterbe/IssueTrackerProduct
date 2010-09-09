@@ -1,3 +1,18 @@
+- 0.1.1
+
+    New feature: Show 20 items on the dashboard instead of 15
+    
+    New feature: The ability to ignore trackers and other
+    masscontainers is removed. It brings little value and much
+    confusion.
+    
+    New feature: Odd/Even columns coloured like inside
+    IssueTrackerProduct.
+    
+    Bug fixed: The continual lookup could sometimes keep adding the
+    same new issue(s) to the dashboard due to a difference between
+    the client-side (Javascipt) datetime and the server-side (Zope)
+
 - 0.1.0
 
     New feature: Thanks to optimization the dashboard AJAX refresh

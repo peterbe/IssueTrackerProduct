@@ -26,6 +26,9 @@
 <script type="text/javascript" src="/misc_/IssueTrackerMassContainer/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="/misc_/IssueTrackerMassContainer/jquery.treeview.min.js"></script>
 <script type="text/javascript" src="/misc_/IssueTrackerMassContainer/jquery.cookie.js"></script>
+<script type="text/javascript" 
+        tal:define="now_timestamp python:float(DateTime())"
+        tal:content="structure string:var SERVER_SINCE_TIMSTAMP=${now_timestamp};"></script>
 <script type="text/javascript" src="/misc_/IssueTrackerMassContainer/core.js"></script>
 <script metal:define-slot="extrajs" tal:omit-tag=""></script>
 

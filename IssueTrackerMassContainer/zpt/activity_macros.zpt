@@ -1,6 +1,7 @@
 <metal:block define-macro="activity_tbodies">
 <tbody tal:repeat="issue issues"
-       style="background:#C3C3C3 url(/misc_/IssueTrackerMassContainer/gradissuehead.png) repeat scroll 0%;">
+       tal:attributes="class python:test(path('repeat/issue/odd'), 'lodd','leven')"
+       >
   <tr tal:define="its_tracker issue/getRoot; tracker_parent python:its_tracker.aq_parent">
     <td tal:define="path python:its_tracker.absolute_url().replace(root_url,'')">
        <a class="issuetracker"
@@ -10,6 +11,7 @@
                 tal:condition="python:here.title_id_different(its_tracker.getTitle(), its_tracker.getId())"
                 tal:content="string:(${path})"></span></a>
           <a tal:attributes="href string:ignoreIssueTracker?path=${path}"
+	     tal:replace="nothing"
              title="Ignore issue tracker for activity table"><img src="/misc_/IssueTrackerProduct/close.gif" border="0" alt="Ignore" /></a>
              
       <a
@@ -19,6 +21,7 @@
          <a tal:define="path python:tracker_parent.absolute_url().replace(root_url,'')"
             tal:condition="path"
             tal:attributes="href string:ignoreMassContainer?path=${path}"
+	    tal:replace="nothing"
             title="Ignore issue trackers for activity table"><img src="/misc_/IssueTrackerProduct/close.gif" border="0" alt="Ignore" /></a>
             
     </td>

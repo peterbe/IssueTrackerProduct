@@ -8,12 +8,15 @@ table thead tr td {
   font-weight:bold;
 }
 
-/*table tbody  {
+.leven { 
   background-color:#DFDFDF;
 }
-/*table tbody {
-  background-color:red;
-}*/
+
+.lodd { 
+  background-color:#F1F1F1; 
+}
+
+
 span.status {
   color:red;
 }
