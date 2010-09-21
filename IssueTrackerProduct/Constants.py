@@ -97,6 +97,7 @@ DEFAULT_TYPE = DEFAULT_TYPES[0]
 #DEFAULT_URGENCIES = ('low','normal','high','critical')
 DEFAULT_URGENCIES = (_(u'low'), _(u'normal'), _(u'high'), _(u'critical'))
 DEFAULT_ALWAYS_NOTIFY = ()
+DEFAULT_ALWAYS_NOTIFY_EVERYTHING = False
 DEFAULT_URGENCY = DEFAULT_URGENCIES[1]
 DEFAULT_SECTIONS_OPTIONS = (_(u'General'), _(u'Homepage'), _(u'Other'))
 DEFAULT_SECTIONS = [DEFAULT_SECTIONS_OPTIONS[0]]

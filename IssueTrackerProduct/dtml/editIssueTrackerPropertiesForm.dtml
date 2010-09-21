@@ -232,6 +232,26 @@
   </td> 
 </tr>
 
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-always_notify_everything">Always notify everything</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+        <div class="form-element">
+	<input type="checkbox" name="always_notify_everything:boolean"
+        <dtml-if "AlwaysNotifyEverything()">checked="checked"</dtml-if> />
+    	</div>
+  </td>
+  <td align="left" valign="top">
+  <p>
+      Users on the 'Always notify' list will not only be notified on new issues but also
+      on followups that they are not involved in or subscribed to. 
+  </p>
+  </td> 
+</tr>
+
 
 
 <tr>

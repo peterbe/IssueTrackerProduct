@@ -1,3 +1,6 @@
+    New feature: Can enable so that 'Always notify' means it sends
+    notifications on all followups and not just new issues. 
+    
     New feature: Followup duplicates are only duplicates if they have
     the same name and content and was posted within 5 minutes. (Thanks
     Radim)

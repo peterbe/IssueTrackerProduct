@@ -530,6 +530,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.when_ignore_word   = DEFAULT_WHEN_IGNORE_WORD
         self.display_date       = DEFAULT_DISPLAY_DATE
         self.always_notify      = DEFAULT_ALWAYS_NOTIFY
+        self.always_notify_everything = DEFAULT_ALWAYS_NOTIFY_EVERYTHING
         self.sitemaster_name    = sitemaster_name
         self.sitemaster_email   = sitemaster_email
         self.default_type       = DEFAULT_TYPE
@@ -1465,6 +1466,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'enable_pages',
                     'show_dates_cleverly',
                     'show_spambot_prevention',
+                    'always_notify_everything',
                     ]
         properties = self.__dict__
         for each in strings:
@@ -2741,9 +2743,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         elif stage == 8:
             always_notify = request.get('always_notify',[])
-            always_notify = [x.strip() for x in always_notify]
-            while '' in always_notify:
-                always_notify.remove('')
+            always_notify = [x.strip() for x in always_notify if x.strip()]
 
             # Check that each is either a notifyable or a valid
             # email address.
@@ -2754,14 +2754,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             checked = []
             invalids = []
             for each in always_notify:
-                if each in notifyables_names:
-                    checked.append(each)
-                elif Utils.ValidEmailAddress(each):
-                    checked.append(each)
+                valid, better_spelling = self._checkAlwaysNotify(each)
+                if valid:
+                    checked.append(better_spelling)
                 else:
                     invalids.append(each)
-
-            
+           
             self.always_notify = checked
 
             if invalids:
@@ -2772,6 +2770,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 msg += ', '.join(checked)
                 
                 stage += 1
+                
+            self.always_notify_everything = bool(request.get('always_notify_everything'))
 
         
         elif stage == 9:
@@ -6169,6 +6169,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             always=always_checked
                 
         return always
+    
+    def AlwaysNotifyEverything(self):
+        return getattr(self, 'always_notify_everything', DEFAULT_ALWAYS_NOTIFY_EVERYTHING)
 
     
     def Always2Notify(self, format='email', emailtoskip=None, requireemail=False,

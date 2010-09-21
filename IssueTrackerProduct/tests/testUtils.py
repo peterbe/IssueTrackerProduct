@@ -171,6 +171,7 @@ class TimeSinceTestCase(unittest.TestCase):
         t1 = DateTime('2005/04/01')
         t2 = DateTime('2005/04/08')
         difference = Utils.timeSince(t1, t2)
+        
         self.assertEqual(difference, "1 week")
         
     def testWeek2(self):

@@ -1221,6 +1221,19 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 # this issue that is designated to the submitter of this followup.
                 self._removeUnsentNotifications(followupobject.getEmail())
             
+            always_email_addresses = []
+            if self.AlwaysNotifyEverything():
+                always = self.getAlwaysNotify()
+                checked = [self._checkAlwaysNotify(x, format='list') 
+                           for x in always]
+                for valid, (name_, email_) in checked:
+                    if not valid:
+                        continue
+                    if email_ == email:
+                        # don't send to the email to skip
+                        continue
+                    if self.ValidEmailAddress(email_):
+                        always_email_addresses.append(email_)
                 
             if request.get('notify-more-options'):
                 email_addresses = request.get('notify_email')
@@ -1231,6 +1244,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                    in email_addresses 
                                    if x.strip() and x.strip() in possible_email_addresses]
                                    
+                if always_email_addresses:
+                    email_addresses.extend(always_email_addresses)
+                    email_addresses = Utils.uniqify(email_addresses)
+
                 if email_addresses:
                     self.sendFollowupNotifications(followupobject, 
                               email_addresses, gentitle,
@@ -1256,11 +1273,18 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 # get who to notify
                 email_addresses = self.Others2Notify(do='email',
                                                      emailtoskip=email)
-
-                                                     
+                if always_email_addresses:
+                    email_addresses.extend(always_email_addresses)
+                    email_addresses = Utils.uniqify(email_addresses)
+                    
                 if email_addresses:
                     self.sendFollowupNotifications(followupobject, 
                               email_addresses, gentitle,
+                              status_change=action == 'add followup')
+                              
+            elif always_email_addresses:
+                self.sendFollowupNotifications(followupobject, 
+                              always_email_addresses, gentitle,
                               status_change=action == 'add followup')
                               
             

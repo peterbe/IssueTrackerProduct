@@ -291,7 +291,7 @@ href="CompleteList">Complete list</a>) even though added a long time
 
 <dtml-elif "stage==8">
 
-  <script>
+  <script type="text/javascript">
   function appendWord(word) {
     var t = document.form1['always_notify:lines'].value;
     if (t!="") {
@@ -303,15 +303,24 @@ href="CompleteList">Complete list</a>) even though added a long time
   </script>
 
 
-  <p>Are there people who should get an <b>email notification</b> on all added issues?<br />
-     Write the email addresses line by line or if you have defined <b>notifyables</b> you 
+  <p>Are there people who should get an <strong>email notification</strong> on all added issues?<br />
+     Write the email addresses line by line or if you have defined <strong>notifyables</strong> you 
      can just enter their name.
   </p>
-  <table>
+  <table border="1">
     <tr>
       <td valign="top">
         <textarea name="always_notify:lines" rows="6" cols="35"><dtml-var "_.string.join(getAlwaysNotify(), '\n')" html_quote></textarea><br />
          <dtml-var "ShowError(error, 'always_notify')">
+         
+         
+     <p>Do you want these to always be notified about <strong>everything</strong>?</p>
+     <p>
+	<input type="checkbox" name="always_notify_everything:boolean"
+        <dtml-if "AlwaysNotifyEverything()">checked="checked"</dtml-if> /> Notify on all followups and not just new issues
+     </p>
+     
+         
       </td>
       <td valign="top">
       <dtml-in getNotifyables>
