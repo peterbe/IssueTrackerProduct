@@ -1939,6 +1939,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         msgs.append(self.AssertAllProperties())
             
         msgs.append(self.UpdateCatalog())
+        
+        msgs.append(self._updateRandomIDLength())
             
         msgs.append(self.PrerenderDescriptionsAndComments())
             
@@ -1982,6 +1984,19 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return msg
 
                 
+    def _updateRandomIDLength(self):
+        """increment the randomid_length attribute if the number of issues have 
+        gone over this limit"""
+        # if the number is 3, the max no issues is 999 (10**3)
+        container = self._getIssueContainer()
+        count_issues = len(container.objectValues(ISSUE_METATYPE))
+        
+        if count_issues > 10 ** self.randomid_length:
+            # time to upgrade!
+            self.randomid_length += 1
+            
+        return ""
+        
     security.declarePrivate('_cleanTempFolder')
     def _cleanTempFolder(self, hours=CLEAN_TEMPFOLDER_INTERVAL_HOURS,
                          implode_if_possible=False):

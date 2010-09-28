@@ -1,3 +1,6 @@
+    Bug fixed: Finding and making links to issues with IDs higher than
+    the current number of digits used for IDs not matches.
+    
     New feature: Can enable so that 'Always notify' means it sends
     notifications on all followups and not just new issues. 
     

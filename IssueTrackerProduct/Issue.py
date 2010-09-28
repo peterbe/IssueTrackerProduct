@@ -449,6 +449,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             trackerids.append(adj_issuetracker_id)
         prefix = self.issueprefix 
         zfill_ = self.randomid_length
+        # if you set it up to use a length of 3 (the default) and the
+        # day you have more than 999 issues you won't match things with
+        # issue IDs like 7818. You safely increment this number by 1
+        zfill_ += 1
+        
         regex = Utils.getFindIssueLinksRegex(zfill_, trackerids, prefix)
         
         _inner_template_ = '<a href="%s" title="%s">%s#%s</a>'
