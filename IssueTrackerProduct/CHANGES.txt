@@ -1,3 +1,5 @@
+    Bug fixed: Badly raised UnicodeDecodeError on parsing emails in.
+    
     Bug fixed: Finding and making links to issues with IDs higher than
     the current number of digits used for IDs not matches.
     

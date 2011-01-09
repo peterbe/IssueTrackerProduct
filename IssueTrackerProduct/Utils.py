@@ -12,6 +12,7 @@ from random import shuffle
 from math import floor
 from htmlentitydefs import entitydefs
 import warnings
+import logging
 
 # import line used by textify
 import formatter, htmllib, StringIO
@@ -71,6 +72,7 @@ except ImportError:
 
 from Constants import UNICODE_ENCODING
 
+
 def unicodify(s, encodings=(UNICODE_ENCODING, 'latin1', 'utf8')):
     if isinstance(s, str):
         if not isinstance(encodings, (tuple, list)):
@@ -78,10 +80,15 @@ def unicodify(s, encodings=(UNICODE_ENCODING, 'latin1', 'utf8')):
         for encoding in encodings:
             try:
                 return unicode(s, encoding)
-            except UnicodeDecodeError:
+            except UnicodeDecodeError, e:
                 pass
-        raise UnicodeDecodeError, \
-            "Unable to unicodify %r with these encodings %s" % (s, encodings)
+        # Basically no encoding could handle it!
+        logging.error(
+        "Unable to unicodify %r with these encodings %r" % (s, encodings)
+        , exc_info=True)
+        # to raise a UnicodeDecodeError raise off the first encoding
+        unicode(s, encoding[0]) # this will raise a UnicodeDecodeError
+        
     return s
 
 def asciify(s, errors='xmlcharrefreplace'):

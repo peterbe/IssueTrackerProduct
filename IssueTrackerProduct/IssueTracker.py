@@ -10492,7 +10492,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 if charsets:
                     # sometimes part.get_charsets() is [None]
                     # hence the list comprehension
-                    content = unicodify(content, charsets)
+                    try:
+                        content = unicodify(content, charsets)
+                    except UnicodeDecodeError:
+                        # try brute force
+                        content = unicodify(content)
                 elif type(content) is str:
                     # desperately guess the encoding
                     content = unicodify(content)
