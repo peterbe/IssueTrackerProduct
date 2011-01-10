@@ -10360,9 +10360,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             emailstring = '\n'.join(emailstring)
 
             sub_log = []
-            email = self._processEmailString(emailstring, account,
+            try:
+                email = self._processEmailString(emailstring, account,
                                 already_message_ids=already_message_ids,
                                 log=sub_log)
+            except:
+                # this is done so that you avoid processing the same POP3 email
+                # more than once if you get unexpected exceptions.
+                logger.error("Failed to process email string", exc_info=True)
+                email = None
 
             log.extend(['\t%s' % x for x in sub_log])
             if email:
