@@ -14,15 +14,15 @@ try:
 except ImportError:
     # we must be in an older than 2.8 version of Zope
     transaction = None
-    
+
 try:
     import simplejson
 except ImportError:
     import warnings
     warnings.warn("simplejson no installed (easy_install simplejson)")
     simplejson = None
-    
-    
+
+
 # Zope
 from Acquisition import aq_inner, aq_parent
 from AccessControl import ClassSecurityInfo, getSecurityManager
@@ -78,7 +78,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     """ Issues class as containers """
 
     meta_type = ISSUE_METATYPE
-    
+
     _properties=({'id':'title',         'type': 'ustring', 'mode':'w'},
                  {'id':'issuedate',     'type': 'date',   'mode':'w'},
                  {'id':'modifydate',    'type': 'date',   'mode':'w'},
@@ -96,10 +96,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                  {'id':'display_format','type': 'string', 'mode':'w'},
                  {'id':'subscribers',   'type': 'lines',  'mode':'w'},
                  {'id':'submission_type','type':'string', 'mode':'w'},
-                 
+
                  )
-    
-    
+
+
     security = ClassSecurityInfo()
 
     manage_options = (
@@ -109,13 +109,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         )
 
     # backward compatability
-    acl_adder = '' 
+    acl_adder = ''
     submission_type = ''
     detail_changes = []
 
     def __init__(self, id, title, status, issuetype, urgency, sections,
                  fromname, email, url2issue, confidential, hide_me,
-                 description, display_format, issuedate='', 
+                 description, display_format, issuedate='',
                  acl_adder='', submission_type='',
                  subscribers=None, # keep this parameter (not used) for legacy (remove in a year)
                  due_date=None,
@@ -153,29 +153,29 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if acl_adder is None:
             acl_adder = ''
         self.acl_adder = acl_adder
-        
+
         self.custom_fields_data = PersistentMapping()
-        
+
         self.detail_changes = PersistentList()
 
 
     def getId(self):
         """ return id """
         return self.id
-    
+
     def getIssueId(self):
         """ return id
         The reason for having this method is so that one can be sure to called the correct
         getId() since 'getId' is a common function name here in Zope. """
         return self.getId()
-    
+
     def getGlobalIssueId(self):
         """ return a string that contains both the issuetrackers id and the issue id """
         tmpl = '%s#%s'
         root_id = self.getRoot().getId()
         issue_id = self.getIssueId()
         return tmpl % (root_id, issue_id)
-    
+
     def relative_url_path(self):
         """ return the url to this issue based on where you are at the moment """
         return self.absolute_url().replace(self.REQUEST.URL1+'/','')
@@ -195,18 +195,18 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                )
         else:
             return self.HighlightQ(Utils.tag_quote(t))
-               
+
     def getStatus(self):
         """ return the status of the issue """
         return self.status
-    
+
     def getURL2Issue(self):
         """ return url2issue """
-        return self.url2issue    
+        return self.url2issue
 
     def getModifyDate(self):
         """ return modifydate """
-        return self.modifydate        
+        return self.modifydate
 
     security.declareProtected('View', 'getModifyTimestamp')
     def getModifyTimestamp(self):
@@ -215,12 +215,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
     def _updateModifyDate(self):
         """ set the modify date again """
-        self.modifydate = DateTime()        
+        self.modifydate = DateTime()
 
     def getIssueDate(self):
         """ return issuedate """
         return self.issuedate
-    
+
     def getDueDate(self):
         return getattr(self, 'due_date', None)
 
@@ -237,17 +237,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 except KeyError:
                     # the userfolder (as it was saved) no longer exists
                     return self.fromname
-            
+
             if uf.meta_type == ISSUEUSERFOLDER_METATYPE:
                 if uf.data.has_key(name):
-                    issueuserobj = uf.data[name]            
+                    issueuserobj = uf.data[name]
                     return issueuserobj.getFullname() or self.fromname
             elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
                 mtool = CMF_getToolByName(self, 'portal_membership')
                 member = mtool.getMemberById(name)
                 if member and member.getProperty('fullname'):
                     return member.getProperty('fullname')
-            
+
         return self.fromname
 
     def getEmail(self, issueusercheck=True):
@@ -263,7 +263,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 except KeyError:
                     # the userfolder (as it was saved) no longer exists
                     return self.email
-            
+
             if uf.meta_type == ISSUEUSERFOLDER_METATYPE:
                 if uf.data.has_key(name):
                     issueuserobj = uf.data[name]
@@ -273,25 +273,25 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 member = mtool.getMemberById(name)
                 if member and member.getProperty('email'):
                     return member.getProperty('email')
-                
+
         return self.email
 
     def getACLAdder(self):
         """ return acl_adder """
         return self.acl_adder
-    
+
     def _setACLAdder(self, acl_adder):
         """ set acl_adder """
         self.acl_adder = acl_adder
 
     def getDetailChanges(self):
         return self.detail_changes
-        
+
     def _addDetailChange(self, change):
         try:
             if isinstance(self.detail_changes, list):
                 changes = self.detail_changes
-                
+
                 changes.append(change)
                 self.detail_changes = changes
             else:
@@ -303,7 +303,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         if last_change.get('acl_adder') == change.get('acl_adder'):
                             # same user very close together
                             self.detail_changes[-1] = merge_changes(last_change, change)
-                            
+
                             # if someone changed say urgency low->high then immediately after
                             # back to urgency high->low there are no actual changes here.
                             # Then we can pop the last item
@@ -312,22 +312,22 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                             if not _actual_changes:
                                 self.detail_changes.pop()
                             _merged_change = True
-                    
+
                 except IndexError:
                     # there was no last change
                     pass
-            
+
                 if not _merged_change:
                     self.detail_changes.append(change)
-                    
-            
+
+
         except AttributeError:
             changes = PersistentList()
             changes.append(change)
             self.detail_changes = changes
-            
-        
-            
+
+
+
     def isRecentlyAdded(self):
         """ return true if the issue was recently added.
         This will be true just after you press save on the Add Issue page.
@@ -339,11 +339,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return True
         elif self.REQUEST.get('NewIssue'): # the old way
             return True
-        
+
         return False
-        
+
     def isYourIssue(self):
-        """ return true if the currently logged in user is the same 
+        """ return true if the currently logged in user is the same
         user who added this issue. """
         issueuser = self.getIssueUser()
         if issueuser:
@@ -353,7 +353,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return True
             else:
                 # if you're logged in as an issue user then how could
-                # the issue have been yours if your identifier 
+                # the issue have been yours if your identifier
                 # is not the same.
                 # If this `return False` wasn't here a logged in user
                 # would be able to change his email address and then see
@@ -362,7 +362,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 # it's also not possible to return True here if the issue
                 # was added by an authenticated user.
                 return False
-            
+
         zopeuser = self.getZopeUser()
         if zopeuser:
             path = '/'.join(zopeuser.getPhysicalPath())
@@ -372,21 +372,21 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return True
             else:
                 return False
-            
+
         # the last remaining chance is if the issue was added by someone
         # who's not logged in but has the same email address.
         if not self.getACLAdder():
-            
+
             if self.getEmail() == self.getSavedUser('email'):
                 return True
-        
+
         return False
-        
+
 
     def getDisplayFormat(self):
         """ return display_format """
         return self.display_format
-    
+
     def getDescription(self):
         """ return description """
         return self.description
@@ -398,48 +398,48 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if self.getDisplayFormat() =='html':
             # textify() coverts "<tag>Something</tag>" to "Something". Simple.
             description = Utils.textify(description)
-            
+
             # a very common thing is that the description contains
             # these faux double linebreaks and when you run textify()
             # on '<p>&nbsp;</p>' the result is '&nbsp;'. Too many of
-            # those result in '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' which 
+            # those result in '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' which
             # isn't pure and purifying is what this method aims to do
             description = description.replace('<p>&nbsp;</p>','')
-            
+
         return description
-    
+
     def getEmailMessageId(self):
         """ if the email was submitted via email it will most likely have
         a message id """
         return getattr(self, 'email_message_id', None)
-    
+
     def _setEmailMessageId(self, message_id):
         """ set the email message id """
         assert message_id.strip(), "Message_id not valid"
         self.email_message_id = message_id.strip()
-        
+
     def _setEmailOriginal(self, original_email):
         """ set the original_email attribute """
         self.original_email = original_email
-        
+
     def hasEmailOriginal(self):
         """ return if we have a 'original_email' attribute set """
         return hasattr(self, 'original_email')
-    
+
     def ShowOriginalEmail(self, REQUEST):
         """ return the original email text """
         if REQUEST:
             REQUEST.RESPONSE.setHeader('Content-Type','text/plain')
         return self.original_email
-    
+
     def _findIssueLinks(self, formatted):
-        """ return a dictionary where we find each issue link and it's 
-        relative URL. 
-        
+        """ return a dictionary where we find each issue link and it's
+        relative URL.
+
         This method is quite slow since it does a check if the issues exist so
         only fire this of rarely.
         """
-        
+
         root = self.getRoot()
         root_id = root.getId()
         trackerids = [root_id]
@@ -447,32 +447,32 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         adjacent_items = roots_parent.objectItems(ISSUETRACKER_METATYPE)
         for adj_issuetracker_id in [one for (one, two) in adjacent_items]:
             trackerids.append(adj_issuetracker_id)
-        prefix = self.issueprefix 
+        prefix = self.issueprefix
         zfill_ = self.randomid_length
         # if you set it up to use a length of 3 (the default) and the
         # day you have more than 999 issues you won't match things with
         # issue IDs like 7818. You safely increment this number by 1
         zfill_ += 1
-        
+
         regex = Utils.getFindIssueLinksRegex(zfill_, trackerids, prefix)
-        
+
         _inner_template_ = '<a href="%s" title="%s">%s#%s</a>'
         _outer_template_ = '<a href="%s" title="%s">%s#%s</a>'
-        
+
         def process_find(match):
             find = match.group(1)
             if formatted[match.span()[1]:match.span()[1]+4] != '</a>':
-                
+
                 # deconstruct this find to see if we can to pursue it
                 trackerid, issueid = match.group(1).split('#')
                 if prefix:
                     if len(issueid.split(prefix))==2:
                         issueid = issueid.split(prefix)[1]
-                        
+
                 if issueid.isdigit() and not issueid.startswith('0'):
                     # this can happen if someone sloppily enters #123
                     # instead of #0123 when '0123' is the real issue id
-                    
+
                     issueid = zfill(issueid, zfill_)
                 if not trackerid or trackerid == root_id:
                     try:
@@ -489,7 +489,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         # the issue doesn't exist in this issuetracker anymore
                         # and there's nothing we can do about that
                         pass
-                    
+
                 elif hasattr(roots_parent, trackerid):
                     adjacent_tracker = getattr(roots_parent, trackerid)
                     try:
@@ -499,93 +499,93 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         issue_title = issue.getTitle()
                         return _outer_template_ % (issue_url, issue_title, trackerid, issueid)
                     except AttributeError:
-                        # the issue doesn't exist there anymore :( 
+                        # the issue doesn't exist there anymore :(
                         # nothing we can do about that
                         pass
-                    
+
             return find
-            
-        
+
+
         return regex.sub(process_find, formatted)
 
-    
+
     def _unicode_title(self):
         """ make the title of this issue a unicode string """
         self.title = unicodify(self.title)
-    
+
     def _unicode_description(self):
         """ make the description of this issue a unicode string """
         self.description = unicodify(self.description)
         self._prerendered_description = unicodify(self._prerendered_description)
-        
+
     def _prerender_description(self):
         """ Run the methods that pre-renders the description on the issue. """
         description = self.getDescription()
         display_format = self.getDisplayFormat()
-        
+
         formatted = self.ShowDescription(description+' ', display_format)
-        
+
         if self.getSubmissionType()=='email':
             use_newline_to_br = True
             if display_format == 'plaintext':
                 use_newline_to_br = False
-                
+
             attrs = 'class="sig"'
             formatted = Utils.highlight_signature(formatted, attrs,
                                                   use_newline_to_br=True)
-                
+
         formatted = self._findIssueLinks(formatted)
-        
+
         self._prerendered_description = formatted
-    
-        
+
+
     def _getFormattedDescription(self, force_refresh=False):
         """ return the formatted description (prerendered) or not """
         if force_refresh:
             self._prerender_description()
-            
+
         if getattr(self, '_prerendered_description', None):
             formatted = self._prerendered_description
         else:
             description = self.getDescription()
             display_format = self.getDisplayFormat()
             formatted = self.ShowDescription(description+' ', display_format)
-            
+
             if self.getSubmissionType()=='email':
                 attrs = 'class="sig"'
                 formatted = Utils.highlight_signature(formatted, attrs)
         return formatted
-        
+
 
     def showDescription(self, signature_hidden=False):
         """ combine ShowDescription (which is generic) with this
         issues display format."""
         formatted = self._getFormattedDescription()
         highlighted = self.HighlightQ(formatted)
-        
+
         return highlighted
-    
+
     def getSubmissionType(self):
         """ return how it was submitted, empty string if not found """
         return getattr(self, 'submission_type', '')
-    
+
     def getSections(self):
         """ return the sections """
         return self.sections
-    
+
     def getUrgency(self):
         """ return urgency """
         return self.urgency
-    
+
     def getType(self):
         """ return type """
         return self.type
-    
+
     def countFileattachments(self):
         """ return how many file attachments this issue has """
         return len(self.objectValues('File'))
-    
-    
+
+
     security.declareProtected(VMS, 'manage_editProperties')
     def manage_editProperties(self, REQUEST):
         """ re-prerender the description of the issue after manual change """
@@ -601,16 +601,16 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     err_log.raising(sys.exc_info())
                 except:
                     pass
-                LOG(self.__class__.__name__, ERROR, 
+                LOG(self.__class__.__name__, ERROR,
                     "Unable to _prerender_description() in manage_editProperties()",
                     error=sys.exc_info())
         return result
-    
+
     def manage_afterAdd(self, REQUEST, RESPONSE):
         """ intercept so that we prerender always """
         return
         try:
-            self._prerender_description()    
+            self._prerender_description()
         except:
             if DEBUG:
                 raise
@@ -620,28 +620,28 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     err_log.raising(sys.exc_info())
                 except:
                     pass
-                LOG(self.__class__.__name__, ERROR, 
+                LOG(self.__class__.__name__, ERROR,
                     "Unable to _prerender_description() after add",
-                    error=sys.exc_info())        
-    
-            
+                    error=sys.exc_info())
+
+
     security.declareProtected(VMS, 'assertAllProperties')
     def assertAllProperties(self):
         """ make sure issue has all properties """
-        props = {'title':'', 'issuedate':DateTime(), 
+        props = {'title':'', 'issuedate':DateTime(),
                  'status':self.getStatuses()[0], 'type':self.default_type,
                  'urgency':self.default_urgency,
                  'sections':self.defaultsections,
                  'fromname':'', 'email':'', 'url2issue':'',
                  'confidential':False, 'hide_me':False,
-                 'description':'', 
+                 'description':'',
                  'display_format':self.getDefaultDisplayFormat(),
                  'subscribers':[],
                  'modifydate':self.bobobase_modification_time(),
                  'actual_time_hours': None,
                  'estimated_time_hours': None,
                  }
-                 
+
         count = 0
         for key, default in props.items():
             if not self.__dict__.has_key(key):
@@ -650,7 +650,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             elif key=='sections' and isinstance(self.sections, tuple):
                 self.sections = list(self.sections)
                 count += 1
-                
+
         # check that self.fromname is as good as self.getFromname()
         attr_fromname = self.getFromname(issueusercheck=False)
         linked_fromname = self.getFromname(issueusercheck=True)
@@ -659,7 +659,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if linked_fromname:
                 self.fromname = linked_fromname
                 count += 1
-                
+
         # check that self.email is as good as self.getFromname()
         attr_email = self.getEmail(issueusercheck=False)
         linked_email = self.getEmail(issueusercheck=True)
@@ -667,10 +667,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # for sanity, check that the linked email is ok
             if linked_email:
                 self.email = linked_email
-                count += 1                
-        
+                count += 1
+
         return count
-                
+
     security.declareProtected('View', 'index_html')
     def index_html(self, REQUEST,
                    savedraftfollowup=False,
@@ -678,17 +678,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                    previewfollowup=False,
                    savefollowup=False,
                    *args, **kw):
-        """ show the issue 
-        
+        """ show the issue
+
         The parameters savedraftfollowup, cancelfollowup, previewfollowup and
         savedraftfollowup are all here because that's the only way to make the
-        buttons on the followup form all go to this place yet do different 
+        buttons on the followup form all go to this place yet do different
         things.
         """
         if self.canViewIssue():
             #self.RememberIssueVisit(self.getId())
             self.RememberRecentIssue(self.getId(), 'viewed')
-            
+
             if REQUEST.get('fileattachment', []):
                 fake_fileattachments = self._getFakeFileattachments(REQUEST.get('fileattachment'))
                 if fake_fileattachments:
@@ -696,11 +696,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     SubmitError = {'fileattachment':m}
                     self.REQUEST.set('previewissue',None)
                     return self.ShowIssue(self, self.REQUEST, FollowupSubmitError=SubmitError, **kw)
-            
+
             # XXX is this really necessary every time?
             self._uploadTempFiles()
-            
-            
+
+
             if savedraftfollowup:
                 return self.SaveDraftThread(REQUEST, *args, **kw)
             elif cancelfollowup:
@@ -713,10 +713,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return self.ModifyIssue(REQUEST, *args, **kw)
             elif previewfollowup:
                 self.REQUEST.set('showpreview', True)
-                
+
             session_key = '%s-%s-notify_emails' % (self.getRoot().getId(),
                                                    self.getId())
-            
+
             notify_emails = self.get_session(session_key)
             if notify_emails:
                 self.REQUEST.set('notify-more-options', '1')
@@ -727,23 +727,23 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             response = self.REQUEST.RESPONSE
             listpage = '/%s'%self.whichList()
             response.redirect(self.getRootURL()+listpage)
-            
+
     def _cancelDraftThreads(self, autosaved_only=False):
         """remove any draft threads you have in this issue"""
         followupdrafts = self.getMyFollowupDrafts(issueid=self.getId(),
                                                   autosaved_only=autosaved_only)
         for draft in followupdrafts:
-            # this will remove it from the cookie 
+            # this will remove it from the cookie
             self.DeleteDraftThread(draft.getId())
             # this will remove it independent of cookie
             self._dropDraftThread(draft.getId())
-        
+
         if getattr(self,'_v_recent_draft', None):
             if self._v_recent_draft.issueid == self.getId():
                 del self._v_recent_draft
-        
+
         assert not self.getMyFollowupDrafts(issueid=self.getId())
-        
+
     security.declarePrivate('canViewIssue')
     def canViewIssue(self):
         """return true if you should be allowed to see the issue """
@@ -753,23 +753,23 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """ check confidential property """
         return getattr(self, 'confidential', False)
     IsConfidential = isConfidential
-    
+
     def isHidden(self):
         """ return hide_me """
         return self.hide_me
-    
+
     def getEstimatedTimeHours(self):
         """ return estimated_time_hours """
         return getattr(self, 'estimated_time_hours', None)
-    
+
     def getActualTimeHours(self):
         """ return actual_time_hours """
         return getattr(self, 'actual_time_hours', None)
-    
-        
+
+
     def _parseTimeHours(self, hours):
         """ return a floating point number from the number of hours
-        input. This can be in the form of a float, an int or a 
+        input. This can be in the form of a float, an int or a
         string containing the words 'hours' """
         try:
             return float(hours)
@@ -777,14 +777,14 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if isinstance(hours, basestring):
                 if not hours.strip():
                     return 0.0
-                
+
                 try:
                     return float(hours.replace('hours','').replace('hour',''))
                 except ValueError:
                     # try to parse it
                     minutes_ = 0
                     hours_ = 0
-                    
+
                     # perhaps they've written "15 minutes"
                     minutes_regex = re.compile('((\d{1,2})\sminutes)')
                     if minutes_regex.findall(hours):
@@ -794,68 +794,68 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                             hours = hours.replace(whole, '')
                         except KeyError:
                             pass
-                        
+
                     hours_regex = re.compile(r'((\d{1,2})\s*(hour|hours))', re.I)
                     if hours_regex.findall(hours):
                         whole, number, __ = hours_regex.findall(hours)[0]
-                        
+
                         try:
                             hours_ = int(number)
                             hours = hours.replace(whole, '')
                         except KeyError:
                             pass
-                        
+
                     return hours_ + minutes_/60.0
-                
+
         # still here?!
         raise ValueError, "Hours not recognized, enter only a numeral (or decimal)"
-                    
-            
-        
+
+
+
     def getPreviewTitle(self, oldstatus, action):
         """ Get what the title of thread will be (via the web only) """
         action = unicodify(ss(action))
-        
+
         statuses_and_verbs = self.getStatusesMerged(asdict=1)
         lowercase_values = {}
         statuses_and_verbs_reversed = {}
         for key, value in statuses_and_verbs.items():
             lowercase_values[value.lower()] = value
             statuses_and_verbs_reversed[value] = key
-            
+
         if lowercase_values.has_key(action):
             past_tense = statuses_and_verbs_reversed[lowercase_values[action]]
         else:
             action = 'add followup'
-                                        
+
         if action == 'add followup':
             gentitle = 'Added Issue followup'
         else:
             gentitle = 'Changed status from %s to %s'%\
                        (oldstatus.capitalize(), past_tense.capitalize())
-        
+
         return gentitle
 
 
     def ExtensionForm(self, options):
         """ set some REQUEST variables to be used by form_followup. """
         request = self.REQUEST
-        
+
         # extract what we need from this caller templates options
         SubmitError = options.get('FollowupSubmitError',
                                   options.get('SubmitError'))
-    
-            
-        draft_followup_id = options.get('draft_followup_id', 
+
+
+        draft_followup_id = options.get('draft_followup_id',
                                         request.get('draft_followup_id'))
-        
-        
+
+
         draft_saved = options.get('draft_saved')
-        
+
         if draft_followup_id:
             if not isinstance(draft_followup_id, basestring):
                 raise ValueError, "draft_followup_id not a string (%r)" % draft_followup_id
-            
+
             # take the action from the draft
             container = self.getDraftsContainer()
             if safe_hasattr(container, draft_followup_id):
@@ -870,18 +870,18 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     request.set('email', draft_object.getEmail())
                 if not request.get('display_format'):
                     request.set('display_format', draft_object.display_format)
-                    
+
         request_action = unicodify(request.get('action','')).lower()
-                    
+
         if request_action == 'delete':
             return self.form_delete(SubmitError=SubmitError)
-        
+
         if request_action == 'rejectassignment':
             otherTitle = "Reject issue assignment"
             request.set('otherActionTitle', otherTitle)
             request.set('otherComment', "Optional comment")
             request.set('otherAction', 'rejectassignment')
-            
+
         elif request_action != 'add followup':
             title, action, comment = self._constructOtherTitles(self.status, request_action)
             if title:
@@ -890,11 +890,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 request.set('otherAction', action)
             if comment:
                 request.set('otherComment', comment)
-                
+
         return self.form_followup(SubmitError=SubmitError,
                                   draft_followup_id=draft_followup_id,
                                   draft_saved=draft_saved)
-                                  
+
     def _constructOtherTitles(self, issuestatus, action):
         """ return a suitable title for the action and verb """
         issuestatus = issuestatus.lower()
@@ -902,7 +902,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         otherTitle = _(u"Added Issue Followup")
         otherAction = _(u"Add Followup")
         otherComment = u""
-        
+
         for status, verb in self.getStatusesMerged(aslist=1):
             if ss(verb).replace(' ','') == action:
                 otherTitle = _(u'Change status from') + u' '
@@ -911,14 +911,14 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 otherAction = verb.capitalize()
                 otherComment = _(u"Optional comment")
                 break
-            
+
         return otherTitle, otherAction, otherComment
 
 
     def ManagerOptionsExtend(self):
         """ Determine which forms to show to Managers """
         request = self.REQUEST
-        
+
         print " * * * ManagerOptionsExtend  * * * "
 
         has_key_special = self.has_key_special
@@ -927,7 +927,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         do_preview = 0
         if has_key_special('IssueAction') and has_key_special('previewissue'):
             do_preview = 1
-            
+
         form = ''
         if has_key_special('IssueAction') and not do_preview:
             action = get_special_key('IssueAction')
@@ -980,29 +980,29 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
         return form
 
-    
+
     def ModifyIssue(self, REQUEST, action=None):
         """ advanced change to issue properties """
         request = self.REQUEST
         SubmitError = {}
-        
+
         if action is None:
             action = request.get('action', 'Add followup')
-            
+
         issueobject = self
         action = unicodify(ss(action))
         oldstatus = self.status
         prefix = self.issueprefix
-                
+
         comment = request.get('comment','').strip()
         if comment.endswith('<br />'):
             comment = comment[:-6].strip()
-            
+
             while comment.endswith('<p>&nbsp;</p>'):
                 comment = comment[:-len('<p>&nbsp;</p>')].strip()
             while comment.startswith('<p>&nbsp;</p>'):
                 comment = comment[len('<p>&nbsp;</p>'):].strip()
-            
+
         if not request.has_key('display_format'):
             saved_display_format = self.getSavedTextFormat()
             if saved_display_format:
@@ -1019,11 +1019,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         for key, value in statuses_and_verbs.items():
             lowercase_values[value.lower()] = value
             statuses_and_verbs_reversed[value] = key
-            
+
         if lowercase_values.has_key(action):
             past_tense = statuses_and_verbs_reversed[lowercase_values[action]]
             addfollowup = True
-        
+
         elif action == 'delete':
             DeleteIssue(self, self.id)
             addfollowup = False
@@ -1031,7 +1031,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         elif action == 'add followup':
             addfollowup = True
             req_manager = False
-            
+
         if req_manager and not self.hasManagerRole():
             # the chosen action requires manager role,
             # but the person is not a manager
@@ -1052,7 +1052,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     if count:
                         url += '#i%s' % count
                     return self.REQUEST.RESPONSE.redirect(url)
-                
+
             # anything else means that the comment_description
             # cannot be empty
             if not Utils.SimpleTextPurifier(comment):
@@ -1061,7 +1061,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 SubmitError['comment'] = err
             elif self.containsSpamKeywords(comment, verbose=True):
                 SubmitError['comment'] = _("Contains spam keywords")
-                
+
             # first make sure the email address is ascii
             request['email'] = asciify(request.get('email',''))
             _invalid_name_chars = re.compile('|'.join([re.escape(x) for x in list('<>;\\')]))
@@ -1076,7 +1076,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 captchas_used = request.get('captchas')
                 if isinstance(captchas_used, basestring):
                     captchas_used = [captchas_used]
-                
+
                 if not captcha_numbers:
                     m = _("Enter the numbers shown to that you are not a spambot")
                     SubmitError['captcha_numbers'] = m
@@ -1090,17 +1090,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         except ValueError:
                             errors = True
                             break
-                    
+
                     if errors:
                         # use this oppurtunity to clean up what they tried to enter
                         captcha_numbers = request.get('captcha_numbers','').strip()
                         captcha_numbers = re.sub('[^\d]','', captcha_numbers).strip()
                         request.set('captcha_numbers', captcha_numbers)
-                    
+
                         m = _("Incorrect numbers matching")
                         SubmitError['captcha_numbers'] = m
                     else:
-                        self._rememberProvenNotSpambot()            
+                        self._rememberProvenNotSpambot()
 
             if REQUEST.get('fileattachment', []):
                 fake_fileattachments = self._getFakeFileattachments(request.get('fileattachment'))
@@ -1110,7 +1110,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
             if SubmitError:
                 return self.ShowIssue(self, REQUEST, FollowupSubmitError=SubmitError)
-            
+
         # most actions may perhaps add a little comment
         if addfollowup:
 
@@ -1118,7 +1118,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if randomid_length > 3:
                 randomid_length = 3
 
-            genid = issueobject.generateID(randomid_length, 
+            genid = issueobject.generateID(randomid_length,
                                            prefix=prefix+'thread',
                                            meta_type=ISSUETHREAD_METATYPE,
                                            use_stored_counter=False)
@@ -1162,7 +1162,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 email = self.get_cookie(ckey)
             elif request.get('email'):
                 self.set_cookie(ckey, asciify(email, 'replace'))
-                
+
             if request.get('display_format'):
                 display_format = request.get('display_format')
                 if issueuser:
@@ -1172,10 +1172,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if issueuser:
                     if issueuser.getDisplayFormat():
                         display_format = issueuser.getDisplayFormat()
-                
+
 
             # update Thread object
-            title  = gentitle            
+            title  = gentitle
             threaddate = DateTime()
 
             #
@@ -1187,7 +1187,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 url = issueobject.absolute_url()
                 url += '#i%s' % self.countThreads()
                 return self.REQUEST.RESPONSE.redirect(url)
-                
+
             # create an Thread object
             create_method = issueobject._createThreadObject
             followupobject = create_method(genid, title, comment,
@@ -1198,38 +1198,38 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
             # update the parent issue
             self._updateModifyDate()
-            
+
             # Also upload the fileattachments
             self._moveTempfiles(followupobject)
-    
+
             # upload new file attachments
             if request.get('fileattachment', []):
                 self._uploadFileattachments(followupobject, request.get('fileattachment'))
                 followupobject.index_object(idxs=['filenames'])
-            
+
             self.nullifyTempfolderREQUEST()
-            
+
             if request.form.get('draft_followup_id'):
                 self._dropDraftThread(request.form.get('draft_followup_id'))
-                
+
             if self.SaveDrafts():
                 # make sure there aren't any drafts that match
                 # this recently added followupobject
                 self._dropMatchingDraftThreads(followupobject)
-                
+
                 # in fact, drop all drafts in this issue
                 self._cancelDraftThreads(autosaved_only=True)
-                
+
             if not self.doDispatchOnSubmit() and followupobject.getEmail():
                 # Notifications aren't sent out immediately, that means that
                 # there's a chance of a notification already exists inside
                 # this issue that is designated to the submitter of this followup.
                 self._removeUnsentNotifications(followupobject.getEmail())
-            
+
             always_email_addresses = []
             if self.AlwaysNotifyEverything():
                 always = self.getAlwaysNotify()
-                checked = [self._checkAlwaysNotify(x, format='list') 
+                checked = [self._checkAlwaysNotify(x, format='list')
                            for x in always]
                 for valid, (name_, email_) in checked:
                     if not valid:
@@ -1239,26 +1239,26 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         continue
                     if self.ValidEmailAddress(email_):
                         always_email_addresses.append(email_)
-                
+
             if request.get('notify-more-options'):
                 email_addresses = request.get('notify_email')
                 # check that they're all email address that are possible
                 possible_email_addresses = self.Others2Notify(do='email',
                                                               emailtoskip=email)
                 email_addresses = [x.strip() for x
-                                   in email_addresses 
+                                   in email_addresses
                                    if x.strip() and x.strip() in possible_email_addresses]
-                                   
+
                 if always_email_addresses:
                     email_addresses.extend(always_email_addresses)
                     email_addresses = Utils.uniqify(email_addresses)
 
                 if email_addresses:
-                    self.sendFollowupNotifications(followupobject, 
+                    self.sendFollowupNotifications(followupobject,
                               email_addresses, gentitle,
                               status_change=action == 'add followup')
-                              
-                              
+
+
                     session_key = '%s-%s-notify_emails' % (self.getRoot().getId(),
                                                            self.getId())
                     if email_addresses == possible_email_addresses:
@@ -1267,12 +1267,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         self.delete_session(session_key)
                     else:
                         # put this in a session variable so the next time you get to
-                        # this followup form it will preselect the same notification 
+                        # this followup form it will preselect the same notification
                         # options.
                         self.set_session(session_key, email_addresses)
-            
+
             elif request.has_key('notify'):
-                        
+
                 # now, create and email-alert-queue object
                 # using filtered email address
                 # get who to notify
@@ -1281,70 +1281,70 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if always_email_addresses:
                     email_addresses.extend(always_email_addresses)
                     email_addresses = Utils.uniqify(email_addresses)
-                    
+
                 if email_addresses:
-                    self.sendFollowupNotifications(followupobject, 
+                    self.sendFollowupNotifications(followupobject,
                               email_addresses, gentitle,
                               status_change=action == 'add followup')
-                              
+
             elif always_email_addresses:
-                self.sendFollowupNotifications(followupobject, 
+                self.sendFollowupNotifications(followupobject,
                               always_email_addresses, gentitle,
                               status_change=action == 'add followup')
-                              
-            
+
+
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
         redirect_url = '%s#i%s'%(issueobject.absolute_url(),
                                  len(objectIds))
         # catalog
         issueobject.unindex_object()
         issueobject.index_object()
-        
+
         # ready ! redirect!
         request.RESPONSE.redirect(redirect_url)
-        
-        
+
+
     def _removeUnsentNotifications(self, to_email):
         """ for all the unsent notification inside this issue, those that
         are designated to @to_email can be discarded.
-        
+
         When doing this, if by removing this email from the notificaiton's
         list of emails, the list becomes empty then remove the notification
         object.
-        
+
         The reason for doing this is that it's assumed that this @to_email
-        has already participated in the issue and therefore don't need 
+        has already participated in the issue and therefore don't need
         to be notified.
         """
-        
+
         def filter_function(notification, email):
             if not notification.isDispatched():
                 if email.lower() in [x.lower() for x in notification.getEmails()]:
                     return True
             return False
-        
+
         notifications = [x for x in self.getCreatedNotifications()
                            if filter_function(x, to_email.lower())]
 
         del_notification_ids = []
         for notification in notifications:
-            new_emails_list = [x for x in notification.getEmails() 
+            new_emails_list = [x for x in notification.getEmails()
                                  if x.lower() != to_email.lower()]
             if new_emails_list:
                 notification._setEmails(new_emails_list)
             else:
                 del_notification_ids.append(notification.getId())
-        
+
         if del_notification_ids:
             self.manage_delObjects(del_notification_ids)
-        
-        
+
+
     security.declarePrivate('sendFollowupNotifications')
     def sendFollowupNotifications(self, followupobject, email_addresses, change,
                                   status_change=False):
 
         prefix = self.issueprefix
-        
+
         # create id for notification
         mtype = NOTIFICATION_META_TYPE
         notifyid = self.generateID(4, prefix+"notification",
@@ -1356,9 +1356,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         anchorname = len(self.objectIds(ISSUETHREAD_METATYPE))
         emails = email_addresses
         date = DateTime()
-        
+
         assert self.hasIssue(issueID), "This notification has no issue"
-        
+
         if status_change:
             new_status = self.getStatus()
         else:
@@ -1368,16 +1368,16 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         notification_comment = followupobject.getCommentPure()
         notification = IssueTrackerNotification(
                             notifyid, title, issueID,
-                            emails, 
+                            emails,
                             followupobject.fromname,
-                            comment=notification_comment, 
-                            anchorname=anchorname, 
+                            comment=notification_comment,
+                            anchorname=anchorname,
                             change=change,
                             new_status=new_status,
                             )
         self._setObject(notifyid, notification)
         notifyobject = getattr(self, notifyid)
-          
+
         # use the dispatcher to try to send
         # this notification right now.
         # there is no big deal if the dispatcher crashes here
@@ -1396,40 +1396,40 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                    'Email could not be sent', error=sys.exc_info())
 
 
-        
+
     def _check4Duplicate(self, title, comment, fromname=None, email=None,
                          email_message_id=None
                          ):
         """ check if there is an exact replica of this issue """
-        
+
         # A duplication
         # is only a duplication if the last added thread is exactly the
         # same. Suppose some does this:
             # from Open -> Completed (comment fixed!)
             # from Completed -> Open (comment still doesn't work!)
             # from Open -> Completed (comment fixed!)
-            # then the first and last threads are identical but the flow 
-            # is perfectly valid. 
+            # then the first and last threads are identical but the flow
+            # is perfectly valid.
             #
         allthreads = self.ListThreads()
         for thread in allthreads:
-            
-            
+
+
             if thread.getTitle() == title and thread.getComment() == comment:
                 #
                 # looking like it's a duplicate.
                 #
-                
+
                 # check for match on email_message_id
                 if email_message_id and thread.getEmailMessageId():
                     if ss(email_message_id) == ss(thread.getEmailMessageId()):
                         return thread
-                
+
                 # Before we return this
                 # thread object, do a few pessimistic tests
                 if fromname and ss(fromname) != ss(thread.getFromname()):
                     continue
-                
+
                 if email and ss(email) != ss(thread.getEmail()):
                     continue
 
@@ -1437,12 +1437,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 days_ago = DateTime() - thread.getThreadDate()
                 if days_ago * 24 * 60 >= 5:
                     continue
-                
+
                 return thread
-    
+
         # not a duplicate
         return None
-    
+
 
     def _createThreadObject(self, id, title, comment, threaddate,
                             fromname, email, display_format,
@@ -1457,20 +1457,20 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
         # get that object
         threadobject = getattr(self, id)
-        
+
         if email_message_id:
             threadobject._setEmailMessageId(email_message_id)
-        
+
 
         return threadobject
 
-    
+
     def isAllowedToChangeIssues(self):
         """ return true if the logged in user is allowed to change issue details """
         user = getSecurityManager().getUser()
         here = self
         return self.AllowIssueAttributeChange() and user.has_permission(ChangeIssuePermission, here)
-    
+
     def showChangeKey(self, key):
         if key == 'url2issue':
             return _(u"URL")
@@ -1482,11 +1482,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             return _(u"Due date")
 
         return key.capitalize()
-    
+
     def showChangedDetail(self, key, value):
         if isinstance(value, (tuple, list)):
             return ', '.join(value)
-        
+
         if value:
             if key in ('estimated_time_hours', 'actual_time_hours'):
                 return self.showTimeHours(value, show_unit=True)
@@ -1497,12 +1497,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         else:
             if key in ('estimated_time_hours', 'actual_time_hours'):
                 return _(u"n/a")
-        
+
         if value:
             return Utils.html_quote(value)
         return u''
-    
-    
+
+
     def getUserDetailsByACLAdder(self, acl_adder):
         """ return (name, email) of the user that is this acl user """
         ufpath, name = acl_adder.split(',')
@@ -1517,19 +1517,19 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
         if uf.meta_type == ISSUEUSERFOLDER_METATYPE:
             if uf.data.has_key(name):
-                issueuserobj = uf.data[name]            
+                issueuserobj = uf.data[name]
                 return dict(fromname=issueuserobj.getFullname() or self.fromname,
                             email=issueuserobj.getEmail() or self.email)
-                        
+
         elif CMF_getToolByName and hasattr(uf, 'portal_membership'):
             mtool = CMF_getToolByName(self, 'portal_membership')
             member = mtool.getMemberById(name)
             if member.getProperty('fullname'):
                 return dict(fromname=member.getProperty('fullname'),
                             email=member.getProperty('email'))
-                            
+
         return {}
-    
+
 
     security.declareProtected(ChangeIssuePermission, 'editIssueDetails')
     def editIssueDetails(self, sections=None, type=None, urgency=None,
@@ -1542,7 +1542,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         assert self.AllowIssueAttributeChange(), "Issue attribute change not enabled"
 
         change = {}
-        
+
         if REQUEST is not None:
             SubmitError = {}
             # validate the custom fields
@@ -1573,26 +1573,26 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         if not message:
                             message = '*failed the validation test*'
                         SubmitError[field.getId()] = message
-                        
+
             if self.EnableDueDate():
                 if due_date:
                     if not self.parseDueDate(due_date):
                         SubmitError['due_date'] = _("Invalid date")
-    
+
             # this perhaps needs to be improved
             if SubmitError:
                 page = self.ShowIssue
                 REQUEST.set('change', 'Details')
                 return page(REQUEST, SubmitError=SubmitError)
-            
-        
+
+
         # Section must be a list and might only allow for recognized values
         if sections is not None:
             if not isinstance(sections, list):
                 sections = [sections]
-                
+
             sections = [unicodify(x) for x in sections]
-                
+
             if not self.CanAddNewSections():
                 # check that all sections are recognized
                 _options = self.getSectionOptions()
@@ -1602,25 +1602,25 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if self.sections != sections:
                 change['sections'] = dict(old=self.sections, new=sections)
             self.sections = sections
-            
+
         # Type must be recognized
         if type is not None: ## I hate this variable name!
             assert type in self.getTypeOptions(), "Unrecognized issue type"
-            
-            # set it 
+
+            # set it
             if self.type != type:
                 change['type'] = dict(old=self.type, new=type)
             self.type = type
-            
+
         # urgency must be recognized
         if urgency is not None:
             assert urgency in self.getUrgencyOptions(), "Unrecognized issue urgency"
-            
-            # set it 
+
+            # set it
             if self.urgency != urgency:
                 change['urgency'] = dict(old=self.urgency, new=urgency)
             self.urgency = urgency
-            
+
         # due_date must be a valid date
         if self.EnableDueDate() and due_date is not None:
             if due_date or self.getDueDate():
@@ -1629,13 +1629,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     assert due_date is not None, "Invalid due date"
                 else:
                     due_date = None
-                    
+
                 if due_date != self.getDueDate():
                     change['due_date'] = dict(old=self.getDueDate(), new=due_date)
                 assert due_date is None or hasattr(due_date, 'strftime'), repr(due_date)
                 self.due_date = due_date
-            
-        # because of the way forms work, the confidential boolean is never 
+
+        # because of the way forms work, the confidential boolean is never
         # present as False, so we have to assume that it is default.
         # That means that an issue being confidential is always set in
         # this method.
@@ -1644,18 +1644,18 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if confidential != self.confidential:
             change['confidential'] = dict(old=self.confidential, new=confidential)
         self.confidential = confidential
-        
+
         if url2issue is not None:
             url2issue = url2issue.strip()
             if self.url2issue != url2issue:
                 change['url2issue'] = dict(old=self.url2issue, new=url2issue)
             self.url2issue = url2issue
-            
+
         if self.UseEstimatedTime() and estimated_time_hours is not None:
             hours = self._parseTimeHours(estimated_time_hours)
             assert isinstance(hours, float)
 
-            # initially self.estimated_time_hours will be None. And if the 
+            # initially self.estimated_time_hours will be None. And if the
             # input estimated_time_hours is left blank then there is no change.
             # However if this is the second time
             if hours != self.estimated_time_hours and estimated_time_hours:
@@ -1663,15 +1663,15 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                                       new=hours)
             if estimated_time_hours:
                 self.estimated_time_hours = hours
-            elif self.estimated_time_hours is not None: 
-                # if it was something before and this time the user has wiped 
-                # it then this needs to be set back to None 
+            elif self.estimated_time_hours is not None:
+                # if it was something before and this time the user has wiped
+                # it then this needs to be set back to None
                 self.estimated_time_hours = None
-            
+
         if self.UseActualTime() and actual_time_hours is not None:
             hours = self._parseTimeHours(actual_time_hours)
             assert isinstance(hours, float)
-            
+
             if hours != self.actual_time_hours and actual_time_hours:
                 change['actual_time_hours'] = dict(old=self.actual_time_hours,
                                                    new=hours)
@@ -1679,8 +1679,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 self.actual_time_hours = hours
             elif self.actual_time_hours is not None:
                 self.actual_time_hours = None
-            
-            
+
+
         if REQUEST is not None:
             # we can save custom fields
             for field in self.getCustomFieldObjects():
@@ -1691,36 +1691,36 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                   compare_custom_value(old_data, new_data, field.getPythonType()):
                     change[field.getId()] = dict(old=field.showValue(old_data),
                                                  new=field.showValue(new_data))
-            
+
         if change:
-            
+
             # something has changed in the issue!
             change['change_date'] = DateTime()
             issueuser = self.getIssueUser()
             cmfuser = self.getCMFUser()
             zopeuser = self.getZopeUser()
             email = fromname = None
-            
+
             if self.has_cookie(self.getCookiekey('email')):
                 email = self.get_cookie(self.getCookiekey('email'))
             if self.has_cookie(self.getCookiekey('name')):
                 fromname = self.get_cookie(self.getCookiekey('name'))
-                    
+
             if issueuser:
                 change['acl_adder'] = ','.join(issueuser.getIssueUserIdentifier())
                 fromname = issueuser.getFullname()
                 email = issueuser.getEmail()
-                
+
             elif zopeuser:
                 path = '/'.join(zopeuser.getPhysicalPath())
                 name = zopeuser.getUserName()
                 change['acl_adder'] = ','.join([path, name])
-            
+
             if email:
                 change['email'] = email
             if fromname:
                 change['fromname'] = fromname
-                    
+
             self._addDetailChange(change)
 
         self._updateModifyDate()
@@ -1730,9 +1730,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if REQUEST is not None:
             # go back to the issue itself
             REQUEST.RESPONSE.redirect(self.absolute_url())
-        
-    
-        
+
+
+
     def isCreator(self):
         """ return true if the current user is logged in as the same user
         who created this issue. """
@@ -1743,46 +1743,46 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             identifier = ','.join(identifier)
             acl_adder = self.getACLAdder()
             return identifier == acl_adder
-        
+
         return False
-    
-    
+
+
     def getCameFromSearchURL(self):
         """ if the previous page was a search, return the URL back to the same """
         raise NotImplementedError, "This method has be deprecated"
-    
+
         referer = self.REQUEST.get('HTTP_REFERER')
         if not referer:
             return None
-        
+
         if referer.find(self.getRootURL()) == -1:
             return None
-        
+
         if referer.find('?') > -1 and referer.split('?')[1].find('q') > -1:
             querystring = referer.split('?')[1]
             qs = cgi.parse_qs(querystring)
             if qs.has_key('q'):
                 #q = qs.get('q')[0]
                 return referer
-                
-                
+
+
         return None
-        
+
     def getCameFromReportURL(self):
-        """ if the previous page the user was on was a report, 
+        """ if the previous page the user was on was a report,
         return the URL to that report. If it wasn't or the report can't be found
-        return None. 
-    
-        This is used on the ShowIssue page so that we can link back to the 
+        return None.
+
+        This is used on the ShowIssue page so that we can link back to the
         report they came from.
         """
         raise NotImplementedError, "This method has be deprecated"
-    
+
         referer = self.REQUEST.get('HTTP_REFERER')
         if not referer:
             return None
-        
-        
+
+
         if referer.find('/report-') > -1 and referer.startswith(self.getRootURL()):
             regex = r'/report-(.*?)$'
             found = re.findall(regex, referer)
@@ -1794,24 +1794,24 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     if root_url == '/':
                         root_url = ''
                     return '%s/%s/report-%s' % (root_url, self.whichList(), reportid)
-                
+
         return None
-    
-    
+
+
     ##
     ## Drafts for followups
     ##
-    
-        
+
+
     def getMyThreadDrafts(self, issueid=None):
         """ return a list of issuethread draft objects """
         if not self.SaveDrafts(): # don't even bother
             return []
-        
+
         ids = self._getDraftThreadIds()
         if not ids:
             return []
-        
+
         container = self.getDraftsContainer()
         objects = []
         for id in ids:
@@ -1820,7 +1820,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if object.meta_type == ISSUETHREAD_DRAFT_METATYPE:
                     if issueid is None or object.issueid == issueid:
                         objects.append(object)
-                    
+
         return objects
 
     # Commented out because this is already happening in IssueTracker.py
@@ -1830,7 +1830,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     #    c_key = self.defineInstanceCookieKey(c_key)
     #    ids_cookie = self.get_cookie(c_key, '')
     #    ids_cookie = [x.strip() for x in ids_cookie.split('|') if x.strip()]
-    #        
+    #
     #    issueuser = self.getIssueUser()
     #    ids_user = []
     #    if issueuser:
@@ -1840,21 +1840,21 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     #        for draft in all_draftobjects:
     #            if draft.getACLAdder()==acl_adder:
     #                ids_user.append(draft.getId())
-    #    
-    #                
+    #
+    #
     #    if separate:
     #        return Utils.uniqify(ids_cookie), Utils.uniqify(ids_user)
     #    else:
     #        return Utils.uniqify(ids_cookie+ids_user)
-    
-    
+
+
     security.declareProtected('View', 'DeleteDraftIssue')
     def DeleteDraftThread(self, id, REQUEST=None):
         """ delete this id from issue user or cookies and delete the
         draft issue object. """
         ids_cookie, ids_user = self._getDraftThreadIds(separate=True)
         matched = False
-        
+
         if id in ids_cookie:
             matched = True
             ids_cookie.remove(id)
@@ -1867,7 +1867,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         issueuser = self.getIssueUser()
         if id in ids_user and issueuser:
             matched = True
-            
+
         if matched:
             # mark the draft issue as obsolete
             container = self.getDraftsContainer()
@@ -1895,15 +1895,15 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         # remove draft object
         if hasattr(container, id):
             container.manage_delObjects([id])
-            
+
     def _dropMatchingDraftThreads(self, thread):
         """ delete (if any) all thread drafts that match this particular
         followup thread object. """
         title = thread.getTitle()
         comment = thread.getComment()
-        
+
         container = self.getDraftsContainer()
-        
+
         # the requirement for matching what to delete is if a draft matches
         # either:
         #   - exactly on title and comment
@@ -1911,16 +1911,16 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         for draft in container.objectValues(ISSUETHREAD_DRAFT_METATYPE):
             if not draft.getTitle() or not draft.getComment(): # odd draft!
                 continue
-            
+
             draft_title = unicodify(draft.getTitle())
             draft_comment = unicodify(draft.getComment())
             if draft_title == title and draft_comment == comment:
                 self._dropDraftThread(draft.getId())
             elif comment.startswith(draft_comment) and draft_title == title:
                 self._dropDraftThread(draft.getId())
-            
 
-            
+
+
     security.declareProtected('View', 'SaveDraftThread')
     def SaveDraftThread(self, REQUEST, draft_followup_id=None,
                        prevent_preview=True,
@@ -1929,7 +1929,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         save a draft on the side. """
         if prevent_preview:
             REQUEST.set('previewissue', False)
-            
+
         if self.SaveDrafts() and \
                (\
                  (draft_followup_id is None and self._reason2saveDraft(REQUEST)) \
@@ -1942,8 +1942,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             kw['draft_followup_id'] = draft_followup_id
             kw['draft_saved'] = True
         return self.index_html(REQUEST, *args, **kw)
-    
-    
+
+
     security.declareProtected('View', 'AutoSaveDraftThread')
     def AutoSaveDraftThread(self, REQUEST, draft_followup_id=None,
                        *args, **kw):
@@ -1964,25 +1964,25 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         else:
             return ""
 
-    
+
     def getRecentOtherDraftThreadAuthor(self, only_fromname=False, max_age_seconds=20,
                                         min_timestamp=None, REQUEST=None):
         """ return the name of the author of the most recent draft followup
-        that is not written by the current user. 
+        that is not written by the current user.
         """
         you_fromname = self.getSavedUser('fromname')
         you_email = self.getSavedUser('email')
         now = int(DateTime())
-        
+
         if REQUEST is not None:
             ct = 'text/html; charset=%s' % UNICODE_ENCODING
             REQUEST.RESPONSE.setHeader('Content-Type', ct)
             self.StopCache()
-        
+
         container = self.getDraftsContainer()
         draftobjects = [x for x in container.objectValues(ISSUETHREAD_DRAFT_METATYPE)
                                 if x.getIssueId()==self.getIssueId()]
-                                
+
         if min_timestamp:
             # the @min_timestamp is possibly an integer timestamp of how old
             # the drafts have to be to be considered "recent".
@@ -1990,15 +1990,15 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # javascript picks up and sticks to. Then this timestamp is effectively
             # when the page was generate and thus the time the user came to it.
             draftobjects = [x for x in draftobjects if int(x.getModifyDate()) > int(min_timestamp)]
-            
+
         draftobjects.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
-        
+
         fmt_followup = u"%s is working on a followup"
         for draft in draftobjects:
             if now - int(draft.getModifyDate()) > max_age_seconds:
                 return None
             if draft.getFromname() != you_fromname and draft.getEmail() != you_email:
-                
+
                 if only_fromname and draft.getFromname():
                     return fmt_followup % draft.getFromname()
                 elif only_fromname and draft.getEmail():
@@ -2012,7 +2012,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         name = draft.getEmail()
                     return fmt_followup % name
         return None
-    
+
     def getRecentOtherDraftThreadAuthorFast(self, min_timestamp=None,
                                             max_age_seconds=40, REQUEST=None):
         """ return the name of the author of the most recent draft followup or None
@@ -2027,11 +2027,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if min_timestamp:
                 if int(draft.getModifyDate()) < int(min_timestamp):
                     return None
-                
+
             no_words = len(draft.comment.split())
             if not no_words:
                 return None
-                
+
             fromname = draft.getFromname(issueusercheck=False)
             if fromname:
                 you_fromname = self.getSavedUser('fromname')
@@ -2042,15 +2042,15 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     else:
                         msg += " (%s words)" % no_words
                     return msg
-                
+
         except AttributeError:
             # it has simply not been set. Very common
             pass
-        
+
         # default is to return None
-        
-    
-    def getRecentOtherDraftThreadAuthor_json(self, 
+
+
+    def getRecentOtherDraftThreadAuthor_json(self,
                                              only_fromname=False,
                                              max_age_seconds=20,
                                              min_timestamp=None,
@@ -2062,12 +2062,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                                        min_timestamp=min_timestamp)
         if REQUEST is not None:
             REQUEST.RESPONSE.setHeader('Content-Type', 'application/javascript')
-            
+
         if msg:
             r = dict(msg=msg)
         else:
             r = dict()
-            
+
         if simplejson:
             return simplejson.dumps(r)
         else:
@@ -2075,16 +2075,16 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
     def getLatestDraftThreadAuthor(self, only_if_not_you=False):
         """ return the fullname of the latest draft thread author.
-        
+
         If @only_if_not_you is true, then don't bother if the current
         user *is* the latest draft thread author.
         """
         latest_draft = self._getLatestThreadDraft()
-        
+
         if only_if_not_you:
             you_fromname = self.getSavedUser('fromname')
             you_email = self.getSavedUser('email')
-        
+
         if latest_draft is not None:
             fromname = latest_draft.getFromname()
             email = latest_draft.getEmail()
@@ -2096,27 +2096,27 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             else:
                 return self.ShowNameEmail(fromname, email)
         return ''
-    
+
 
     def _reason2saveDraft(self, request):
         """ no draft has been created. Inspect this 'request' see if
         there is reason enough to save a draft. """
-    
+
         enough_request_data = False
         for key in ('comment',):
             if Utils.SimpleTextPurifier(request.get(key,'')):
                 enough_request_data = True
                 break
-        
-        if enough_request_data:    
+
+        if enough_request_data:
             # check that a draft like this doesn't exist already
             _finder = self._findMatchingThreadDraft
             draft = _finder(request.get('comment',''))
             if draft:
                 return False
-        
+
         return enough_request_data
-    
+
     def _findMatchingThreadDraft(self, comment):
         """ return drafts that match exactly. Return None if nothing found """
         container = self.getDraftsContainer()
@@ -2125,7 +2125,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if unicodify(draft.comment) == comment:
                 return draft
         return None
-    
+
     def _getLatestThreadDraft(self):
         """ return the thread draft object that is the latest """
         container = self.getDraftsContainer()
@@ -2135,7 +2135,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             return draftobjects[0]
         except IndexError:
             return None
-                
+
 
     def _saveDraftThread(self, issueid, action, REQUEST, draft_followup_id=None,
                          is_autosave=False):
@@ -2144,7 +2144,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if draft_followup_id:
             if not hasattr(draftscontainer, draft_followup_id):
                 # you're lying!
-                draft_followup_id = None 
+                draft_followup_id = None
 
         if not draft_followup_id:
             # need to create a draft issuethread object
@@ -2163,7 +2163,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         acl_adder = None
         if issueuser:
             acl_adder = ','.join(issueuser.getIssueUserIdentifier())
-            
+
         # now, populate this draftissue with as much data as
         # we can find
         modifier = draftthread.ModifyThread
@@ -2174,10 +2174,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
           and draftthread.email == rget('email'):
             # the thread hasn't changed enough, no need to call ModifyThread()
             # again which would be a waste of ZODB transactions and would also
-            # mean that the getModifyDate() of the draft thread would be 
+            # mean that the getModifyDate() of the draft thread would be
             # set again.
             return draft_followup_id
-        
+
         modifier(title=rget('title'),
                  comment=rget('comment'),
                  fromname=rget('fromname'),
@@ -2186,9 +2186,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                  display_format=rget('display_format', self.getSavedTextFormat()),
                  is_autosave=is_autosave,
                  )
-        
+
         self._v_recent_draft = draftthread
-                 
+
         # remember this
         issueuser = self.getIssueUser()
         if not issueuser:
@@ -2200,22 +2200,22 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 all_draft_ids.append(draft_followup_id)
                 all_draft_ids = '|'.join(all_draft_ids)
                 self.set_cookie(c_key, all_draft_ids, days=14)
-            
+
             # also save, the name if we didn't already have it
             if rget('fromname') and not self.getSavedUser('fromname', use_request=False):
                 self.set_cookie(self.getCookiekey('name'), rget('fromname'))
             if rget('email') and not self.getSavedUser('email', use_request=False):
                 self.set_cookie(self.getCookiekey('email'), rget('email'))
-                
-        return draft_followup_id
-    
-            
 
-    
+        return draft_followup_id
+
+
+
+
     def _createDraftThread(self, id, issueid, action):
         """ create a draftissuethread and return it """
         root = self.getDraftsContainer()
-        
+
         title = None
         if action.lower() == 'AddFollowup'.lower():
             title = _("Followup")
@@ -2228,18 +2228,18 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         return object
 
 
-    
+
     ## Changing the issue in mid-air
 
-    
-    def Others2Notify(self, format='email', emailtoskip=None, requireemail=False, 
+
+    def Others2Notify(self, format='email', emailtoskip=None, requireemail=False,
                       do=None # legacy parameter
                       ):
         """
         Returns a list of names and emails of people to notify if this issue
         changes or gets a followup.
         Take the hide_me and confidential factor into consideration.
-        
+
         if format == email:
             return [foo@bar.com, bar@foo.com,...]
         elif format == name:
@@ -2248,11 +2248,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             return ['Foo <foo@bar.com>', ...]
         elif format == merged:
             return [self.ShowNameEmail(Foo, foo@bar.com),...]
-        
+
         """
 
         if emailtoskip is None:
-            # caller was lazy not to specify this 
+            # caller was lazy not to specify this
             # we do it here in the code
             issueuser = self.getIssueUser()
             if issueuser:
@@ -2264,16 +2264,16 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
         all = []
         nameemailshower = lambda n,e: self.ShowNameEmail(n, e, highlight=0)
-        
+
         names_and_emails = self._getOthers(emailtoskip)
         for _name, _email in names_and_emails:
             add = ''
             if emailtoskip is not None and ss(_email) == ss(emailtoskip):
                 continue # skip it!
-            
+
             if requireemail and not Utils.ValidEmailAddress(_email):
                 continue # skip it!
-            
+
             if format == 'tuple':
                 add = (_email, nameemailshower(_name and _name or _email, _email))
             elif format == 'email':
@@ -2298,9 +2298,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         add = nameemailshower(_email, _email)
             if add and add not in all:
                 all.append(add)
-            
+
         return all
-                        
+
 
     def _getOthers(self, avoidemail=None):
         """ return a 2D list of names and emails that _should_ be notified """
@@ -2329,7 +2329,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     item = [thread_fromname, thread_email]
                     all.append(item)
                     allemails[ss_thread_email] = 1
-                    
+
 
         # 3. Get all subscribers
         notifyables = self.getNotifyablesEmailName()
@@ -2343,7 +2343,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     all.append(item)
                     allemails[ss_subscriber] = 1
 
-            elif len(subscriber.split(','))==2: 
+            elif len(subscriber.split(','))==2:
                 # quite possibly an acl user
                 ufpath, name = subscriber.split(',')
                 try:
@@ -2358,22 +2358,22 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                 issueuserobj.getEmail()]
                         all.append(item)
                         allemails[ss_email] = 1
-                    
-                
+
+
             elif Utils.ValidEmailAddress(subscriber):
                 ss_subscriber = ss(subscriber)
                 if not allemails.has_key(ss_subscriber):
                     all.append(['', subscriber])
                     allemails[ss_subscriber] = 1
-                
-        
+
+
         del allemails
         return all
 
     def getOptionButtons(self):
         """ Return list of dicts of actions and verbs """
         res=[]
-        
+
         def url_quote_unicodeaware(s):
             # if the string is a unicode string,
             # first convert it to a non-unicode string
@@ -2389,11 +2389,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if issuestatus != status.lower():
                 action = verb.capitalize()
                 action_quoted = url_quote_unicodeaware(action)
-                
+
                 #res.append([action, verb.capitalize()])
                 res.append({'action':action, 'verb':verb.capitalize(),
                             'action_quoted':action_quoted})
-                
+
         res.append({'action':u'Delete', 'verb':u'Delete',
                     'action_quoted':url_quote_unicodeaware('Delete'),
                     'id':'delete_option_button'})
@@ -2415,12 +2415,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if not fromname:
                 fromname = self.getEmail()
             return "Added by %s" % fromname
-        
+
 
     def getBriefedDescription(self, length=100):
         """ return some of the text """
         hq = self.HighlightQ # shortcut
-        
+
         description = self.getDescriptionPure()
         if len(description) <= length:
             d = description
@@ -2434,13 +2434,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 d = description + '...'
             except:
                 d = description[:length]
-        
+
         if isinstance(d, str):
             return self.HighlightQ(Utils.html_entity_fixer(Utils.safe_html_quote(d)))
         else:
             return self.HighlightQ(Utils.safe_html_quote(d))
 
-        
+
     def showAdditionalInformation(self, usebrackets=0, timedifference=None):
         """ returns a string of information about the issue.
         Zeroth (if timedifference is not None) the time difference
@@ -2452,17 +2452,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         if timedifference is not None:
             if timedifference:
                 info.append(str(timedifference))
-            
+
         if self.isConfidential():
             info.append("confidential")
-            
+
         count_files = self.countFileattachments()
         if count_files:
             if count_files == 1:
                 info.append('%s file'%count_files)
             else:
                 info.append('%s files'%count_files)
-            
+
         count_comments = self.countThreads()
         if count_comments:
             if count_comments == 1:
@@ -2480,14 +2480,14 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                         info.append('assigned to %s' % self.ShowNameEmail(_name, _email, highlight=False))
                     else:
                         info.append('assigned')
-                    
+
                 elif assignments[-1].getState() == 0:
                     _name = assignments[-1].getAssigneeFullname()
                     _email = assignments[-1].getAssigneeEmail()
                     if _name or _email:
                         info.append('reassigned to %s' % self.ShowNameEmail(_name, _email, highlight=False))
                     else:
-                        info.append('reassigned')                    
+                        info.append('reassigned')
             except AttributeError:
                 pass
 
@@ -2498,21 +2498,21 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return ', '.join(info)
         else:
             return ""
-        
-        
+
+
     def hasThreads(self):
         """ return true if there are issuethreads within """
         return not not self.ListThreads()
-        
+
     def countThreads(self):
         """ return the number of threads within """
         return len(self.ListThreads())
-        
+
     def getThreadObjects(self):
         """ Return the followup objects. The threads. """
         return self.objectValues(ISSUETHREAD_METATYPE)
     listThreads = ListThreads = getThreadObjects # better name
-    
+
     def getLastThread(self):
         """ Return the last thread in an issue or None """
         allthreads = self.ListThreads()
@@ -2520,11 +2520,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             return allthreads[-1]
         else:
             return None
-        
+
     def countFileattachments(self):
         """ return [no files in issue, no files in threads] """
         return len(self.ZopeFind(self, obj_metatypes=['File'], search_sub=1))
-    
+
     def filenames(self):
         """ return all the filenames of this issue splitted """
         files = self.objectValues('File')
@@ -2532,8 +2532,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         for file in files:
             all.extend(Utils.filenameSplitter(file.getId()))
         return Utils.uniqify([x.lower() for x in all])
-        
-        
+
+
     def manage_beforeDelete(self, REQUEST=None, RESPONSE=None):
         """ uncatalog yourself """
         for thread in self.objectValues(ISSUETHREAD_METATYPE):
@@ -2544,9 +2544,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """A common method to allow Findables to index themselves."""
         path = '/'.join(self.getPhysicalPath())
         catalog = self.getCatalog()
-        
+
         if idxs is None:
-            # because I don't want to put mutable defaults in 
+            # because I don't want to put mutable defaults in
             # the keyword arguments
             idxs = ['id','title','description', 'fromname','email','url2issue',
                     'meta_type','status','path','modifydate',
@@ -2554,42 +2554,42 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         else:
             # No matter what, when indexing you must always include 'path'
             # otherwise you might update indexes without putting the object
-            # brain in the catalog. If that happens the object won't be 
+            # brain in the catalog. If that happens the object won't be
             # findable in the searchResults(path='/some/path') even if it's
             # findable on other indexes such as comment.
-            
+
             if 'path' not in idxs:
                 idxs.append('path')
-        
+
         indexes = catalog._catalog.indexes
-        
+
         # this test is really old
         #if 'status' in idxs and not indexes.has_key('status'):
         #    idxs.remove('status')
-            
+
         if 'modifydate' in idxs and not indexes.has_key('modifydate'):
             msg = "%s Catalog out of date. " % self.getRoot().absolute_url_path()
             msg += "Missing 'modifydate'. Press the Update Everything button"
             warnings.warn(msg)
             idxs.remove('modifydate')
-        
+
         if 'issuedate' in idxs and not indexes.has_key('issuedate'):
             msg = "%s Catalog out of date. " % self.getRoot().absolute_url_path()
             msg += "Missing 'issuedate'. Press the Update Everything button"
             warnings.warn(msg)
-            idxs.remove('issuedate')            
-            
+            idxs.remove('issuedate')
+
         if self.EnableDueDate() and indexes.has_key('due_date'):
             idxs.append('due_date')
-            
+
         catalog.catalog_object(self, path, idxs=idxs)
- 
+
     def getTitle_idx(self):
         return self.getTitle()
-    
+
     def getFromname_idx(self):
         return self.getFromname()
-    
+
     def getDescription_idx(self):
         return self.getDescription()
 
@@ -2597,39 +2597,39 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """A common method to allow Findables to unindex themselves."""
         path = '/'.join(self.getPhysicalPath())
         self.getCatalog().uncatalog_object(path)
-        
+
     def isImplicitlySubscribing(self, email):
         """ return if they're already involved in this issue such that there is
         no point for them becoming a subscriber """
-        
+
         # was it you who added this issue?
         issue_email = self.getEmail()
         if email and issue_email == email:
             return True
-        
+
         # have you made any kind of followup?
         for thread in self.ListThreads():
             if email and thread.getEmail() == email:
-                return True            
-        
+                return True
+
         return False # fallback
-    
+
     def isSubscribing(self, email):
         """ check if in subscribers list """
         subscribers = self.getSubscribers()
         email = ss(str(email))
         return email in [ss(x) for x in subscribers]
-    
+
     def getSubscribers(self):
         """ return subscribers list """
         return getattr(self, 'subscribers', [])
-    
+
     def _addSubscriber(self, name_or_email):
         """ add subscriber to subscribers list """
         subscribers = self.getSubscribers()
         email = None
         name_or_email = name_or_email.strip()
-        
+
         if Utils.ValidEmailAddress(name_or_email):
             email = name_or_email
         elif len(name_or_email.split(','))==2:
@@ -2649,12 +2649,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if isinstance(subscribers, tuple):
                     subscribers = list(subscribers)
                 subscribers.append(email)
-                
+
                 self.subscribers = subscribers
                 return True
-            
+
         return False
-            
+
     def _delSubscriber(self, email):
         """ remove item from subscribers list """
         n_subscribers = []
@@ -2663,10 +2663,10 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if ss_email != ss(subscriber):
                 n_subscribers.append(subscriber)
         self.subscribers = n_subscribers
-            
+
     def Subscribe(self, subscriber, unsubscribe=0, REQUEST=None):
         """ analyse subscriber and add accordingly """
-        
+
         if subscriber == 'issueuser':
             issueuser = self.getIssueUser()
             assert issueuser, "Not logged in as Issue User"
@@ -2676,24 +2676,24 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             else:
                 self._addSubscriber(identifier)
         else:
-            
+
             emails = self.preParseEmailString(subscriber, aslist=1)
             for email in emails:
                 if unsubscribe:
                     self._delSubscriber(email)
                 else:
                     self._addSubscriber(email)
-                    
+
             # Exceptional case. If the user doesn't already have an email
-            # address, but has asked to subscribe with only one email 
+            # address, but has asked to subscribe with only one email
             # address, then we can assume that that is the email address he wants
             # to use all the time.
             if not self.getSavedUser('email') and len(emails)==1:
                 if Utils.ValidEmailAddress(emails[0]):
-                    # add this 
+                    # add this
                     self.set_cookie(self.getCookiekey('email'), emails[0])
-                
-                
+
+
         if REQUEST is not None:
             url = self.absolute_url() + '/'
             REQUEST.RESPONSE.redirect(url)
@@ -2714,7 +2714,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             maxlength = abs(int(maxlength))
         except ValueError:
             maxlength = 13
-            
+
 
         # 0. Who are you?
         issueuser = self.getIssueUser()
@@ -2722,17 +2722,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             _email_ss = Utils.ss(issueuser.getEmail())
         else:
             _email_ss = Utils.ss(self.getSavedUserEmail())
-            
+
         if _email_ss:
             friends_emails.append(_email_ss)
 
         # 1. Search current issue
         if self.meta_type == ISSUE_METATYPE:
             _email = self.getEmail()
-            
+
             if _email and Utils.ss(_email) not in friends_emails and Utils.ValidEmailAddress(_email):
                 _email_ss = Utils.ss(_email)
-                
+
                 _name = self.getFromname()
                 _show = self.ShowNameEmail(_name, _email, highlight=False)
                 item = {'name':_name,
@@ -2751,13 +2751,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                             'email':_email,
                             'show':_show}
                     friends.append(item)
-                    friends_emails.append(_email_ss)                
+                    friends_emails.append(_email_ss)
 
-                
+
         # 2. list of acl identifiers
 
         # filter=true removes all assignment blacklisted people
-        all_users = self.getAllIssueUsers(filter=1) 
+        all_users = self.getAllIssueUsers(filter=1)
         for each in all_users:
             user = each['user']
             _email = user.getEmail()
@@ -2827,25 +2827,25 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 friend['notifyable'] = False
 
             checked.append(friend)
-            
+
         friends = checked
 
         return friends
-        
 
-        
+
+
     security.declareProtected('View', 'TellAFriend')
     def TellAFriend(self, email_string, friends=[], ignoreword='', added=False, send=True,
                     message_sender='', cancel=False):
         """ Allows people to send notifications to other people """
-        
+
         if not self.UseTellAFriend():
             return "Tell a friend feature disabled"
-        
+
         if cancel:
             self.REQUEST.RESPONSE.redirect(self.absolute_url())
             return
-        
+
         email_string = email_string.strip()
         if (not email_string or email_string == ignoreword) and send:
             if not friends:
@@ -2860,7 +2860,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             fromname = self.getSavedUserName()
             email = self.getSavedUserEmail()
 
-        if fromname and Utils.ValidEmailAddress(email):                
+        if fromname and Utils.ValidEmailAddress(email):
             fr = "%s <%s>"%(fromname, email)
         elif Utils.ValidEmailAddress(email):
             fr = email
@@ -2871,7 +2871,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         _roottitle = self.getRoot().getTitle()
         subject = "%s: An issue to your attention"%_roottitle
 
-        
+
         if message_sender:
             msg = message_sender
         else:
@@ -2884,11 +2884,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             params = {}
             if self.REQUEST.get('NewIssue'):
                 params['NewIssue'] = self.REQUEST.get('NewIssue')
-            
+
             if to or friends:
                 to_strings = [x.strip() for x in to]
                 both = to_strings+friends
-                
+
                 both = ', '.join(both)
                 #body = '\r\n'.join(['From: %s'%fr, 'To: %s'%both,
                 #                'Subject: %s'%subject, "", msg])
@@ -2915,7 +2915,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                             pass
                     except KeyError:
                         pass
-                
+
             else:
                 params['tellafriend'] = "Failed because no one to send to"
                 params['bad'] = 1
@@ -2930,17 +2930,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     pass
 
             url = self.absolute_url()
-            
+
             if message_sender and len(message_sender) < 5000:
                 params['message_sender'] = message_sender
-                
+
             #params['MoreEmailOptions'] = 1
             url = Utils.AddParam2URL(url, params) + '#details'
             self.REQUEST.RESPONSE.redirect(url)
-            
+
         else:
             return msg
-        
+
 
     def _constructTellAFriendMessage(self, fromname):
         """ create a suggested TellAFriendMessage """
@@ -2966,16 +2966,16 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         signature = self.showSignature()
         if signature:
             msg += "--" + br +signature
-            
+
         return msg
-    
-    
+
+
     def getDefaultTellAFriendMessage(self, added=False):
         """ wrap TellAFriend() to be able to extract only the message """
         msg = self.TellAFriend('', added=added, send=False)
         return msg
-        
-            
+
+
 
 
     ## Issue Assignment
@@ -2986,7 +2986,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         user who calls this. """
         if isinstance(send_email, basestring):
             send_email = Utils.niceboolean(send_email)
-            
+
         assignments = self.getAssignments()
         lastone = assignments[-1]
         if lastone.isYou() or self.hasManagerRole():
@@ -2996,59 +2996,59 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         url = self.absolute_url()
         self.REQUEST.RESPONSE.redirect(url)
 
-        
+
     security.declareProtected('View', 'setAssignment')
     def setAssignment(self, assignee, send_email=False):
         """ add a new assignee to the issue object only if the current assignee is the
         user who calls this. """
         if isinstance(send_email, basestring):
             send_email = Utils.niceboolean(send_email)
-            
+
         assignments = self.getAssignments()
         if assignments:
             state = 0
         else:
             state = 1
-            
+
         if self.hasManagerRole():
             self.createAssignment(assignee, state=state, send_email=send_email)
 
         url = self.absolute_url()
         self.REQUEST.RESPONSE.redirect(url)
-        
-    
+
+
     def _getAssignments(self):
         """ return the issues assignment objects unsorted """
         return self.objectValues(ISSUEASSIGNMENT_METATYPE)
-    
-    
+
+
     def getAssignments(self, sort=True):
         """ return the issue assignment objects sorted """
         objects = self._getAssignments()
         if sort:
             objects = self.sortSequence(objects, (('assignmentdate',),))
         return objects
-    
+
     def getFirstAssignment(self):
         """ return the first assignment or None """
         try:
             return self.getAssignments()[0]
         except IndexError:
             return None
-        
+
     def getLastAssignment(self):
         """ return the last assignment or None """
         try:
             return self.getAssignments()[-1]
         except IndexError:
-            return None        
-    
-    
+            return None
+
+
     def createAssignment(self, assignee_identifier, state=1,
                          send_email=False):
         """ create an Issue Assignment """
         request = self.REQUEST
-        
+
         prefix = self.issueprefix + 'assignment'
         mtype = ISSUEASSIGNMENT_METATYPE
         id = self.generateID(4, prefix=prefix,
@@ -3061,7 +3061,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         except ValueError:
             m = "Invalid assignee identifier (%s)"
             raise AssigneeNotFoundError, m % assignee_identifier
-        
+
         userfolder = self.unrestrictedTraverse(userfolderpath)
         if name in userfolder.user_names():
             user = self.getIssueUserObject(assignee_identifier)
@@ -3076,34 +3076,29 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
         email_cookiekey = self.getCookiekey('email')
         name_cookiekey = self.getCookiekey('name')
-        
+
         if issueuser and issueuser.getEmail():
             email = issueuser.getEmail()
         elif not request.get('email') and self.has_cookie(email_cookiekey):
             email = self.get_cookie(email_cookiekey)
         else:
             email = asciify(request.get('email',''), 'ignore')
-            
+
         if issueuser and issueuser.getFullname():
             fromname = issueuser.getFullname()
         elif not request.get('fromname') and self.has_cookie(name_cookiekey):
             fromname = unicodify(self.get_cookie(name_cookiekey))
         else:
             fromname = unicodify(request.get('fromname',''))
-            
+
         # Add it
         adder = self._createAssignmentObject
         assignment = adder(id, assignee_identifier, state,
                            fromname, email, acl_adder)
-              
+
         if send_email and Utils.ValidEmailAddress(user.getEmail()) \
-               and not Utils.ss(user.getEmail())==Utils.ss(email):
+               and Utils.ss(user.getEmail()) != Utils.ss(email):
             self._sendAssignmentNotification(assignment, user.getEmail())
-            
-            #self._sendAssignementEmail(user.getFullname(), user.getEmail(),
-            #                           fromname, email)
-                                       
-            #assignment._setEmailSent()
 
 
     def _createAssignmentObject(self, id, identifier, state,
@@ -3120,31 +3115,30 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     def _sendAssignementEmail(self, to_name, to_email, from_name, from_email):
         """ Send a simple email to he who was assigned this issue """
         raise DeprecatedError, "We're using _sendAssignmentNotification() instead"
-    
-    
+
+
     def _sendAssignmentNotification(self, assignment, to_email):
         """ create a notification object about this new assignment object """
         # the person who "created" the assignment
         fromname = assignment.getFromname()
         email = assignment.getEmail()
         issue = aq_parent(aq_inner(assignment))
-        
+
         notifyid = self.generateID(5, self.issueprefix+"notification",
                                    meta_type=NOTIFICATION_META_TYPE,
                                    use_stored_counter=False,
                                    incontainer=issue)
-                                   
+
         title = issue.getTitle()
         issueID = issue.getId()
         date = DateTime()
-        
+
         notification = IssueTrackerNotification(notifyid,
                              title, issue.getId(), [to_email],
                              assignment=assignment.getId()
                              )
         issue._setObject(notifyid, notification)
         notifyobject = getattr(issue, notifyid)
-        
         if self.doDispatchOnSubmit():
             if 1: #try:
                 self.dispatcher([notifyobject])
@@ -3156,61 +3150,61 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     pass
                 LOG(self.__class__.__name__, PROBLEM,
                    'Email could not be sent', error=sys.exc_info())
-        
 
 
-                       
+
+
     ##
     ## The issue's notifications
     ##
-    
-                       
+
+
     def getCreatedNotifications(self, sort=False):
         objects = list(self._getCreatedNotifications())
         if sort:
             objects.sort(lambda x, y: cmp(x.date, y.date))
         return objects
-    
+
     def _getCreatedNotifications(self):
         return self.objectValues(NOTIFICATION_META_TYPE)
-    
+
     ##
     ## Misc.
     ##
-    
+
     def getNotifiedUsersByNotificationsAndAssignment(self):
         """ return a list of of strings of people who will be notified
         when this issue was submitted. """
-        
+
         strings = []
         _all_emails = []
         notifications = self.getCreatedNotifications()
         first_assignment = self.getFirstAssignment()
-        
+
         if first_assignment is not None:
             assignee_name = first_assignment.getAssigneeFullname()
             assignee_email = first_assignment.getAssigneeEmail()
             add = self.ShowNameEmail(assignee_name, assignee_email, highlight=False)
             strings.append(add)
             _all_emails.append(assignee_email.lower())
-            
+
         always = self.getAlwaysNotify()
         checked = [self._checkAlwaysNotify(x, format='list') for x in always]
         # checked is a list of tuples that look like this:
         # [(True, ['', 'peterbe@gmail.com']), ...]
-        # And this can be used to help us figure out the names of the emails 
+        # And this can be used to help us figure out the names of the emails
         # stored in the notification objects.
         emails2names = {}
-        
+
         for valid, name_email in checked:
             if not valid:
                 continue
-            
+
             n, e = name_email
-            
+
             if n:
                 emails2names[e.lower()] = n.strip()
-            
+
         for notification in notifications:
             for email in notification.getEmails():
                 name = emails2names.get(email.lower(), '')
@@ -3218,17 +3212,17 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if email.lower() not in _all_emails:
                     strings.append(add)
                     _all_emails.append(email.lower())
-            
+
         return strings
-    
+
     ##
     ## Notes
     ##
-    
+
     def getNotes(self):
         """return all note objects"""
         return self.objectValues(ISSUENOTE_METATYPE)
-    
+
     def getYourNotes(self, threadID=None):
         # first figure out if there are any notes in the issue
         # before we figure out who we can and search for them
@@ -3238,9 +3232,9 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         for __ in self.findNotes(threadID=threadID):
             any_notes = True
             break
-        
+
         note_objects = []
-        
+
         # before we fetch all private notes, just check that there are any
         # before we start the expensive operation of figuring out your
         # identifier and doing the search
@@ -3255,7 +3249,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 path = '/'.join(zopeuser.getPhysicalPath())
                 name = zopeuser.getUserName()
                 acl_adder = ','.join([path, name])
-    
+
             ckey = self.getCookiekey('name')
             if issueuser and issueuser.getFullname():
                 fromname = issueuser.getFullname()
@@ -3265,7 +3259,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 fromname = self.get_cookie(ckey)
             else:
                 fromname = ''
-    
+
             ckey = self.getCookiekey('email')
             if issueuser and issueuser.getEmail():
                 email = issueuser.getEmail()
@@ -3275,7 +3269,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 email = self.get_cookie(ckey)
             else:
                 email = ''
-            
+
             if acl_adder:
                 note_objects += list(self.findNotes(acl_adder=acl_adder,
                                                     threadID=threadID))
@@ -3283,18 +3277,18 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 note_objects += list(self.findNotes(fromname=fromname,
                                                     email=email,
                                                     threadID=threadID))
-        
+
         note_objects.sort(lambda x,y: cmp(x.notedate, y.notedate))
-        
+
         return note_objects
-        
-    
+
+
 
     security.declareProtected('View', 'createNote')
     def createNote(self, comment, public=False, threadID='',
                    REQUEST=None):
         """create a note via the web"""
-        
+
         acl_adder = ''
         issueuser = self.getIssueUser()
         cmfuser = self.getCMFUser()
@@ -3331,8 +3325,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             display_format = saved_display_format
         else:
             display_format = self.getDefaultDisplayFormat()
-            
-        
+
+
         try:
             note = self._createNote(comment, fromname=fromname, email=email,
                                       acl_adder=acl_adder,
@@ -3343,29 +3337,29 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return "Error: %s" % str(msg)
             else:
                 raise
-            
+
         if REQUEST is not None:
             redirect_url = self.absolute_url()
             request.RESPONSE.redirect(redirect_url)
         else:
             return note
-            
-        
+
+
     def _createNote(self, comment, fromname=None, email=None, acl_adder=None,
                    public=False, display_format='', threadID='',
                    REQUEST=None):
-        
+
         # the comment can not be blank
         if not comment:
             raise IssueNoteError("Note comment can not be empty")
-        
+
         if threadID:
             try:
                 thread = getattr(self, threadID)
             except AttributeError:
                 raise ValueError("thread does not exist")
-        
-                
+
+
         # test if the comment doesn't already exist
         for note in self.findNotes(comment=comment,
                                     fromname=fromname, email=email,
@@ -3374,7 +3368,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # already created
             # perhaps user doubleclick the submit button
             return note
-            
+
         randomid_length = self.randomid_length
         if randomid_length > 3:
             randomid_length = 3
@@ -3382,7 +3376,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                                 prefix=self.issueprefix + 'note',
                                 meta_type=ISSUENOTE_METATYPE,
                                 use_stored_counter=False)
-        
+
         from Products.IssueTrackerProduct.Note import IssueNote
         # create a note inside this issue
         note = IssueNote(genid, title, comment, fromname, email,
@@ -3392,12 +3386,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         self._setObject(genid, note)
         note = self._getOb(genid)
         note.index_object()
-        
+
         return note
-        
+
     def findNotes(self, comment=None, fromname=None, email=None,
                   acl_adder=None, threadID=None):
-        
+
         for note in self.getNotes():
             if comment is not None:
                 if note.getComment() != comment:
@@ -3412,24 +3406,24 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 if note.threadID != threadID:
                     continue
             yield note
-                                    
+
 
 
 zpts = ({'f':'zpt/ShowIssue', 'optimize':OPTIMIZE and 'xhtml'},
         'zpt/OptionButtons',
-        
+
         'zpt/tell_a_friend',
         'zpt/form_followup',
         'zpt/quick_form_followup',
         'zpt/subscription',
         #'zpt/manager_options',
         #'zpt/anonymous_options',
-        
+
         'zpt/form_delete',
         'zpt/followup_preview',
         )
 
-        
+
 addTemplates2Class(IssueTracker, zpts, extension='zpt')
 
 InitializeClass(IssueTrackerIssue)
@@ -3440,7 +3434,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
     """ These are used for the 'Save as draft' feature.
     It's like the regular Issue objects except that it
     doesn't get cataloged. """
-    
+
     __implements__ = (IWriteLock,)
 
     meta_type = ISSUE_DRAFT_METATYPE
@@ -3487,7 +3481,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         self.Tempfolder_fileattachments = Tempfolder_fileattachments
 
         self.assignee_identifier = assignee_identifier
-        
+
     # legacy support
     is_autosave = False
 
@@ -3498,7 +3492,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
     def unindex_object(self):
         """A common method to allow Findables to unindex themselves."""
         pass
-    
+
     def manage_afterAdd(self, REQUEST, RESPONSE):
         """ the base class defines this to prerender the description, something we
         don't want to do. """
@@ -3510,7 +3504,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
 
     def isAutosave(self):
         return self.is_autosave
-    
+
     def shortDescription(self, maxlength=55, html=True):
         """ return a simplified description where the title is shown
         and then as much of the description as possible. """
@@ -3521,7 +3515,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
             else:
                 title = "(No subject)"
         desc = self.getDescriptionPure()
-        
+
         shortened = self.lengthLimit(title, maxlength, "|...|")
         if shortened.endswith('|...|'):
             # the title was shortened
@@ -3530,17 +3524,17 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                 return "<b>%s</b>..."%shortened
             else:
                 return shortened+'...'
-        else: 
+        else:
             # i.e. title==shortened
             # put some of the description ontop
             if len(shortened) + len(desc) > maxlength:
                 desc = self.lengthLimit(desc, maxlength-len(title))
-                
+
             if html:
                 return "<b>%s</b>, %s"%(shortened, desc)
             else:
                 return "%s, %s"%(shortened, desc)
-                
+
 
     def hasThreads(self):
         """ return true if there are issuethreads within """
@@ -3586,7 +3580,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
 
         if title is not None:
             self.title = unicodify(title)
-            
+
         if description is not None:
             self.description = unicodify(description)
 
@@ -3606,7 +3600,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                 else:
                     sections = [sections]
             self.sections = sections
-            
+
         if fromname is not None:
             self.fromname = unicodify(fromname)
 
@@ -3634,9 +3628,9 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
 
         if assignee_identifier is not None:
             self.assignee_identifier = assignee_identifier
-            
+
         self.is_autosave = not not is_autosave
-        
+
         if Tempfolder_fileattachments is not None:
             self.Tempfolder_fileattachments = Tempfolder_fileattachments
 
@@ -3645,7 +3639,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
     def isAutosave(self):
         """ return if this was saved as an autosave or a plain draft """
         return self.is_autosave
-    
+
     def get__dict__keys(self):
         """ return the names of the keys we might have """
         return ('title', 'description', 'status', 'type', 'urgency',
@@ -3669,12 +3663,12 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         for key in self.get__dict__keys():
             if self.__dict__.get(key):
                 request.set(key, self.__dict__.get(key))
-                
-        
+
+
     #
     # External editor
     #
-    
+
     #security.declareProtected('Use External Editor', 'manage_FTPget')
     security.declareProtected('View', 'manage_FTPget')
     def manage_FTPget(self, REQUEST, RESPONSE):
@@ -3700,19 +3694,19 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
         out += "[URL] %s\n"%self.url2issue
         #out += "[Assign to]\n%s\n\n"%
         return out
-    
+
     def get_size(self):
         """ Used for FTP and ZMI """
         return len(self.manage_FTPget())
-    
-    
+
+
     #security.declareProtected('Use External Editor', 'PUT')
     security.declareProtected('View', 'PUT')
     def PUT(self, REQUEST, RESPONSE):
         """ handle the HTTP PUT requests for ExternalEditor """
         self.dav__init(REQUEST, RESPONSE)
         self.dav__simpleifhandler(REQUEST, RESPONSE, refresh=1)
-                    
+
         if not REQUEST.get('BODY'):
             if transaction is None:
                 get_transaction.abort()
@@ -3735,13 +3729,13 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                 apply(self.ModifyIssue, (), info)
                 RESPONSE.setStatus(204)
             return RESPONSE
-        
+
     def _parseExternalEditBody(self, body):
         """ return a dict of all the info we could find in this body """
         d = {}
-        
-        labels = {'Subject':'title', 'Description':'description', 
-                  'Name':'fromname', 'Email':'email', 
+
+        labels = {'Subject':'title', 'Description':'description',
+                  'Name':'fromname', 'Email':'email',
                   'Display format':'display_format',
                   'Sections':'sections', 'Type':'type', 'Urgency':'urgency',
                   'URL':'url2issue'}
@@ -3757,7 +3751,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                 tidied = self._tidyFoundValue(labels.get(key), value)
                 if tidied is not None:
                     d[labels.get(key)] = tidied
-        
+
         return d
 
     def _tidyFoundValue(self, key, value):
@@ -3791,7 +3785,7 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                 # makes sure the value is of correct case
                 if Utils.ss(value) == Utils.ss(urgencyoption):
                     return urgencyoption
-                
+
             return None # if the above loop didn't work the value is unrecongized
         elif key == 'type':
             for typeoption in self.types:
@@ -3799,23 +3793,19 @@ class IssueTrackerDraftIssue(IssueTrackerIssue):
                 if Utils.ss(value) == Utils.ss(typeoption):
                     return typeoption
             return None # see above on urgencies
-        
+
         # all else, nothing to complain or nag about
         return value
-    
+
 
 dtmls = ({'f':'dtml/draftissue_properties', 'n':'manage_draftissue_properties'},
          )
 addTemplates2Class(IssueTrackerDraftIssue, dtmls, "dtml")
-InitializeClass(IssueTrackerDraftIssue)    
-    
+InitializeClass(IssueTrackerDraftIssue)
+
 
 #----------------------------------------------------------------------------
 
 from Notification import IssueTrackerNotification
 from Thread import IssueTrackerIssueThread, IssueTrackerDraftIssueThread
 from Assignment import IssueTrackerIssueAssignment
-
-
-
-
