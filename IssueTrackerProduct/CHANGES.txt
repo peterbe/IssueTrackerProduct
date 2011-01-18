@@ -1,3 +1,6 @@
+    New feature: Urgency of an issue included in the subject line of
+    notifications. 
+    
     Bug fixed: Badly raised UnicodeDecodeError on parsing emails in.
     
     Bug fixed: Finding and making links to issues with IDs higher than
