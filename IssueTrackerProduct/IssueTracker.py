@@ -7514,8 +7514,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def sendEmail(self, msg, to, fr, subject, swallowerrors=False, headers={}):
         """ this is the new sendEmail that works much better but with Unicode instead
         """
-        raise Exception
-        print "sendEmail(), ", DEBUG
         if DEBUG:
             # print the email instead of sending it
             out = sys.stdout
