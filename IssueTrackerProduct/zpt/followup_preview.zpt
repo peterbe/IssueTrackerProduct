@@ -1,12 +1,11 @@
 <h3>Preview before saving</h3>
 
 
-
 <table width="630" class="threadbox" cellpadding="3" border=0
  tal:define="previewtitle python:here.getPreviewTitle(here.status, request['IssueAction'])">
     <tr bgcolor="#DEDBDE">
 	<td>
-	
+
 	<strong tal:content="structure python:here.colorizeThreadChange(previewtitle)">
 		Title
 	</strong>
@@ -19,12 +18,12 @@
 	</tr>
 	<tr bgcolor="#EFEBEF">
 	<td tal:define="emptystring string:;comment request/comment_description | emptystring; display_format request/display_format;fileattachmentcontainer python:here.getFileattachmentContainer(only_temporary=1)">
-	
-	    <blockquote tal:condition="comment"				            
+
+	    <blockquote tal:condition="comment"
 			tal:content="structure python:here.ShowDescription(comment.strip()+' ', display_format)">
 			    COMMENT here
 	    </blockquote>
-	    
+
 	    <p tal:condition="not:comment"><em>No comment.</em></p>
 
 	    <div align="right" tal:content="python:here.ZopeTime().strftime(here.display_date)">date</div>
@@ -37,7 +36,7 @@
 			    <span tal:repeat="file files">
 			    <a href="" title="" tal:define="size file/getSize; size_str python:here.ShowFilesize(size)"
 			    tal:attributes="href file/absolute_url;title string:File size ${size_str}"><img hspace="2" src="" alt="File" border="0"
-			    tal:attributes="src python:here.getFileIconpath(file.getId());title file/absolute_url" /><span 
+			    tal:attributes="src python:here.getFileIconpath(file.getId());title file/absolute_url" /><span
 			    tal:replace="structure python:here.HighlightQ(file.getId())"></span></a>
 			    &nbsp;</span>
 			   </td>
@@ -54,5 +53,3 @@
     tal:condition="python:notify and Others2Notify">
 Notification will be sent to: <br tal:replace="python:', '.join(Others2Notify)" />
 </div>
-
-

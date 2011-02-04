@@ -34,20 +34,20 @@ except ImportError:
 """IssueTracker Product"""
 
 def dummyFunction(zope):
-    """ dummy function because we don't want to use the ZMI for 
+    """ dummy function because we don't want to use the ZMI for
     some classes. """
     return MessageDialog(title="Add Issue Error",
            message="Don't add Issue Tracker Issues with the Zope management interface;"\
                    "instead, use the Issue Tracker only",
                    action="manage_main")
-                    
+
 
 def initialize(context):
     """ Initialize IssueTracker product """
     from Globals import DevelopmentMode
-    
+
     import UnicodeSplitter
-    
+
     try:
 
 
@@ -63,7 +63,7 @@ def initialize(context):
                 ),
             icon = "www/issuetracker.gif"
             )
-                    
+
         context.registerClass(
             Issue.IssueTrackerIssue,
             constructors = (dummyFunction,),
@@ -79,7 +79,7 @@ def initialize(context):
                 # This is called when
                 Notifyables.manage_addNotifyableContainerForm,
                 # someone adds the product
-                Notifyables.manage_addNotifyableContainer         
+                Notifyables.manage_addNotifyableContainer
                 ),
             icon = "www/issuetracker_notifyablecontainer.gif"
 
@@ -94,7 +94,7 @@ def initialize(context):
                 ),
             icon='www/issueuserfolder.gif',
         )
-        
+
         context.registerClass(
             ReportScript.ReportScript,
             constructors=(
@@ -103,7 +103,7 @@ def initialize(context):
                 ),
             icon='www/issuereportscript.gif',
         )
-        
+
         context.registerClass(
             CustomField.CustomField,
             constructors=(
@@ -112,7 +112,7 @@ def initialize(context):
                 ),
             icon='www/customfield.png',
         )
-        
+
         context.registerClass(
             CustomField.CustomFieldFolder,
             constructors=(
@@ -120,14 +120,14 @@ def initialize(context):
                 CustomField.manage_addCustomFieldFolder,
                 ),
             icon='www/customfieldfolder.png',
-        )        
-        
+        )
+
         def registerIcon(filename, **kw):
             _registerIcon(OFS.misc_.misc_.IssueTrackerProduct, filename, **kw)
-            
+
         def registerJS(filename, **kw):
             _registerJS(OFS.misc_.misc_.IssueTrackerProduct, filename, **kw)
-        
+
         def registerCSS(filename, **kw):
             _registerCSS(OFS.misc_.misc_.IssueTrackerProduct, filename, **kw)
 
@@ -154,6 +154,7 @@ def initialize(context):
         registerIcon('report-big.png')
         registerIcon('close.gif')
         registerIcon('paperclip.gif')
+        registerIcon('clock.png')
         registerIcon('gradhead.png')
         registerIcon('gradissuehead.png')
         registerIcon('gradtablehead.png')
@@ -169,7 +170,7 @@ def initialize(context):
         registerJS('issuenotes-core.js')
         registerJS('issuenotes-list.js')
         registerCSS('jquery-ui-1.7.1.datepickeronly.css')
-        
+
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())
         for icon in icons:
             registerIcon(icon, epath='icons')
@@ -179,22 +180,22 @@ def initialize(context):
                     )
         for micon in menuicons:
             registerIcon(micon, epath='menuicons')
-        
+
         ui_icons = os.listdir(os.path.join(package_home(globals()), 'www', 'ui_icons'))
         ui_icons = [x for x in ui_icons if x.endswith('.png') or x.endswith('.gif')]
         for ui_icon in ui_icons:
             registerIcon(ui_icon, epath='ui_icons')
-            
+
     except:
         if DevelopmentMode:
             raise
-        """If you can't register the product, tell someone. 
-        
+        """If you can't register the product, tell someone.
+
         Zope will sometimes provide you with access to "broken product" and
-        a backtrace of what went wrong, but not always; I think that only 
-        works for errors caught in your main product module. 
-        
-        This code provides traceback for anything that happened in 
+        a backtrace of what went wrong, but not always; I think that only
+        works for errors caught in your main product module.
+
+        This code provides traceback for anything that happened in
         registerClass(), assuming you're running Zope in debug mode."""
         import sys, traceback, string
         type, val, tb = sys.exc_info()
@@ -229,13 +230,13 @@ except ImportError:
     except ImportError:
         # < Zope 2.10 (I think)
         from OFS.content_types import guess_content_type
-    
+
 FILESTREAM_ITERATOR_THRESHOLD = 2 << 16 # 128 Kb (from LocalFS StreamingFile.py)
 
 
 class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
-    
-    def __init__(self, path, _prefix=None, 
+
+    def __init__(self, path, _prefix=None,
                  max_age_development=3600,
                  max_age_production=3600*24*7,
                  content_type=None, set_expiry_header=True):
@@ -246,7 +247,7 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
         path = os.path.join(_prefix, path)
         self.path = path
         self.set_expiry_header = set_expiry_header
-        
+
         if DevelopmentMode:
             # In development mode, a shorter time is handy
             max_age = max_age_development
@@ -264,13 +265,13 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
         else:
             raise ValueError, "content_type not set or couldn't be guessed"
             #self.content_type='text/plain'
-            
+
         self.__name__=path[path.rfind('/')+1:]
         self.lmt=float(os.stat(path)[8]) or time.time()
         self.lmh=rfc1123_date(self.lmt)
         self.content_size = os.stat(path)[stat.ST_SIZE]
-        
-        
+
+
     def index_html(self, REQUEST, RESPONSE):
         """Default document"""
         # HTTP If-Modified-Since header handling. This is duplicated
@@ -282,7 +283,7 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
         RESPONSE.setHeader('Content-Length', self.content_size)
         if self.set_expiry_header:
             RESPONSE.setHeader('Expires', self._expires())
-            
+
 
         header=REQUEST.get_header('If-Modified-Since', None)
         if header is not None:
@@ -315,13 +316,13 @@ class BetterImageFile(App.ImageFile.ImageFile): # that name needs to improve
         RESPONSE.setHeader('Content-Type', self.content_type)
         RESPONSE.setHeader('Last-Modified', self.lmh)
         RESPONSE.setHeader('Content-Length', self.content_size)
-            
-        return ''    
+
+        return ''
 
     def _expires(self):
         return rfc1123_date(time()+self.max_age)
-    
-    
+
+
 def my_guess_content_type(path, data):
     content_type, enc = guess_content_type(path, data)
     if content_type in ('text/plain', 'text/html'):
@@ -336,7 +337,7 @@ def my_guess_content_type(path, data):
 
 def _registerIcon(product, filename, idreplacer={}, epath=None, startpath='www'):
     # A helper function that takes an image filename (assumed
-    # to live in a 'www' subdirectory of this package). It 
+    # to live in a 'www' subdirectory of this package). It
     # creates an ImageFile instance and adds it as an attribute
     # of misc_.MyPackage of the zope application object (note
     # that misc_.MyPackage has already been created by the product
@@ -346,22 +347,22 @@ def _registerIcon(product, filename, idreplacer={}, epath=None, startpath='www')
         path = os.path.join(startpath, epath)
     else:
         path = startpath
-    
+
     for k,v in idreplacer.items():
         objectid = objectid.replace(k,v)
     setattr(product,
-            objectid, 
+            objectid,
             #App.ImageFile.ImageFile(os.path.join(path, filename), globals())
             BetterImageFile(os.path.join(path, filename), globals())
             )
-            
-def _registerJS(product, filename, 
+
+def _registerJS(product, filename,
                 path='js', slim_if_possible=True):
     objectid = filename
     setattr(product,
-            objectid, 
+            objectid,
             BetterImageFile(os.path.join(path, filename), globals())
-            )            
+            )
     obj = getattr(product, objectid)
     if js_slimmer is not None and OPTIMIZE:
         if slim_if_possible:
@@ -369,12 +370,12 @@ def _registerJS(product, filename,
             new_path = obj.path + '-slimmed'
             open(new_path, 'wb').write(slimmed)
             setattr(obj, 'path', new_path)
-    
+
 
 def _registerCSS(product, filename, path='css', slim_if_possible=True):
     objectid = filename
     setattr(product,
-            objectid, 
+            objectid,
             BetterImageFile(os.path.join(path, filename), globals())
             )
     obj = getattr(product, objectid)
@@ -384,8 +385,3 @@ def _registerCSS(product, filename, path='css', slim_if_possible=True):
             new_path = obj.path + '-slimmed'
             open(new_path, 'wb').write(slimmed)
             setattr(obj, 'path', new_path)
-
-            
-            
-            
-            

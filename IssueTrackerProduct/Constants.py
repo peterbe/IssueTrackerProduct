@@ -7,7 +7,7 @@
 
 import os
 def getEnvBool(key, default):
-    """ return an boolean from the environment variables """    
+    """ return an boolean from the environment variables """
     value = os.environ.get(key, default)
     try:
         value = not not int(value)
@@ -27,12 +27,12 @@ def getEnvInt(key, default):
         return int(value)
     except ValueError:
         return default
-    
+
 def getEnvStr(key, default):
     """ return a string from the environment variables """
     value = os.environ.get(key, default)
     return str(value)
-    
+
 true = not 0
 false = not true
 try:
@@ -40,8 +40,8 @@ try:
 except NameError:
     True = true
     False = false
-    
-from I18N import _    
+
+from I18N import _
 
 # Optimize the output
 OPTIMIZE = getEnvBool('OPTIMIZE_ISSUETRACKERPRODUCT', True)
@@ -53,8 +53,8 @@ DEBUG = getEnvBool('DEBUG_ISSUETRACKERPRODUCT', False)
 UNICODE_ENCODING = getEnvStr('UNICODE_ENCODING_ISSUETRACKERPRODUCT', 'utf-8')
 
 # Global variable if you want to disable CheckoutableTemplates
-# even if it's installed and working. This can be useful to disable 
-# if you're doing development or want to supress all checked out 
+# even if it's installed and working. This can be useful to disable
+# if you're doing development or want to supress all checked out
 # templates in ZODB.
 DISABLE_CHECKOUTABLE_TEMPLATES = getEnvBool('DISABLE_CHECKOUTABLE_TEMPLATES', False)
 
@@ -88,7 +88,7 @@ PAGE_CHANGE_METATYPE = 'Issue Tracker Page Change'
 #DEFAULT_TYPES = ('general', 'announcement', 'idea', 'bug report',
 #                 'feature request','question',
 #                 'usability','other')
-DEFAULT_TYPES = (_(u'general'), _(u'announcement'), _(u'idea'), 
+DEFAULT_TYPES = (_(u'general'), _(u'announcement'), _(u'idea'),
                  _(u'bug report'), _(u'feature request'), _(u'question'),
                  _(u'usability'), _(u'other'),
                  )
@@ -143,6 +143,7 @@ DEFAULT_SHOW_REMEMBER_SAVEDFILTER_PERSISTENTLY_OPTION = True
 DEFAULT_USE_AUTOSAVE = True
 DEFAULT_USE_ESTIMATED_TIME = False
 DEFAULT_USE_ACTUAL_TIME = False
+DEFAULT_USE_FOLLOWUP_ACTUAL_TIME = False
 DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS = True
 DEFAULT_USE_TELLAFRIEND = True
 DEFAULT_USE_TELLAFRIEND_FOR_ANONYMOUS = True
@@ -273,7 +274,7 @@ ALREADY_NOT_SPAMBOT_COOKIE_KEY = '__it_AlreadyNotSpambot'
 AUTOSAVE_INTERVAL_SECONDS = 4 # DEPRECATED?
 FILTERVALUER_EXPIRATION_DAYS = 30 # saved filters > this gets cleaned away
 FILTERVALUER_MAX_PER_USER = 20 # how many saved filters one person can have
-FILTERVALUEFOLDER_THRESHOLD_CLEANING = 1000 # when 
+FILTERVALUEFOLDER_THRESHOLD_CLEANING = 1000 # when
 SPAMBAYES_CHECK = 'spam' # if X-Spambayes-Classification=$this delete the inbound email
 BTREEFOLDER2_ID = 'issues' # if a BTreeFolder2 is used, use this id
 POSSIBLE_USER_LISTS = ['assignments', 'added', 'followedup', 'subscribed']
@@ -286,11 +287,11 @@ MENUICONS_DATA = {'Home':{'src':'home.gif', 'size':'16x16'},
                   'User':{'src':'user.gif', 'size':'16x16'},
                   'Login':{'src':'login.gif', 'size':'16x16'},
                   'Logout':{'src':'logout.gif', 'size':'16x16'},
-                  
+
                   }
 for title, data in MENUICONS_DATA.items():
     if not data.has_key('width'):
-        data['width'] = data['size'].split('x')[0]        
+        data['width'] = data['size'].split('x')[0]
     if not data.has_key('height'):
         data['height'] = data['size'].split('x')[1]
     if not data['src'].startswith('/'):

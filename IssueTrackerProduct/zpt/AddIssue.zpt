@@ -222,7 +222,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
           <div class="fileattachment-on">
           <a href="AddIssue" onclick="showFileAttachments();return false"
              class="fileattachment-tip"
-            ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Click here to attach
+            ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Attach
           <span tal:condition="python:number_of_files==1">a file</span>
           <span tal:condition="not:python:number_of_files==1">one or more files</span>
           </a>

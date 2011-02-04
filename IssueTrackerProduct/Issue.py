@@ -810,7 +810,14 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         # still here?!
         raise ValueError, "Hours not recognized, enter only a numeral (or decimal)"
 
-
+    def parse_and_showTimeHours(self, value, **kwargs):
+        """wrapper on showTimeHours() that only works if we can first parse the
+        value. This is so that we can use the parsing when previewing the
+        followup."""
+        try:
+            return self.showTimeHours(self._parseTimeHours(value), **kwargs)
+        except ValueError:
+            return ""
 
     def getPreviewTitle(self, oldstatus, action):
         """ Get what the title of thread will be (via the web only) """
@@ -870,6 +877,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                     request.set('email', draft_object.getEmail())
                 if not request.get('display_format'):
                     request.set('display_format', draft_object.display_format)
+                if not request.get('actual_time_hours') and getattr(draft_object, 'actual_time_hours', None):
+                    request.set('actual_time_hours', draft_object.actual_time_hours)
 
         request_action = unicodify(request.get('action','')).lower()
 
@@ -1009,6 +1018,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 request.set('display_format', saved_display_format)
             else:
                 request.set('display_format', self.getDefaultDisplayFormat())
+
+        actual_time_hours = request.get('actual_time_hours')
+        if actual_time_hours and self.UseActualTime() and self.UseFollowupActualTime():
+            hours = self._parseTimeHours(actual_time_hours.strip())
+            assert isinstance(hours, float)
+        else:
+            hours = None
 
         req_manager = True # require manager by default
         addfollowup = False
@@ -1193,7 +1209,11 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             followupobject = create_method(genid, title, comment,
                                            threaddate, fromname,
                                            email, display_format,
-                                           acl_adder)
+                                           acl_adder,
+                                           actual_time_hours=hours)
+            if hours:
+                issueobject.increment_issue_actual_time(followupobject)
+
             followupobject.index_object(idxs=['id','comment'])
 
             # update the parent issue
@@ -1296,6 +1316,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         objectIds = issueobject.objectIds(ISSUETHREAD_METATYPE)
         redirect_url = '%s#i%s'%(issueobject.absolute_url(),
                                  len(objectIds))
+
         # catalog
         issueobject.unindex_object()
         issueobject.index_object()
@@ -1447,12 +1468,14 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
     def _createThreadObject(self, id, title, comment, threaddate,
                             fromname, email, display_format,
                             acl_adder='', submission_type='',
-                            email_message_id=None):
+                            email_message_id=None,
+                            actual_time_hours=None):
         """ Crudely create thread object. No checking. """
         thread = IssueTrackerIssueThread(id, title, comment, threaddate,
                                          fromname, email, display_format,
                                          acl_adder=acl_adder,
-                                         submission_type=submission_type)
+                                         submission_type=submission_type,
+                                         actual_time_hours=actual_time_hours)
         self._setObject(id, thread)
 
         # get that object
@@ -1460,7 +1483,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
         if email_message_id:
             threadobject._setEmailMessageId(email_message_id)
-
 
         return threadobject
 
@@ -1680,7 +1702,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             elif self.actual_time_hours is not None:
                 self.actual_time_hours = None
 
-
         if REQUEST is not None:
             # we can save custom fields
             for field in self.getCustomFieldObjects():
@@ -1731,7 +1752,16 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # go back to the issue itself
             REQUEST.RESPONSE.redirect(self.absolute_url())
 
+    def increment_issue_actual_time(self, followupobject):
+        assert followupobject.getActualTimeHours()
+        assert self.UseFollowupActualTime()
+        assert self.UseActualTime()
 
+        issue_hours = self.getActualTimeHours()
+        if not issue_hours:
+            issue_hours = 0.0
+        issue_hours += followupobject.getActualTimeHours()
+        self.actual_time_hours = issue_hours
 
     def isCreator(self):
         """ return true if the current user is logged in as the same user
@@ -2184,6 +2214,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                  email=rget('email'),
                  acl_adder=acl_adder,
                  display_format=rget('display_format', self.getSavedTextFormat()),
+                 actual_time_hours=rget('actual_time_hours'),
                  is_autosave=is_autosave,
                  )
 

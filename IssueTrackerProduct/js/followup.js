@@ -24,13 +24,13 @@ function checkRefresh() {
 function clearAutoRefreshTitle() {
    document.title = document.title.replace(/\(automatically refreshed\) /,'');
 }
-  
+
 var previous_clairvoyant_note='';
 var clairvoyant_timer;
 var page_generated_timestamp, last_clairvoyant_check_timestamp;
 function clairvoyant_followups() {
    var url = _base_url+'/getRecentOtherDraftThreadAuthor_json?nochache='+(Math.random()+"").substr(2, 5);
-   
+
    if (last_clairvoyant_check_timestamp) {
       url += '&min_timestamp='+last_clairvoyant_check_timestamp;
    } else {
@@ -88,21 +88,21 @@ function toggleHighlight() {
 }
 
 $(function() {
-   
+
    setTimeout(function() {
       $.get(_base_url+'/getModifyTimestamp', {}, function(resp) {
 	 if (resp) modified_timestamp = resp;
       });
    }, 3*1000);
-   
+
    setTimeout(function() {
       startautorefresh();
    }, 5*1000);
-   
+
    setTimeout(function() {
       start_clairvoyant_followups();
-   }, 7*1010);   
-   
+   }, 7*1010);
+
    if ($('span.q_highlight').size() && $('a.backlink')) {
       // make a javascript link that removes the highlighting
       $('a.backlink').parent('div').append(
@@ -111,19 +111,23 @@ $(function() {
                                            .text('Turn off highlighting')
       );
    }
-   
+
    $('#delete_option_button').attr('onclick','').attr('onkeypress','');
    $('#delete_option_button').click(function() {
       $('#optionbuttons-outer').load('form_delete');
       return false;
    });
-   
+
    $('a.notify-tip').click(function() {
       $('#notify-others').hide();
       $('#notify-more-options:hidden').fadeIn(400);
       $('#notify-more-options input[name="notify-more-options"]').val('1');
-      
+
       return false;
+   });
+
+   $('input[name="actual_time_hours"]').change(function() {
+      /* might want to do some client-side validation here of the input */
    });
 });
 
@@ -139,7 +143,7 @@ function af(dest, e, ignoreword) {
       val = val.replace(e+", ", "");
     }
   }
-  dest.value = val;  
+  dest.value = val;
 }
 function softsubmit(action) {
   if (document.form_followup) {
@@ -165,11 +169,10 @@ function closeAnnouncement() {
 
 /* FEATURE ON HOLD
 // If the AJAX doesn't work for some reason, pause the autorefresh for a
-// very long time and show a little notice message. 
+// very long time and show a little notice message.
 $(document).ajaxError(function(event, request, settings){
    clairvoyantinterval = refreshinterval = 60; //seconds
    alert(settings.url);
    showAJAXProblemWarning(settings.url);
 });
  */
-

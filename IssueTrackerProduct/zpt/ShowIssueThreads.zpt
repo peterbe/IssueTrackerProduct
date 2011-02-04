@@ -1,13 +1,13 @@
-<div align="center" 
+<div align="center"
      tal:define="threads python:here.ListThreads();
                  use_issue_notes here/useIssueNotes;
                  in_completelist python:here.thisInURL('CompleteList');
-                 dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)" 
+                 dummy python:request.RESPONSE.setHeader('Content-Type','text/html;; charset=%s'%here.UNICODE_ENCODING)"
      tal:condition="threads">
 
-  <div tal:repeat="thread threads" 
+  <div tal:repeat="thread threads"
        class="threadbox"
-       tal:attributes="id string:${here/getId}__${thread/getId}"
+       tal:attributes="id string:i${here/getId}__${thread/getId}"
        >
 
     <a tal:condition="in_completelist"
@@ -15,19 +15,19 @@
     <a tal:condition="not:in_completelist"
        tal:attributes="name string:i${repeat/thread/number}"></a>
     <div class="thead">
-    
+
     <a tal:condition="use_issue_notes"
        tal:attributes="onclick string:return new_note(this, '${here/getId}__${thread/getId}')"
        class="new-note" href="#" title="Click to add a new note">
       <img border="0" src="/misc_/IssueTrackerProduct/new-issuenote.png" alt="New note"/>
     </a>
-    
+
     <a tal:condition="use_issue_notes"
        tal:repeat="note python:here.getYourNotes(threadID=thread.getId())"
        href="#" class="old-note"
        tal:attributes="title python:here.showDate(note.notedate)+'|'+note.showComment()"
        ><img border="0" src="/misc_/IssueTrackerProduct/issuenote.png" alt="Note"/></a>
-    
+
      <b tal:content="structure python:here.colorizeThreadChange(thread.getTitle())">Title</b>
 
     <a tal:condition="thread/hasEmailOriginal" rel="nofollow"
@@ -49,16 +49,16 @@
     <a class="plink"
        tal:condition="not:in_completelist"
        tal:attributes="href string:#i${repeat/thread/number}">permanent link</a>
-                                
-	
+
+
     </div>
-	 
+
 	<div class="trest">
-	  
-        <div class="tbody" 
+
+        <div class="tbody"
              tal:define="comment thread/getComment"
              tal:attributes="onclick python:test(path('repeat/thread/end'), 'clearAutoRefreshTitle()')">
-	    <div tal:condition="comment"				            
+	    <div tal:condition="comment"
 			tal:replace="structure python:thread.showComment()">
 			    COMMENT here
 	    </div>
@@ -66,10 +66,15 @@
         </div>
 
         <div class="threaddate" tal:content="structure python:here.showDate(thread.getThreadDate())">date</div>
+        <div class="threadactualhours"
+             tal:define="hours thread/getActualTimeHours"
+             tal:condition="hours">
+             <strong>Actual time:</strong> <br tal:replace="python:here.showTimeHours(hours, show_unit=1)"/>
+             </div>
         <div class="threadfiles" tal:content="structure thread/showThreadFileattachments"></div>
         <div class="clearerR">&nbsp;</div>
 
     </div>
-			
+
   </div>
 </div>

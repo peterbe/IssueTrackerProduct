@@ -1,6 +1,6 @@
 <dtml-call "doCache(hours=30)"><dtml-call "RESPONSE.setHeader('Content-type','text/css')">
 html, body {
-  margin:0; 
+  margin:0;
   padding:0;
   background: white; color: black;
   font-family:Arial, sans-serif, verdana;
@@ -25,7 +25,7 @@ h3 span.id {
   font-size:11pt;
 }
 
- 
+
 .qbroader { /* broaden your search blurb */
   text-align:center;
   font-style:italic;
@@ -64,7 +64,7 @@ div.errormessage {
   border:1px solid #F99;
   background-color:#FCC;
   padding-left:10px;
-  padding-right:10px;  
+  padding-right:10px;
 }
 
 div.followup-errormessage-outer {
@@ -87,15 +87,15 @@ abbr { text-decoration:none; border-bottom:0px solid #efefef; }
 textarea.autoexpanding { width:610px; } /* same as thread box */
 #tsizer a {
   border:1px solid #ccc;
-  text-decoration:none; 
+  text-decoration:none;
   color:#666;
   padding:1px 3px;
   margin:5px 0;
 }
 
-.bumf { 
-  width:500px; 
-  padding-left:20px; 
+.bumf {
+  width:500px;
+  padding-left:20px;
 }
 
 /* For the tabs  ------------------------ */
@@ -158,7 +158,7 @@ div#tab1 li.tab1 a, body#tab0 li.tab0 a {
 
 div#logo {
  padding-right:10px;
- float:left; 
+ float:left;
 }
 
 h1.head {
@@ -174,7 +174,7 @@ h2.head {
 div#topright {
   padding-top:10px;
   padding-right:30px;
-  float:right;  
+  float:right;
 }
 
 .clearer { clear: left; line-height: 0; height: 0; }
@@ -191,19 +191,19 @@ div#topright {
   margin-top: 15px;
   padding-top:1em;
   color: #333;
-  border-top:1px solid #999966; 
+  border-top:1px solid #999966;
 }
 
 #foot a {
   font-size:9pt;
-  color:#333;   
+  color:#333;
 }
 
 
 /* Thread         ------------------------ */
 
-.threaddate { 
-  float:right; 
+.threaddate {
+  float:right;
   padding:2px 4px;
 }
 
@@ -211,6 +211,9 @@ div#topright {
   padding:0 4px;
 }
 
+.threadactualhours {
+  padding:2px 0 2px 6px;
+}
 
 .cth { /* ColorThreadChange */
   color:#c00;
@@ -266,18 +269,18 @@ tr.lhead {
   background:#C3C3C3 url(/misc_/IssueTrackerProduct/gradtablehead.png);
   font-weight:bold;
 }
-tr.l_commenthead { 
-  border-top:1px solid #666; 
-  background-color:#C3C3C3; 
+tr.l_commenthead {
+  border-top:1px solid #666;
+  background-color:#C3C3C3;
   font-weight:bold;
 }
 
-.leven { 
+.leven {
   background-color:#DFDFDF;
 }
 
-.lodd { 
-  background-color:#F1F1F1; 
+.lodd {
+  background-color:#F1F1F1;
 }
 
 
@@ -300,7 +303,7 @@ a.highlight-toggle {
   margin-top:30px;
   margin-bottom:20px;
   padding:14px;
-}  
+}
 
 
 
@@ -343,17 +346,17 @@ ul.r {
 /* Show Issue      ----------------------- */
 
 
-div.issue { 
-  border:1px solid #999; 
+div.issue {
+  border:1px solid #999;
   background-color:#eee;
   padding:0;
   width:690px;
   margin-bottom:1.1em;
-} 
+}
 
- 
+
 div.ihead {
-  margin:0;  
+  margin:0;
   background:#ccc url(/misc_/IssueTrackerProduct/gradissuehead.png);
   border-right:1px solid #999;
   voice-family: "\"}\"";
@@ -405,7 +408,7 @@ div.ihead h3 {
 .idetails2 {
   float:right;
   text-align:right;
-  margin-right:15px; 
+  margin-right:15px;
 }
 
 .shade {
@@ -416,7 +419,7 @@ div.assignment {
   padding:6px;
 }
 
-img.fileatt { 
+img.fileatt {
   vertical-align:middle;
   padding:3px;
 }
@@ -454,7 +457,7 @@ ul#navlist li a:hover {
   background-color: #ccc;
   color: #000;
   border: 1px solid #666;
-    
+
 }
 
 a.assignment {
@@ -511,7 +514,7 @@ a.plink:hover { text-decoration:none; color:#999; }
 * html .trest {height: 1%;}
 /* End hide from IE5-mac */
 
-a.fileattachment-tip, a.notify-tip {
+a.tip, a.notify-tip {
   text-decoration:none;
   color:#666;
 }
@@ -556,7 +559,7 @@ div.thead a.new-note, div.thead a.old-note {
 
 a.new-note, a.new-note {
   opacity:0.3;
-}  
+}
 a.new-note:hover, a.new-note:active {
   opacity:1.0;
 }

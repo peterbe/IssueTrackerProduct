@@ -2,9 +2,9 @@
 <metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
 
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/followup.js"></script>
-<script type="text/javascript" tal:condition="python:here.SaveDrafts() and here.UseAutoSave()">
+<script type="text/javascript" tal:condition="python:here.SaveDrafts() and here.UseAutoSave()">//<![CDATA[
 function autosave() {
-   $.post(_base_url+'/AutoSaveDraftThread', 
+   $.post(_base_url+'/AutoSaveDraftThread',
           $(document.form_followup).fastSerialize(),
           function(resp) {
 	    if (resp)
@@ -16,15 +16,55 @@ var as_timer;
 var orig_autosaveinterval=4;
 var autosaveinterval=4;
 startautosave = function() {
-  autosave(); 
+  autosave();
   as_timer=window.setTimeout("startautosave()", autosaveinterval*1000);
 };
 stopautosave=function() {
   if (as_timer) window.clearTimeout(as_timer);
-  
-};
-</script>
 
+};
+//]]>
+</script>
+<script type="text/javascript" tal:condition="here/UseFollowupActualTime">//<![CDATA[
+$(function() {
+
+  if ($('#actual_time_input').size()) { /* When editing issue details */
+    $('#actual_time_input').hide();
+    var container = $('<td>');
+
+    container.append($('<span>')
+      .css('font-size','80%')
+      .text("Warning, when using actual time on each followup this is automatically set. "));
+    container.append($('<a href="#">')
+      .css('font-size','80%')
+      .click(function() {
+        $(this).parents('td').hide();
+        $('#actual_time_input').show();
+        return false;
+      })
+      .text("Override"));
+    $('#actual_time_input').parents('tr').append(container);
+  }
+
+  $('div.actualtime-on a').click(function() {
+    $('div.actualtime-on').hide();
+    $('div.actualtime-off').show();
+    $('#followup_actual_time').show();
+    return false;
+  });
+
+  $('div.actualtime-off a').click(function() {
+    $('div.actualtime-off').hide();
+    $('div.actualtime-on').show();
+    $('#followup_actual_time').hide();
+    $('input', '#followup_actual_time').val('');
+    return false;
+  });
+
+
+});
+//]]>
+</script>
 <tal:block define="useaccesskeys here/useAccessKeys" condition="request/action|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
 $(function() {if($('#textarea').size()) $('#textarea')[0].focus();});</script>
@@ -36,22 +76,22 @@ $(function() {if($('#textarea').size()) $('#textarea')[0].focus();disableKS();})
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/issuenotes.js"></script>
 </tal:block>
 
- 
+
 <script
  tal:define="conf here/getWYSIWYGEditor"
  tal:condition="python:here.getSavedTextFormat()=='html' and conf"
  tal:replace="structure conf"></script>
- 
+
 <tal:block condition="python:here.EnableDueDate() and request.get('change')">
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.min.js"
         ></script>
 <script type="text/javascript"
         tal:content="structure string:$(function() {$('#id_due_date').datepicker({${here/getDatepickerOptions}})})">
 </script>
-</tal:block>        
+</tal:block>
 
 
- 
+
 </metal:script>
 
 <metal:style fill-slot="extracss">
@@ -84,18 +124,18 @@ a.detailslink { font-size:10px; }
 </style>
 
   <link tal:condition="python:here.EnableDueDate() and request.get('change')"
-        rel="stylesheet" type="text/css" 
+        rel="stylesheet" type="text/css"
         href="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.css" />
 
 </metal:style>
- 
-<div metal:fill-slot="body" tal:omit-tag="" 
+
+<div metal:fill-slot="body" tal:omit-tag=""
  tal:define="in_completelist python:here.thisInURL('CompleteList')">
 
 
 <div tal:define="came_from_list here/getRememberedListURL"
      tal:condition="came_from_list">
-<a class="backlink" tal:attributes="href came_from_list/url" 
+<a class="backlink" tal:attributes="href came_from_list/url"
  >&#171; Back to <em tal:content="came_from_list/title"></em></a>
 </div>
 
@@ -125,7 +165,7 @@ a.detailslink { font-size:10px; }
                tal:attributes="href request/URL1;onclick python:test(not request.get('NewIssue'),'return closeAnnouncement()')"
              ><img src="/misc_/IssueTrackerProduct/close.gif" alt="Close" border="0" /></a>
              <br clear="right" />
-             
+
 		<p>
 		  <b tal:condition="here/doDispatchOnSubmit">Notification was sent to:</b>
 		  <b tal:condition="not:here/doDispatchOnSubmit">Notification will be sent to:</b>
@@ -149,14 +189,14 @@ a.detailslink { font-size:10px; }
   <div id="optionbuttons-outer">
     <span tal:replace="structure here/OptionButtons"></span>
   </div>
-  
+
   <!-- id=issue -->
   <a name="i"></a>
   <div tal:attributes="id python:test(not in_completelist, 'issuedata')"
        tal:content="structure python:here.ShowIssueData(SubmitError=options.get('SubmitError',{}))">Show the actual issue data
   </div>
   <!--/ id=issue-->
-  
+
   <!-- Show Issue Threads -->
   <div tal:define="in_completelist python:here.thisInURL('CompleteList')"
        tal:attributes="id python:test(not in_completelist, 'threads')"
@@ -167,9 +207,9 @@ a.detailslink { font-size:10px; }
   <a name="followup"></a>
 
   <div id="followup-preview" style="width:610px" tal:condition="request/reviewissue|request/showpreview|nothing">
-  
+
   <h3 align="left" class="preview">Preview before saving</h3>
-  
+
   <div class="threadbox" tal:define="previewtitle python:here.getPreviewTitle(here.status, request.get('otherAction', request.get('action')))">
   	<div class="thead" tal:define="issueuser here/getIssueUser">
   	<b tal:content="structure python:here.colorizeThreadChange(previewtitle)">
@@ -194,52 +234,58 @@ a.detailslink { font-size:10px; }
                                          comment request/comment | emptystring;
                                          display_format python:here.getSavedTextFormat;
                                          display_format request/display_format|display_format|here/default_display_format">
-  	
+
           <div class="tbody">
-  	    <p tal:condition="comment"				            
+  	    <p tal:condition="comment"
   			tal:replace="structure python:here.ShowDescription(comment.strip()+' ', display_format)">
   			    COMMENT here
   	    </p>
-          <span tal:condition="not:comment">
-  	    <em tal:condition="python:request['action'].lower()!='addfollowup'">No comment.</em>
-          <span class="submiterror" tal:condition="not:python:request['action'].lower()!='addfollowup'">Follow ups must have a comment</span>
-          </span>
+            <p tal:condition="not:comment">
+         	    <em tal:condition="python:request['action'].lower()!='addfollowup'">No comment.</em>
+                    <span class="submiterror" tal:condition="not:python:request['action'].lower()!='addfollowup'">Follow ups must have a comment</span>
+            </p>
           </div>
-  
+
           <div class="threaddate" tal:content="structure python:here.showDate(here.ZopeTime())">date</div>
+            <div class="threadactualhours"
+               tal:define="hours request/actual_time_hours|nothing"
+               tal:condition="hours">
+                 <strong>Actual time:</strong>
+                 <br tal:replace="python:here.parse_and_showTimeHours(hours, show_unit=1)" tal:on-error="nothing"/>
+            </div>
 
           <div class="followupfiles" tal:content="structure python:here.showFileattachments(only_temporary=True)"></div>
           <div class="clearerR">&nbsp;</div>
 
       </div>
-  
+
   </div>
-  
+
   <div align="left" tal:define="false python:0;notify request/notify | false; dispatch here/doDispatchOnSubmit; Others2Notify python:here.Others2Notify(format='merged', requireemail=1)"
       tal:condition="python:notify and Others2Notify">
   Notification will be sent to: <br tal:replace="structure python:', '.join(Others2Notify)" />
   </div>
-  
+
   </div>
 
 
 <!--
   <div id="extensionform-outer"><span tal:condition="request/action|request/draft_followup_id|nothing"
                                       tal:replace="structure python:here.ExtensionForm(options)"></span></div>
--->                                      
+-->
 
   <tal:block condition="request/action|request/draft_followup_id|nothing"
              replace="structure python:here.ExtensionForm(options)"></tal:block>
 
   <tal:block condition="not:request/action|request/draft_followup_id|nothing"
              replace="structure here/quick_form_followup"></tal:block>
-  
+
 
 </div>
 
 
 
-<div 
+<div
      tal:condition="python:request.get('compareTo') and here.getRoot().hasIssue(request.get('compareTo'))">
 <tal:block define="other python:here.getIssueObject(request['compareTo'])">
 
@@ -263,9 +309,9 @@ a.detailslink { font-size:10px; }
     <!-- Show Issue Threads -->
     <div tal:content="structure here/ShowIssueThreads">Show the threads
     </div>
-    <!-- /Show Issue Threads -->  
+    <!-- /Show Issue Threads -->
   </div>
-  
+
   <div class="clearerR">&nbsp;</div>
 
 </tal:block>
@@ -288,7 +334,7 @@ a.detailslink { font-size:10px; }
      tal:content="structure here/subscription"></td>
   </tr>
   </table>
-</div>  
+</div>
 <!-- /Special options -->
 
 

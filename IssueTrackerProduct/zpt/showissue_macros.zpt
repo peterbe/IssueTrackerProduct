@@ -7,18 +7,18 @@
   tal:attributes="method python:test(change, 'post','get');
                   action python:test(change, 'editIssueDetails', '#i')"
   >
-  
+
   <span tal:condition="python:options.get('SubmitError')"
         tal:replace="structure python:here.show_submissionerror_message(SubmitError=options.get('SubmitError'))">
   </span>
 
-  
+
   <table class="idetails-table" summary="Details" border="0"
    tal:attributes="ondblclick python:test(allowed2change and not show_many, 'location.href=location.href+\'?change=Details#i\'')">
     <tr tal:condition="python:change and here.UseEstimatedTime()">
       <td class="ilabel">Estimated time</td>
       <td>
-        <input name="estimated_time_hours" size="7" 
+        <input name="estimated_time_hours" size="7"
          tal:define="preval python:request.get('estimated_time_hours', here.getEstimatedTimeHours())"
          tal:attributes="value python:here.showTimeHours(preval)" />  (hours)
       </td>
@@ -27,11 +27,11 @@
       <td class="ilabel">Estimated time</td>
       <td tal:content="python:here.showTimeHours(here.getEstimatedTimeHours(), show_unit=1)">
       </td>
-    </tr>    
+    </tr>
     <tr tal:condition="python:change and here.UseActualTime()">
       <td class="ilabel">Actual time</td>
-      <td>
-        <input name="actual_time_hours" size="7" 
+      <td id="actual_time_input">
+        <input name="actual_time_hours" size="7"
          tal:define="preval python:request.get('actual_time_hours', here.getActualTimeHours())"
          tal:attributes="value python:here.showTimeHours(preval)" /> (hours)
       </td>
@@ -40,27 +40,27 @@
       <td class="ilabel">Actual time</td>
       <td tal:content="python:here.showTimeHours(here.getActualTimeHours(), show_unit=1)">
       </td>
-    </tr>    
+    </tr>
     <tr tal:condition="python:change and here.ShowConfidentialOption()">
       <td class="ilabel">Confidential</td>
       <td>
-        <input type="checkbox" name="confidential:boolean" value="1" 
+        <input type="checkbox" name="confidential:boolean" value="1"
          tal:attributes="checked python:test(here.isConfidential())" />
-      </td>      
+      </td>
     </tr>
     <tr tal:condition="python:not change and here.isConfidential()">
       <td colspan="2"><acronym title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym></td>
-    </tr>    
+    </tr>
     <tr>
       <td class="ilabel">Sections:</td>
       <td tal:condition="not:change"
           tal:content="python:u', '.join(here.getSections())">Homepage, Other
       </td>
       <td tal:condition="change">
-        <select name="sections:list" multiple="multiple" 
+        <select name="sections:list" multiple="multiple"
          tal:define="sections here/getSections"
          tal:attributes="size python:min(6, len(here.sections_options))">
-            <option tal:repeat="option here/sections_options" 
+            <option tal:repeat="option here/sections_options"
                 tal:attributes="value option; selected python:option in sections"
                 tal:content="option">Section</option>
 	</select>
@@ -71,15 +71,15 @@
       <td tal:condition="not:change" tal:content="here/type">
       </td>
       <td tal:condition="change">
-        <select name="type" tal:define="types here/types; 
-                                        size python:min(6, len(types)); 
-                                        type here/getType" 
+        <select name="type" tal:define="types here/types;
+                                        size python:min(6, len(types));
+                                        type here/getType"
                 tal:attributes="size size;
                                 name string:type:${here/UNICODE_ENCODING}:ustring">
-          <option 
-           tal:repeat="option types" 
+          <option
+           tal:repeat="option types"
            tal:attributes="value option;
-                           selected python:option==type" 
+                           selected python:option==type"
            tal:content="option">Types</option>
 	</select>
       </td>
@@ -89,9 +89,9 @@
       <td tal:condition="not:change"
           tal:content="here/urgency" tal:attributes="class here/getUrgencyCSSSelector">
       </td>
-      <td tal:condition="change"> 
+      <td tal:condition="change">
         <select tal:define="urgencies here/urgencies;
-                            size python:min(6, len(urgencies)); 
+                            size python:min(6, len(urgencies));
                             urgency here/getUrgency"
          tal:attributes="size size;
                          name string:urgency:${here/UNICODE_ENCODING}:ustring">
@@ -107,13 +107,13 @@
            tal:attributes="class python:here.getDueDateCSSSelector(here.getDueDate())">due!</span>
        </td>
       <td tal:condition="change">
-        <input name="due_date" id="id_due_date" tabindex="40" size="12" 
+        <input name="due_date" id="id_due_date" tabindex="40" size="12"
                tal:attributes="value python:request.get('due_date', here.getDueDate() and here.getDueDate().strftime('%Y-%m-%d') or '')" />
         <noscript tal:content="python:here.showStrftimeFriendly(here.display_date, strip_hour_part=True)"></noscript>
-            <span class="submiterror" tal:condition="options/SubmitError|nothing" 
+            <span class="submiterror" tal:condition="options/SubmitError|nothing"
                   tal:content="python:here.ShowSubmitError(options, 'due_date')"></span>
-       </td>       
-    </tr>    
+       </td>
+    </tr>
 
     <tr tal:condition="python:here.url2issue and not change">
       <td class="ilabel">URL:</td>
@@ -136,7 +136,7 @@
       </td>
     </tr>
     </tal:block>
-    
+
     <tal:block condition="change">
     <tr tal:repeat="field here/getCustomFieldObjects">
       <td class="ilabel"
@@ -145,10 +145,10 @@
         <tal:input replace="structure python:field.render(request.get(field.getId(), here.getCustomFieldData(field.getId())))" />
 	<span class="submiterror" tal:condition="python:errors.get(field.getId())"
 		  tal:content="python:here.ShowSubmitError(options, field.getId())"></span>
-            
+
       </td>
     </tr>
-    </tal:block>    
+    </tal:block>
     <tr tal:condition="python:allowed2change and not show_many">
       <td>&nbsp;</td>
       <td tal:condition="change">
@@ -164,19 +164,19 @@
         <a class="detailslink" tal:condition="not:request/show-detailchanges|nothing"
            tal:attributes="href string:${here/absolute_url}?show-detailchanges=1#i">show changed details</a>
         </tal:block>
-         
-      </td>      
+
+      </td>
     </tr>
   </table>
- 
+
   <div id="detailschanged-outer">
-      
+
     <table metal:use-macro="here/showissue_macros/macros/detailchanges"></table>
-    
+
   </div>
 
   </form>
-  
+
 </metal:block>
 
 
@@ -184,7 +184,7 @@
   <div id="detailschanges-inner" tal:condition="request/show-detailchanges|nothing">
   <p><strong>Details change log</strong>
   &nbsp;&nbsp;<a class="detailslink" tal:attributes="href string:${here/absolute_url}#i">hide</a>
-  
+
   </p>
   <table tal:define="changes here/getDetailChanges">
     <tbody tal:repeat="change changes">
@@ -192,18 +192,18 @@
         <td colspan="3"><strong tal:content="structure python:here.showDate(change['change_date'])"></strong>
           <tal:block condition="change/acl_adder|nothing">
           by
-          
+
           <tal:block define="user_details python:here.getUserDetailsByACLAdder(change['acl_adder'])">
 
           <strong tal:condition="python:user_details.get('fromname') or user_details.get('email')"
                   tal:content="structure python:here.ShowNameEmail(user_details.get('fromname'), user_details.get('email'))"></strong>
-                  
+
           <strong tal:condition="python:not (user_details.get('fromname') or user_details.get('email')) and (change.get('fromname') or change.get('email'))"
                   tal:content="structure python:here.ShowNameEmail(change.get('fromname'), change.get('email'))"></strong>
-          
+
           <em tal:condition="not:python:user_details.get('fromname') or user_details.get('email') or change.get('fromname') or change.get('email')"
           >name not available</em>
-                  
+
           </tal:block>
           </tal:block>
         </td>
@@ -217,7 +217,7 @@
          </td>
          <td>
            <strike tal:replace="structure python:here.showChangedDetail(change[0], change[1]['new'])"></strike>
-         </td>         
+         </td>
       </tr>
     </tbody>
   </table>

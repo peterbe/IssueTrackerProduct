@@ -102,6 +102,7 @@ try:
 except ImportError:
     _has_markdown_ = False
 
+
 # Zope
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile as PTF
 from OFS import Folder
@@ -575,6 +576,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.disallow_duplicate_issue_subjects = DEFAULT_DISALLOW_DUPLICATE_ISSUE_SUBJECTS
         self.use_estimated_time = DEFAULT_USE_ESTIMATED_TIME
         self.use_actual_time = DEFAULT_USE_ACTUAL_TIME
+        self.use_followup_actual_time = DEFAULT_USE_FOLLOWUP_ACTUAL_TIME
         self.include_description_in_notifications = DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS
         self.spam_keywords = DEFAULT_SPAM_KEYWORDS
         self.show_spambot_prevention = DEFAULT_SHOW_SPAMBOT_PREVENTION
@@ -826,6 +828,17 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def _setUseActualTime(self, toggle_to=True):
         """ set use_actual_time """
         self.use_actual_time = bool(toggle_to)
+
+    def UseFollowupActualTime(self):
+        """ return use_actual_time """
+        default = DEFAULT_USE_FOLLOWUP_ACTUAL_TIME
+        return getattr(self, 'use_followup_actual_time', default)
+
+    def _setUseFollowupActualTime(self, toggle_to=True):
+        """ set use_followup_actual_time """
+        if bool(toggle_to):
+            assert self.use_actual_time, "use_actual_time must first be enabled"
+        self.use_followup_actual_time = bool(toggle_to)
 
     def IncludeDescriptionInNotifications(self):
         """ return include_description_in_notifications """
@@ -1461,6 +1474,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     'disallow_duplicate_issue_subjects',
                     'use_estimated_time',
                     'use_actual_time',
+                    'use_followup_actual_time',
                     'include_description_in_notifications',
                     'enable_due_date',
                     'enable_pages',
@@ -2294,6 +2308,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                   'images_in_menu':DEFAULT_IMAGES_IN_MENU,
                   'use_estimated_time':DEFAULT_USE_ESTIMATED_TIME,
                   'use_actual_time':DEFAULT_USE_ACTUAL_TIME,
+                  'use_followup_actual_time':DEFAULT_USE_FOLLOWUP_ACTUAL_TIME,
                   'include_description_in_notifications':DEFAULT_INCLUDE_DESCRIPTION_IN_NOTIFICATIONS,
                   'use_tellafriend':DEFAULT_USE_TELLAFRIEND,
                   'brother_issuetracker_paths':[],
@@ -2336,14 +2351,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self._deployImages(root.www, www_home,
                            t=t, remove_oldstuff=remove_oldstuff,
                            skipfolders=('.svn','CVS'))
-
-        ##home = osj(standards_home, 'tinymce')
-        ##self._deployImages(root.tinymce, home,
-        ##                   t=t, remove_oldstuff=remove_oldstuff,
-        ##                   check_updates=True)
-        ##self._deployDocuments(root.tinymce, home,
-        ##                      t=t, remove_oldstuff=remove_oldstuff,
-        ##                      check_updates=True)
 
         # perhaps TinyMCE is now installed but 'html' is not a recognized
         # display format option
@@ -3119,8 +3126,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return getattr(self.getRoot(), ztinymce_conf_id)
         return None
 
-
-
     def getCookiekey(self, which):
         """ return the cookiekey constants depending on key """
         which_orig = which
@@ -3552,13 +3557,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         #
 
         # strip whitespace
-        for property in ['title','fromname','email',
+        for property_ in ['title','fromname','email',
                          'url2issue','display_format']:
-            value = request.get(property, '').strip()
-            if property in ('email', 'display_format'):
+            value = request.get(property_, '').strip()
+            if property_ in ('email', 'display_format'):
                 value = asciify(value)
-            request[property] = value
-
+            request[property_] = value
         # Special treatment needed in case STX is used upon display
         request['description'] = request.get('description','').strip()+' '
 
@@ -3782,7 +3786,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 set_cookie(self.getCookiekey('display_format'),
                            request.get('display_format'))
                 self.setACLCookieDisplayformat(request.get('display_format'))
-
 
         # filter out empty item from sections
         sections_newlist = self.cleanSectionsList(request.get('sections', []))

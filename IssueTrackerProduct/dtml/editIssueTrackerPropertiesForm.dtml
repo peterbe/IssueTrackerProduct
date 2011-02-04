@@ -1,4 +1,4 @@
-<dtml-var manage_page_header> 
+<dtml-var manage_page_header>
 <dtml-with "_(management_view='Properties')">
 <dtml-var manage_tabs>
 </dtml-with>
@@ -9,21 +9,21 @@
 /* Taken from Gavin Kistner's Tabtastic (tabtastic.css) */
 .tabset_tabs	{ margin:0; padding:0; list-style-type:none; position:relative; z-index:2; white-space:nowrap }
 .tabset_tabs li	{ margin:0; padding:0; display:inline }
-.tabset_tabs a	{ color:#999 ! important; background-color:#fff ! important; border:1px solid #99c; 
+.tabset_tabs a	{ color:#999 ! important; background-color:#fff ! important; border:1px solid #99c;
                   text-decoration:none; padding:0 0.6em; border-left-width:1px;
 		  border-bottom:none;
 		  }
 .tabset_tabs a:hover	{ color:#000 ! important; background-color:#fff ! important }
-.tabset_tabs a.active	{ color:black ! important; background-color:#efefef ! important; 
+.tabset_tabs a.active	{ color:black ! important; background-color:#efefef ! important;
                           border-color:black; border-left-width:1px; cursor:default;
 			  padding-top:1px; padding-bottom:1px;
 			  border-bottom:1px solid #efefef;
 			  /*border-bottom:none;*/
 			  } /* the last border-bottom should ideally be value 'none' but since
 			       MSIE fails on that we have to set it to something. */
-			  
+
 .tabset_tabs li.firstchild a	{ border-left-width:1px }
-.tabset_content	{ border:1px solid black; background-color:#efefef; position:relative; z-index:1; 
+.tabset_content	{ border:1px solid black; background-color:#efefef; position:relative; z-index:1;
                   padding:0.5em 1em; display:none }
 .tabset_label	{ display:none }
 .tabset_content_active	{ display:block }
@@ -45,9 +45,9 @@
 
 <dtml-unless activetab>
   <dtml-comment>'activetab' defines which tab should be enabled
-  when you first load the Properties tab. This can be set from the 
+  when you first load the Properties tab. This can be set from the
   REQUEST or by parameter (what's called 'options' in ZPT).
-  This dtml-unless and REQUEST.set asserts that we have the variable 
+  This dtml-unless and REQUEST.set asserts that we have the variable
   available for testing.
   </dtml-comment>
   <dtml-call "REQUEST.set('activetab', 'basic')">
@@ -86,7 +86,7 @@
   <p>
       The name of the whole instance
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -102,11 +102,11 @@
 
   <td align="left" valign="top">
   <p>
-    Enter as many different sections with which this issue tracker might be used. 
+    Enter as many different sections with which this issue tracker might be used.
     Further down on this page you can enable new ones to be added outside the Properties tab
     with the <b>Allow adding new sections</b> option.
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -129,7 +129,7 @@
       If somebody enters an issue without specifying sections, these
       are used.
     </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -144,7 +144,7 @@
       </td>
   <td align="left" valign="top">
   <p>&nbsp;</p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -162,13 +162,13 @@
 	</dtml-in>
           </select>
     </div>
-    
+
       </td>
   <td align="left" valign="top">
   <p>
-    If a type is not selected when entering an issue this is used.  
+    If a type is not selected when entering an issue this is used.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -184,7 +184,7 @@
       </td>
   <td align="left" valign="top">
   <p>&nbsp;</p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -202,13 +202,13 @@
 	</dtml-in>
      </select>
     </div>
-    
+
       </td>
   <td align="left" valign="top">
   <p>
-    If an urgency is not selected when entering an issue this is used.    
+    If an urgency is not selected when entering an issue this is used.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -225,11 +225,11 @@
   <td align="left" valign="top">
   <p>
       The people who get notifications about everything, one per line.
-      Enter either a username or an email address. If what you enter is not an email 
+      Enter either a username or an email address. If what you enter is not an email
       address but a username, the system will try to find the user and instead show
       the username and fullname.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -247,9 +247,9 @@
   <td align="left" valign="top">
   <p>
       Users on the 'Always notify' list will not only be notified on new issues but also
-      on followups that they are not involved in or subscribed to. 
+      on followups that they are not involved in or subscribed to.
   </p>
-  </td> 
+  </td>
 </tr>
 
 
@@ -261,9 +261,9 @@
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
-	<input type="checkbox" name="allow_subscription:boolean" 
+	<input type="checkbox" name="allow_subscription:boolean"
         <dtml-if "AllowIssueSubscription()">checked="checked"</dtml-if> />
     	</div>
       </td>
@@ -271,7 +271,7 @@
   <p>
   With this there's a form when viewing an issue to subscribe to changes to it.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -281,7 +281,7 @@
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="use_tellafriend:boolean" <dtml-if "UseTellAFriend()">checked="checked"</dtml-if> />
     	</div>
@@ -291,7 +291,7 @@
   If you enable the Tell a Friend widget people will be able to quickly inform
   other people about issues simply by entering their email address or username.
   </p>
-  </td> 
+  </td>
 </tr>
 
 
@@ -302,17 +302,17 @@
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="save_drafts:boolean" <dtml-if "SaveDrafts()">checked="checked"</dtml-if> />
     	</div>
       </td>
   <td align="left" valign="top">
   <p>
-  If this is true, when adding issues (or followups) it becomes possible to 
+  If this is true, when adding issues (or followups) it becomes possible to
   pre-save them as draft objects.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -330,7 +330,7 @@
   <p>
       If true, the Id is always shown next to the title
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -353,7 +353,7 @@
   <p>If by modification date, follow ups to old issues pushes the
 issue towards the top of List Issues.
   </p>
-  </td> 
+  </td>
 </tr>
 
 
@@ -377,7 +377,7 @@ issue towards the top of List Issues.
   <div class="list-item">
       The usual syntax.
   </div>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -394,7 +394,7 @@ issue towards the top of List Issues.
   <p>
       Admin, webmaster of this IssueTracker instance.
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -408,9 +408,9 @@ issue towards the top of List Issues.
    value="<dtml-var sitemaster_email html_quote>">
       </td>
   <td align="left" valign="top">
-  <p>&nbsp; 
+  <p>&nbsp;
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -424,9 +424,9 @@ issue towards the top of List Issues.
       </td>
   <td align="left" valign="top">
   <p>
-    How many issues to list in List Issues  
+    How many issues to list in List Issues
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -443,7 +443,7 @@ issue towards the top of List Issues.
   <p>
   Number of possible file attachments when adding issue.
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -461,7 +461,7 @@ issue towards the top of List Issues.
   Number of possible file attachments when adding some sort of
   followup.
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -470,7 +470,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="allow_issueattrchange:boolean" <dtml-if "AllowIssueAttributeChange()">checked="checked"</dtml-if> />
     	</div>
@@ -479,7 +479,7 @@ issue towards the top of List Issues.
   <p>
   Whether you, as Manager, can change the attributes of an issue once created or not.
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -488,7 +488,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="use_issue_assignment:boolean" <dtml-if "UseIssueAssignment()">checked="checked"</dtml-if> />
     	</div>
@@ -497,7 +497,7 @@ issue towards the top of List Issues.
   <p>
   Use the <a href="manage_ManagementUsers">User Management page</a> instead.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -507,17 +507,17 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="images_in_menu:boolean" <dtml-if "imagesInMenu()">checked="checked"</dtml-if> />
     	</div>
       </td>
   <td align="left" valign="top">
   <p>
-  When true, the menu items will be shown together with a little icon image. 
+  When true, the menu items will be shown together with a little icon image.
   Makes every page 1.9Kb bigger in size.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -527,7 +527,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="can_add_new_sections:boolean" <dtml-if "CanAddNewSections()">checked="checked"</dtml-if> />
     	</div>
@@ -536,9 +536,9 @@ issue towards the top of List Issues.
   <td align="left" valign="top">
   <p>
   When true makes it possible to add a new section when adding an issue instead of
-  being restricted to the existing list of sections. 
+  being restricted to the existing list of sections.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -559,9 +559,9 @@ issue towards the top of List Issues.
   <code>[sitemaster name]</code>, <code>[sitemaster email]</code>
   <br />
   This is used for email send outs and the variables are replaced with their real values just before
-  the email is sent out. 
+  the email is sent out.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -573,16 +573,16 @@ issue towards the top of List Issues.
   <td align="left" valign="top">
     <div class="form-element">
 	<input type="checkbox" name="enable_due_date:boolean" <dtml-if "EnableDueDate()">checked="checked"</dtml-if> />
-      
+
     </div>
   </td>
   <td align="left" valign="top">
   <p>
-    Adds a date field so that you can set when issues are due to be completed. 
+    Adds a date field so that you can set when issues are due to be completed.
     It's entirely superficial and up to you but the attribute might help you and your team.
     <a href="manage_DatepickerManagementForm">Click here to configure the date picker</a>
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -594,12 +594,12 @@ issue towards the top of List Issues.
   <td align="left" valign="top">
     <div class="form-element">
 	<input type="checkbox" name="enable_pages:boolean" <dtml-if "EnablePages()">checked="checked"</dtml-if> />
-      
+
     </div>
   </td>
   <td align="left" valign="top">
   <p>Pages are online documents that you can annotate issues to. </p>
-  </td> 
+  </td>
 </tr>
 
 </table>
@@ -629,7 +629,7 @@ issue towards the top of List Issues.
   <p>
     How many issues to list in the summary on the home page
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -639,7 +639,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="disallow_duplicate_issue_subjects:boolean" <dtml-if "DisallowDuplicateIssueSubjects()">checked="checked"</dtml-if> />
     	</div>
@@ -648,7 +648,7 @@ issue towards the top of List Issues.
   <p>
   If enabled, won't allow new issues with the exact (case insensitive) same subject if it has been used before
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -658,7 +658,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="use_estimated_time:boolean" <dtml-if "UseEstimatedTime()">checked="checked"</dtml-if> />
     	</div>
@@ -671,12 +671,12 @@ issue towards the top of List Issues.
     <dtml-else>
      take to become "<dtml-var "getStatuses()[-1].capitalize()">".
     </dtml-if>
-   
+
   <dtml-else>
   This property only applies if you have "Allow issue attribute change" enabled.
   </dtml-if>
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -686,7 +686,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="use_actual_time:boolean" <dtml-if "UseActualTime()">checked="checked"</dtml-if> />
     	</div>
@@ -699,12 +699,38 @@ issue towards the top of List Issues.
     <dtml-else>
      take to become "<dtml-var "getStatuses()[-1].capitalize()">".
     </dtml-if>
-   
+
   <dtml-else>
   This property only applies if you have "Allow issue attribute change" enabled.
   </dtml-if>
   </p>
-  </td> 
+  </td>
+</tr>
+
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+  <label for="cb-use_followup_actual_time">Use 'Actual time' for followups</label>
+  </div>
+  </td>
+  <td align="left" valign="top">
+
+        <div class="form-element">
+	<input type="checkbox" name="use_followup_actual_time:boolean" <dtml-if "UseFollowupActualTime()">checked="checked"</dtml-if>
+        <dtml-unless "UseActualTime()">disabled="disabled"</dtml-unless>/>
+    	</div>
+      </td>
+  <td align="left" valign="top">
+  <p>
+    <dtml-if "UseActualTime()">
+      Allows you to type in the number of hours actually spent per followup. This works
+      just like follows can have attachments.<br/>
+      The number is automatically added to the issue's Actual time.
+    <dtml-else>
+      First enable 'Actual time'.
+    </dtml-if>
+  </p>
+  </td>
 </tr>
 
 
@@ -722,11 +748,11 @@ issue towards the top of List Issues.
   <td align="left" valign="top">
   <p>
   	Here you define the statuses issue can have and the captions for going into that
-	status. Each line should be separated by a , comma like this 
+	status. Each line should be separated by a , comma like this
 	<code>&lt;state&gt;, &lt;verb&gt;</code>.<br />
         <a href="manage_PropertiesStatusScores">Set a score on each status as a measure of progress</a>
   </p>
-  </td> 
+  </td>
 </tr>
 <tr>
   <td align="left" valign="top">
@@ -743,7 +769,7 @@ issue towards the top of List Issues.
   <p>
     What makes a user a "IssueTracker Manager"
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -753,7 +779,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
     <select name="default_display_format:string">
 	<dtml-in display_formats>
@@ -765,7 +791,7 @@ issue towards the top of List Issues.
       </td>
   <td align="left" valign="top">
   <p>&nbsp;</p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -775,17 +801,17 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="show_spambot_prevention:boolean" <dtml-if "ShowSpambotPrevention()">checked="checked"</dtml-if> />
     	</div>
       </td>
   <td align="left" valign="top">
   <p>
-  If enabled, posting issues or followups won't be possible unless the user verifies 
+  If enabled, posting issues or followups won't be possible unless the user verifies
   being human by recognizing the text in a set of images. Like captchas.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -795,7 +821,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="dispatch_on_submit:boolean" <dtml-if "doDispatchOnSubmit()">checked="checked"</dtml-if> />
     	</div>
@@ -804,7 +830,7 @@ issue towards the top of List Issues.
   <p>
   Send out emails after notifications have been created.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -814,7 +840,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="private_statistics:boolean" <dtml-if "PrivateStatistics()">checked="checked"</dtml-if> />
     	</div>
@@ -823,7 +849,7 @@ issue towards the top of List Issues.
   <p>
   If this is true, then only Managers can see the statistics.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -833,7 +859,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="private_reports:boolean" <dtml-if "PrivateReports()">checked="checked"</dtml-if> />
     	</div>
@@ -842,7 +868,7 @@ issue towards the top of List Issues.
   <p>
   If this is true, then only Managers can see the reports.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -852,16 +878,16 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="show_dates_cleverly:boolean" <dtml-if "ShowDatesCleverly()">checked="checked"</dtml-if> />
     	</div>
       </td>
   <td align="left" valign="top">
   <p>
-  If on when listing or viewing issues it will show the date cleverly depending on how far it is from today's date in a more human form. 
+  If on when listing or viewing issues it will show the date cleverly depending on how far it is from today's date in a more human form.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -871,7 +897,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="stop_cache:boolean" <dtml-if "doStopCache()">checked="checked"</dtml-if> />
     	</div>
@@ -880,7 +906,7 @@ issue towards the top of List Issues.
   <p>
   If true, headers are set so that no caching happens.
   </p>
-  </td> 
+  </td>
 </tr>
 
 
@@ -892,7 +918,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="show_confidential_option:boolean" <dtml-if "ShowConfidentialOption()">checked="checked"</dtml-if> />
     	</div>
@@ -901,7 +927,7 @@ issue towards the top of List Issues.
   <p>
   If true, in Add Issue, users can set if an issue should be confidential or not.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -911,7 +937,7 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="show_hideme_option:boolean" <dtml-if "ShowHideMeOption()">checked="checked"</dtml-if> />
     	</div>
@@ -920,7 +946,7 @@ issue towards the top of List Issues.
   <p>
   If true, in Add Issue, users can set if their name and email should be hidden.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -930,9 +956,9 @@ issue towards the top of List Issues.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
-	<input type="checkbox" name="show_issueurl_option:boolean" 
+	<input type="checkbox" name="show_issueurl_option:boolean"
          <dtml-if "ShowIssueURLOption()">checked="checked"</dtml-if> />
     	</div>
       </td>
@@ -941,7 +967,7 @@ issue towards the top of List Issues.
   If true, in Add Issue, you can specify a URL which is related to the
 issue.
   </p>
-  </td> 
+  </td>
 </tr>
 
 
@@ -954,7 +980,7 @@ Deprecated feature. Remove later.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="show_download_button:boolean" <dtml-if "ShowDownloadButton()">checked="checked"</dtml-if> />
     	</div>
@@ -964,7 +990,7 @@ Deprecated feature. Remove later.
   If true, when viewing an issue users can click the Download button
   to get the issue as a text file.
   </p>
-  </td> 
+  </td>
 </tr>
 </dtml-comment>
 
@@ -975,7 +1001,7 @@ Deprecated feature. Remove later.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="encode_emaildisplay:boolean" <dtml-if "EncodeEmailDisplay()">checked="checked"</dtml-if> />
     	</div>
@@ -985,7 +1011,7 @@ Deprecated feature. Remove later.
   If true, all hyperlinked email addresses are display as an encoded
   JavaScript script.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -995,9 +1021,9 @@ Deprecated feature. Remove later.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
-	<input type="checkbox" name="use_tellafriend_for_anonymous:boolean" 
+	<input type="checkbox" name="use_tellafriend_for_anonymous:boolean"
         <dtml-if "UseTellAFriendForAnonymous()">checked="checked"</dtml-if> />
     	</div>
       </td>
@@ -1005,10 +1031,10 @@ Deprecated feature. Remove later.
   <p>
   If you use the Tell a friend feature, unsetting this will disallow users
   who have not logged in to use the Tell a friend feature.<br />
-  Tip! If you're running a public issue tracker instance, spambots can use the 
+  Tip! If you're running a public issue tracker instance, spambots can use the
   Tell a friend to send spam unless you untick this option.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1018,17 +1044,17 @@ Deprecated feature. Remove later.
   </div>
   </td>
   <td align="left" valign="top">
-  
+
         <div class="form-element">
 	<input type="checkbox" name="show_always_notify_status:boolean" <dtml-if "doShowAlwaysNotifyStatus()">checked="checked"</dtml-if> />
     	</div>
       </td>
   <td align="left" valign="top">
   <p>
-  When true, a list is displayed after an issue is added to say who 
+  When true, a list is displayed after an issue is added to say who
   has been notified.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1045,7 +1071,7 @@ Deprecated feature. Remove later.
   <p>
       How many numbers in the Id of issues.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1063,7 +1089,7 @@ Deprecated feature. Remove later.
   <p>
   String you might want issues id to start with.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1080,7 +1106,7 @@ Deprecated feature. Remove later.
   <p>
   With this on users can enable access keys to keyboard shortcuts
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1094,10 +1120,10 @@ Deprecated feature. Remove later.
        <dtml-if "ShowRememberSavedfilterPersistentlyOption()">checked="checked"</dtml-if> />
   </td>
   <td align="left" valign="top">
-  <p>Allows acl users of an Issue User Folder to set their filters to be remembered persistently, 
+  <p>Allows acl users of an Issue User Folder to set their filters to be remembered persistently,
   meaning their last used filter is still on even if they restart their browser.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1112,9 +1138,9 @@ Deprecated feature. Remove later.
   </td>
   <td align="left" valign="top">
   <p>
-  Only applies if you enable Save drafts. 
+  Only applies if you enable Save drafts.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1132,7 +1158,7 @@ Deprecated feature. Remove later.
   If enabled will show a link at the bottom of <a href="ListIssues">List Issues</a>
   to export the current unbatched issues to CSV.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1149,7 +1175,7 @@ Deprecated feature. Remove later.
   <p>If checked, email notifications will be sent out with the issue description included in the email. <br />
   An advantage with having this checked is that email notifyees don't have to visit the issuetracker to read the whole text.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1164,10 +1190,10 @@ Deprecated feature. Remove later.
   </td>
   <td align="left" valign="top">
   <p>If checked, on the List Issues and Complete List you can click to list all the first 1000.<br />
-  This can get really really slow on a high traffic issue tracker and its slow loading time can cause Zope to 
+  This can get really really slow on a high traffic issue tracker and its slow loading time can cause Zope to
   run high in CPU and memory.
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1184,7 +1210,7 @@ Deprecated feature. Remove later.
   <p>A plugin is an adjacent instance object that can be linked to from the issuetracker.
   Enter the path of the plugin (eg. somefolder/someobject)
   </p>
-  </td> 
+  </td>
 </tr>
 
 <tr>
@@ -1213,16 +1239,16 @@ Deprecated feature. Remove later.
           <input type="hidden" name="brother_issuetracker_paths:lines" value="" />
           <em>No adjacent issue trackers found</em>
         </dtml-if>
-      
+
       </dtml-let>
   </td>
   <td align="left" valign="top">
   <p>These are issue trackers found in the proximity. You can select several issue trackers
   from this list and then all of their issues will be counted, listed and shown next to the issues
-  of this issue tracker. Useful if you want to monitor several issue trackers from one 
+  of this issue tracker. Useful if you want to monitor several issue trackers from one
   single instance.
   </p>
-  </td> 
+  </td>
 </tr>
 
 </table>
@@ -1231,7 +1257,7 @@ Deprecated feature. Remove later.
 
 <div class="submitarea" align="center">
         <input type="submit" value="Save Changes" name="manage_editIssueTrackerProperties:method">
-</div>	
+</div>
 
 
 </div><!-- /advanced -->
@@ -1268,7 +1294,7 @@ Deprecated feature. Remove later.
 <tr>
   <td align="left" valign="top" width="8">
   <dtml-if "'d' in _['sequence-item'].get('mode', 'awd')">
-  <input type="checkbox" name="ids:list" value="<dtml-var id html_quote>" 
+  <input type="checkbox" name="ids:list" value="<dtml-var id html_quote>"
    id="cb-<dtml-var id>">
   <dtml-else>
   </dtml-if>
@@ -1282,12 +1308,12 @@ Deprecated feature. Remove later.
 
   <dtml-if "'w' in _['sequence-item'].get('mode', 'awd')">
   <dtml-if "type == 'int'">
-  <input type="text" name="<dtml-var id>:<dtml-var 
-   type>" size="35" value="<dtml-if "hasProperty(id)"><dtml-var 
+  <input type="text" name="<dtml-var id>:<dtml-var
+   type>" size="35" value="<dtml-if "hasProperty(id)"><dtml-var
    "'%s' % getProperty(id)" html_quote></dtml-if>">
   <dtml-elif "type == 'long'">
   <input type="text" name="<dtml-var id>:<dtml-var type>" size="35"
-   value="<dtml-if "hasProperty(id)"><dtml-var 
+   value="<dtml-if "hasProperty(id)"><dtml-var
    "('%s' % getProperty(id))[:-1]" html_quote></dtml-if>">
   <dtml-elif "type in ('float', 'date')">
   <input type="text" name="<dtml-var id>:<dtml-var type>" size="35"
@@ -1302,7 +1328,7 @@ Deprecated feature. Remove later.
   <input type="text" name="<dtml-var id>:tokens" size="35"
    value="<dtml-in "getProperty(id)"><dtml-var sequence-item html_quote> </dtml-in>">
   <dtml-elif "type=='text'">
-  <textarea name="<dtml-var id>:text" rows="6" cols="37"><dtml-var 
+  <textarea name="<dtml-var id>:text" rows="6" cols="37"><dtml-var
    "getProperty(id)" html_quote></textarea>
   <dtml-elif "type=='lines'">
   <textarea name="<dtml-var id>:lines" rows="6" cols="37"><dtml-in
@@ -1344,7 +1370,7 @@ Deprecated feature. Remove later.
     <select name="<dtml-var id>:list" multiple
       size="<dtml-var "_.min(7, _.len(getProperty(select_variable)))">">
       <dtml-in "getProperty(select_variable)">
-         <option<dtml-if 
+         <option<dtml-if
          "getProperty(id) and (_['sequence-item'] in getProperty(id))"
          > SELECTED</dtml-if
          >><dtml-var sequence-item html_quote></option>
@@ -1356,7 +1382,7 @@ Deprecated feature. Remove later.
     <select name="<dtml-var id>:list" multiple
       size="<dtml-var "_.min(7, _.len(_[select_variable]))">">
       <dtml-in "_[select_variable]">
-         <option<dtml-if 
+         <option<dtml-if
          "getProperty(id) and (_['sequence-item'] in getProperty(id))"
          > SELECTED</dtml-if
          >><dtml-var sequence-item html_quote></option>
@@ -1384,9 +1410,9 @@ Deprecated feature. Remove later.
   </td>
   <td align="left" valign="top">
   <div class="list-item">
-  
+
   </div>
-  </td> 
+  </td>
 </tr>
 
 </dtml-unless>
@@ -1396,9 +1422,9 @@ Deprecated feature. Remove later.
     <td colspan="2">&nbsp;</td>
     <td align="left" valign="top" colspan="2">
       <div class="form-element">
-       <input name="manage_editProperties:method" type="submit" 
+       <input name="manage_editProperties:method" type="submit"
   	   class="form-element" value="Save Changes" />
-       <input name="manage_delOtherProperties:method" type="submit" 
+       <input name="manage_delOtherProperties:method" type="submit"
              class="form-element" value="Delete" />
       </div>
     </td>
@@ -1408,19 +1434,19 @@ Deprecated feature. Remove later.
 
 </dtml-in>
 
-  <p class="form-help"> To add a new property, enter a name, type and value for 
+  <p class="form-help"> To add a new property, enter a name, type and value for
     the new property and click the &quot;Add&quot; button. </p>
   <table>
-    <tr> 
-      <td align="left" valign="top"> 
+    <tr>
+      <td align="left" valign="top">
         <div class="form-label"> Name </div>
       </td>
-      <td align="left" valign="top"> 
+      <td align="left" valign="top">
         <input type="text" name="id" size="30" value=""/>
       </td>
       <td align="left" valign="top" class="form-label"> Type </td>
-      <td align="left" valign="top"> 
-        <div class="form-element"> 
+      <td align="left" valign="top">
+        <div class="form-element">
           <select name="type">
             <option>boolean</option>
             <option>date</option>
@@ -1437,15 +1463,15 @@ Deprecated feature. Remove later.
         </div>
       </td>
     </tr>
-    <tr> 
-      <td align="left" valign="top"> 
+    <tr>
+      <td align="left" valign="top">
         <div class="form-label"> Value </div>
       </td>
-      <td colspan=2 align="left" valign="top"> 
+      <td colspan=2 align="left" valign="top">
         <input type="text" name="value" size="30" />
       </td>
-      <td align="right" valign="top"> 
-        <div class="form-element"> 
+      <td align="right" valign="top">
+        <div class="form-element">
           <input class="form-element" type="submit" name="manage_addOtherProperty:method" value=" Add "
 	   />
         </div>
