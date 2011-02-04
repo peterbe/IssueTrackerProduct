@@ -277,7 +277,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             # because I don't want to put mutable defaults in
             # the keyword arguments
             idxs = ['comment','meta_type','fromname','email','path',
-                    'modifydate', 'filenames']
+                    'modifydate', 'threaddate', 'filenames']
         else:
             # No matter what, when indexing you must always include 'path'
             # otherwise you might update indexes without putting the object
@@ -286,8 +286,6 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             # findable on other indexes such as comment.
             if 'path' not in idxs:
                 idxs.append('path')
-
-
 
         indexes = catalog._catalog.indexes
         if 'filenames' not in idxs and indexes.has_key('filenames'):

@@ -5,6 +5,8 @@
 #added_issues ul li, #modified_issues ul li { list-style-type:none; padding-bottom:4px;}
 #added_issues ul, #modified_issues ul { margin-left:0; padding-left:12px;}
 #added_issues h3, #modified_issues h3 { border-bottom:1px solid #ccc; width:90% }
+#total_actual_time { width:43%; margin-bottom:40px; }
+h3 { border-bottom:1px solid #ccc; }
 b.adjacent { display:none; }
 a.adjacent { background-color:#ffff88; }
 #actual_hours, #estimated_hours { padding-left:12px; }
@@ -22,8 +24,29 @@ a.adjacent { background-color:#ffff88; }
        tal:attributes="href prev_url">&larr; previous month</a>
      &#183;
     <a tal:condition="next_url"
-       tal:attributes="href next_url">next month &rarr;</a>       
+       tal:attributes="href next_url">next month &rarr;</a>
   </p>
+</div>
+
+<div tal:condition="here/UseFollowupActualTime" id="total_actual_time">
+<h3>Actual time</h3>
+<p tal:define="total_actual_hours python:here.getTotalActualFollowupHours(month=request.get('month'), year=request.get('year'))"
+><strong>Total actual time this month:</strong>
+
+         <abbr tal:attributes="title string:total_actual_hours"
+               tal:condition="total_actual_hours"
+               tal:content="python:here.showTimeHours(total_actual_hours)"></abbr>
+         <tal:item condition="not:total_actual_hours">0</tal:item>
+         hours
+
+                        <span style="color:#999"
+                              tal:condition="python:total_actual_hours>10">
+                          (<abbr title="Assuming 8 hours per day"
+                          >approximately <br tal:replace="python:'%.1f'% round(total_actual_hours/8.0,1)"/> days</abbr>)
+                        </span>
+</p>
+
+
 </div>
 
 
@@ -37,12 +60,12 @@ a.adjacent { background-color:#ffff88; }
   <h3 tal:condition="python:count_added_issues>1"
       ><tal:item replace="python:count_added_issues"/> issues added</h3>
 
-  
+
   <ul tal:condition="summary/added_issues">
   <li tal:repeat="issue summary/added_issues"
       tal:attributes="class python:here.getUniqueIssueClassname(issue)">
     <span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
-    
+
          <a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
                tal:attributes="href issue/absolute_url_path;
                                title python:test(diff, diff)"
@@ -62,18 +85,18 @@ a.adjacent { background-color:#ffff88; }
                    (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
                        tal:attributes="href brother/absolute_url_path" class="brother"
                        tal:content="brother/getTitle"></a>)
-                  </tal:test>                              
+                  </tal:test>
                  <tal:comment replace="nothing">- <b class="status" tal:content="python:issue.getStatus().capitalize()"></b><br/></tal:comment>
-                 
+
           <b class="adjacent">&larr; same issue</b>
-         
+
   </li>
   </ul>
-  
+
     <p id="actual_hours" tal:condition="python:here.UseEstimatedTime() and summary['added_issues']">
       <b>Total estimated hours:</b>
       <tal:block define="total_hours python:sum([x.getEstimatedTimeHours() for x in summary['added_issues'] if x.getEstimatedTimeHours()])">
-      
+
          <abbr tal:attributes="title string:total_hours"
                tal:condition="total_hours"
                tal:content="python:here.showTimeHours(total_hours)"></abbr>
@@ -85,8 +108,8 @@ a.adjacent { background-color:#ffff88; }
                >approximately <br tal:replace="python:'%.1f'% round(total_hours/8.0,1)"/> days</abbr>)
          </span>
       </tal:block>
-    </p>  
-  
+    </p>
+
   </div>
 
   <div id="modified_issues">
@@ -96,11 +119,11 @@ a.adjacent { background-color:#ffff88; }
       <tal:item replace="count"/>
       <tal:item condition="python:count==1">issue</tal:item>
       <tal:item condition="not:python:count==1">issues</tal:item>
-      changed 
+      changed
       <tal:item condition="python:here.isFirstStatusOption(status)">back</tal:item>
       to <b class="status" tal:content="python:status.capitalize()"></b>
     </h3>
-    
+
     <ul>
       <li tal:repeat="issue_and_thread python:modified_issue_list[1]"
           tal:attributes="class python:here.getUniqueIssueClassname(issue_and_thread[0])">
@@ -126,15 +149,15 @@ a.adjacent { background-color:#ffff88; }
                        tal:content="brother/getTitle"></a>)
                   </tal:test>
           <b class="adjacent">&larr; same issue</b>
-                
+
       </tal:block>
       </li>
     </ul>
-    
-    <p id="actual_hours" tal:condition="python:here.isLastStatusOption(modified_issue_list[0]) and here.UseActualTime()">
+
+    <p id="actual_hours" tal:condition="python:here.UseActualTime() and not here.UseFollowupActualTime() and here.isLastStatusOption(modified_issue_list[0])">
       <b>Total actual hours:</b>
       <tal:block define="total_actual_hours python:sum([x[0].getActualTimeHours() for x in modified_issue_list[1] if x[0].getActualTimeHours()])">
-      
+
          <abbr tal:attributes="title string:total_actual_hours"
                tal:condition="total_actual_hours"
                tal:content="python:here.showTimeHours(total_actual_hours)"></abbr>
@@ -147,7 +170,7 @@ a.adjacent { background-color:#ffff88; }
          </span>
       </tal:block>
     </p>
-    
+
   </tal:change>
   </div>
 
@@ -187,7 +210,7 @@ $(function() {
     $('#added_issues a.adjacent').removeClass('adjacent');
     $('a.adjacent').removeClass('adjacent');
   });
-  
+
 });
 </script>
 </html>

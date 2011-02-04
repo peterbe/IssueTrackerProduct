@@ -5834,7 +5834,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     extras.lexicon_id = 'Lexicon'
                     zcatalog.addIndex(idx, 'ZCTextIndex', extras)
 
-        dateindexes = ['modifydate','issuedate']
+        dateindexes = ['modifydate','issuedate','threaddate']
         if self.EnableDueDate():
             dateindexes.append('due_date')
 
@@ -7596,7 +7596,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             mailhost = self._findMailHost()
             # We like to do our own (more unicode sensitive) munging of headers and
             # stuff but like to use the mailhost to do the actual network sending.
-            mailhost._send(fr, to, message.as_string())
+            t0 = time()
+            message_as_string = message.as_string()
+            mailhost._send(fr, to, message_as_string)
+            t1 = time()
+            logger.info("Took %s seconds to send %d bytes email to %s" %\
+                        (t1-t0, len(message_as_string), to))
 
             return True
 
