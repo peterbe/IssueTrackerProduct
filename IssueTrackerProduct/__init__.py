@@ -161,7 +161,7 @@ def initialize(context):
         registerIcon('customfieldfolder.png')
         registerIcon('issue-note-screenshot.png')
         registerJS('core.js')
-        registerJS('jquery-1.3.2.min.js', slim_if_possible=False)
+        registerJS('jquery-1.4.4.min.js', slim_if_possible=False)
         registerJS('jquery-ui-1.7.1.datepickeronly.min.js', slim_if_possible=False)
         registerJS('manage-customfield.js')
         registerJS('jquery.qtip-1.0.0-rc3.min.js', slim_if_possible=False)
@@ -169,7 +169,13 @@ def initialize(context):
         registerJS('issuenotes.js')
         registerJS('issuenotes-core.js')
         registerJS('issuenotes-list.js')
+        registerJS('tabtastic-combined.js')
+        registerJS('home.js')
+        registerJS('addissue.js')
         registerCSS('jquery-ui-1.7.1.datepickeronly.css')
+        registerCSS('screen.css')
+        registerCSS('print.css')
+        registerCSS('home.css')
 
         icons = Utils.uniqify(ICON_ASSOCIATIONS.values())
         for icon in icons:

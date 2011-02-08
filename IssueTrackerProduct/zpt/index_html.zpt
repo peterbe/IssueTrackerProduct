@@ -1,11 +1,11 @@
 <html metal:use-macro="here/getHeader">
 
 <script type="text/javascript" metal:fill-slot="extrajs"
-        tal:attributes="src string:${here/getRootRelativeURL}/home.js"
+        src="/misc_/IssueTrackerProduct/home.js"
         ></script>
 
 <link rel="stylesheet" type="text/css" metal:fill-slot="extracss"
- tal:attributes="href string:${here/getRootRelativeURL}/home.css" />
+ href="/misc_/IssueTrackerProduct/home.css" />
 
 <div metal:fill-slot="body">
 
@@ -26,8 +26,8 @@
 
       <tr>
         <td align="right" colspan=1 tal:attributes="colspan python:len(statuslist)">
-          Only for the last 
-          <a href="?count_status_since=1" tal:attributes="style python:test(request.has_key('count_status_since') and request['count_status_since']=='1','background-color: gainsboro;;','')">1 day</a>, 
+          Only for the last
+          <a href="?count_status_since=1" tal:attributes="style python:test(request.has_key('count_status_since') and request['count_status_since']=='1','background-color: gainsboro;;','')">1 day</a>,
           <a href="?count_status_since=7" tal:attributes="style python:test(request.has_key('count_status_since') and request['count_status_since']=='7','background-color: gainsboro;;','')">1 week</a> or
           <a href="?count_status_since=30" tal:attributes="style python:test(request.has_key('count_status_since') and request['count_status_since']=='30','background-color: gainsboro;;','')">1 month</a>
 
@@ -36,7 +36,7 @@
         </td>
       </tr>
     </table>
-     
+
 
   <br />
   <ul class="further">
@@ -52,7 +52,7 @@
        tal:define="reportscontainer here/getReportsContainer"
        tal:attributes="href reportscontainer/absolute_url_path">Reports</a></li>
   </ul>
-  
+
   <ul class="further" tal:define="plugins here/getPluginObjects"
                    tal:condition="plugins">
     <li tal:repeat="plugin plugins"
@@ -61,14 +61,14 @@
          tal:content="plugin/getTitle|plugin/title_or_id"></a>
     </li>
   </ul>
-  
+
   <div id="issuedraftsouter" tal:content="structure here/show_drafts"></div>
-  
+
 
     <tal:block condition="here/EnableDueDate">
     <br/><br/>
     <table width="250"
-           tal:define="duelist here/CountDueDates" 
+           tal:define="duelist here/CountDueDates"
            tal:condition="python:duelist"
      summary="List of issues by due date"
      border="0" cellspacing="0" cellpadding="2">
@@ -78,26 +78,26 @@
           <th align="left" colspan="2">Due dates</th>
         </tr>
       </thead>
-      
-      <tbody tal:repeat="each duelist" 
+
+      <tbody tal:repeat="each duelist"
              tal:attributes="class python:test(path('repeat/each/odd'), 'lodd','leven')">
         <tr>
           <td tal:define="option python:each[0]">
               <a tal:condition="not:python:option=='No due date'"
-                 tal:attributes="href python:here.getDueDate2ListLink(option)" 
+                 tal:attributes="href python:here.getDueDate2ListLink(option)"
                  tal:content="python:option">option</a>
               <span tal:condition="python:option=='No due date'"
                     >No due date</span>
           </td>
           <td align="right">
-           <br tal:replace="python:each[1]"/>&nbsp;</td> 
+           <br tal:replace="python:each[1]"/>&nbsp;</td>
         </tr>
       </tbody>
-    </table>     
+    </table>
     </tal:block>
 
 
-  
+
   <div id="nextactionsouter"
    tal:condition="here/showNextActionIssues"
    tal:content="structure here/show_next_actions"></div>
@@ -113,4 +113,3 @@
 
 </div>
 </html>
-

@@ -1,0 +1,370 @@
+html, body {
+  margin:0; padding:0;
+  background: white; color: black;
+  font-family:Arial, sans-serif, verdana;
+}
+
+p,td,th,div,span {
+  font-size: x-small;
+  voice-family: "\"}\"";
+  voice-family: inherit;
+  font-size: small
+}
+
+.status {
+  color:red;
+}
+
+span.id {
+  color:#333;
+}
+
+h3 span.id {
+  color:#333;
+  font-size:11pt;
+}
+
+h1.head {
+  font:bold 18pt Verdana;
+}
+
+h3.preview {
+  font-style:italic;
+}
+
+.bigger {
+  font-size:120%;
+}
+
+.hidden {
+  display:none;
+}
+
+.smaller, .s {
+  font-size:85%;
+}
+
+.floatL {
+  float:left;
+}
+
+.floatR {
+  float:right;
+}
+
+div.errormessage {
+  border:1px solid #F99;
+  background-color:#FCC;
+  padding-left:10px;
+  padding-right:10px;  
+}
+
+.submiterror {
+  color:red;
+  font-weight:bold;
+}
+
+.aeh a { text-decoration:none; }
+
+.bumf { 
+  width:500px; 
+  padding-left:20px; 
+}
+
+
+/* Header      --------------------------- */
+
+#head {
+  background-color:#CC9;
+  margin-bottom:10px; 
+}
+
+div#logo {
+ padding-right:10px;
+ float:left; 
+}
+
+h1.head {
+  margin-left:10px;
+  float:left;
+}
+
+h2.head {
+  float:left;
+  margin-left:30px;
+}
+
+
+
+.clearer { clear: left; line-height: 0; height: 0; }
+.clearerR { clear: right; line-height: 0; height: 0; }
+
+
+#main {
+  padding:7px;
+  padding-bottom:2px;
+}
+
+
+/* List Issues --------------------------- */
+
+.ftitle {
+  text-align:center;
+  font-weight:bold;
+  padding-bottom:3px;
+}
+
+.bd { /* brief description */
+  color:#828282; 
+}
+
+.ilink {
+  font-weight:bold;
+  font-style:italic;
+}
+
+
+tr.lhead { 
+  background-color:#C3C3C3; 
+  font-weight:bold;
+}
+tr.l_commenthead { 
+  border-top:1px solid #666; 
+  background-color:#C3C3C3; 
+  font-weight:bold;
+}
+
+.leven { 
+  background-color:#DFDFDF;
+}
+
+.lodd { 
+  background-color:#F1F1F1; 
+}
+
+
+/* Search result ----------------------------------------- */
+
+.q_highlight {
+  font-weight: bold;
+  background-color: #FFFF66;
+  font-style: italic;
+}
+
+
+/* Forms --------------------------------- */
+
+.submitbutton {
+  font-weight:bold;
+}
+
+.smallbutton {
+  display:none;
+}
+
+
+/* Show Issue      ----------------------- */
+
+
+#issuedrafts {
+  float:right;
+  width:340px;
+  border:1px solid #666;
+  background-color:#F6F6F6;
+  padding:2px 9px;
+}
+
+#issuedrafts p {
+  margin-top:4px;margin-bottom:4px;
+}
+
+.assignment form { display:none; }
+
+/* Misc.       -------------------------- */
+
+/* Urgencies */
+.ur-0 {color:#666; }
+.ur-1 { } /* default 'normal' */
+.ur-2 {font-weight:bold; }
+.ur-3 {font-weight:bold; color:red; }
+.ur-4 {font-weight:bolder; color:red; }
+
+div.note {
+  font-size:80%;
+  color:#333;
+}
+
+.extendedoptions {
+  padding:0 4px 4px 4px;
+  float:left;
+}
+
+
+.specialoptions {
+  display:none;
+}
+
+.formfollowup {
+  display:none;
+}
+
+#recent {
+  display:none;
+}
+
+#topright {
+  display:none;
+}
+
+#foot {
+  clear: both;
+  display:none;
+}
+
+/* For the tabs  ------------------------ */
+
+div#tabs {
+  display:none;
+}
+
+
+/* Option buttons ---------------------------- */
+
+ul#navlist {
+  display:none;
+}
+
+
+/* Show Issue      ----------------------- */
+
+
+.issue { 
+/*  border:1px solid #999; */
+/*  background-color:#eee; */
+  padding:0;
+/*  width:690px; */
+  margin-bottom:1.9em;
+} 
+
+.ihead { 
+  margin:0;  
+}
+ 
+.ihead {
+/*  background:#ccc; */
+/*  height:30px; */
+}
+
+
+.ihead h3 {
+  font-family:arial,sans-serif;
+  font-size:14px;
+  padding:6px 10px 0 15px;
+  margin:0;
+}
+
+.istatus {
+  padding:8px 12px;
+  float: right;
+  font-family:verdana;
+  font-weight:bold;
+  color:red;
+/*  background-color: #eee; */
+}
+
+.ibody {
+  font-size: 10pt;
+  font-family:verdana;
+  padding:6px 24px;
+}
+
+.sig, .sig a { /* signature in text */
+  color:#666;
+}
+
+
+
+.ilabel {
+  font-weight:bold;
+  padding-right:8px;
+  vertical-align:top;
+}
+
+
+.shade {
+  color:#666;
+}
+
+.announcement {
+  border:1px solid black;
+  background-color:#efefef;
+  margin-bottom:15px;
+}
+
+img.fileatt { 
+  vertical-align:middle;
+  padding:3px;
+}
+
+a.assignment {
+  font-size:0.8em;
+}
+
+.topbar {
+  display:none;
+}
+
+table.lhead {
+  display:none;
+}
+
+#filteroptions {
+  display:none;
+}
+
+.idetails-table, .idetails2 {
+  margin-left:15px;
+  margin-bottom:10px;
+
+}
+
+div.assignment {
+  margin-left:15px;
+}
+
+.threadbox {
+  margin-left:20px;
+  margin-bottom:13px;
+}
+
+.thead {
+  padding:5px 10px;
+}
+
+
+.tbody {
+  font-size: 10pt;
+  font-family:verdana,helvetica, arial, sans-serif;
+  padding:2px 20px;
+}
+
+
+.threaddate { 
+  margin-left:20px;
+}
+
+.threadfiles {
+  padding:0 4px;
+}
+
+.cth { /* ColorThreadChange */
+  color:#c00;
+}
+
+.idetails2 {
+  float:left;
+}
+
+.plink, a.highlight-toggle, a.backlink {
+  display:none;
+}

@@ -4,7 +4,7 @@
 <metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
 
 <script type="text/javascript"
- tal:attributes="src string:$ru/quickaddissue.js"></script>
+ src="/misc_/IssueTrackerProduct/quickaddissue.js"></script>
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="not:request/previewissue|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
@@ -13,7 +13,7 @@ $(function() {$('#title')[0].focus();});</script>
 $(function() {$('#title')[0].focus();disableKS();});</script>
 </tal:block>
 
-<script 
+<script
  tal:define="conf here/getWYSIWYGEditor"
  tal:condition="python:here.getSavedTextFormat()=='html' and conf"
  tal:replace="structure conf"></script>
@@ -25,7 +25,7 @@ div#previewsubmit {
 }
 </style>
 
- 
+
 <div metal:fill-slot="body" tal:omit-tag="">
 
 
@@ -43,7 +43,7 @@ div#previewsubmit {
 <h3 class="pagetitle">Quick Add Issue</h3>
 
 <p class="quickadd_note">
-For more adding options such as <em>urgency</em>, <em>type</em>, <em>URL</em>, 
+For more adding options such as <em>urgency</em>, <em>type</em>, <em>URL</em>,
 <em>privacy</em> and Preview-before-save use the <a href="AddIssue" onclick="softsubmit();return false;" onkeypress="softsubmit();return false;">Add Issue</a>
 </p>
 
@@ -67,18 +67,18 @@ here's a special script that converts 'section' into ['section'] if present and 
                                       onfocus python:test(use_autosave, 'startautosave()');
                                       onblur python:test(use_autosave, 'stopautosave()');
                                       name string:title:${here/UNICODE_ENCODING}:ustring" />
-            <span class="submiterror" 
-             tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>  
+            <span class="submiterror"
+             tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>
         </td>
 
-	</tr>        
+	</tr>
     <tr tal:condition="issueuser">
         <td><b>User:</b></td>
         <td tal:content="structure python:here.ShowNameEmail(issueuser.getFullname(), issueuser.getEmail(), highlight=0)"></td>
     </tr>
 	<tr tal:condition="python:not issueuser and not fromname">
 		<td><b>Name:</b></td>
-		<td><input name="fromname" tabindex="2" value="" size="30" 
+		<td><input name="fromname" tabindex="2" value="" size="30"
                            tal:attributes="value request/fromname|nothing;
                                            name string:fromname:${here/UNICODE_ENCODING}:ustring" /></td>
 	</tr>
@@ -116,21 +116,21 @@ here's a special script that converts 'section' into ['section'] if present and 
         <b>Spambot prevention:</b>
       </td>
       <td>
-        
+
         <br tal:replace="structure python:here.getCaptchaNumbersHTML(request.get('captchas'), howmany=4)" />
-      
+
       <input name="captcha_numbers" size="4"
        tal:attributes="value python:request.get('captcha_numbers','')"
        onkeydown="this.value=checkCaptchaValue(this.value, 'Only numbers', 4)"
         />
-        <span class="submiterror" 
+        <span class="submiterror"
              tal:content="structure python:here.ShowSubmitError(options, 'captcha_numbers')"></span>
          <tal:block condition="not:python:options.get('SubmitError',{}).get('captcha_numbers')">enter these numbers</tal:block>
-	 
-	 
-         
+
+
+
       </td>
-    </tr>	
+    </tr>
 	<tr>
 		<td><b>Section(s):</b></td>
 		<td colspan="2">
@@ -148,20 +148,20 @@ here's a special script that converts 'section' into ['section'] if present and 
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						<input type="submit" name="SubmitIssue:method" tabindex="8" value="  Save Issue  " class="submitbutton"
                          onclick="javascript:this.value='Saving Issue...'" />
-                         
-                         
-                         <input name="fromname" type="hidden" 
+
+
+                         <input name="fromname" type="hidden"
                                 tal:condition="python:not issueuser and fromname"
                                 tal:attributes="value fromname" />
-                                
+
                          <input name="email" type="hidden"
                                 tal:condition="python:not issueuser and email"
-                                tal:attributes="value email" />                                
-                         
+                                tal:attributes="value email" />
+
 					</td>
 				</tr>
 			</table>
-			
+
 		</td>
 
 	</tr>
@@ -170,7 +170,7 @@ here's a special script that converts 'section' into ['section'] if present and 
 <input type="hidden" name="type" value="" tal:attributes="value here/default_type" />
 <input type="hidden" name="urgency" value="" tal:attributes="value here/default_urgency" />
 
-<input type="hidden" name="draft_issue_id" 
+<input type="hidden" name="draft_issue_id"
  tal:define="draft_issue_id python:options.get('draft_issue_id', request.get('draft_issue_id', ''))"
  tal:attributes="value draft_issue_id" />
 

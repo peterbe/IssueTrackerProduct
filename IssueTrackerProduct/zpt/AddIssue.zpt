@@ -3,8 +3,8 @@
 <metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
 
 <script type="text/javascript"
- tal:attributes="src string:$ru/addissue.js"></script>
-
+  tal:content="structure string:var AUTO_SAVE_INTERVAL=${here/getAutosaveInterval};"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/addissue.js"></script>
 
 <tal:block condition="here/EnableDueDate">
 <script type="text/javascript" src="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.min.js"
@@ -12,9 +12,9 @@
 <script type="text/javascript"
         tal:content="structure string:$(function() {$('#id_due_date').datepicker({${here/getDatepickerOptions}})})">
 </script>
-</tal:block>        
+</tal:block>
 
- 
+
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="not:request/previewissue|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
@@ -24,7 +24,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
 </tal:block>
 
 
- 
+
 <script
  tal:define="conf here/getWYSIWYGEditor"
  tal:condition="python:here.getSavedTextFormat()=='html' and conf"
@@ -36,17 +36,17 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
   <tal:block define="custom_fields_css here/getCustomFieldsCombinedCSS"
              condition="custom_fields_css"
              replace="structure custom_fields_css">
-             
+
   </tal:block>
-  
+
   <link tal:condition="here/EnableDueDate"
-        rel="stylesheet" type="text/css" 
+        rel="stylesheet" type="text/css"
         href="/misc_/IssueTrackerProduct/jquery-ui-1.7.1.datepickeronly.css" />
-        
-  
+
+
 
 </metal:style>
- 
+
 <div metal:fill-slot="body">
 
 <span tal:condition="python:options.get('SubmitError')"
@@ -86,14 +86,14 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
          <input name="title" tabindex="1" size="50" maxlength="70" id="title"
           tal:attributes="value python:request.get('title','');
                           name string:title:${here/UNICODE_ENCODING}:ustring" />
-                          
+
          <span class="submiterror" tal:condition="errors/title|nothing"
 	     tal:content="structure python:here.ShowSubmitError(options, 'title')"></span>
       </td>
       </tr>
     <tr tal:condition="loggedin">
         <td><b>User:</b></td>
-        <td tal:condition="issueuser" 
+        <td tal:condition="issueuser"
             tal:content="structure python:here.ShowNameEmail(issueuser.getFullname(), issueuser.getEmail(), highlight=0)"></td>
         <td tal:condition="cmfuser"
             tal:content="structure python:here.ShowNameEmail(cmfuser.getProperty('fullname'), cmfuser.getProperty('email'), highlight=0)"></td>
@@ -106,7 +106,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
                            tal:define="fromname python:here.getSavedUser('fromname')"
                            tal:attributes="value fromname;
                                            name string:fromname:${here/UNICODE_ENCODING}:ustring" />
-                    <span class="submiterror" 
+                    <span class="submiterror"
                           tal:condition="errors/fromname|nothing"
                           tal:content="structure python:here.ShowSubmitError(options, 'fromname')"></span>
                 </td>
@@ -116,18 +116,18 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
 		<td><input name="email" tabindex="3"
                 tal:define="email python:here.getSavedUser('email')"
                 value="" tal:attributes="value email" size="30" />
-                    <span class="submiterror" 
+                    <span class="submiterror"
                           tal:condition="errors/email|nothing"
-                          tal:content="structure python:here.ShowSubmitError(options, 'email')"></span>                
+                          tal:content="structure python:here.ShowSubmitError(options, 'email')"></span>
 		</td>
 	</tr>
 	<tr>
-  
-  
+
+
   		<td valign="top"><br /><br /><br /><br /><b>Description:</b><br />
   		<td>
 		<textarea tabindex="4" name="description:text" rows="10" cols="70" id="description_text" class="autoexpanding"
-		tal:content="python:request.get('description','')" 
+		tal:content="python:request.get('description','')"
                 tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                                 onblur python:test(use_autosave, 'stopautosave()');
                                 name string:description:${here/UNICODE_ENCODING}:utext"
@@ -157,7 +157,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
 			<span tal:condition="here/ShowConfidentialOption">
 		    <b><label for="confidential">Confidential issue?</label></b>
 		    <input type="checkbox" name="confidential:boolean" id="confidential" tabindex="8" value="1" tal:define="confidential request/confidential | false" tal:attributes="checked python:confidential" />
-		    
+
 			</span>
 			<span tal:condition="not:python:here.ShowHideMeOption() or here.ShowConfidentialOption()">&nbsp;</span>
         </td>
@@ -168,24 +168,24 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
     </tr>
     <tr tal:condition="here/ShowIssueURLOption">
 	<td><strong>URL:</strong></td>
-        <td><input name="url2issue" tabindex="12" size="50" value="" tal:define="url2issue request/url | request/url2issue | emptystring" 
+        <td><input name="url2issue" tabindex="12" size="50" value="" tal:define="url2issue request/url | request/url2issue | emptystring"
               tal:attributes="value url2issue" /></td>
     </tr>
-    
+
     <tr tal:define="all_users here/getAllIssueUsers"
         tal:condition="python:here.UseIssueAssignment() and all_users">
 	<td><strong>Assign to:</strong></td>
 	<td>
   		  <select name="assignee" tabindex="30"
-                          tal:define="selected python:request.get('assignee',''); 
+                          tal:define="selected python:request.get('assignee','');
                                       youare python:here.getWhoYouAre(issueuser)"
                           tal:attributes="onchange string:if(this.options[this.selectedIndex].value){askNoti(this.options[this.selectedIndex].value,'${youare}');;}">
                      <option value=""></option>
-		     <option tal:repeat="user all_users" 
-                             tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected" 
+		     <option tal:repeat="user all_users"
+                             tal:attributes="value python:user['identifier']; selected python:user['identifier']==selected"
                              tal:content="python:user['user'].getFullname()">Statuses</option>
 	           </select>
-            <span class="submiterror" tal:condition="options/SubmitError|nothing" 
+            <span class="submiterror" tal:condition="options/SubmitError|nothing"
                   tal:content="python:here.ShowSubmitError(options, 'assignee')"></span>
             <span id="asi-noti" class="note">
             <span tal:condition="request/asked-notify-assignee|nothing" tal:omit-tag="">
@@ -196,26 +196,26 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
             </span>
 	</td>
     </tr>
-    
+
     <tr tal:condition="here/EnableDueDate">
       <td><b>Due date:</b></td>
       <td>
         <input name="due_date" id="id_due_date" tabindex="40" size="12"
                tal:attributes="value request/due_date|nothing" />
         <noscript tal:content="python:here.showStrftimeFriendly(here.display_date, strip_hour_part=True)"></noscript>
-            <span class="submiterror" tal:condition="options/SubmitError|nothing" 
-                  tal:content="python:here.ShowSubmitError(options, 'due_date')"></span>        
-               
+            <span class="submiterror" tal:condition="options/SubmitError|nothing"
+                  tal:content="python:here.ShowSubmitError(options, 'due_date')"></span>
+
       </td>
     </tr>
-    
+
     <tr class="fileattachment-error"
         tal:condition="python:options.get('SubmitError') and options.get('SubmitError').get('fileattachment')">
       <td>&nbsp;</td>
       <td><span class="submiterror" tal:content="python:here.ShowSubmitError(options, 'fileattachment')"></span></td>
     </tr>
 
-    <tr class="fileattachment-tip" 
+    <tr class="fileattachment-tip"
         tal:condition="number_of_files">
       <td>&nbsp;</td>
       <td>
@@ -227,13 +227,13 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
           <span tal:condition="not:python:number_of_files==1">one or more files</span>
           </a>
 	  </div>
-	  
+
 	  <div class="fileattachment-off" style="display:none">
           <a href="#" class="fileattachment-tip" onclick="hideFileAttachments();return false">
           <img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Hide again" />
           hide file attachments</a>
 	  </div>
-	  
+
       </td>
     </tr>
 
@@ -265,9 +265,9 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
         <b>Spambot prevention:</b>
       </td>
       <td>
-        
+
         <br tal:replace="structure python:here.getCaptchaNumbersHTML(request.get('captchas'), howmany=4)" />
-      
+
       <input name="captcha_numbers" size="4"
        tal:attributes="value python:request.get('captcha_numbers','')"
        onkeydown="this.value=checkCaptchaValue(this.value, 'Only numbers', 4)"
@@ -275,19 +275,19 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
          <span class="submiterror" tal:condition="errors/captcha_numbers|nothing"
 	     tal:content="structure python:here.ShowSubmitError(options, 'captcha_numbers')"></span>
          <tal:block condition="not:errors/captcha_numbers|nothing">enter these numbers</tal:block>
-         
+
       </td>
     </tr>
     <tr>
       <td>&nbsp;</td>
 
-      
+
       <td align="right" tal:define="previewissue python:request.get('previewissue')">
     <input type="hidden" name="previewissue" value="1" />
 	<input type="submit" name="AddIssue:method" value=" Preview again "
 	   tabindex="50"
            class="submitbutton" tal:condition="previewissue" />
-	
+
 	<input type="submit" name="AddIssue:method" value=" Preview first "
 	  tabindex="51"
            class="submitbutton" tal:condition="not:previewissue" />
@@ -303,7 +303,7 @@ $(function() {$('#title')[0].focus();disableKS();});</script>
     </tr>
 </table>
 
-<input type="hidden" name="draft_issue_id" 
+<input type="hidden" name="draft_issue_id"
  tal:define="draft_issue_id python:options.get('draft_issue_id', request.get('draft_issue_id', ''))"
  tal:attributes="value draft_issue_id" />
 

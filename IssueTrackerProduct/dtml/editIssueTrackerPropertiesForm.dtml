@@ -3,7 +3,7 @@
 <dtml-var manage_tabs>
 </dtml-with>
 
-<script type="text/javascript" src="tabtastic-combined.js"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/tabtastic-combined.js"></script>
 <style type="text/css">
 .tabset_tabs a { font-size:10pt; }
 /* Taken from Gavin Kistner's Tabtastic (tabtastic.css) */

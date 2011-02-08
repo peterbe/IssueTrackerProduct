@@ -1,0 +1,38 @@
+#rest {
+    float:right;
+    width:48%;
+}
+#outlook {
+    width:90%;
+    voice-family: "\"}\""; 
+    voice-family:inherit;
+    width:46%;
+}
+#outlook dd { margin-bottom:9px; }
+#outlook dt.daylabel { font-size:110%; font-weight:bold;}
+
+
+ul.further {
+  margin: 0 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+ul.further li {
+  margin: 2px 0 6px 0;
+  padding: 0;
+  font-weight: bold;
+  line-height: 24px; /* height of icon */
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+}
+ul.further li a {
+  padding-left: 24px; /* width of icon + whitespace */
+}
+
+
+#statistics { background-image: url(/misc_/IssueTrackerProduct/statistics.gif); }
+#summary { background-image: url(/misc_/IssueTrackerProduct/summary.png); }
+#reports { background-image: url(/misc_/IssueTrackerProduct/reports.gif); }
+
+
+

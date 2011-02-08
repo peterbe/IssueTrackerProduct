@@ -296,9 +296,6 @@ class IssueTrackerFolderBase(Folder.Folder, Persistent):
         return DEBUG
 
     def getAutosaveInterval(self):
-        """ return the seconds interval of how often the autosaving function
-        should submit. """
-        # XXX I THINK THIS ONE IS DEPRECATED AND NO LONGER NEEDED
         return AUTOSAVE_INTERVAL_SECONDS
 
     def ValidEmailAddress(self, email):
@@ -10623,9 +10620,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         del emailstring
 
-
-
-
     def _getIntersection(self, list1, list2):
         """ if 'A, C, D' in ['a','b'] should return True """
         intersection = []
@@ -13990,11 +13984,9 @@ zpts = ('zpt/StandardHeader',
 
 #addTemplates2Class(IssueTracker, zpts, extension='zpt')
 
-dtmls = ({'f':'dtml/screen.css', 'optimize':OPTIMIZE and 'css'},
-         {'f':'dtml/print.css',  'optimize':OPTIMIZE and 'css'},
-         {'f':'dtml/home.css',   'optimize':OPTIMIZE and 'css'},
-         'dtml/tw-sack.js', # here for legacy
-         'dtml/js-core.js', # here for legacy
+dtmls = (#{'f':'dtml/screen.css', 'optimize':OPTIMIZE and 'css'},
+         #{'f':'dtml/print.css',  'optimize':OPTIMIZE and 'css'},
+         #{'f':'dtml/home.css',   'optimize':OPTIMIZE and 'css'},
          ('dtml/editIssueTrackerPropertiesForm',
           'manage_editIssueTrackerPropertiesForm'),
          ('dtml/configureMenuForm', 'manage_configureMenuForm'),
@@ -14006,24 +13998,23 @@ dtmls = ({'f':'dtml/screen.css', 'optimize':OPTIMIZE and 'css'},
          ('dtml/ManagementUsers','manage_ManagementUsers'),
          ('dtml/ManagementUpgrade','manage_ManagementUpgrade'),
          ('dtml/ManagementSpamProtection','manage_ManagementSpamProtection'),
-         'dtml/tabtastic-combined.js',
-         {'f':'dtml/keyboardshortcuts.js',
-          'optimize':OPTIMIZE and 'js',
-          },
-         {'f':'dtml/AddIssueJavascript', 'n':'addissue.js',
-          'optimize':OPTIMIZE and 'js',
-          },
-         {'f':'dtml/QuickAddIssueJavascript', 'n':'quickaddissue.js',
-          'optimize':OPTIMIZE and 'js',
-          },
-         #{'f':'dtml/followup.js', 'optimize':OPTIMIZE and 'js'},
-         {'f':'dtml/home.js', 'optimize':OPTIMIZE and 'js',
-          },
+         #'dtml/tabtastic-combined.js',
+         #{'f':'dtml/keyboardshortcuts.js',
+         # 'optimize':OPTIMIZE and 'js',
+         # },
+         #{'f':'dtml/AddIssueJavascript', 'n':'addissue.js',
+         # 'optimize':OPTIMIZE and 'js',
+         # },
+         #{'f':'dtml/QuickAddIssueJavascript', 'n':'quickaddissue.js',
+         # 'optimize':OPTIMIZE and 'js',
+         # },
+         #{'f':'dtml/home.js', 'optimize':OPTIMIZE and 'js',
+         # },
 
          ('dtml/PropertiesStatusScores', 'manage_PropertiesStatusScores'),
 
          # TinyMCE stuff
-         {'f':'dtml/tiny_mce_itp.js', 'optimize':OPTIMIZE and 'js'},
+         #{'f':'dtml/tiny_mce_itp.js', 'optimize':OPTIMIZE and 'js'},
          )
 
 
