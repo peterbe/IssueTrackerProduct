@@ -4,3 +4,5 @@ README.peter.txt
 tags
 *.js-slimmed.js
 *.css-slimmed.css
+*.css-slimmed
+*.js-slimmed
