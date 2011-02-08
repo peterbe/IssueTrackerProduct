@@ -172,6 +172,8 @@ def initialize(context):
         registerJS('tabtastic-combined.js')
         registerJS('home.js')
         registerJS('addissue.js')
+        registerJS('quickaddissue.js')
+        registerJS('keyboardshortcuts.js')
         registerCSS('jquery-ui-1.7.1.datepickeronly.css')
         registerCSS('screen.css')
         registerCSS('print.css')

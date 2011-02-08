@@ -15,15 +15,12 @@
 </tal:block>
 
 
-
 <tal:block define="useaccesskeys here/useAccessKeys" condition="not:request/previewissue|nothing">
 <script type="text/javascript" tal:condition="not:useaccesskeys">
 $(function() {$('#title')[0].focus();});</script>
 <script type="text/javascript" tal:condition="useaccesskeys">
 $(function() {$('#title')[0].focus();disableKS();});</script>
 </tal:block>
-
-
 
 <script
  tal:define="conf here/getWYSIWYGEditor"

@@ -1,3 +1,7 @@
+L = function() {
+   console.log.apply(console, arguments);
+};
+
 $.id=function(id){return document.getElementById(id)};
 
 function econvert(s) {
@@ -25,7 +29,7 @@ function hideFileAttachments() {
    $('div.fileattachment-off').hide();
    $('div.fileattachment-on').show();
    $('tr.fileattachment').hide();
-} 
+}
 function showFileAttachments() {
    $('div.fileattachment-on').hide();
    $('div.fileattachment-off').show();
@@ -34,35 +38,35 @@ function showFileAttachments() {
 
 $(function() {
    fixEncodedLinks();
-   
-   // First, for all the textareas that have lots of lines of text 
+
+   // First, for all the textareas that have lots of lines of text
    // in them, we want to double their number of rows
    $('textarea.autoexpanding').each(function() {
       if (_getNoLines(this) > parseInt(this.rows))
         this.rows = '' + Math.min(_getNoLines(this) + 2, 50);
    });
-            
+
    // When a user enters new lines, if they have entered more
    // lines than the textarea has rows, then double the textareas rows
    $('textarea.autoexpanding').bind('keyup', function() {
       if (_getNoLines(this) > parseInt(this.rows))
         this.rows = '' + Math.min(_getNoLines(this) + 2, 50);
    });
-   
+
   // Unless we can find a reason not to, hide all the fileattachment input TRs
   if (!($('tr.fileattachment-error').size() || $('tr.fileattachment input[type="checkbox"]').size())) {
      hideFileAttachments();
   } else {
      showFileAttachments();
   }
-   
+
   $('input[type="file"]').change(function() {
      if (this.value)
        $('.fileattachment a.fileattachment-tip').hide();
      else
        $('.fileattachment a.fileattachment-tip:hidden').show();
   });
-   
+
 });
 
 
@@ -78,7 +82,7 @@ function checkCaptchaValue(elm, msg, maxlength) {
       //alert(v);
       //alert(typeof v);
       v = v.replace(/\D/g,'');
-      if (v.length >= maxlength) 
+      if (v.length >= maxlength)
         v = v.substring(0, maxlength);
       //elm.value = v;
    }
@@ -90,7 +94,7 @@ function checkCaptchaValue(v, msg, maxlength) {
       if (v.search(/\D/)>-1)
         alert(msg);
       v = v.replace(/\D/g,'');
-      if (v.length >= maxlength) 
+      if (v.length >= maxlength)
         v = v.substring(0, maxlength);
    }
    return v;
@@ -130,7 +134,7 @@ $.fn.fastSerialize = function() {
 
 function showAJAXProblemWarning(url) {
    if ($('#ajax-problem-warning').size()) return;
-   
+
    // show a nice message that the AJAX call didn't work
    container = $('<div id="ajax-problem-warning">')
      .addClass('problem-warning-message')
@@ -142,12 +146,13 @@ function showAJAXProblemWarning(url) {
                  .addClass('error').text('Currently having network connection problems.'))
 
    $('#main').append(container);
-   
+
    window.setTimeout(function() {
       $('#ajax-problem-warning').fadeOut().remove();
    }, 60*1000);
-   
+
 }
+
 
 
 function debug(text) {

@@ -17,18 +17,13 @@ function swapFilterLogic() {
   }
 }
 
-function _doload(url, d, outid) {
-  $($.id(outid)).load(url + '?' +d);
-  return false;
-}
-
 var _loaded_filteroptions = false;
 function loadfilteroptions(f) {
   if (_loaded_filteroptions) {
     //alert('not loading again');
     return false;
     }
-  
+
   var d = 'force_filtervaluer_update=1&';
   for (i=0;i < f.elements.length;i++) {
     ob = f.elements[i];
@@ -36,19 +31,19 @@ function loadfilteroptions(f) {
   }
   var url = f.action.replace(/\/ListIssues|\/CompleteList/,'/filter_options').split('?')[0];
   if (url.indexOf('?')>-1) { d += url.substring(url.indexOf('?')+1, url.length-1); url = url.substring(0, url.indexOf('?')); }
-  var loaded = _doload(url, d, 'filteroptions')
+  $('#filteroptions').load(url + '?' + d);
   _loaded_filteroptions = true;
-  return loaded;
+  return false;
 }
 
 function unloadfilteroptions(f) {
-  var unloaded = _doload(f.action+'filter_options', 'ShowFilterOptions:int=0&', 'filteroptions')
+  $('#filteroptions').load(f.action+'filter_options?ShowFilterOptions:int=0&');
   _loaded_filteroptions = false;
-  return unloaded;
+  return false;
 }
 //--></script>
 <div tal:condition="not:request/ShowFilterOptions|nothing" id="filteroptions">
-<form 
+<form
 tal:define="start python:request.get('start');
             action python:here.BatchedQueryString(test(start,{'start':start},{}))"
 tal:attributes="action action">
@@ -65,12 +60,12 @@ tal:attributes="action action">
  tal:attributes="value request/i"/>
 <input type="hidden" name="report" tal:condition="request/report|nothing"
  tal:attributes="value request/report"/>
-  <input type="submit" value="Show filter options" 
-   onclick="this.value='Opening options...';return loadfilteroptions(this.form)" 
+  <input type="submit" value="Show filter options"
+   onclick="this.value='Opening options...';return loadfilteroptions(this.form)"
    onkeypress="this.value='Opening options...';return loadfilteroptions(this.form)" />
 
   </div>
-  
+
 </form>
 </div>
 
@@ -81,7 +76,7 @@ tal:attributes="action action">
   If this template is called on its own from AJAX, we have to make sure the content-type is set.
 </tal:block>
 <tal:block condition="request/force_filtervaluer_update|nothing">
-  <span tal:define="dummy here/forceFilterValuerUpdate" 
+  <span tal:define="dummy here/forceFilterValuerUpdate"
       tal:replace="nothing">
   <!--
   This is a bit of a hack. Every time you load ListIssues or CompleteList it makes a
@@ -89,10 +84,10 @@ tal:attributes="action action">
   will make sure that if there is a sessioned savedfilter (key='last_savedfilter_id')
   this saved filter's values are populated in the REQUEST. If you run filter_options
   without having previously run ListIssuesFiltered() in the same request your REQUEST
-  will NOT have the right copy of the filter values which will result in this form 
+  will NOT have the right copy of the filter values which will result in this form
   below appearing unused.
   If the request variable 'force_filtervaluer_update' is true, we are instructed to make
-  a call to forceFilterValuerUpdate() which basically finds any last used filtervaluer 
+  a call to forceFilterValuerUpdate() which basically finds any last used filtervaluer
   from the session and populates it's values into our current REQUEST object.
   -->
   </span>
@@ -103,7 +98,7 @@ tal:attributes="action action">
 
 
 <form method="get" name="filter"
- tal:define="rooturl here/getRootURL; 
+ tal:define="rooturl here/getRootURL;
              page python:test(here.whichList()=='CompleteList','CompleteList', 'ListIssues');
              filterlogic here/getFilterlogic" name="foptions"
  tal:attributes="action string:${rooturl}/">
@@ -115,8 +110,7 @@ tal:attributes="action action">
 
 
 <table metal:use-macro="here/listissues_macros/macros/filteroptionstable"></table>
- 
+
 
 </form>
 </div>
-

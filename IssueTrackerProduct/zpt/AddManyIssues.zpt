@@ -4,23 +4,23 @@
 <metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
 
 <script type="text/javascript"
- tal:attributes="src string:$ru/quickaddissue.js"></script>
- 
+ src="/misc_/IssueTrackerProduct/quickaddissue.js"></script>
+
 <tal:test tal:condition="python:here.getSavedTextFormat()=='html' and here.hasWYSIWYGEditor()">
 <script type="text/javascript" tal:attributes="src string:$ru/tinymce/tiny_mce.js"></script>
-<script type="text/javascript" tal:attributes="src string:$ru/tiny_mce_itp.js"></script>
+<script type="text/javascript" src="/misc_/IssueTrackerProduct/tiny_mce_itp.js"></script>
 </tal:test>
 </metal:script>
 
 <style type="text/css" metal:fill-slot="extracss">
-div.part { 
+div.part {
   margin-bottom:20px;
 }
 div.textinput {float:left; margin-right:15px; }
 div.selectinput { }
 </style>
 
- 
+
 <div metal:fill-slot="body" tal:omit-tag="">
 
 
@@ -68,7 +68,7 @@ div.selectinput { }
      tal:attributes="onfocus python:test(use_autosave, 'startautosave()');
                      onblur python:test(use_autosave, 'stopautosave()');
 		     name ikey"></textarea>
-    
+
   </div>
   <div class="selectinput">
     <b>Section(s):</b><br />
@@ -78,11 +78,11 @@ div.selectinput { }
                  sections request/ikey | here/defaultsections | emptylist"
      tal:attributes="size python:min(5, len(here.sections_options));
                      name string:$ikey:list">
-       <option tal:repeat="option here/sections_options" 
-               tal:attributes="value option; selected python:option in sections" 
+       <option tal:repeat="option here/sections_options"
+               tal:attributes="value option; selected python:option in sections"
 	       tal:content="option">Section</option>
     </select>
-    
+
     <br />
 <!--    <b>Type:</b><br />-->
     <select tal:attributes="name ikey"
@@ -90,26 +90,26 @@ div.selectinput { }
                         ikey string:type$i;
 	                type request/type | here/default_type | emptystring">
         <option value="">Type:</option>
-        <option 
-	 tal:repeat="option types" 
-	 tal:attributes="value option;selected python:option == type" 
+        <option
+	 tal:repeat="option types"
+	 tal:attributes="value option;selected python:option == type"
 	 tal:content="option">Types</option>
     </select>
-    
-    <br />    
-    
+
+    <br />
+
 <!--    <b>Urgency:</b><br /> -->
     <select tal:attributes="name ikey"
        tal:define="urgencies here/urgencies;
                    ikey string:urgency$i;
                    urgency request/ikey | here/default_urgency | emptystring">
        <option value="">Urgency:</option>
-       <option  
-        tal:repeat="option urgencies" 
-	tal:attributes="value option; selected python:urgency == option" 
+       <option
+        tal:repeat="option urgencies"
+	tal:attributes="value option; selected python:urgency == option"
         tal:content="option">Urgencies</option>
      </select>
-    
+
   </div>
   <div class="clearer">&nbsp;</div>
 </div>

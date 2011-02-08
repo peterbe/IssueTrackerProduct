@@ -25,6 +25,7 @@ stopautosave=function() {
 };
 //]]>
 </script>
+
 <script type="text/javascript" tal:condition="here/UseFollowupActualTime">//<![CDATA[
 $(function() {
 

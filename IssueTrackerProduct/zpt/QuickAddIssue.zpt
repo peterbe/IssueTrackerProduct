@@ -4,6 +4,8 @@
 <metal:script metal:fill-slot="extrajs" tal:define="ru here/getRootRelativeURL">
 
 <script type="text/javascript"
+  tal:content="structure string:var AUTO_SAVE_INTERVAL=${here/getAutosaveInterval};"></script>
+<script type="text/javascript"
  src="/misc_/IssueTrackerProduct/quickaddissue.js"></script>
 
 <tal:block define="useaccesskeys here/useAccessKeys" condition="not:request/previewissue|nothing">

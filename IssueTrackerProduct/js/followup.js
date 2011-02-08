@@ -129,6 +129,16 @@ $(function() {
    $('input[name="actual_time_hours"]').change(function() {
       /* might want to do some client-side validation here of the input */
    });
+
+   if ($('form#tell_a_friend').size()) {
+      $('.friends','#tell_a_friend').click(function() {
+         if (this.checked) {
+            $('span', $(this).parent('div')).css('font-weight', 'bold');
+         } else {
+            $('span', $(this).parent('div')).css('font-weight', 'normal');
+         }
+      });
+   }
 });
 
 
