@@ -31,6 +31,7 @@ except ImportError:
     css_slimmer = js_slimmer = None
 
 
+
 """IssueTracker Product"""
 
 def dummyFunction(zope):
@@ -375,7 +376,7 @@ def _registerJS(product, filename,
     if js_slimmer is not None and OPTIMIZE:
         if slim_if_possible:
             slimmed = js_slimmer(open(obj.path,'rb').read())
-            new_path = obj.path + '-slimmed'
+            new_path = obj.path + '-slimmed.js'
             open(new_path, 'wb').write(slimmed)
             setattr(obj, 'path', new_path)
 
@@ -390,6 +391,6 @@ def _registerCSS(product, filename, path='css', slim_if_possible=True):
     if css_slimmer is not None and OPTIMIZE:
         if slim_if_possible:
             slimmed = css_slimmer(open(obj.path,'rb').read())
-            new_path = obj.path + '-slimmed'
+            new_path = obj.path + '-slimmed.css'
             open(new_path, 'wb').write(slimmed)
             setattr(obj, 'path', new_path)
