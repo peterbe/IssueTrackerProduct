@@ -1983,7 +1983,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         no_previous_pleas = int(getattr(self, 'userstory_plea'))
                     else:
                         no_previous_pleas = 0
-                    if no_previous_pleas < 3:
+                    if no_previous_pleas < 1:
                         params['userstory'] = 'plea'
                     self.userstory_plea = no_previous_pleas + 1
             except:

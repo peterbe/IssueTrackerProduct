@@ -99,7 +99,7 @@
                        onclick="showFileAttachments();return false"
                        ><img src="/misc_/IssueTrackerProduct/paperclip.gif" border="0" alt="Attach files" /> Attach
                    <tal:block condition="python:number_of_files==1">a file</tal:block>
-                   <tal:block condition="not:python:number_of_files==1">one or more files</tal:block>
+                   <tal:block condition="not:python:number_of_files==1">files</tal:block>
                     </a>
                 </div>
 

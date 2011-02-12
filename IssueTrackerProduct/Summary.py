@@ -126,8 +126,8 @@ class SummaryBase(object):
                 added_issues.append(issue)
 
             search = dict(base_search,
-                              modifydate={'query': [start_date, end_date],
-                                          'range':'min:max'})
+                          modifydate={'query': [start_date, end_date],
+                                      'range':'min:max'})
             for brain in catalog(sort_on='modifydate', **search):
                 try:
                     issue = brain.getObject()
