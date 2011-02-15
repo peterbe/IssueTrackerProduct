@@ -1,7 +1,9 @@
+
 import datetime
 from time import time
 from pprint import pprint
 import warnings
+from Acquisition import aq_inner, aq_parent
 from AccessControl import ClassSecurityInfo
 from DateTime import DateTime
 from zExceptions import NotFound
@@ -236,6 +238,53 @@ class SummaryBase(object):
                 return True
             return False
 
+    def getIssueActivity(self, month=None, year=None):
+        month, year = self._get_and_check_month_and_year(month, year)
+        month_nr = MONTH_NAMES.index(month)+1
+        start_date = DateTime(year, month_nr, 1)
+        if month_nr == 12:
+            end_date = DateTime(year + 1, 1, 1)
+        else:
+            end_date = DateTime(year, month_nr + 1, 1)
+
+        trackers = [self] + self._getBrothers()
+        base_search = {'meta_type': ISSUETHREAD_METATYPE}
+
+        issues = []
+        issue_info = {}
+        _use_followup_actual_time = self.UseFollowupActualTime()
+        for tracker in trackers:
+            catalog = tracker.getCatalog()
+            if not catalog._catalog.indexes.has_key('threaddate'):
+                raise ConfigurationError(
+                "Can't sum followup actual time without threaddate. Run UpdateEverything()")
+            search = dict(base_search,
+                          threaddate={'query': [start_date, end_date],
+                                     'range':'min:max'})
+            for brain in catalog(**search):
+                try:
+                    thread = brain.getObject()
+                except KeyError:
+                    warnings.warn("ZCatalog (%s) out of date. Press Update Everything" %\
+                                  catalog.absolute_url_path())
+                    continue
+
+                issue = aq_parent(aq_inner(thread))
+                if issue not in issues:
+                    issues.append(issue)
+                info = issue_info.get(issue.absolute_url_path(), {})
+                info['followups'] = info.get('followups', 0) + 1
+                info['actual_time'] = info.get('actual_time', 0.0)
+
+                if _use_followup_actual_time and thread.getActualTimeHours():
+                    info['actual_time'] += thread.getActualTimeHours()
+
+                issue_info[issue.absolute_url_path()] = info
+
+        return [(issue, issue_info[issue.absolute_url_path()])
+                for issue in issues]
+
+
     def getTotalActualFollowupHours(self, month=None, year=None):
         assert self.UseFollowupActualTime()
         month, year = self._get_and_check_month_and_year(month, year)
@@ -250,7 +299,7 @@ class SummaryBase(object):
         base_search = {'meta_type': ISSUETHREAD_METATYPE}
 
         total = 0.0
-        threads = list()
+        #threads = list()
 
         for tracker in trackers:
             catalog = tracker.getCatalog()
@@ -284,9 +333,9 @@ class SummaryBase(object):
                         continue
 
                 total += thread.getActualTimeHours()
-                threads.append(thread)
+                #threads.append(thread)
 
-        count_threads = len(threads)
+        #count_threads = len(threads)
         return total
 
 

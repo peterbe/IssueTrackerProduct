@@ -1214,7 +1214,7 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             if hours:
                 issueobject.increment_issue_actual_time(followupobject)
 
-            followupobject.index_object(idxs=['id','comment'])
+            followupobject.index_object()
 
             # update the parent issue
             self._updateModifyDate()

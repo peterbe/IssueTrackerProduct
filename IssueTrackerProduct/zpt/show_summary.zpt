@@ -2,15 +2,20 @@
 <style type="text/css" metal:fill-slot="extracss">
 #added_issues, #modified_issues { width:48%; float:left;}
 #added_issues { margin-right:20px; }
-#added_issues ul li, #modified_issues ul li { list-style-type:none; padding-bottom:4px;}
-#added_issues ul, #modified_issues ul { margin-left:0; padding-left:12px;}
+ul.issuelist li{ list-style-type:none; padding-bottom:4px;}
+ul.issuelist { margin-left:0; padding-left:12px;}
 #added_issues h3, #modified_issues h3 { border-bottom:1px solid #ccc; width:90% }
-#total_actual_time { width:43%; margin-bottom:40px; }
+#issue_activity { margin-bottom:50px; }
+#issue_activity table { margin-left:8px; }
 h3 { border-bottom:1px solid #ccc; }
 b.adjacent { display:none; }
 a.adjacent { background-color:#ffff88; }
 #actual_hours, #estimated_hours { padding-left:12px; }
 #main { margin-bottom:100px; }
+
+th { text-align:left; }
+th.description, td.description { width:500px; }
+th.actual_time, td.actual_time { width:200px; }
 </style>
 <div metal:fill-slot="body">
 
@@ -28,14 +33,23 @@ a.adjacent { background-color:#ffff88; }
   </p>
 </div>
 
-<div tal:condition="here/UseFollowupActualTime" id="total_actual_time">
-<h3>Actual time</h3>
-<p tal:define="total_actual_hours python:here.getTotalActualFollowupHours(month=request.get('month'), year=request.get('year'))"
-><strong>Total actual time this month:</strong>
+<div tal:condition="here/UseFollowupActualTime" id="issue_activity">
+<h3>Issue activity</h3>
 
+    <table
+        tal:define="today context/ZopeTime;
+                    issues_and_info python:here.getIssueActivity(month=request.get('month'), year=request.get('year'))">
+      <thead>
+        <th class="description">&nbsp;</th>
+        <th class="actual_time" tal:condition="here/UseFollowupActualTime">Actual time</th>
+        <th># Follow ups</th>
+      </thead>
+      <tfoot tal:condition="here/UseFollowupActualTime">
+        <th style="text-align:right">Total actual time this month:</th>
+        <td colspan="2" tal:define="total_actual_hours python:here.getTotalActualFollowupHours(month=request.get('month'), year=request.get('year'))">
          <abbr tal:attributes="title string:total_actual_hours"
                tal:condition="total_actual_hours"
-               tal:content="python:here.showTimeHours(total_actual_hours)"></abbr>
+               tal:content="python:here.showTimeHours(total_actual_hours, show_unit=1)"></abbr>
          <tal:item condition="not:total_actual_hours">0</tal:item>
          hours
 
@@ -44,8 +58,45 @@ a.adjacent { background-color:#ffff88; }
                           (<abbr title="Assuming 8 hours per day"
                           >approximately <br tal:replace="python:'%.1f'% round(total_actual_hours/8.0,1)"/> days</abbr>)
                         </span>
-</p>
 
+        </td>
+      </tfoot>
+      <tbody tal:repeat="issue_and_info issues_and_info">
+        <tr tal:define="issue python:issue_and_info[0]; info python:issue_and_info[1]">
+        <td class="description"
+             tal:attributes="class python:here.getUniqueIssueClassname(issue_and_info[0])">
+        <span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
+         <a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
+               tal:attributes="href issue/absolute_url_path;
+                               title python:test(diff, diff)"
+	         tal:content="structure python:context.displayBriefTitle(issue.getTitle(), limit=60)"
+		 class="ilink"
+		 ></a>
+                 by: <a tal:replace="structure python:here.ShowNameEmail(issue.getFromname(), issue.getEmail(), hideme=issue.isHidden())"></a>
+                 <img src="/misc_/IssueTrackerProduct/paperclip.gif"
+                  tal:define="noattachments issue/countFileattachments"
+                  tal:condition="noattachments"
+                  tal:attributes="alt python:test(noattachments==1,'1 file attachment','%s file attachments'%noattachments) "/>
+                  <tal:confidential condition="issue/isConfidential">
+                  (<acronym title="This issue is confidential but you can see it because you have sufficient access rights">Confidential</acronym>)
+                  </tal:confidential>
+                  <tal:test tal:condition="python:here.isFromBrother(issue)">
+                   (<a tal:define="brother python:here.getBrotherFromIssue(issue)"
+                       tal:attributes="href brother/absolute_url_path" class="brother"
+                       tal:content="brother/getTitle"></a>)
+                  </tal:test>
+                  - <b class="status" tal:content="python:issue.getStatus().capitalize()"></b>
+
+          <b class="adjacent">&larr; same issue</b>
+        </td>
+        <td class="actual_time" tal:condition="here/UseFollowupActualTime">
+            <span tal:condition="info/actual_time" tal:content="python:here.showTimeHours(info['actual_time'], show_unit=1)"></span>
+            <span tal:condition="not:info/actual_time" tal:content="string:0 hours"></span>
+         </td>
+         <td tal:content="info/followups"></td>
+         </tr>
+      </tbody>
+    </table>
 
 </div>
 
@@ -61,7 +112,7 @@ a.adjacent { background-color:#ffff88; }
       ><tal:item replace="python:count_added_issues"/> issues added</h3>
 
 
-  <ul tal:condition="summary/added_issues">
+  <ul class="issuelist" tal:condition="summary/added_issues">
   <li tal:repeat="issue summary/added_issues"
       tal:attributes="class python:here.getUniqueIssueClassname(issue)">
     <span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
@@ -124,7 +175,7 @@ a.adjacent { background-color:#ffff88; }
       to <b class="status" tal:content="python:status.capitalize()"></b>
     </h3>
 
-    <ul>
+    <ul class="issuelist">
       <li tal:repeat="issue_and_thread python:modified_issue_list[1]"
           tal:attributes="class python:here.getUniqueIssueClassname(issue_and_thread[0])">
       <tal:block define="issue python:issue_and_thread[0]; thread python:issue_and_thread[1]">
@@ -182,35 +233,19 @@ a.adjacent { background-color:#ffff88; }
 
 <script type="text/javascript" metal:fill-slot="extrajs">
 $(function() {
-  $('#added_issues a.ilink').bind('mouseover', function() {
+  $('a.ilink').bind('mouseover', function() {
     var also = false
-    $('#modified_issues .' +$(this).parents('li').attr('class')).each(function() {
+    var orig = this;
+    $('.' +$(this).parents('li,td').attr('class')).each(function() {
       $('b.adjacent', this).show();
       $('a.ilink', this).addClass('adjacent');
-      also = true;
     });
     if (also) $(this).addClass('adjacent');
   }).bind('mouseout', function() {
-    $('#modified_issues b.adjacent:visible').hide();
-    $('#modified_issues a.adjacent').removeClass('adjacent');
+    $('b.adjacent:visible').hide();
     $('a.adjacent').removeClass('adjacent');
+    //$('a.adjacent').removeClass('adjacent');
   });
-
-  // now in reverse
-  $('#modified_issues a.ilink').bind('mouseover', function() {
-    var also = false
-    $('#added_issues .' +$(this).parents('li').attr('class')).each(function() {
-      $('b.adjacent', this).show();
-      $('a.ilink', this).addClass('adjacent');
-      also = true;
-    });
-    if (also) $(this).addClass('adjacent');
-  }).bind('mouseout', function() {
-    $('#added_issues b.adjacent:visible').hide();
-    $('#added_issues a.adjacent').removeClass('adjacent');
-    $('a.adjacent').removeClass('adjacent');
-  });
-
 });
 </script>
 </html>
