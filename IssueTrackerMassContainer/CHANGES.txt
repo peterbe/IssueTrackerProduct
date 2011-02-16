@@ -1,3 +1,9 @@
+- 0.2.0
+
+    New feature: Massive performance boost by using ZCatalog better
+    for fetching all recent issues and avoiding a python sort on no
+    more than 15 issues at a time. 
+
 - 0.1.1
 
     New feature: Show 20 items on the dashboard instead of 15

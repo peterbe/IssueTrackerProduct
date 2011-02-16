@@ -1,6 +1,6 @@
 // It's important that the initial timestamp is taken from the server-side
 // This variable 'SERVER_SINCE_TIMSTAMP' is rendered just before this Javascript
-// is executed. 
+// is executed.
 // The issues' date is that of the server (e.g. time zone +3) but any Javascript
 // Date() object here will be different (e.g. time zone -2)
 var since_timestamp = SERVER_SINCE_TIMSTAMP;
@@ -28,17 +28,17 @@ function _showLoading() {
 function _hideLoading() {
    $('img.loading-bar', $('#table-refresher')).remove();
    $('#table-refresher a').show();
-   
+
    __load_favicon(original_favicon_href);
-   
-   
+
+
 }
 function refreshActivityTable() {
    // only go ahead if the Loading is or was hidden (needs testing)
    if ($('a:hidden', '#table-refresher').length) return false;
-   
+
    _showLoading();
-   
+
    $.get('show_recent_activity_tbodies?since='+since_timestamp, function(res) {
       if ($.trim(res)) {
          var table = $('#activity-table');
@@ -47,7 +47,7 @@ function refreshActivityTable() {
 	 refresh_interval = orig_refresh_interval;
       }
       _hideLoading();
-      
+
       since_timestamp = (new Date).getTime()/1000;
    });
    return true;
@@ -80,17 +80,14 @@ $(function() {
       persist:"cookie",
       collapsed: collapsed
    });
-   
+
    $('li.ignored').each(function() {
       $('span.folder', this)
         .fadeTo(0, 0.3);
       $('span.file', this)
-        .fadeTo(0, 0.3);      
+        .fadeTo(0, 0.3);
    });
-   
+
    window.setTimeout(function() {autorefreshActivityTable()}, 1000*30);
-   
+
 });
-
-
-
