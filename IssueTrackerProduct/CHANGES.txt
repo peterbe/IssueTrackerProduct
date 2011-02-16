@@ -1,3 +1,6 @@
+    Bug fixed: Adding followups on out-of-date trackers without the
+    'threaddate' DateIndex is now not failing with an error. 
+    
     New feature: Full issue activity report if you enable "Actual time
     per follow up"
 

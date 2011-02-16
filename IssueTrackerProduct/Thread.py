@@ -299,7 +299,16 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
               )
 
         if 'modifydate' in idxs and not indexes.has_key('modifydate'):
+            update_url = self.getRoot().absolute_url() + '/UpdateEverything'
+            LOG("IssueTrackerProduct.Thread", PROBLEM,
+                "Index 'modifydate' not set up. Visit %s" % update_url)
             idxs.remove('modifydate')
+
+        if 'threaddate' in idxs and not indexes.has_key('threaddate'):
+            update_url = self.getRoot().absolute_url() + '/UpdateEverything'
+            LOG("IssueTrackerProduct.Thread", PROBLEM,
+                "Index 'modifydate' not set up. Visit %s" % update_url)
+            idxs.remove('threaddate')
 
         catalog.catalog_object(self, path, idxs=idxs)
 
