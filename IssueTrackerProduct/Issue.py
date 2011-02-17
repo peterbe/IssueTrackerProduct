@@ -2584,7 +2584,8 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # the keyword arguments
             idxs = ['id','title','description', 'fromname','email','url2issue',
                     'meta_type','status','path','modifydate',
-                    'filenames','issuedate']
+                    'filenames','issuedate',
+                    'urgency','type']
         else:
             # No matter what, when indexing you must always include 'path'
             # otherwise you might update indexes without putting the object
@@ -2601,17 +2602,12 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         #if 'status' in idxs and not indexes.has_key('status'):
         #    idxs.remove('status')
 
-        if 'modifydate' in idxs and not indexes.has_key('modifydate'):
-            msg = "%s Catalog out of date. " % self.getRoot().absolute_url_path()
-            msg += "Missing 'modifydate'. Press the Update Everything button"
-            warnings.warn(msg)
-            idxs.remove('modifydate')
-
-        if 'issuedate' in idxs and not indexes.has_key('issuedate'):
-            msg = "%s Catalog out of date. " % self.getRoot().absolute_url_path()
-            msg += "Missing 'issuedate'. Press the Update Everything button"
-            warnings.warn(msg)
-            idxs.remove('issuedate')
+        for idx in ('modifydate','issuedate','urgency','type'):
+            if idx in idxs and not indexes.has_key(idx):
+                msg = "%s Catalog out of date. " % self.getRoot().absolute_url()
+                msg += "Missing '%s'. Press the Update Everything button" % idx
+                warnings.warn(msg)
+                idxs.remove(idx)
 
         if self.EnableDueDate() and indexes.has_key('due_date'):
             idxs.append('due_date')
