@@ -118,6 +118,7 @@ from DateTime.DateTime import DateError
 from App.ImageFile import ImageFile
 from ZPublisher.HTTPRequest import record
 from zExceptions import NotFound, Unauthorized
+from Products.ZCatalog.Catalog import CatalogError
 
 try:
     # >= Zope 2.12
@@ -1274,15 +1275,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             parent = aq_parent(aq_inner(parent))
         return parent
 
-    def getIssueObjects(self):
+    def getIssueObjects(self, local_only=False):
         """ return what objectValues does but with varying container """
         container = self._getIssueContainer()
         all = list(container.objectValues(ISSUE_METATYPE))
+        if local_only:
+            return all
         try:
-            brothers = self._getBrothers()
-            if brothers:
-                for brother in brothers:
-                    all.extend(brother.getIssueObjects())
+            for brother in self._getBrothers():
+                #all.extend(brother.getIssueObjects())
+                all.extend(list(brother.objectValues(ISSUE_METATYPE)))
         except KeyError, msg:
             tmpl = 'Reference to join-in issue trackers (%s) is broken in %s'
             paths = ', '.join(self.getBrotherPaths())
@@ -1290,6 +1292,16 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         return all
 
+    def getIssueObjectsFromCatalog(self, local_only=False, **extra_search):
+        search = dict(extra_search, meta_type=ISSUE_METATYPE)
+        def _get_issues(tracker):
+            return [x.getObject() for x in tracker.getCatalog().searchResults(**search)]
+        issues = _get_issues(self)
+        if local_only:
+            return issues
+        for tracker in self._getBrothers():
+            issues.extend(_get_issues(tracker))
+        return issues
 
     def getIssueItems(self):
         """ return what objectItems does but with varying container """
@@ -1325,11 +1337,26 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def ageOfOldestIssue(self):
         """ return the datetime object of the oldest issue """
+        try:
+            return self._ageOfOldestIssue_catalog()
+        except CatalogError:
+            return self._ageOfOldestIssue_objectvalues()
+
+    def _ageOfOldestIssue_objectvalues(self):
+        # slower and more memory intensive
         oldest = DateTime()
         for issue in self.getIssueObjects():
             if issue.getIssueDate() < oldest:
                 oldest = issue.getIssueDate()
         return oldest
+
+    def _ageOfOldestIssue_catalog(self):
+        # faster and less memory intensive but assumes that the index
+        # 'issuedate' is available in all trackers
+        search = dict(sort_on='issuedate',
+                      sort_limit=1)
+        issues = self.getIssueObjectsFromCatalog(**search)
+        return issues[0].getIssueDate()
 
     def hasIssue(self, issueid):
         """ see if this issue exists """
@@ -1855,7 +1882,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         root = self.getRoot()
         nochanges_issues = 0
         nochanges_threads = 0
-        for issue in root.getIssueObjects():
+        for issue in root.getIssueObjects(local_only=True):
             iemail = issue.email
             if caseinsensitive:
                 iemail = iemail.lower()
@@ -2118,9 +2145,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         count_threads = 0
         root = self.getRoot()
 
-
-
-        for issue in root.getIssueObjects():
+        for issue in root.getIssueObjects(local_only=True):
             # fix a few possible legacy issues with the issue
             if isinstance(issue.getTitle(), str):
                 issue._unicode_title()
@@ -2130,7 +2155,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 issue.fromname = unicodify(issue.fromname)
             # check if the email contains non-ascii
             issue.email = asciify(issue.email)
-
 
             d_before = issue._getFormattedDescription()
             issue._prerender_description()
@@ -2318,7 +2342,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         count = 0
         count += self._assertAllProperties()
         root = self.getRoot()
-        for issue in root.getIssueObjects():
+        for issue in root.getIssueObjects(local_only=True):
             count += issue.assertAllProperties()
             for thread in issue.objectValues(ISSUETHREAD_METATYPE):
                 count += thread.assertAllProperties()
@@ -3680,7 +3704,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             SubmitError['title'] = _("Empty")
         elif self.DisallowDuplicateIssueSubjects():
             this_subject = ss(request.get('title').strip())
-            for issue in self.getIssueObjects():
+            for issue in self.getIssueObjects(local_only=True):
                 if ss(issue.getTitle()) == this_subject:
                     link = '<a href="%s">#%s</a>' % (issue.absolute_url_path(), issue.getId())
                     SubmitError['title'] = _("Issue subject already used in %s" % link)
@@ -3970,30 +3994,28 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return issue
 
 
-
     def _check4Duplicate(self, title, description, sections,
-                         type, urgency, email_message_id=None
-                         ):
+                         type_, urgency, email_message_id=None):
         """ check if there is an exact replica of this issue """
-        for issue in self.getIssueObjects():
-
-            # most basic test, the title
-            if unicodify(issue.title) == title:
-
-                # potentially match email 'Message-Id'
-                if email_message_id and issue.getEmailMessageId():
-                    if ss(email_message_id)==ss(issue.getEmailMessageId()):
-                        return issue
-
-                # match description, sections, type and urgencies
-                if unicodify(issue.description) == description and \
-                   issue.sections == sections and \
-                   issue.type == type and \
-                   issue.urgency == urgency:
+        search = dict(title=title)
+        # if I knew for certain that all issuetrackers have urgency and type
+        # fully indexed I could add that to the catalog search to make it
+        # even faster.
+        issues = self.getIssueObjectsFromCatalog(local_only=True, **search)
+        for issue in issues:
+            # potentially match email 'Message-Id'
+            if email_message_id and issue.getEmailMessageId():
+                if ss(email_message_id) == ss(issue.getEmailMessageId()):
                     return issue
 
-        return None
+            # match description, sections, type and urgencies
+            if unicodify(issue.description) == description and \
+               issue.sections == sections and \
+               issue.type == type_ and \
+               issue.urgency == urgency:
+                return issue
 
+        return None
 
     security.declareProtected(AddIssuesPermission, 'SubmitIssue')
     def createIssueObject(self, id, title, status, type_, urgency, sections,
@@ -5850,7 +5872,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             t['Lexicon'] = "Lexicon for ZCTextIndex created"
 
 
-        for fieldindex in ('id','meta_type','status'):
+        for fieldindex in ('id','meta_type','status','urgency','type'):
             if not indexes.has_key(fieldindex):
                 zcatalog.addIndex(fieldindex, 'FieldIndex')
 
@@ -5973,15 +5995,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                 # we don't need to do the migration :)
                 pass
 
-
         catalog.manage_catalogClear()
 
-        for issue in self.getIssueObjects():
+        for issue in self.getIssueObjects(local_only=True):
             issue.index_object()
             for thread in issue.objectValues(ISSUETHREAD_METATYPE):
                 thread.index_object()
 
-        msg = "%s updated."%catalog.getId()
+        msg = "%s updated." % catalog.getId()
         if REQUEST is None:
             return msg
         else:
@@ -6373,7 +6394,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def getAllNotifications(self):
         """ Go through all issues and find all notification objects """
         all = []
-        for issue in self.getIssueObjects():
+        for issue in self.getIssueObjects(local_only=True):
             all.extend(list(issue.objectValues(NOTIFICATION_META_TYPE)))
         return all
 
@@ -7906,10 +7927,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             seq = self._getIssueObjectsSince('added', added_since)
 
         else:
-            # We won't need the ZCatalog, we can use objectValues() which
-            # is many times faster if the amount of issues is small
-            seq = self.getIssueObjects()
-
+            # We won't need the ZCatalog, we can use objectValues()
+            seq = None#self.getIssueObjects()
 
         if q_orig is not None:
             # Remember this searchterm
@@ -7966,8 +7985,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             issues.append(brain.getObject())
 
         return issues
-
-
 
     def _validIssueIDList(self, comma_delimited_string):
         """ return true or false, a wrapper around _splitIssueIDList() """
@@ -8351,6 +8368,14 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if msg:
             self.REQUEST.set('SearchFilterWarning', msg)
 
+    def _countAllIssues(self):
+        search = dict(meta_type=ISSUE_METATYPE)
+        def _count(tracker):
+            return len(tracker.getCatalog().searchResults(**search))
+        count = _count(self)
+        for tracker in self._getBrothers():
+            count += _count(tracker)
+        return count
 
 
     def _ListIssuesFiltered(self, issues, skip_filter=False, skip_sort=False):
@@ -8358,7 +8383,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         request = self.REQUEST
 
         # 1. Remember how many issues there are before filtering
-        request.set('TotalNoIssues', len(issues))
+        if issues is None:
+            # the list of issues hasn't been defined yet, we can therefore
+            # safely use a catalog search
+            request.set('TotalNoIssues', self._countAllIssues())
+        else:
+            request.set('TotalNoIssues', len(issues))
 
         # 2. Filter issues
         if not skip_filter:
@@ -8380,7 +8410,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def _filterIssues(self, issues):
         """ look for things that shouldn't appear or should only appear """
-
         # assume that we always save the current filter options
         _do_save_filter = True
 
@@ -8439,7 +8468,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if _do_save_filter and is_bot_user_agent(request.get('HTTP_USER_AGENT','')):
             _do_save_filter = False
 
-
         # get filter setup
         filterlogic = self.getFilterlogic()
 
@@ -8447,7 +8475,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             return zope.getFilterValue(key, filterlogic,
                                        request_only=True,
                                        )
-
 
         f_statuses = getFVal('statuses')
         f_sections = getFVal('sections')
@@ -8489,10 +8516,52 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                f_fromname is None and f_email is None and \
                f_due is None and f_assignee is None and \
                not custom_filters:
+            if issues is None:
+                # it was lazy
+                # if you're not going to do any filtering at all, it's
+                # almost 10 times faster to just do a objectValues() based
+                # fetch than using the catalog.
+                issues = self.getIssueObjects()
             # Filter logic is to show only selected items but
             # nothing has been set so just return everything
             return [issue for issue in issues
                     if not issue.isConfidential() or has_managerrole or issue.isYourIssue()]
+
+        if issues is None:
+            # this is because the caller has been lazy and hasn't already
+            # prepared a list of issues. We are then free to pick this up from
+            # the catalog.
+            # Instead of running the filters we're about to run on ALL issues
+            # now we can apply some of the necessary filters on a Catalog
+            # search.
+            catalog_search = {}
+            def has_index(idx):
+                return self.getCatalog()._catalog.indexes.has_key(idx)
+
+            if filterlogic == 'show':
+                if f_statuses is not None:
+                    catalog_search['status'] = f_statuses
+                    f_statuses = None
+                if f_urgencies is not None and has_index('urgency'):
+                    catalog_search['urgency'] = f_urgencies
+                    f_urgencies = None
+                if f_types is not None and has_index('urgency'):
+                    catalog_search['type'] = f_types
+                    f_types = None
+                if f_email is not None:
+                    catalog_search['email'] = f_email
+                    f_email = None
+
+            if catalog_search:
+                # only use the Zcatalog if it means we can do some filtering
+                issues = self.getIssueObjectsFromCatalog(**catalog_search)
+                # using catalog search is much faster if you can do some
+                # filtering right there and instead not have to loop over
+                # as many issue objects
+            else:
+                # with no filtering, the objectValues() based approach is almost
+                # 10 times faster
+                issues = self.getIssueObjects()
 
         if f_fromname:
             _maker = Utils.createStandaloneWordRegex
@@ -8527,15 +8596,12 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
                 return False
 
-
         for issue in issues:
             if not issue.canViewIssue():
             #if issue.isConfidential() and not (has_managerrole or issue.isYourIssue()):
                 continue
 
-
             if filterlogic == 'show':
-
                 if f_statuses is not None:
                     if issue.status not in f_statuses:
                         continue
@@ -10460,7 +10526,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def _getAllAlreadyMessageIds(self):
         """ return a list of message ids of emails previously processes """
-        already_message_ids = [x.getEmailMessageId() for x in self.getIssueObjects()]
+        already_message_ids = [x.getEmailMessageId() for x
+                               in self.getIssueObjects(local_only=True)]
         return [ss(x) for x in already_message_ids if x]
 
     def _processEmailString(self, emailstring, account, already_message_ids=None,
@@ -10970,13 +11037,15 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             # needs to merge the list of tuples
             if isinstance(tres, list):
                 tres = dict(tres)
-            tres.update(dict(self._CountStatuses_catalog_in_tracker(tracker, since=since)))
+            for status, count in \
+              self._CountStatuses_catalog_in_tracker(tracker, since=since):
+                tres[status] = tres.get(status, 0) + count
 
         if isinstance(tres, dict):
             # needs to be sorted back
             tres_list = []
             for status in self.getStatuses():
-                tres_list.append((status, tres[status]))
+                tres_list.append((status, tres.pop(status)))
             tres = tres_list
 
         return tres
@@ -11010,7 +11079,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             since = DateTime(since)
         elif request.has_key('count_status_since'):
             since = DateTime()-int(request['count_status_since'])
-
 
         res={}
         tres=[]
@@ -11362,9 +11430,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         always_email = ss(always_email) in [ss(x) for x in always_notify_emails]
 
         include_statuses = [ss(x) for x in self.getStatuses()[:2]]
-
-        issues = [x for x in self.getIssueObjects() \
-                   if ss(x.getStatus()) in include_statuses]
+        if include_statuses:
+            issues = self.getIssueObjectsFromCatalog(status=include_statuses)
+        else:
+            # faster if you can't do any filtering
+            issues = self.getIssueObjects()
 
         # now, look for all issues where You haven't had the last word such as
         # issues you've added but haven't posted the last followup,
@@ -11384,9 +11454,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             urgency_scores[urgency_options[i]] = i
 
         today = DateTime()
-
         for issue in issues:
-
             # check assignment
             assignments = issue.getAssignments()
             if assignments:
@@ -13498,10 +13566,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             url = url.replace('/user','/User')
             return self.REQUEST.RESPONSE.redirect(url, lock=1)
 
-
-
-
-
         typicals = {'/AddIssue':'Add Issue',
                     '/QuickAddIssue':'Quick Add Issue',
                     '/ListIssues':'List Issues',
@@ -13520,10 +13584,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         if id_with_junk.findall(path):
             issueid = id_with_junk.findall(path)[0]
             # does it exit?
-            for objectid, object in root.getIssueItems():
+            for objectid, object_ in root.getIssueItems():
                 if objectid == issueid:
-                    title = object.getTitle()
-                    objecturl = object.absolute_url()
+                    title = object_.getTitle()
+                    objecturl = object_.absolute_url()
                     guesses.append([objecturl, title])
                     break
 
