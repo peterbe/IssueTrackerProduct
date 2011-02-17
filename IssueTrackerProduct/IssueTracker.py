@@ -16,6 +16,7 @@ Gavin Kistner for the the tabbed Properties tab
 Danny W. Adair of Asterisk Ltd for getRolesInContext(self) bug report and patch.
 """
 # python
+from time import time
 import string, os, re, sys
 import random
 import poplib
@@ -602,17 +603,40 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         return self.title
 
 
-    security.declareProtected('View', 'getModifyTimestamp')
+    # This method has been made public because it's called so often by the AJAX
+    # that there's is no point letting the heavy Zope security machine work
+    # on this one.
+    security.declarePublic('getModifyTimestamp')
     def getModifyTimestamp(self):
         """ return the modify date of the issuetracker as a whole as
         an integer timestamp. The latest modify date is the issue with
         the latest modify date. """
-        issues = self.getIssueObjects()
-        issues.sort(lambda x,y: cmp(y.getModifyDate(), x.getModifyDate()))
-        if issues:
-            return issues[0].getModifyTimestamp()
-        return int(self.bobobase_modification_time())
+        search = {'meta_type':ISSUE_METATYPE,
+                  'sort_on':'modifydate',
+                  'sort_order':'reverse',
+                  'sort_limit':1}
+        def getModifyTimestampInTracker(tracker):
+            for brain in tracker.getCatalog()(**search):
+                try:
+                    issue = brain.getObject()
+                except KeyError:
+                    update_url = tracker.absolute_url() + '/UpdateEverything'
+                    LOG("IssueTrackerProduct.IssueTracker", PROBLEM,
+                        "Catalog out-of-date. Visit %s" % update_url)
+                    return 0
+                return int(issue.getModifyDate())
+        ts = getModifyTimestampInTracker(self)
+        for path in self.getBrotherPaths():
+            try:
+                tracker = self.restrictedTraverse(path)
+                assert tracker.meta_type == ISSUETRACKER_METATYPE
+            except KeyError:
+                continue
+            this_ts = getModifyTimestampInTracker(tracker)
+            if this_ts > ts:
+                ts = this_ts
 
+        return "%d\n" % ts
 
     def relative_url(self, url=None):
         """ shorter than absolute_url """
@@ -1957,6 +1981,8 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         msgs.append(self._cleanTempFolder(implode_if_possible=True))
 
+        msgs.append(self._removeBrokenBrothers())
+
         msgs.append(self.CleanOldSavedFilters(user_excess_clean=True,
                                               implode_if_possible=True,
                                               clean_keyed_only_filtervaluers=True))
@@ -2007,6 +2033,26 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             self.randomid_length += 1
 
         return ""
+
+    def _removeBrokenBrothers(self):
+        if not self.getBrotherPaths():
+            return
+
+        paths = self.getBrotherPaths()
+        keep_paths = []
+        for path in paths:
+            try:
+                tracker = self.restrictedTraverse(path)
+            except KeyError:
+                # it's gone!
+                continue
+            if tracker.meta_type == ISSUETRACKER_METATYPE:
+                keep_paths.append(path)
+
+        if sorted(paths) != sorted(keep_paths):
+            self.brother_issuetracker_paths = keep_paths
+            return "Cleaned up join-in issuetrackers"
+
 
     security.declarePrivate('_cleanTempFolder')
     def _cleanTempFolder(self, hours=CLEAN_TEMPFOLDER_INTERVAL_HOURS,

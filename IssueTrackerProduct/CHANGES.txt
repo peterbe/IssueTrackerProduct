@@ -1,3 +1,6 @@
+    New feature: Greatly optimized how getModifyTimestamp is done on
+    the whole IssueTracker. 
+
     Bug fixed: Adding followups on out-of-date trackers without the
     'threaddate' DateIndex is now not failing with an error. 
     

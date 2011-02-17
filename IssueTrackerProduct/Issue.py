@@ -208,10 +208,13 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
         """ return modifydate """
         return self.modifydate
 
-    security.declareProtected('View', 'getModifyTimestamp')
+    # This method has been made public because it's called so often by the AJAX
+    # that there's is no point letting the heavy Zope security machine work
+    # on this one.
+    security.declarePublic('getModifyTimestamp')
     def getModifyTimestamp(self):
         """ return the modify date as a integer timestamp """
-        return int(self.getModifyDate())
+        return "%d\n" % int(self.getModifyDate())
 
     def _updateModifyDate(self):
         """ set the modify date again """
