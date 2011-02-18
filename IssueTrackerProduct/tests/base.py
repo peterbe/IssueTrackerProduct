@@ -19,7 +19,8 @@ ZopeTestCase.utils.setupCoreSessions(app)
 ZopeTestCase.close(app)
 
 
-
+def void_manage_beforeDelete(*args, **kwargs):
+    pass # do nothing
 
 class TestBase(ZopeTestCase.ZopeTestCase):
 
@@ -39,7 +40,6 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         dispatcher = self.folder.manage_addProduct['SiteErrorLog']
         dispatcher.manage_addErrorLog()
 
-
         # if you set this override you won't be able to do a transaction.get().commit()
         # in the unit tests.
         #self.mexpenses.http_redirect = self.dummy_redirect
@@ -51,13 +51,16 @@ class TestBase(ZopeTestCase.ZopeTestCase):
         #self.has_redirected = False
         self._mockMailHost()
 
+        # The reasons for this one is that we don't want Zope to have execute
+        # Issue.manage_beforeDelete() every time it tears down the setup after
+        # each test.
+        from Products.IssueTrackerProduct.Issue import IssueTrackerIssue
+        IssueTrackerIssue.manage_beforeDelete = void_manage_beforeDelete
 
 
     def _mockMailHost(self):
         context = self.folder.tracker
         context.sendEmail = fake_sendEmail
-
-
 
     def set_cookie(self, key, value, expires=365, path='/',
                    across_domain_cookie_=False,

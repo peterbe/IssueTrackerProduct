@@ -109,6 +109,9 @@ class DodgyNewFileUpload:
     def read(self, bytes=None, mode=0):
         return ""
 
+    def seek(self, bytes, mode=0):
+        return self.file.seek(bytes, mode)
+
 
 from Products.IssueTrackerProduct.IssueTracker import FilterValuer
 
@@ -682,7 +685,7 @@ class IssueTrackerTestCase(base.TestBase):
         # with no issues, the getModifyTimestamp() should be the
         # same as the issuetrackers' bobobase_modification_time()
         self.assertEqual(int(tracker.bobobase_modification_time()),
-                         tracker.getModifyTimestamp())
+                         int(tracker.getModifyTimestamp().strip()))
 
         # if we add an issue, the issuetrackers' getModifyTimestamp()
         # should be that of the last added issue.
@@ -823,9 +826,10 @@ class IssueTrackerTestCase(base.TestBase):
         # Post a followup and expect to be able to search and find it
         request.set('comment', u'COMMENT')
         this_file = os.path.abspath(__file__)
-        a_file = os.listdir(os.path.dirname(this_file))[-1]
-        a_file = os.path.join(os.path.dirname(this_file), a_file)
+        #a_file = os.listdir(os.path.dirname(this_file))[-1]
+        a_file = os.path.join(os.path.dirname(this_file), 'CHANGES.log')
         request.set('fileattachment', NewFileUpload(a_file))
+        issue.ModifyIssue(request)
         thread = issue.getThreadObjects()[0]
 
         # search for the comment
@@ -861,7 +865,6 @@ class IssueTrackerTestCase(base.TestBase):
         # and a variation of that
         q = os.path.splitext(q)[0]
         self.assertEqual(issue, tracker._searchCatalog(q)[0])
-
 
     def test_filterIssues(self):
         """ test to call filter issues and note how the filter should be saved and

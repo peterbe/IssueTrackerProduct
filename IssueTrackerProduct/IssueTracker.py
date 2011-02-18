@@ -626,6 +626,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                         "Catalog out-of-date. Visit %s" % update_url)
                     return 0
                 return int(issue.getModifyDate())
+            return int(tracker.bobobase_modification_time())
         ts = getModifyTimestampInTracker(self)
         for path in self.getBrotherPaths():
             try:
@@ -4143,7 +4144,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             try:
                 ok = self._isFile(file)
             except NotAFileError:
-                print "\tnot a file", repr(getattr(file, 'filename', None))
+                #print "\tnot a file", repr(getattr(file, 'filename', None))
                 # if this exception is raised, it means that the user
                 # didn't press the "Browse..." button but rather wrote
                 # something for the file name.
@@ -4854,7 +4855,6 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         # manually set sortorder
         request.set('keep_sortorder',False)
-#        request.set('sortorder','modifydate')
         request.set('reverse', True)
 
         comments_as_items = False
@@ -4865,15 +4865,27 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             comments_as_items = True
         else:
             request.set('sortorder', 'issuedate')
-
-
         self.REQUEST.set('keep_sortorder', 0)
         self.REQUEST.set('sortorder', self.getDefaultSortorder())
         self.REQUEST.set('reverse', 0)
 
-        allissues = self.ListIssuesFiltered(skip_filter=True)
+        #allissues = self.ListIssuesFiltered(skip_filter=True)
+        search = dict(sort_limit=batchsize,
+                      sort_on=self.getDefaultSortorder(),
+                      sort_order='reverse')
+        try:
+            allissues = self.getIssueObjectsFromCatalog(**search)
+            # the getIssueObjectsFromCatalog() is great but it still only
+            # gets issues from trackers.
+            # So you'll have 'batchsize' issues from this tracker followed
+            # by 'batchsize' issues from each join-in tracker
+            if self.getBrotherPaths():
+                allissues.sort(lambda x,y:cmp(y.getModifyDate(), x.getModifyDate()))
+        except CatalogError:
+            # all indexes are not set up yet
+            allissues = self.ListIssuesFiltered(skip_filter=True)
 
-        for issue in allissues[:batchsize]:
+        for issue in allissues:#[:batchsize]:
             sections = ", ".join(issue.sections)
             url = issue.absolute_url()
             if comments_as_items and issue.hasThreads():
@@ -4914,7 +4926,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             item += '  <title>%s</title>\n' % title
             item += '  <description>%s</description>\n' % description
             item += '  <link>%s</link>\n' % url
-            item += '  <dc:subject>%s</dc:subject>\n' % sections
+            item += '  <dc:subject>%s</dc:subject>\n' % self._prepare_feed(sections)
             item += '  <dc:date>%s</dc:date>\n' % date
             item += '</item>\n\n'
 
@@ -8396,6 +8408,9 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
         # 3. Mandatory filter
         if not self.hasManagerRole():
+            if issues is None:
+                # it was lazy but now we need to get the objects out
+                issues = self.getIssueObjects()
             issues = [issue for issue in issues if issue.canViewIssue()]
             #issues = [issue for issue in issues
             #          if not issue.isConfidential() or issue.isYourIssue()]
@@ -10000,7 +10015,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         # input.
         title = unicodify(email['title'])
         if self._check4Duplicate(title, body,
-                          sections=email['sections'], type=email['type'],
+                          sections=email['sections'], type_=email['type'],
                           urgency=email['urgency'],
                           email_message_id=email.get('message_id', None)):
             log.append('\tfound that the email is a duplicate of an already existing issue')
