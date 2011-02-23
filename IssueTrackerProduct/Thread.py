@@ -414,6 +414,50 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
 
         return Utils.uniqify([x.lower() for x in all])
 
+    def isYourThread(self):
+        """ return true if the currently logged in user is the same
+        user who added this issue. """
+        issueuser = self.getIssueUser()
+        if issueuser:
+            identifier = issueuser.getIssueUserIdentifier()
+            identifier = ','.join(identifier)
+            if identifier == self.getACLAdder():
+                return True
+            else:
+                # if you're logged in as an issue user then how could
+                # the issue have been yours if your identifier
+                # is not the same.
+                # If this `return False` wasn't here a logged in user
+                # would be able to change his email address and then see
+                # other peoples issues.
+                # However, as you'll see in the comment a few lines below
+                # it's also not possible to return True here if the issue
+                # was added by an authenticated user.
+                return False
+
+        zopeuser = self.getZopeUser()
+        if zopeuser:
+            path = '/'.join(zopeuser.getPhysicalPath())
+            name = zopeuser.getUserName()
+            acl_user = path+','+name
+            if acl_user == self.getACLAdder():
+                return True
+            else:
+                return False
+
+        # the last remaining chance is if the issue was added by someone
+        # who's not logged in but has the same email address.
+        if not self.getACLAdder():
+            if self.getEmail() == self.getSavedUser('email'):
+                return True
+
+        return False
+    
+    def canEditActualTime(self):
+        """true if you're a manager or you're the author of the thread"""
+        assert self.actual_time_hours
+        return self.isYourThread() or self.hasManagerRole()
+
 
 
 InitializeClass(IssueTrackerIssueThread)

@@ -68,9 +68,30 @@
         <div class="threaddate" tal:content="structure python:here.showDate(thread.getThreadDate())">date</div>
         <div class="threadactualhours"
              tal:define="hours thread/getActualTimeHours"
-             tal:condition="hours">
+             tal:condition="python:hours and not request.get('edit-actual-time')==thread.getId()">
              <strong>Actual time:</strong> <br tal:replace="python:here.showTimeHours(hours, show_unit=1)"/>
-             </div>
+	     <a class="editlink"
+                tal:condition="python:not in_completelist and here.isAllowedToChangeIssues() and thread.canEditActualTime()"
+	        tal:attributes="href string:?edit-actual-time=${thread/getId}"
+		>edit</a>
+
+        </div>
+        <div class="threadactualhours"
+             tal:define="hours thread/getActualTimeHours"
+             tal:condition="python:hours and request.get('edit-actual-time')==thread.getId()">
+             <form method="post" action=".">
+             <input type="hidden" name="edit-actual-time" tal:attributes="value thread/getId"/>
+             <strong>Actual time:</strong>
+
+             <input name="actual_time_hours" size="7" tal:attributes="value request/actual_time_hours|thread/actual_time_hours|nothing"/> (hours)
+             <input type="submit" value="Save" class="smallbutton" />
+	     <br/>
+             </form>
+             <a class="editlink"
+                tal:attributes="href string:#i${repeat/thread/number}"
+		>cancel</a>
+
+        </div>
         <div class="threadfiles" tal:content="structure thread/showThreadFileattachments"></div>
         <div class="clearerR">&nbsp;</div>
 

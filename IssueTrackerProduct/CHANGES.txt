@@ -1,3 +1,6 @@
+    New feature: Ability to edit actual time per followup if you're
+    manager or author. 
+    
     Bug fixed: Thread default actual_time_hours to 0.0 so you can use
     the ZMI property sheet to update it.
 

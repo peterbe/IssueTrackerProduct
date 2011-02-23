@@ -385,7 +385,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
 
         return False
 
-
     def getDisplayFormat(self):
         """ return display_format """
         return self.display_format
@@ -703,7 +702,6 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
             # XXX is this really necessary every time?
             self._uploadTempFiles()
 
-
             if savedraftfollowup:
                 return self.SaveDraftThread(REQUEST, *args, **kw)
             elif cancelfollowup:
@@ -716,6 +714,23 @@ class IssueTrackerIssue(IssueTracker, CustomFieldsIssueBase):
                 return self.ModifyIssue(REQUEST, *args, **kw)
             elif previewfollowup:
                 self.REQUEST.set('showpreview', True)
+
+            if REQUEST.REQUEST_METHOD == 'POST' and REQUEST.get('edit-actual-time'):
+                assert self.UseActualTime() and self.UseFollowupActualTime()
+                actual_time_hours = REQUEST.get('actual_time_hours').strip()
+                thread = getattr(self, REQUEST.get('edit-actual-time'))
+                before = thread.actual_time_hours
+                if before is None:
+                    before = 0.0
+
+                if not actual_time_hours:
+                    thread.actual_time_hours = 0.0
+                else:
+                    thread.actual_time_hours = self._parseTimeHours(actual_time_hours)
+                self.actual_time_hours += thread.actual_time_hours - before
+                ids = list(self.objectIds(ISSUETHREAD_METATYPE))
+                index = ids.index(thread.getId()) + 1
+                return REQUEST.RESPONSE.redirect(self.absolute_url() + '#i%s' % index)
 
             session_key = '%s-%s-notify_emails' % (self.getRoot().getId(),
                                                    self.getId())
