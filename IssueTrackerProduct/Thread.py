@@ -63,6 +63,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
                  {'id':'email',         'type': 'string', 'mode':'w'},
                  {'id':'acl_adder',     'type': 'string', 'mode':'w'},
                  {'id':'display_format','type': 'string', 'mode':'w'},
+                 {'id':'actual_time_hours','type': 'float', 'mode':'w'},
                  )
 
     security=ClassSecurityInfo()
@@ -73,7 +74,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
         )
 
     acl_adder = '' # backward compatability
-    actual_time_hours = None # legacy
+    actual_time_hours = 0.0 # legacy
 
     def __init__(self, id, title, comment, threaddate, fromname, email,
                  display_format=None, acl_adder='', submission_type='',
@@ -362,7 +363,7 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
     security.declareProtected(VMS, 'assertAllProperties')
     def assertAllProperties(self):
         """ make sure issue has all properties """
-        props = {'actual_time_hours': None,
+        props = {'actual_time_hours': 0,
                  }
 
         count = 0
@@ -388,6 +389,13 @@ class IssueTrackerIssueThread(IssueTrackerIssue):
             if linked_email:
                 self.email = linked_email
                 count += 1
+
+        # it was a previous mistake to default the actual_time_hours to None
+        # because it means it can't be edited with the regular ZMI property
+        # sheet
+        if getattr(self, 'actual_time_hours', 0) is None:
+            self.actual_time_hours = 0.0
+
 
         return count
 

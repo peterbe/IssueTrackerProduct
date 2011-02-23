@@ -1,9 +1,12 @@
+    Bug fixed: Thread default actual_time_hours to 0.0 so you can use
+    the ZMI property sheet to update it.
+
     New feature: Greatly optimized how getModifyTimestamp is done on
-    the whole IssueTracker. 
+    the whole IssueTracker.
 
     Bug fixed: Adding followups on out-of-date trackers without the
-    'threaddate' DateIndex is now not failing with an error. 
-    
+    'threaddate' DateIndex is now not failing with an error.
+
     New feature: Full issue activity report if you enable "Actual time
     per follow up"
 

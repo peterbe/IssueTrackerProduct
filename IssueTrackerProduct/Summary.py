@@ -280,7 +280,6 @@ class SummaryBase(object):
                     info['actual_time'] += thread.getActualTimeHours()
 
                 issue_info[issue.absolute_url_path()] = info
-
         return [(issue, issue_info[issue.absolute_url_path()])
                 for issue in issues]
 

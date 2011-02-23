@@ -14,7 +14,7 @@ a.adjacent { background-color:#ffff88; }
 #main { margin-bottom:100px; }
 
 th { text-align:left; }
-th.description, td.description { width:500px; }
+th.description, td.description { width:600px; }
 th.actual_time, td.actual_time { width:200px; }
 </style>
 <div metal:fill-slot="body">
@@ -63,8 +63,8 @@ th.actual_time, td.actual_time { width:200px; }
       </tfoot>
       <tbody tal:repeat="issue_and_info issues_and_info">
         <tr tal:define="issue python:issue_and_info[0]; info python:issue_and_info[1]">
-        <td class="description"
-             tal:attributes="class python:here.getUniqueIssueClassname(issue_and_info[0])">
+        <td 
+             tal:attributes="class python:'description ' + here.getUniqueIssueClassname(issue_and_info[0])">
         <span tal:condition="here/ShowIdWithTitle" class="id" tal:content="string:#${issue/id} "></span>
          <a tal:define="diff python:context.timeSince(today, issue.getIssueDate(), 'old')"
                tal:attributes="href issue/absolute_url_path;
