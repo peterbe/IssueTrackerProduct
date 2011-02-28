@@ -2170,6 +2170,80 @@ class IssueTrackerTestCase(base.TestBase):
           in assignment_email['subject'])
         self.assertTrue('DESCRIPTION' in assignment_email['msg'])
 
+    def test_avoiding_duplicates(self):
+        tracker = self.folder.tracker
+        B = u'email@address.com'
+        Bf = u'From name'
+        request = self.app.REQUEST
+        request.set('title', u'TITLE (1)')
+        request.set('fromname', Bf)
+        request.set('email', B)
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getUrgencyOptions()[-1])
+        tracker.SubmitIssue(request)
+
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+
+        request.set('title', u'TITLE (1)')
+        request.set('fromname', Bf)
+        request.set('email', B)
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getUrgencyOptions()[-1])
+        tracker.SubmitIssue(request)
+
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+
+        request.set('title', u'TITLE (2)')
+        tracker.SubmitIssue(request)
+        self.assertEqual(len(tracker.getIssueObjects()), 2)
+
+    def test_avoiding_duplicates_harder(self):
+        tracker = self.folder.tracker
+        B = u'email@address.com'
+        Bf = u'From name'
+        request = self.app.REQUEST
+        request.set('title', u'TITLE (1) "peter"')
+        request.set('fromname', Bf)
+        request.set('email', B)
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getUrgencyOptions()[-1])
+        tracker.SubmitIssue(request)
+
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+
+        request.set('title', u'TITLE (1) "peter"')
+        request.set('fromname', Bf)
+        request.set('email', B)
+        request.set('description', u'DESCRIPTION')
+        request.set('type', tracker.getDefaultType())
+        request.set('urgency', tracker.getUrgencyOptions()[-1])
+        tracker.SubmitIssue(request)
+
+        self.assertEqual(len(tracker.getIssueObjects()), 1)
+
+        request.set('title', u'TITLE (1) "chris"')
+        tracker.SubmitIssue(request)
+        self.assertEqual(len(tracker.getIssueObjects()), 2)
+
+        issues = tracker._searchCatalog('1')
+        self.assertEqual(len(issues), 2)
+
+        issues = tracker._searchCatalog('(1)')
+        self.assertEqual(len(issues), 2)
+
+        issues = tracker._searchCatalog('peter')
+        self.assertEqual(len(issues), 1)
+
+        issues = tracker._searchCatalog('"chris')
+        self.assertEqual(len(issues), 1)
+
+        issues = tracker._searchCatalog('"chris"')
+        self.assertEqual(len(issues), 1)
+
+
 
 ################################################################################
 

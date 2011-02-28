@@ -1,3 +1,6 @@
+    Bug fixed: Issue duplication check with brackets or quotation
+    marks could cause a ParseError due to ZCatalog search.
+    
     New feature: Ability to edit actual time per followup if you're
     manager or author. 
     

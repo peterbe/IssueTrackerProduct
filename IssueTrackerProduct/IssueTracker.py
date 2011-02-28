@@ -3998,7 +3998,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     def _check4Duplicate(self, title, description, sections,
                          type_, urgency, email_message_id=None):
         """ check if there is an exact replica of this issue """
-        search = dict(title=title)
+        search = dict(title='"%s"' % title)
         # if I knew for certain that all issuetrackers have urgency and type
         # fully indexed I could add that to the catalog search to make it
         # even faster.
@@ -8080,7 +8080,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             q = unicodify(q)
             request.set('q', q)
 
-        titleq = u'*'+q+'*'
+        if q.count('"'):
+            # uneven number of quotation marks
+            q = q.replace('"','')
+        titleq = u'*' + q.replace('"','\\"') +'*'
 
         # prepare the search result variables
         _exact_title_search = []
