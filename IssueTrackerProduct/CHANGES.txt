@@ -1,3 +1,7 @@
+    Bug fixed: Saved filter cookies were saved with just the ID of the 
+    issuetracker instance which could cause conflicts on different
+    issuetrackers under the same ID.
+    
     Bug fixed: Issue duplication check with brackets or quotation
     marks could cause a ParseError due to ZCatalog search.
     

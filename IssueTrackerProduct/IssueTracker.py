@@ -6942,7 +6942,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                     custom_filters[field.getId()] = fvval
 
         _c_key = LAST_SAVEDFILTER_ID_COOKIEKEY
-        _c_key = self.defineInstanceCookieKey(_c_key)
+        _c_key = self.defineInstanceCookieKey(_c_key, full_path=True)
 
         # 2. Get a nice filter name
         if fname is None:
@@ -7002,7 +7002,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
             # save this in a cookie
             ckey = self.getCookiekey('saved-filters')
-            ckey = self.defineInstanceCookieKey(ckey)
+            ckey = self.defineInstanceCookieKey(ckey, full_path=True)
             if self.has_cookie(ckey):
                 cookie_key = self.get_cookie(ckey)
             else:
@@ -7020,7 +7020,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         self.set_session('last_savedfilter_id', valuer.getId())
         if self.rememberSavedfilterPersistently():
             key = LAST_SAVEDFILTER_ID_COOKIEKEY
-            key = self.defineInstanceCookieKey(key)
+            key = self.defineInstanceCookieKey(key, full_path=True)
             self.set_cookie(key, valuer.getId(),
                             days=FILTERVALUER_EXPIRATION_DAYS)
 
@@ -7227,7 +7227,10 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def getSavedFilterObject(self, objectid):
         """ return the filtervaluer object """
-        return getattr(self._getFilterValueContainer(), objectid)
+        filtervaluer = getattr(self._getFilterValueContainer(), objectid)
+        assert filtervaluer.meta_type == FILTEROPTION_METATYPE, \
+          filtervaluer.meta_type
+        return filtervaluer
 
 
     def getMySavedFilters(self, howmany=10): # New, cataloged saved filter
@@ -7253,7 +7256,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
             email_cookiekey = self.getCookiekey('email')
             name_cookiekey = self.getCookiekey('name')
             key = self.getCookiekey('saved-filters')
-            key = self.defineInstanceCookieKey(key)
+            key = self.defineInstanceCookieKey(key, full_path=True)
 
             key = self.get_cookie(key)
             fromname = self.get_cookie(name_cookiekey)
@@ -8434,7 +8437,7 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
         request = self.REQUEST
 
         _c_key = LAST_SAVEDFILTER_ID_COOKIEKEY
-        _c_key = self.defineInstanceCookieKey(_c_key)
+        _c_key = self.defineInstanceCookieKey(_c_key, full_path=True)
 
         #
         # o 'filteroptions' gets set if people press the
@@ -9400,17 +9403,28 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
     ## Misc. methods
 
 
-    def defineInstanceSessionKey(self, key):
+    def defineInstanceSessionKey(self, key, full_path=False):
         """ We use the default session key, but add to it for this
         issuetracker only. """
-        id = self.getRoot().getId()
-        return '%s-%s'%(key, id)
+        if full_path:
+            id_ = self.getRoot().absolute_url_path()
+            if id_.startswith('/'):
+                id_ = id_[1:]
+            if id_:
+                id_ = id_.replace('/','-').replace(' ','')
+            else:
+                # if issuetracker is the root of the domain
+                # there is no absolute_url_path() other than just '/'
+                id_ = self.getRoot().getId()
+        else:
+            id_ = self.getRoot().getId()
+        return '%s-%s' % (key, id_)
 
-    def defineInstanceCookieKey(self, key):
+    def defineInstanceCookieKey(self, key, full_path=False):
         """ We use the default cookie key, but add to it for this
         issuetracker only. """
         # since that method is the same
-        return self.defineInstanceSessionKey(key)
+        return self.defineInstanceSessionKey(key, full_path=full_path)
 
 
     ## POP3

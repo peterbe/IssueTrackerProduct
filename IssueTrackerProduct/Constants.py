@@ -250,7 +250,7 @@ DRAFT_THREAD_IDS_COOKIEKEY = '__issuetracker_draft_followup_ids'
 AUTOLOGIN_COOKIEKEY = '__issuetracker_autologin'
 WHICHLIST_COOKIEKEY = '__issuetracker_list'
 WHICHSUBLIST_COOKIEKEY = '__issuetracker_sublist'
-LAST_SAVEDFILTER_ID_COOKIEKEY = '__issuetracker_savedfilter_id'
+LAST_SAVEDFILTER_ID_COOKIEKEY = 'savedfilter_id'
 REMEMBER_SAVEDFILTER_PERSISTENTLY_COOKIEKEY = '__issuetracker_rsp'
 LOGOUT_PAGE_COOKIEKEY = '__issuetracker_logout_page'
 
