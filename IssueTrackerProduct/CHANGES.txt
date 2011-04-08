@@ -1,15 +1,20 @@
+- 0.13.1
+
+    Bug fixed: Rare condition of sorting filtered issues could cause a
+    TypeError.
+
 - 0.13.0
 
-    Bug fixed: Saved filter cookies were saved with just the ID of the 
+    Bug fixed: Saved filter cookies were saved with just the ID of the
     issuetracker instance which could cause conflicts on different
     issuetrackers under the same ID.
-    
+
     Bug fixed: Issue duplication check with brackets or quotation
     marks could cause a ParseError due to ZCatalog search.
-    
+
     New feature: Ability to edit actual time per followup if you're
-    manager or author. 
-    
+    manager or author.
+
     Bug fixed: Thread default actual_time_hours to 0.0 so you can use
     the ZMI property sheet to update it.
 

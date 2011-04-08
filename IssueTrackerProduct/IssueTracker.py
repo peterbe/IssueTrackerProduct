@@ -8813,10 +8813,11 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
                              'submittedby':'fromname',
                               }
 
-            issues = self._dosort(issues,
-                           _translations.get(sortorder, sortorder))
-            if do_reverse:
-                issues.reverse()
+            if issues:
+                issues = self._dosort(issues,
+                               _translations.get(sortorder, sortorder))
+                if do_reverse:
+                    issues.reverse()
 
         if keep_sortorder:
             self.set_session(session_key, sortorder)
