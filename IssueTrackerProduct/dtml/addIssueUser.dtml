@@ -126,6 +126,22 @@ Full name
 <input type="text" name="fullname:<dtml-var management_page_charset>:ustring" size="30" value="" />
 </td>
 </tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+Timezone
+  </div>
+  </td>
+  <td align="left" valign="top">
+  <div class="form-element">
+  <select name="timezone" size="10">
+  <dtml-in valid_timezones>
+  <option> <dtml-var sequence-item html_quote> </option>
+  </dtml-in valid_timezones>
+  </select>
+  <br />
+</td>
+</tr>
 
 <tr>
 <td>

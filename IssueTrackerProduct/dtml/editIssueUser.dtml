@@ -120,6 +120,24 @@ Full name
   value="<dtml-if expr="user.fullname"><dtml-var expr="user.fullname"></dtml-if>" />
 </td>
 </tr>
+<tr>
+  <td align="left" valign="top">
+  <div class="form-label">
+Timezone
+  </div>
+  </td>
+  <td align="left" valign="top">
+  <div class="form-element">
+  <select name="timezone" size="10">
+  <dtml-in valid_timezones>
+  <dtml-let sel1="user.getTZ(_vars['sequence-item'])">
+      <option <dtml-var sel1>> <dtml-var sequence-item> </option>
+  </dtml-let>
+  </dtml-in valid_timezones>
+  </select>
+  <br />
+</td>
+</tr>
 
 <dtml-comment>
 <tr>

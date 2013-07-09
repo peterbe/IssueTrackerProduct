@@ -8,7 +8,7 @@
 __version__='0.0.8'
 
 # python
-
+import pytz
 # Zope
 from AccessControl import User, AuthEncoding
 from App.Dialogs import MessageDialog
@@ -212,6 +212,7 @@ class IssueUserFolder(User.UserFolder):
     
     _userFolderProperties = DTMLFile('dtml/userFolderProps', globals())
     
+    valid_timezones = pytz.all_timezones
     
     security = ClassSecurityInfo()
 
@@ -325,9 +326,15 @@ class IssueUserFolder(User.UserFolder):
                 title  ='Illegal value',
                 message='Not a valid email address',
                 action ='manage_main')
+        if REQUEST.get('timezone') and not Utils.ValidTimezone(REQUEST['timezone']):
+            return MessageDialog(
+                title  ='Illegal value',
+                message='Not a valid timezone',
+                action ='manage_main')
         self._doChangeUser(name, password, roles, domains,
                            email=REQUEST.get('email'),
                            fullname=REQUEST.get('fullname'),
+                           timezone=REQUEST.get('timezone'),
                            must_change_password=REQUEST.get('must_change_password'))
         if REQUEST:
             return self._mainUser(self, REQUEST)
@@ -363,12 +370,13 @@ class IssueUserFolder(User.UserFolder):
         """Create a new user"""
         email=kw['email']
         fullname=kw['fullname']
+        timezone=kw.get('timezone', 'UTC')
         must_change_password=kw.get('must_change_password',False)
         display_format = kw.get('display_format','')
         if password is not None and self.encrypt_passwords:
             password = self._encryptPassword(password)
         self.data[name]=IssueUser(name, password, roles, domains,
-                                  email, fullname, must_change_password,
+                                  email, fullname, timezone, must_change_password,
                                   display_format)
 
     def _doChangeUser(self, name, password, roles, domains, **kw):
@@ -385,6 +393,8 @@ class IssueUserFolder(User.UserFolder):
         if kw.get('fullname'):
             fullname=kw['fullname']
             user.fullname = fullname
+        timezone=kw.get('timezone', 'UTC')
+        user.timezone = timezone
         if kw.get('display_format'):
             display_format=kw['display_format']
             user.display_format = display_format
@@ -559,7 +569,7 @@ class IssueUser(User.SimpleUser, Persistent):
     misc_properties = {} # backwardcompatability
     
     def __init__(self, name, password, roles, domains,
-                 email, fullname, must_change_password=False,
+                 email, fullname, timezone, must_change_password=False,
                  display_format='', use_accesskeys=False,
                  remember_savedfilter_persistently=False,
                  show_nextactions=False):
@@ -570,6 +580,7 @@ class IssueUser(User.SimpleUser, Persistent):
         self.domains = domains
         self.email = email
         self.fullname = fullname
+        self.timezone = timezone
         self.must_change_password = must_change_password
         self.display_format = display_format
         self.use_accesskeys = use_accesskeys
@@ -607,6 +618,18 @@ class IssueUser(User.SimpleUser, Persistent):
     def getFullname(self):
         """ returns the fullname """
         return self.fullname
+
+    def getTimezones(self):
+        """ returns all timezones """
+        return [(x,x) for x in pytz.all_timezones]
+
+    def getTZ(self, match=None):
+        """ returns timezone """
+        tz = getattr(self, 'timezone', 'UTC')
+        if match:
+            rc = tz == match and 'selected' or ''
+            return rc
+        return tz
 
     def getUserLists(self):
         """ return _user_lists """

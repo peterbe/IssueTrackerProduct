@@ -18,7 +18,7 @@ Danny W. Adair of Asterisk Ltd for getRolesInContext(self) bug report and patch.
 # python
 from time import time
 import string, os, re, sys
-import random
+import random, pytz, datetime
 import poplib
 from urlparse import urlparse
 import warnings
@@ -1137,6 +1137,13 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
     def showDate(self, date, today=None, include_hour=True, not_clever=False):
         """ return the date formatted nicely """
+        date1 = date
+        issueuser = self.getIssueUser()
+        if issueuser and issueuser.getTZ() != 'UTC':
+            parts = list(date.parts())
+            parts = parts[:-2] + [int(parts[-2]), 0, pytz.timezone('UTC')]
+            dt1 = datetime.datetime(*parts)
+            date1 = dt1.astimezone(pytz.timezone(issueuser.getTZ()))
         if self.ShowDatesCleverly() and not not_clever:
             # The whole reason why today is a parameter is because
             # if this function is called 20 times in one page
@@ -1158,42 +1165,43 @@ class IssueTracker(IssueTrackerFolderBase, CatalogAware,
 
             if date.strftime('%Y%m%d') == today_Ymd:
                 if include_hour:
-                    return abbr(_("Today"), date) + date.strftime(" %H:%M")
+                    rc = abbr(_("Today"), date1) + date1.strftime(" %H:%M %Z")
                 else:
-                    return abbr(_("Today"), date)
+                    rc = abbr(_("Today"), date1)
             elif (date+1).strftime('%Y%m%d') == today_Ymd:
                 if include_hour:
-                    return abbr(_("Yesterday"), date) + date.strftime(" %H:%M")
+                    rc = abbr(_("Yesterday"), date1) + date1.strftime(" %H:%M %Z")
                 else:
-                    return abbr(_("Yesterday"), date)
+                    rc = abbr(_("Yesterday"), date1)
             elif date.strftime('%Y%W') == today_YW:
                 if date.strftime('%Y%m%d') == (today+1).strftime('%Y%m%d'):
                     if include_hour:
-                        return abbr(_("Tomorrow"), date) + date.strftime(' %H:%M')
+                        rc = abbr(_("Tomorrow"), date1) + date1.strftime(' %H:%M %Z')
                     else:
-                        return abbr(_("Tomorrow"), date)
+                        rc = abbr(_("Tomorrow"), date1)
                 else:
                     # this week
                     if include_hour:
-                        return abbr(date.strftime('%A'), date) + date.strftime(' %H:%M')
+                        rc = abbr(date1.strftime('%A'), date1) + date1.strftime(' %H:%M %Z')
                     else:
-                        return abbr(date.strftime('%A'), date)
+                        rc= abbr(date1.strftime('%A'), date1)
             elif (date+7).strftime('%Y%W') == today_YW:
                 if include_hour:
-                    return abbr(_("Last week") + date.strftime(' %A'), date) + \
-                      date.strftime(' %H:%M')
+                    rc = abbr(_("Last week") + date1.strftime(' %A'), date1) + \
+                      date1.strftime(' %H:%M %Z')
                 else:
-                    return abbr(_("Last week") + date.strftime(' %A'), date)
+                    rc = abbr(_("Last week") + date1.strftime(' %A'), date1)
             else:
                 # skip the hour part
                 fmt = default_fmt.replace('%H:%M','').strip()
-                return date.strftime(fmt)
-
-        # default thing
-        fmt = self.display_date
-        if not include_hour:
-            fmt = fmt.replace('%H:%M','').strip()
-        return date.strftime(fmt)
+                rc = date1.strftime(fmt)
+        else:
+            # default thing
+            fmt = self.display_date
+            if not include_hour:
+                fmt = fmt.replace('%H:%M','').strip()
+            rc = date1.strftime(fmt)
+        return rc
 
 
     def getDefaultSortorder(self):
