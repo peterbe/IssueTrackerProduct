@@ -1,3 +1,7 @@
+- Unreleased
+
+    Display time in user's TZ [sureshvv]
+
 - 0.13.1
 
     Bug fixed: Rare condition of sorting filtered issues could cause a

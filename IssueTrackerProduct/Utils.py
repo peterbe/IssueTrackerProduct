@@ -11,7 +11,7 @@ import codecs
 from random import shuffle
 from math import floor
 from htmlentitydefs import entitydefs
-import warnings
+import warnings, pytz
 import logging
 
 # import line used by textify
@@ -1137,6 +1137,8 @@ def ss(s):
     """ simple string """
     return s.strip().lower()
 
+def ValidTimezone(tz):
+    return tz in pytz.all_timezones
   
 def test():
 
