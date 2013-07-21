@@ -4,7 +4,7 @@ Changelog
 0.14.2 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixed CHANGES.txt for docutils. [sureshvv]
 
 
 0.14.1 (2013-07-21)
@@ -296,9 +296,6 @@ Changelog
 
     Bug fixed. Saving filters when only the fromname is known would
     raise an UnmatchableError.
-
-0.9.1 (2013-01-01)
--------------------
 
     Bug fixed. NameError when checking for emails in and nothing to
     download. Thanks Luciano (Real#0743)
@@ -625,7 +622,7 @@ Changelog
     shows the ID like #0001. (Thanks Bob Gimlich Real#0263)
 
     Bug fixed. Emailed in issues with signature had incorrect
-    linebreaks in HTML looking like this. <br\s*/>
+    linebreaks in HTML looking like this. <br\s\*/>
 
     New feature. The URL option on Add Issue is now by default
     switched off (available on Properties, Advanced) on all new
@@ -691,7 +688,7 @@ Changelog
     on is now more careful. (Real#0072)
 
     New feature. When you set up accepting emails for a POP3 account
-    you can also blacklist certain email address like '*@hotmail.com'.
+    you can also blacklist certain email address like '\*@hotmail.com'.
     You can also whitelist exceptions to the blacklist patterns.
 
     New feature. Being able to change issues once added is now
@@ -1781,14 +1778,14 @@ IssueTrackerMassContainer
 -------------------
 
     New feature. Show 20 items on the dashboard instead of 15
-    
+
     New feature. The ability to ignore trackers and other
     masscontainers is removed. It brings little value and much
     confusion.
-    
+
     New feature. Odd/Even columns coloured like inside
     IssueTrackerProduct.
-    
+
     Bug fixed. The continual lookup could sometimes keep adding the
     same new issue(s) to the dashboard due to a difference between
     the client-side (Javascipt) datetime and the server-side (Zope)
@@ -1801,13 +1798,13 @@ IssueTrackerMassContainer
 
     New feature. Even more optimized dashboard and even more memory
     efficient not most importantly, not broken like version 0.0.12 was.
-    
+
 0.0.12 (2013-01-01)
 -------------------
 
     New feature. Further improvements from 0.0.11. Now, with a cache
     you get the nice effect every time you reload the activity page.
-    
+
 0.0.11 (2013-01-01)
 -------------------
 
@@ -1830,23 +1827,23 @@ IssueTrackerMassContainer
 -------------------
 
     * major change to structure *
-    
+
 0.0.7 (2013-01-01)
 -------------------
 
     Bug fixed. Made it compatible with zope 2.8
-    
+
 0.0.6 (2013-01-01)
 -------------------
 
     Bug fixed. Use of issue.getEmail() instead of issue.email
     (getEmail() is better)
-    
+
 0.0.5 (2013-01-01)
 -------------------
 
     Bug fixed. defaults for use_native_header and use_native_footer
-    
+
 0.0.4 (2013-01-01)
 -------------------
 
@@ -1860,11 +1857,8 @@ IssueTrackerMassContainer
 -------------------
 
     New feature. Option for disabling native headers as well as footers.
-    
+
     Bug fixed. Corrected CSS to colorize thread changes.
-    
-0.0.3 (2013-01-01)
--------------------
 
     Bug fixed. The Masscontainer didn't properly listen to the 
     Security settings from Zope. Now it does, so if you disable

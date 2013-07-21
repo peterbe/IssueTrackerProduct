@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 name = 'IssueTrackerProduct'
-version = '0.14.2.dev0'
+version = '0.14.2dev0'
 
 setup(name='IssueTrackerProduct',
       version=version,
