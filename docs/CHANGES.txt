@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.14.2 (unreleased)
+0.14.2 (2013-07-21)
 -------------------
 
 - Fixed CHANGES.txt for docutils. [sureshvv]
