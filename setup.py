@@ -6,7 +6,8 @@ version = '0.14dev'
 setup(name='IssueTrackerProduct',
       version=version,
       description="Bug/issue tracker for Zope2.",
-      long_description=open("README.txt").read(),
+      long_description=open("README.txt").read() + \
+                       open("docs/CHANGES.txt").read(),
       classifiers=[
         "Framework :: Zope2",
         "Programming Language :: Python",
