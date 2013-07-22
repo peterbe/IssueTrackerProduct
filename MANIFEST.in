@@ -1,0 +1,11 @@
+recursive-include IssueTrackerProduct *
+recursive-include IssueTrackerMassContainer *
+recursive-include IssueTrackerOpenID *
+recursive-include docs *
+include *
+global-exclude *.pyc
+exclude IssueTrackerProduct.egg-info
+exclude lib
+exclude local
+exclude bin
+exclude include

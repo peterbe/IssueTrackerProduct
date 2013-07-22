@@ -6,3 +6,8 @@ tags
 *.css-slimmed.css
 *.css-slimmed
 *.js-slimmed
+IssueTrackerProduct.egg-info
+bin
+include
+lib
+local
